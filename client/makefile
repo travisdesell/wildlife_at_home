@@ -1,6 +1,6 @@
-INCLUDE = -I/usr/include/opencv2/ -I/usr/include/boinc/ -I/home/robert/BOINC_SOURCE/ -I/home/robert/BOINC_SOURCE/lib/ -I/home/robert/BOINC_SOURCE/api/
+INCLUDE = -I/opt/local/include -I/opt/local/include/opencv2/ -I/Users/deselt/Software/boinc/ -I/Users/deselt/Software/boinc/api/ -I/Users/deselt/Software/boinc/lib/
 CXX = g++
-LIBS = -lopencv_core -lopencv_highgui /home/robert/BOINC_SOURCE/api/libboinc_api.a /home/robert/BOINC_SOURCE/lib/libboinc.a 
+LIBS = -L/opt/local/lib -L/Users/deselt/Software/boinc_old/mac_build/build/Deployment -lboinc_api -lboinc -lopencv_core -lopencv_highgui
 
 wildlife: wildlife.o
 	g++ $(INCLUDE) $^ -o $@ $(LIBS)
