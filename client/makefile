@@ -1,4 +1,4 @@
-INCLUDE = -I/usr/include/opencv2/ -I/usr/include/boinc/ -I/home/robert/BOINC_SOURCE/ -I/home/robert/BOINC_SOURCE/lib/ -I/home/robert/BOINC_SOURCE/api/
+INCLUDE = -I/opt/local/include -I/opt/local/include/opencv2/ -I/Users/deselt/Software/boinc/ -I/Users/deselt/Software/boinc/api/ -I/Users/deselt/Software/boinc/lib/
 CXX = g++
 LIBS = -lopencv_core -lopencv_highgui /home/robert/BOINC_SOURCE/api/libboinc_api.a /home/robert/BOINC_SOURCE/lib/libboinc.a 
 FLAGS = -D_BOINC_ -Wall
@@ -12,3 +12,4 @@ wildlife: wildlife.o
 
 clean: 
 	rm -rf wildlife wildlife.o
+
