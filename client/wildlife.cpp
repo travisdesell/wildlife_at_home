@@ -223,7 +223,7 @@ int main(int argc, char** argv)
 			if(!strcmp(prop, "Frame")) {
 				startFrame = atoi(val);
 			}
-		}
+		}s
 	}*/
 	
 	string checkpoint_filename = "checkpoint.txt";
