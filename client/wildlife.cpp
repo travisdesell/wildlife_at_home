@@ -1,10 +1,33 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <cmath>
+#include <time.h>
 
-//BOINC includes
-#include "boinc_api.h"
-#include "filesys.h"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <iomanip>
+
+#include "stdint.h"
+
+/**
+* Includes required for BOINC
+*/
+#ifdef _BOINC_
+#ifdef _WIN32
+    #include "boinc_win.h"
+    #include "str_util.h"
+#endif
+
+    #include "diagnostics.h"
+    #include "util.h"
+    #include "filesys.h"
+    #include "boinc_api.h"
+    #include "mfile.h"
+#endif
 
 //OpenCV Includes
 #include "opencv.hpp"
@@ -14,6 +37,98 @@
 #define BLOCK_WIDTH 20
 #define BLOCK_HEIGHT 20
 
+using namespace std;
+
+void write_checkpoint(string checkpoint_filename, string video_filename, int frame, int intervals, float * probArr)
+{
+#ifdef _BOINC_
+	string resolved_path;
+	int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
+	if (retval) {
+		cerr << "Couldn't resolve file name..." << endl;
+		return;
+	}
+
+	ofstream checkpoint_file(resolved_path.c_str());
+#else
+	ofstream checkpoint_file(checkpoint_filename.c_str());
+#endif
+
+	if (!checkpoint_file.is_open()) {
+        cerr << "Checkpoint file not open..." << endl;
+        return;
+    }
+    
+	checkpoint_file << "VIDEO_FILE_NAME: " << video_filename << endl;
+	checkpoint_file << "FRAME: " << frame << endl;
+	checkpoint_file << "INTERVALS: " << intervals << endl;
+	for(int i = 0; i < intervals; i++) {
+		checkpoint_file << probArr[i] << endl;
+	}
+	checkpoint_file << endl;
+
+	checkpoint_file.close();
+}
+
+bool read_checkpoint(string checkpoint_filename, string &video_filename, int &frame, int &intervals, vector<float> *probVec ) {
+#ifdef _BOINC_
+    string resolved_path;
+    int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
+    if (retval) {
+        return false;
+    }
+
+    ifstream checkpoint_file(resolved_path.c_str());
+#else
+    ifstream checkpoint_file(checkpoint_filename.c_str());
+#endif
+    if (!checkpoint_file.is_open()) return false;
+
+    string s;
+    checkpoint_file >> s >> video_filename;
+    if (s.compare("VIDEO_FILE_NAME:") != 0) {
+        cerr << "ERROR: malformed checkpoint! could not read 'VIDEO_FILE_NAME'" << endl;
+#ifdef _BOINC_
+
+        boinc_finish(1);
+#endif
+        exit(1);
+    }
+
+    checkpoint_file >> s >> frame;
+    if (s.compare("FRAME:") != 0) {
+        cerr << "ERROR: malformed checkpoint! could not read 'FRAME'" << endl;
+#ifdef _BOINC_
+        boinc_finish(1);
+#endif
+        exit(1);
+    }
+    
+    checkpoint_file >> s >> intervals;
+    if (s.compare("INTERVALS:") != 0) {
+        cerr << "ERROR: malformed checkpoint! could not read 'INTERVALS'" << endl;
+#ifdef _BOINC_
+        boinc_finish(1);
+#endif
+        exit(1);
+    }
+    
+    float current;
+    for(int i = 0; i < intervals; i++) {
+		checkpoint_file >> current;
+		probVec->push_back(current);
+		if (!checkpoint_file.good()) {
+			cerr << "ERROR: malformed checkpoint! not enough probabilities present" << endl;
+#ifdef _BOINC_
+			boinc_finish(1);
+#endif
+			exit(1);
+		}
+	}
+	
+	return true;
+}
+
 int main(int argc, char** argv)
 {
 	//Variable Declarations
@@ -21,15 +136,15 @@ int main(int argc, char** argv)
 	std::string resolved_outputBlock;
 	std::string resolved_checkpoint;
 	
-	FILE *fPixel;
-	FILE *fBlock;
-	FILE *fCheckpoint;
+	//FILE *fPixel;
+	//FILE *fBlock;
+	//FILE *fCheckpoint;
 	
-	int fileResolveRetval;
+	//int fileResolveRetval;
 	
-	char varStrFromFile[100];
-	char * prop;
-	char * val;
+	//char varStrFromFile[100];
+	//char * prop;
+	//char * val;
 	
 	CvCapture *capture;
 	
@@ -40,38 +155,50 @@ int main(int argc, char** argv)
 	IplImage  *blockFrame;
 	
 	int startFrame;
+	int interval;
 	int frameCount;
 	int fps;
-	int counter;
+	int currentFrameNum;
 	
 	int frameWidth;
 	int frameHeight;
 
 	int frameBlockHeight;
 	int frameBlockWidth;
+	int numBlocks;
 	
-	int *pixelValues;
-	bool *blockValues;
-	int * receivedPixelChanges;
-	int * receivedBlockChanges;
+	int framesInThreeMinutes;
+	int numberOfThreeMinuteIntervals;
+	float * blockFractionArray;
+	float * threeMinuteIntervalProbabilityArray;
+	
+	//int *pixelValues;
+	//bool *blockValues;
+	//int * receivedPixelChanges;
+	//int * receivedBlockChanges;
 	
 	int numFoundPixel;
+	int numFoundBlock;
 	
 	int key;
 	
-	int myInt;
-	int myInt2;
+	//int myInt;
+	//int myInt2;
+	
+	
 	
 	int ** blockHolder;
 	//Assure we have at least an argument to attempt to open
 	assert(argc == 2);
 	
+#ifdef _BOINC_	
 	boinc_init();
+#endif
 	
 	//Open pixel, block, and checkpoint filesys
 	
 	//a+ for pixel and block, because we want to create if non-existant, or append if exists
-	fileResolveRetval = boinc_resolve_filename_s("outputPixel.txt", resolved_outputPixel);
+	/*fileResolveRetval = boinc_resolve_filename_s("outputPixel.txt", resolved_outputPixel);
 	if (fileResolveRetval) boinc_finish(-1);
 	fPixel = boinc_fopen(resolved_outputPixel.c_str(), "a+");
 	
@@ -85,7 +212,7 @@ int main(int argc, char** argv)
 	if (fileResolveRetval) boinc_finish(-1);
 	fCheckpoint = boinc_fopen(resolved_checkpoint.c_str(), "r");
 	
-	//Get Checkpoint Properties, currently frame would seem to be the correct annd only property needed to resume
+	//Get Checkpoint Properties, currently frame would seem to be the correct and only property needed to resume
 	startFrame = 0;
 	if(fCheckpoint) {
 		while(!feof(fCheckpoint)){
@@ -97,60 +224,84 @@ int main(int argc, char** argv)
 				startFrame = atoi(val);
 			}
 		}
-	}
+	}*/
 	
-	//checkpoint file has been read, now reset
-	fCheckpoint = boinc_fopen(resolved_checkpoint.c_str(), "w");
+	string checkpoint_filename = "checkpoint.txt";
+	
+	string checkpointed_video_filename;
+	int checkpointed_video_frame;
+	int checkpointed_video_intervals;
+	vector<float> *checkpointed_video_probabilities = new vector<float>();
+	
+	startFrame = 0;
+	interval = 0;
+	bool successful_checkpoint_read = read_checkpoint(	checkpoint_filename, 
+														checkpointed_video_filename, 
+														checkpointed_video_frame,
+														checkpointed_video_intervals,
+														checkpointed_video_probabilities);
+	
+	if(successful_checkpoint_read) {
+		if(checkpointed_video_filename.compare(argv[1]) != 0) {
+			cout << "Checkpointed video filename was not the same as given video filename... Restarting" << endl;
+		} else {
+			cout << "Continuing from checkpoint..." << endl;
+			interval = checkpointed_video_intervals;
+			startFrame = checkpointed_video_frame; //no longer needed
+		}
+	} else {
+		cout << "Unsuccessful checkpoint read" << endl << "Starting from beginning of video";
+	}
+		
+#ifdef _BOINC_
+	//boinc_finish(1);
+#else
+	//exit(1);
+#endif
 	
 	//Get the video
 	capture = cvCaptureFromAVI(argv[1]);
 	if(!capture) return 1;
-
 	//Get some video properties
-	fps = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FPS );
-	frameCount = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
-	frameWidth = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-	frameHeight = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
-
-	frameBlockWidth = ceil((double)frameWidth / (double)BLOCK_WIDTH);
-	frameBlockHeight = ceil((double)frameHeight / (double)BLOCK_HEIGHT);
-	
+	fps 				= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+	frameCount 			= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
+	frameWidth 			= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+	frameHeight 		= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+	frameBlockWidth 	= ceil((double)frameWidth / (double)BLOCK_WIDTH);
+	frameBlockHeight 	= ceil((double)frameHeight / (double)BLOCK_HEIGHT);
+	numBlocks			= frameBlockHeight * frameBlockWidth;
+	framesInThreeMinutes = fps * 180;
+	blockFractionArray = new float[framesInThreeMinutes];
+	numberOfThreeMinuteIntervals = ceil((float)((float) frameCount / (float) framesInThreeMinutes));
+	threeMinuteIntervalProbabilityArray = new float[numberOfThreeMinuteIntervals];
+	for(int i = 0; i < interval; i++) {
+		threeMinuteIntervalProbabilityArray[i] = checkpointed_video_probabilities->at(i);
+		cout << "prob " << i << "is: " << threeMinuteIntervalProbabilityArray[i] << endl;
+	}
 	blockHolder = new int*[frameBlockHeight];
-	
 	for(int i = 0; i < frameBlockHeight; i++) {
 		blockHolder[i] = new int[frameBlockWidth];
 		for(int j = 0; j < frameBlockWidth; j++) {
 			blockHolder[i][j] = 0;
 		}
-			
 	}
-	
-	
-	printf("FPS:          %d\n", fps);;
-	printf("Frame Count:  %d\n", frameCount);
-	printf("Frame Width:  %d\n", frameWidth);
-	printf("Frame Heigth: %d\n", frameHeight);
-	
-	printf("Frame Block Width: %d\n", frameBlockWidth);
-	printf("Frame Block Height: %d\n", frameBlockHeight);
-	
 	//Create the windows we see the output in
 	cvNamedWindow("Video", 0);
 	cvNamedWindow("Video Pixels", 0);
 	cvNamedWindow("Video Blocks", 0);
 
-	pixelValues = new int[504];
-	blockValues = new bool[504];
+	//pixelValues = new int[504];
+	//blockValues = new bool[504];
 	
-	receivedPixelChanges = new int[frameCount];
-	receivedBlockChanges = new int[frameCount];
+	//receivedPixelChanges = new int[frameCount];
+	//receivedBlockChanges = new int[frameCount];
 
 	//This is what should happen, but does not work currently
 		//cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, startFrame); 
 	
 	//Instead...
 	currentFrame = cvQueryFrame(capture);
-	
+	startFrame = interval * framesInThreeMinutes;
 	for(int i = 0; i < startFrame; i++) {
 		currentFrame = cvQueryFrame(capture);
 	}
@@ -158,100 +309,25 @@ int main(int argc, char** argv)
 	pixelFrame = cvCloneImage(currentFrame);
 	blockFrame = cvCloneImage(currentFrame);        
 	lastFrame = cvCloneImage(currentFrame);
-
-	counter = startFrame;	
 	
+	currentFrameNum = startFrame;	
 	while(true) //quit when q is pressed
 	{
-		boinc_fraction_done((double)((double)counter / (double)frameCount));
+
+#ifdef _BOINC_
+		boinc_fraction_done((double)((double)currentFrameNum / (double)frameCount));
 		
 		if(boinc_time_to_checkpoint() || key == 's')
 		{
-			printf("checkpointing\n");
-			fprintf(fCheckpoint, "\nFrame %d", counter);
+			cout << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
+			write_checkpoint(checkpoint_filename, argv[1], currentFrameNum, interval, threeMinuteIntervalProbabilityArray);
 			boinc_checkpoint_completed();
-			if(key == 's') break;
+			if(key == 's')	boinc_finish(1);
 		}
-		
+#endif
 		currentFrame = cvQueryFrame(capture);
 		
 		if(!currentFrame) break; //quit when no frames remain
-		
-	/*	for(int positiony=0;positiony<24;positiony++)
-		{
-			for(int positionx=0;positionx<21;positionx++)
-			{
-				int position=positiony*21+positionx;
-				
-				int actual = 0;
-				int actual2 = 0;
-				
-				int numFoundPixel = 0;
-				bool blockFound = false;
-
-				for(int y = 0; y < 20; y++)
-				{
-					actual = (positiony * 2112 * 20) + (y * 2112);
-					for(int x = 0; x < 34; x++)
-					{
-						if(positionx * 34 + x > 703)
-						{
-							continue;
-						}
-
-						actual2 = actual + (positionx * 34 * 3 + x * 3);
-
-						if(abs(currentFrame->imageDataOrigin[actual2] - lastFrame->imageDataOrigin[actual2]) > PIXEL_THRESHOLD
-						&& abs(currentFrame->imageDataOrigin[actual2 + 1] - lastFrame->imageDataOrigin[actual2+ 1]) > PIXEL_THRESHOLD
-						&& abs(currentFrame->imageDataOrigin[actual2 + 2] - lastFrame->imageDataOrigin[actual2 + 2]) > PIXEL_THRESHOLD)
-						{
-							pixelFrame->imageDataOrigin[actual2] = 0;
-							pixelFrame->imageDataOrigin[actual2+ 1] = 0;
-							pixelFrame->imageDataOrigin[actual2 + 2] = 0;
-							numFoundPixel++;
-						}
-						else
-						{
-							pixelFrame->imageDataOrigin[actual2] = 255;
-							pixelFrame->imageDataOrigin[actual2 + 1] = 255;
-							pixelFrame->imageDataOrigin[actual2 + 2] = 255;
-						}
-					}
-				}
-
-				for(int y = 0; y < 20; y++)
-				{
-					actual = (positiony * 2112 * 20) + (y * 2112);
-					for(int x = 0; x < 34; x++)
-					{
-						if(positionx * 34 + x > 703)
-						{
-							continue;		
-						}
-						
-						actual2 = actual + (positionx * 34 * 3 + x * 3);
-						
-						if(numFoundPixel > BLOCK_THRESHOLD)
-						{
-							blockFrame->imageDataOrigin[actual2] = 0;
-							blockFrame->imageDataOrigin[actual2+ 1] = 0;
-							blockFrame->imageDataOrigin[actual2 + 2] = 0;
-							blockFound = true;
-						}
-						else
-						{
-							blockFrame->imageDataOrigin[actual2] = 255;
-							blockFrame->imageDataOrigin[actual2 + 1] = 255;
-							blockFrame->imageDataOrigin[actual2 + 2] = 255;
-							blockFound = false;
-						}
-					}
-				}
-
-				pixelValues[position] = numFoundPixel;
-				blockValues[position] = blockFound;
-			}
-		}*/
 		
 		numFoundPixel = 0;
 		
@@ -277,8 +353,12 @@ int main(int argc, char** argv)
 			}
 		}
 		
+		numFoundBlock = 0;
+		
 		for(int h = 0; h < frameBlockHeight; h++) {
 			for(int w = 0; w < frameBlockWidth; w++) {
+				if(blockHolder[h][w] > BLOCK_THRESHOLD) 
+					numFoundBlock++;
 				for(int i = 0; i < BLOCK_HEIGHT; i++) {
 					for(int j = 0; j < BLOCK_WIDTH; j++){
 						int addr = (h * BLOCK_HEIGHT * frameWidth + w * BLOCK_WIDTH + i * frameWidth + j) * 3;
@@ -297,7 +377,21 @@ int main(int argc, char** argv)
 				blockHolder[h][w] = 0;
 			}
 		}
-	
+		
+		blockFractionArray[currentFrameNum % framesInThreeMinutes] = (float)((float) numFoundBlock/ (float) numBlocks);
+		
+		if((currentFrameNum + 1) % framesInThreeMinutes == 0) {
+			threeMinuteIntervalProbabilityArray[interval] = 0;
+			for(int i = 0; i < framesInThreeMinutes; i++) {
+				threeMinuteIntervalProbabilityArray[interval] += blockFractionArray[i]; 
+			}
+			
+			threeMinuteIntervalProbabilityArray[interval] = threeMinuteIntervalProbabilityArray[interval] / framesInThreeMinutes;
+			
+			cout << "In interval " << interval << " probability is: " << threeMinuteIntervalProbabilityArray[interval] << endl;
+			interval++;
+		}
+		
 		cvReleaseImage(&lastFrame); //frame currently pointed too by lastFrame has been analyzed twice, no longer needed
 
 		lastFrame = cvCloneImage(currentFrame);
@@ -308,27 +402,24 @@ int main(int argc, char** argv)
 
 		key = cvWaitKey( 1000/ fps );
 		
-		myInt = 0;
-		for(int i = 0; i < 504; i++)
-		{
+		/*myInt = 0;
+		for(int i = 0; i < 504; i++) {
 			myInt += pixelValues[i];
 		}
 		
 		myInt2 = 0;
-		for(int i = 0; i < 504; i++)
-		{
-			if(blockValues[i])
-			{
+		for(int i = 0; i < 504; i++) {
+			if(blockValues[i]) {
 				myInt2++;
 			}
 		}
-		receivedPixelChanges[counter] = myInt;
-		receivedBlockChanges[counter] = myInt2;
+		receivedPixelChanges[currentFrameNum] = myInt;
+		receivedBlockChanges[currentFrameNum] = myInt2;*/
 		
-		counter++;
+		currentFrameNum++;
    }
 
-	for(int i = 0; i < counter; i++) 
+	/*for(int i = 0; i < currentFrameNum; i++) 
 	{
 		fprintf(fPixel,   "%d\n",  receivedPixelChanges[i]);
 		fprintf(fBlock,   "%d\n",  receivedBlockChanges[i]);
@@ -337,7 +428,7 @@ int main(int argc, char** argv)
 	//Close Used files
 	fclose(fPixel);
 	fclose(fBlock);
-	fclose(fCheckpoint);
+	fclose(fCheckpoint);*/
 
 	//Free remaining frame
 	cvReleaseCapture( &capture );
@@ -348,6 +439,10 @@ int main(int argc, char** argv)
 	cvDestroyWindow("Video Blocks");
 	
 	//Finish
+#ifdef _BOINC_
 	boinc_finish(0);
+#else
+	exit(0);
+#endif
 }
 
