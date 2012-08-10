@@ -180,7 +180,7 @@ int main(int argc, char** argv)
 	int numFoundPixel;
 	int numFoundBlock;
 	
-	int key;
+	int key = 0;
 	
 	//int myInt;
 	//int myInt2;

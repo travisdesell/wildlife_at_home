@@ -1,4 +1,4 @@
-INCLUDE = -I/opt/local/include -I/opt/local/include/opencv2/ -I/Users/deselt/Software/boinc/ -I/Users/deselt/Software/boinc/api/ -I/Users/deselt/Software/boinc/lib/
+INCLUDE = -I/usr/local/include -I/usr/include/opencv2/ -I/home/robert/BOINC_SOURCE/ -I/home/robert/BOINC_SOURCE/api/ -I/home/robert/BOINC_SOURCE/lib/
 CXX = g++
 LIBS = -lopencv_core -lopencv_highgui /home/robert/BOINC_SOURCE/api/libboinc_api.a /home/robert/BOINC_SOURCE/lib/libboinc.a 
 FLAGS = -D_BOINC_ -Wall
