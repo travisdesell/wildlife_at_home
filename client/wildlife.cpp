@@ -136,16 +136,6 @@ int main(int argc, char** argv)
     std::string resolved_outputBlock;
     std::string resolved_checkpoint;
 
-    //FILE *fPixel;
-    //FILE *fBlock;
-    //FILE *fCheckpoint;
-
-    //int fileResolveRetval;
-
-    //char varStrFromFile[100];
-    //char * prop;
-    //char * val;
-
     CvCapture *capture;
 
     IplImage  *currentFrame;
@@ -172,59 +162,21 @@ int main(int argc, char** argv)
     float * blockFractionArray;
     float * threeMinuteIntervalProbabilityArray;
 
-    //int *pixelValues;
-    //bool *blockValues;
-    //int * receivedPixelChanges;
-    //int * receivedBlockChanges;
-
     int numFoundPixel;
     int numFoundBlock;
+	
+	int numFoundPixelOverThreeMin;
 
     int key = 0;
 
-    //int myInt;
-    //int myInt2;
-
-
-
     int ** blockHolder;
-    //Assure we have at least an argument to attempt to open
+
+	//Assure we have at least an argument to attempt to open
     assert(argc == 2);
 
 #ifdef _BOINC_APP_	
     boinc_init();
 #endif
-
-    //Open pixel, block, and checkpoint filesys
-
-    //a+ for pixel and block, because we want to create if non-existant, or append if exists
-    /*fileResolveRetval = boinc_resolve_filename_s("outputPixel.txt", resolved_outputPixel);
-      if (fileResolveRetval) boinc_finish(-1);
-      fPixel = boinc_fopen(resolved_outputPixel.c_str(), "a+");
-
-      fileResolveRetval = boinc_resolve_filename_s("outputBlock.txt", resolved_outputBlock);
-      if (fileResolveRetval) boinc_finish(-1);
-      fBlock = boinc_fopen(resolved_outputBlock.c_str(), "a+");
-
-    //r for checkpoint, becuase we currently just want to read it
-    //It is re-opened after read because after it is read we want to overwrite it completetly
-    fileResolveRetval = boinc_resolve_filename_s("testCheckpoint.txt", resolved_checkpoint);
-    if (fileResolveRetval) boinc_finish(-1);
-    fCheckpoint = boinc_fopen(resolved_checkpoint.c_str(), "r");
-
-    //Get Checkpoint Properties, currently frame would seem to be the correct and only property needed to resume
-    startFrame = 0;
-    if(fCheckpoint) {
-    while(!feof(fCheckpoint)){
-    fgets(varStrFromFile, 100, fCheckpoint);
-    prop = strtok(varStrFromFile, " ");
-    val = strtok(NULL, " ");
-
-    if(!strcmp(prop, "Frame")) {
-    startFrame = atoi(val);
-    }
-    }s
-    }*/
 
     string checkpoint_filename = "checkpoint.txt";
 
@@ -253,16 +205,11 @@ int main(int argc, char** argv)
         cout << "Unsuccessful checkpoint read" << endl << "Starting from beginning of video" << endl;
     }
 
-#ifdef _BOINC_APP_
-    //boinc_finish(1);
-#else
-    //exit(1);
-#endif
-
     //Get the video
     capture = cvCaptureFromAVI(argv[1]);
     if(!capture) return 1;
-    //Get some video properties
+
+	//Get some video properties
     fps 				= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
     frameCount 			= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
     frameWidth 			= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
@@ -274,6 +221,9 @@ int main(int argc, char** argv)
     blockFractionArray = new float[framesInThreeMinutes];
     numberOfThreeMinuteIntervals = ceil((float)((float) frameCount / (float) framesInThreeMinutes));
     threeMinuteIntervalProbabilityArray = new float[numberOfThreeMinuteIntervals];
+	
+	numFoundPixelOverThreeMin = 0;
+	
     for(int i = 0; i < interval; i++) {
         threeMinuteIntervalProbabilityArray[i] = checkpointed_video_probabilities->at(i);
         cout << "prob " << i << "is: " << threeMinuteIntervalProbabilityArray[i] << endl;
@@ -289,12 +239,6 @@ int main(int argc, char** argv)
     cvNamedWindow("Video", 0);
     cvNamedWindow("Video Pixels", 0);
     cvNamedWindow("Video Blocks", 0);
-
-    //pixelValues = new int[504];
-    //blockValues = new bool[504];
-
-    //receivedPixelChanges = new int[frameCount];
-    //receivedBlockChanges = new int[frameCount];
 
     //This is what should happen, but does not work currently
     //cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, startFrame); 
@@ -380,16 +324,22 @@ int main(int argc, char** argv)
 
         blockFractionArray[currentFrameNum % framesInThreeMinutes] = (float)((float) numFoundBlock/ (float) numBlocks);
 
+		numFoundPixelOverThreeMin += numFoundPixel;
+		
         if((currentFrameNum + 1) % framesInThreeMinutes == 0) {
-            threeMinuteIntervalProbabilityArray[interval] = 0;
-            for(int i = 0; i < framesInThreeMinutes; i++) {
+            threeMinuteIntervalProbabilityArray[interval] = (float)((float)numFoundPixelOverThreeMin / (float)((float)(frameWidth * frameHeight) * (float) framesInThreeMinutes));
+            
+			//OLD METHOD
+			/*for(int i = 0; i < framesInThreeMinutes; i++) {
                 threeMinuteIntervalProbabilityArray[interval] += blockFractionArray[i]; 
             }
 
             threeMinuteIntervalProbabilityArray[interval] = threeMinuteIntervalProbabilityArray[interval] / framesInThreeMinutes;
-
+			*/
             cout << "In interval " << interval << " probability is: " << threeMinuteIntervalProbabilityArray[interval] << endl;
             interval++;
+			
+			numFoundPixelOverThreeMin = 0;
         }
 
         cvReleaseImage(&lastFrame); //frame currently pointed too by lastFrame has been analyzed twice, no longer needed
@@ -402,33 +352,8 @@ int main(int argc, char** argv)
 
         key = cvWaitKey( 1000/ fps );
 
-        /*myInt = 0;
-          for(int i = 0; i < 504; i++) {
-          myInt += pixelValues[i];
-          }
-
-          myInt2 = 0;
-          for(int i = 0; i < 504; i++) {
-          if(blockValues[i]) {
-          myInt2++;
-          }
-          }
-          receivedPixelChanges[currentFrameNum] = myInt;
-          receivedBlockChanges[currentFrameNum] = myInt2;*/
-
         currentFrameNum++;
     }
-
-    /*for(int i = 0; i < currentFrameNum; i++) 
-      {
-      fprintf(fPixel,   "%d\n",  receivedPixelChanges[i]);
-      fprintf(fBlock,   "%d\n",  receivedBlockChanges[i]);
-      }
-
-    //Close Used files
-    fclose(fPixel);
-    fclose(fBlock);
-    fclose(fCheckpoint);*/
 
     //Free remaining frame
     cvReleaseCapture( &capture );
