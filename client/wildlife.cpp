@@ -29,13 +29,32 @@
 #include "mfile.h"
 #endif
 
+#ifdef USE_OPENGL
+
+#ifdef __APPLE__
+#  include <OpenGL/gl.h>
+#  include <OpenGL/glu.h>
+#  include <GLUT/glut.h>
+#else
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#  include <GL/glut.h>
+#endif
+
+#endif
+
+//Boost includes
+#include <boost/thread.hpp>
+
 //OpenCV Includes
 #include "opencv.hpp"
 
-#define PIXEL_THRESHOLD 20
-#define BLOCK_THRESHOLD 70
-#define BLOCK_WIDTH 20
-#define BLOCK_HEIGHT 20
+#define PIXEL_THRESHOLD 10
+#define BLOCK_THRESHOLD 20
+#define BLOCK_WIDTH 5
+#define BLOCK_HEIGHT 5
+
+using boost::thread;
 
 using namespace std;
 
@@ -129,6 +148,52 @@ bool read_checkpoint(string checkpoint_filename, string &video_filename, int &fr
     return true;
 }
 
+int frameWidth, frameHeight;
+
+#ifdef USE_OPENGL
+float *pixels;
+
+void display() {
+/*
+    for (int i = 0; i < NUMBER_DROPLETS; i++) {
+        unset_pixel(droplet_x[i], droplet_y[i]);
+    }   
+
+    for (int i = 0; i < NUMBER_DROPLETS; i++) {
+        move_droplet(droplet_x[i], droplet_y[i]);
+    }   
+
+    for (int i = 0; i < NUMBER_DROPLETS; i++) {
+        if (droplet_adjacent(droplet_x[i], droplet_y[i])) {
+            set_pixel(droplet_x[i], droplet_y[i]);
+            new_droplet(droplet_x[i], droplet_y[i]);
+        }   
+    }   
+
+    for (int i = 0; i < NUMBER_DROPLETS; i++) {
+        set_pixel(droplet_x[i], droplet_y[i]);
+    }   
+*/
+//    cout << "droplet is at: " << droplet_x << ", " << droplet_y << endl;
+
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //http://msdn2.microsoft.com/en-us/library/ms537062.aspx
+    //glDrawPixels writes a block of pixels to the framebuffer.
+
+    glDrawPixels(frameWidth, frameHeight, GL_RGB, GL_FLOAT, pixels);
+
+    glFlush();
+    glutSwapBuffers();
+
+    glutPostRedisplay();
+}
+void glutMainLoopWrapper() {
+    glutMainLoop();
+}
+#endif
+
 int main(int argc, char** argv)
 {
     //Variable Declarations
@@ -160,8 +225,10 @@ int main(int argc, char** argv)
     int fps;
     int currentFrameNum;
 
-    int frameWidth;
-    int frameHeight;
+
+    //These are now global for OpenGL
+//    int frameWidth;
+//    int frameHeight;
 
     int frameBlockHeight;
     int frameBlockWidth;
@@ -184,7 +251,6 @@ int main(int argc, char** argv)
 
     //int myInt;
     //int myInt2;
-
 
 
     int ** blockHolder;
@@ -269,15 +335,19 @@ int main(int argc, char** argv)
     frameHeight 		= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
     frameBlockWidth 	= ceil((double)frameWidth / (double)BLOCK_WIDTH);
     frameBlockHeight 	= ceil((double)frameHeight / (double)BLOCK_HEIGHT);
+
     numBlocks			= frameBlockHeight * frameBlockWidth;
     framesInThreeMinutes = fps * 180;
+
     blockFractionArray = new float[framesInThreeMinutes];
     numberOfThreeMinuteIntervals = ceil((float)((float) frameCount / (float) framesInThreeMinutes));
     threeMinuteIntervalProbabilityArray = new float[numberOfThreeMinuteIntervals];
+
     for(int i = 0; i < interval; i++) {
         threeMinuteIntervalProbabilityArray[i] = checkpointed_video_probabilities->at(i);
         cout << "prob " << i << "is: " << threeMinuteIntervalProbabilityArray[i] << endl;
     }
+
     blockHolder = new int*[frameBlockHeight];
     for(int i = 0; i < frameBlockHeight; i++) {
         blockHolder[i] = new int[frameBlockWidth];
@@ -285,6 +355,28 @@ int main(int argc, char** argv)
             blockHolder[i][j] = 0;
         }
     }
+
+#ifdef USE_OPENGL
+    pixels = (float*)malloc(frameWidth * frameHeight * 3 * sizeof(float));
+    for (int i = 0; i < frameWidth * frameHeight * 3; i++) {
+        pixels[i] = 0.0;
+    }
+
+    glutInit(&argc, argv);
+
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitWindowSize(frameWidth, frameHeight);
+
+    glutCreateWindow(argv[1]);      //the name of the window is the name of the video
+
+    glutDisplayFunc(display);
+
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+
+    boost::thread opengl_thread( glutMainLoop );
+#endif
+
     //Create the windows we see the output in
     cvNamedWindow("Video", 0);
     cvNamedWindow("Video Pixels", 0);
@@ -359,18 +451,34 @@ int main(int argc, char** argv)
             for(int w = 0; w < frameBlockWidth; w++) {
                 if(blockHolder[h][w] > BLOCK_THRESHOLD) 
                     numFoundBlock++;
+
                 for(int i = 0; i < BLOCK_HEIGHT; i++) {
                     for(int j = 0; j < BLOCK_WIDTH; j++){
                         int addr = (h * BLOCK_HEIGHT * frameWidth + w * BLOCK_WIDTH + i * frameWidth + j) * 3;
+
+                        int pixel_addr = (((frameHeight - ((h * BLOCK_HEIGHT) + i) - 1) * frameWidth) + (w * BLOCK_WIDTH + j)) * 3;
+
                         if(blockHolder[h][w] > BLOCK_THRESHOLD) {
-                            blockFrame->imageDataOrigin[addr] = 0;
-                            blockFrame->imageDataOrigin[addr + 1] = 0;
-                            blockFrame->imageDataOrigin[addr + 2] = 0;
-                        }
-                        else{
-                            blockFrame->imageDataOrigin[addr] = 255;
-                            blockFrame->imageDataOrigin[addr + 1] = 255;
-                            blockFrame->imageDataOrigin[addr + 2] = 255;
+                            blockFrame->imageDataOrigin[addr]     = 255 - currentFrame->imageDataOrigin[addr];
+                            blockFrame->imageDataOrigin[addr + 1] = 255 - currentFrame->imageDataOrigin[addr + 1];
+                            blockFrame->imageDataOrigin[addr + 2] = 255 - currentFrame->imageDataOrigin[addr + 2];
+
+#ifdef USE_OPENGL
+                            pixels[pixel_addr + 0]    = blockFrame->imageDataOrigin[addr];
+                            pixels[pixel_addr + 1]    = blockFrame->imageDataOrigin[addr + 1];
+                            pixels[pixel_addr + 2]    = blockFrame->imageDataOrigin[addr + 2];
+#endif
+
+                        } else {
+                            blockFrame->imageDataOrigin[addr]     = currentFrame->imageDataOrigin[addr];
+                            blockFrame->imageDataOrigin[addr + 1] = currentFrame->imageDataOrigin[addr + 1];
+                            blockFrame->imageDataOrigin[addr + 2] = currentFrame->imageDataOrigin[addr + 2];
+
+#ifdef USE_OPENGL
+                            pixels[pixel_addr + 0]    = blockFrame->imageDataOrigin[addr];
+                            pixels[pixel_addr + 1]    = blockFrame->imageDataOrigin[addr + 1];
+                            pixels[pixel_addr + 2]    = blockFrame->imageDataOrigin[addr + 2];
+#endif
                         }
                     }
                 }
@@ -437,6 +545,10 @@ int main(int argc, char** argv)
     cvDestroyWindow("Video");
     cvDestroyWindow("Video Pixels");
     cvDestroyWindow("Video Blocks");
+
+#ifdef USE_OPENGL
+    opengl_thread.join();
+#endif
 
     //Finish
 #ifdef _BOINC_APP_
