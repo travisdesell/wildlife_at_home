@@ -229,43 +229,13 @@ int main(int argc, char** argv)
     int key = 0;
 
     int ** blockHolder;
-    //Assure we have at least an argument to attempt to open
+
+	//Assure we have at least an argument to attempt to open
     assert(argc == 2);
 
 #ifdef _BOINC_APP_	
     boinc_init();
 #endif
-
-    //Open pixel, block, and checkpoint filesys
-
-    //a+ for pixel and block, because we want to create if non-existant, or append if exists
-    /*fileResolveRetval = boinc_resolve_filename_s("outputPixel.txt", resolved_outputPixel);
-      if (fileResolveRetval) boinc_finish(-1);
-      fPixel = boinc_fopen(resolved_outputPixel.c_str(), "a+");
-
-      fileResolveRetval = boinc_resolve_filename_s("outputBlock.txt", resolved_outputBlock);
-      if (fileResolveRetval) boinc_finish(-1);
-      fBlock = boinc_fopen(resolved_outputBlock.c_str(), "a+");
-
-    //r for checkpoint, becuase we currently just want to read it
-    //It is re-opened after read because after it is read we want to overwrite it completetly
-    fileResolveRetval = boinc_resolve_filename_s("testCheckpoint.txt", resolved_checkpoint);
-    if (fileResolveRetval) boinc_finish(-1);
-    fCheckpoint = boinc_fopen(resolved_checkpoint.c_str(), "r");
-
-    //Get Checkpoint Properties, currently frame would seem to be the correct and only property needed to resume
-    startFrame = 0;
-    if(fCheckpoint) {
-    while(!feof(fCheckpoint)){
-    fgets(varStrFromFile, 100, fCheckpoint);
-    prop = strtok(varStrFromFile, " ");
-    val = strtok(NULL, " ");
-
-    if(!strcmp(prop, "Frame")) {
-    startFrame = atoi(val);
-    }
-    }s
-    }*/
 
     vector<float> slice_probabilities;
 
@@ -286,12 +256,6 @@ int main(int argc, char** argv)
     } else {
         cout << "Unsuccessful checkpoint read" << endl << "Starting from beginning of video" << endl;
     }
-
-#ifdef _BOINC_APP_
-    //boinc_finish(1);
-#else
-    //exit(1);
-#endif
 
     //Get the video
     CvCapture *capture = cvCaptureFromAVI(argv[1]);
@@ -357,12 +321,6 @@ int main(int argc, char** argv)
 //    cvNamedWindow("Video", 0);
 //    cvNamedWindow("Video Pixels", 0);
 //    cvNamedWindow("Video Blocks", 0);
-
-    //pixelValues = new int[504];
-    //blockValues = new bool[504];
-
-    //receivedPixelChanges = new int[frameCount];
-    //receivedBlockChanges = new int[frameCount];
 
     //This is what should happen, but does not work currently
     //cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, startFrame); 
@@ -465,7 +423,6 @@ int main(int argc, char** argv)
 //                if(key == 's')	boinc_finish(1);
 //            }
 #endif
-        }
 
         cvReleaseImage(&lastFrame); //frame currently pointed too by lastFrame has been analyzed twice, no longer needed
 
@@ -476,20 +433,6 @@ int main(int argc, char** argv)
 //        cvShowImage("Video Blocks", blockFrame);
 
         key = cvWaitKey( 1000 / fps );
-
-        /*myInt = 0;
-          for(int i = 0; i < 504; i++) {
-          myInt += pixelValues[i];
-          }
-
-          myInt2 = 0;
-          for(int i = 0; i < 504; i++) {
-          if(blockValues[i]) {
-          myInt2++;
-          }
-          }
-          receivedPixelChanges[currentFrameNum] = myInt;
-          receivedBlockChanges[currentFrameNum] = myInt2;*/
 
         currentFrameNum++;
     }
