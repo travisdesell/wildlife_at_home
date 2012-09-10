@@ -47,6 +47,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/c
 #include_directories (${Boost_INCLUDE_DIR})
 
 find_package(BOINC)
-find_package(OpenCV)
+find_package(OpenCV COMPONENTS highgui imageproc)
 
 add_subdirectory(client)

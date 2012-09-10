@@ -47,7 +47,10 @@
 #include <boost/thread.hpp>
 
 //OpenCV Includes
-#include "opencv.hpp"
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+
+#define SLICE_TIME_S 180
 
 #define PIXEL_THRESHOLD 10
 #define BLOCK_THRESHOLD 20
@@ -58,8 +61,7 @@ using boost::thread;
 
 using namespace std;
 
-void write_checkpoint(string checkpoint_filename, string video_filename, int frame, int intervals, float * probArr)
-{
+void write_checkpoint(string checkpoint_filename, string video_filename, vector<float> &slice_probabilities) {
 #ifdef _BOINC_APP_
     string resolved_path;
     int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
@@ -79,17 +81,16 @@ void write_checkpoint(string checkpoint_filename, string video_filename, int fra
     }
 
     checkpoint_file << "VIDEO_FILE_NAME: " << video_filename << endl;
-    checkpoint_file << "FRAME: " << frame << endl;
-    checkpoint_file << "INTERVALS: " << intervals << endl;
-    for(int i = 0; i < intervals; i++) {
-        checkpoint_file << probArr[i] << endl;
+    checkpoint_file << "INTERVALS: " << slice_probabilities.size() << endl;
+    for(int i = 0; i < slice_probabilities.size(); i++) {
+        checkpoint_file << slice_probabilities[i] << endl;
     }
     checkpoint_file << endl;
 
     checkpoint_file.close();
 }
 
-bool read_checkpoint(string checkpoint_filename, string &video_filename, int &frame, int &intervals, vector<float> *probVec ) {
+bool read_checkpoint(string checkpoint_filename, string &video_filename, vector<float> &slice_probabilities ) {
 #ifdef _BOINC_APP_
     string resolved_path;
     int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
@@ -107,25 +108,18 @@ bool read_checkpoint(string checkpoint_filename, string &video_filename, int &fr
     checkpoint_file >> s >> video_filename;
     if (s.compare("VIDEO_FILE_NAME:") != 0) {
         cerr << "ERROR: malformed checkpoint! could not read 'VIDEO_FILE_NAME'" << endl;
-#ifdef _BOINC_APP_
 
-        boinc_finish(1);
-#endif
-        exit(1);
-    }
-
-    checkpoint_file >> s >> frame;
-    if (s.compare("FRAME:") != 0) {
-        cerr << "ERROR: malformed checkpoint! could not read 'FRAME'" << endl;
 #ifdef _BOINC_APP_
         boinc_finish(1);
 #endif
         exit(1);
     }
 
+    int intervals;
     checkpoint_file >> s >> intervals;
     if (s.compare("INTERVALS:") != 0) {
         cerr << "ERROR: malformed checkpoint! could not read 'INTERVALS'" << endl;
+
 #ifdef _BOINC_APP_
         boinc_finish(1);
 #endif
@@ -135,9 +129,10 @@ bool read_checkpoint(string checkpoint_filename, string &video_filename, int &fr
     float current;
     for(int i = 0; i < intervals; i++) {
         checkpoint_file >> current;
-        probVec->push_back(current);
+        slice_probabilities.push_back(current);
         if (!checkpoint_file.good()) {
             cerr << "ERROR: malformed checkpoint! not enough probabilities present" << endl;
+
 #ifdef _BOINC_APP_
             boinc_finish(1);
 #endif
@@ -151,47 +146,72 @@ bool read_checkpoint(string checkpoint_filename, string &video_filename, int &fr
 int frameWidth, frameHeight;
 
 #ifdef USE_OPENGL
-float *pixels;
+char *gl_pixels;
+
+int gl_width, gl_height;
+
+bool analysis_finished = false;
 
 void display() {
-/*
-    for (int i = 0; i < NUMBER_DROPLETS; i++) {
-        unset_pixel(droplet_x[i], droplet_y[i]);
-    }   
-
-    for (int i = 0; i < NUMBER_DROPLETS; i++) {
-        move_droplet(droplet_x[i], droplet_y[i]);
-    }   
-
-    for (int i = 0; i < NUMBER_DROPLETS; i++) {
-        if (droplet_adjacent(droplet_x[i], droplet_y[i])) {
-            set_pixel(droplet_x[i], droplet_y[i]);
-            new_droplet(droplet_x[i], droplet_y[i]);
-        }   
-    }   
-
-    for (int i = 0; i < NUMBER_DROPLETS; i++) {
-        set_pixel(droplet_x[i], droplet_y[i]);
-    }   
-*/
-//    cout << "droplet is at: " << droplet_x << ", " << droplet_y << endl;
-
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //http://msdn2.microsoft.com/en-us/library/ms537062.aspx
-    //glDrawPixels writes a block of pixels to the framebuffer.
+    //glDrawPixels writes a block of gl_pixels to the framebuffer.
 
-    glDrawPixels(frameWidth, frameHeight, GL_RGB, GL_FLOAT, pixels);
+    glDrawPixels(gl_width, gl_height, GL_RGB, GL_UNSIGNED_BYTE, gl_pixels);
 
     glFlush();
     glutSwapBuffers();
 
     glutPostRedisplay();
 }
-void glutMainLoopWrapper() {
-    glutMainLoop();
+
+//from: http://en.wikipedia.org/wiki/YUV#Y.27UV420p_.28and_Y.27V12_or_YV12.29_to_RGB888_conversion
+void YprimeUV444toRGB888(char yp, char u, char v, char &r, char &g, char &b) {
+    char cr = u - 128;
+    char cb = v - 128;
+
+    r = yp + cr + (cr >> 2) + (cr >> 3) + (cr >> 5);
+    g = yp - ((cb >> 2) + (cb >> 4) + (cb >> 5)) - ((cr >> 1) + (cr >> 3) + (cr >> 4) + (cr >> 5));
+    b = yp + cb + (cb >> 1) + (cb >> 2) + (cb >> 6);
 }
+
+void YprimeUV444toRGB888_2(char yp, char u, char v, char &r, char &g, char &b) {
+    char c = yp - 16;
+    char d = u - 128;
+    char e = v - 128;
+    r = (298 * c + 409 * e + 128) >> 8;
+    g = (298 * c - 100 * d - 208 * e + 128) >> 8;
+    b = (298 * c + 516 * d + 128) >> 8;
+}
+
+void YUVtoRGB(char y, char u, char v, char &r, char &g, char &b) {
+    r = y + (v / 0.877);
+    g = -1.7036 * y - 3.462 * u - 1.942 * v;
+    b = y + (u / 0.492);
+}
+
+void draw_gl_pixels(int gl_start_w, int gl_start_h, int image_width, int image_height, char* cl_pixels) {
+    for (int h = 0; h < image_height; h++) {
+        for (int w = 0; w < image_width; w++) {
+            int cl_pos = (h * image_width + w) * 3;
+
+            char b = cl_pixels[cl_pos];
+            char g = cl_pixels[cl_pos + 1];
+            char r = cl_pixels[cl_pos + 2];
+
+            int gl_w = gl_start_w + w;
+            int gl_h = gl_start_h + (image_height - h - 1);
+
+            int gl_pos = ((gl_h * gl_width) + gl_w) * 3;
+
+            gl_pixels[gl_pos]       = r;
+            gl_pixels[gl_pos + 1]   = g;
+            gl_pixels[gl_pos + 2]   = b;
+        }
+    }
+}
+
 #endif
 
 int main(int argc, char** argv)
@@ -201,57 +221,12 @@ int main(int argc, char** argv)
     std::string resolved_outputBlock;
     std::string resolved_checkpoint;
 
-    //FILE *fPixel;
-    //FILE *fBlock;
-    //FILE *fCheckpoint;
-
-    //int fileResolveRetval;
-
-    //char varStrFromFile[100];
-    //char * prop;
-    //char * val;
-
-    CvCapture *capture;
-
-    IplImage  *currentFrame;
-    IplImage  *lastFrame;
-
-    IplImage  *pixelFrame;
-    IplImage  *blockFrame;
-
-    int startFrame;
-    int interval;
-    int frameCount;
-    int fps;
     int currentFrameNum;
-
-
-    //These are now global for OpenGL
-//    int frameWidth;
-//    int frameHeight;
-
-    int frameBlockHeight;
-    int frameBlockWidth;
-    int numBlocks;
-
-    int framesInThreeMinutes;
-    int numberOfThreeMinuteIntervals;
-    float * blockFractionArray;
-    float * threeMinuteIntervalProbabilityArray;
-
-    //int *pixelValues;
-    //bool *blockValues;
-    //int * receivedPixelChanges;
-    //int * receivedBlockChanges;
 
     int numFoundPixel;
     int numFoundBlock;
 
     int key = 0;
-
-    //int myInt;
-    //int myInt2;
-
 
     int ** blockHolder;
     //Assure we have at least an argument to attempt to open
@@ -292,28 +267,21 @@ int main(int argc, char** argv)
     }s
     }*/
 
+    vector<float> slice_probabilities;
+
     string checkpoint_filename = "checkpoint.txt";
 
     string checkpointed_video_filename;
-    int checkpointed_video_frame;
-    int checkpointed_video_intervals;
-    vector<float> *checkpointed_video_probabilities = new vector<float>();
 
-    startFrame = 0;
-    interval = 0;
     bool successful_checkpoint_read = read_checkpoint(	checkpoint_filename, 
             checkpointed_video_filename, 
-            checkpointed_video_frame,
-            checkpointed_video_intervals,
-            checkpointed_video_probabilities);
+            slice_probabilities);
 
     if(successful_checkpoint_read) {
         if(checkpointed_video_filename.compare(argv[1]) != 0) {
             cout << "Checkpointed video filename was not the same as given video filename... Restarting" << endl;
         } else {
             cout << "Continuing from checkpoint..." << endl;
-            interval = checkpointed_video_intervals;
-            startFrame = checkpointed_video_frame; //no longer needed
         }
     } else {
         cout << "Unsuccessful checkpoint read" << endl << "Starting from beginning of video" << endl;
@@ -326,26 +294,34 @@ int main(int argc, char** argv)
 #endif
 
     //Get the video
-    capture = cvCaptureFromAVI(argv[1]);
+    CvCapture *capture = cvCaptureFromAVI(argv[1]);
     if(!capture) return 1;
+
     //Get some video properties
-    fps 				= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
-    frameCount 			= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
-    frameWidth 			= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-    frameHeight 		= (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
-    frameBlockWidth 	= ceil((double)frameWidth / (double)BLOCK_WIDTH);
-    frameBlockHeight 	= ceil((double)frameHeight / (double)BLOCK_HEIGHT);
+    int fps 				    = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+    int frameCount 			    = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
 
-    numBlocks			= frameBlockHeight * frameBlockWidth;
-    framesInThreeMinutes = fps * 180;
+    //frameWidth and frameHight are defined globally
+    frameWidth 			        = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+    frameHeight 		        = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
 
-    blockFractionArray = new float[framesInThreeMinutes];
-    numberOfThreeMinuteIntervals = ceil((float)((float) frameCount / (float) framesInThreeMinutes));
-    threeMinuteIntervalProbabilityArray = new float[numberOfThreeMinuteIntervals];
+    gl_width = frameWidth * 2;
+    gl_height = frameHeight * 2;
+//    gl_width = ((frameWidth * frameHeight) * 2.0) / frameHeight;
+//    gl_height = ((frameWidth * frameHeight) * 2.0) / frameWidth;
+//    gl_width = frameWidth * 3.0 / 2.0;
+//    gl_height = frameHeight * 3.0 / 2.0;
 
-    for(int i = 0; i < interval; i++) {
-        threeMinuteIntervalProbabilityArray[i] = checkpointed_video_probabilities->at(i);
-        cout << "prob " << i << "is: " << threeMinuteIntervalProbabilityArray[i] << endl;
+    int frameBlockWidth 	    = ceil((double)frameWidth / (double)BLOCK_WIDTH);
+    int frameBlockHeight 	    = ceil((double)frameHeight / (double)BLOCK_HEIGHT);
+
+    int numBlocks			    = frameBlockHeight * frameBlockWidth;
+    int framesInThreeMinutes    = fps * SLICE_TIME_S;
+
+    float *blockFractionArray = new float[framesInThreeMinutes];
+
+    for(int i = 0; i < slice_probabilities.size(); i++) {
+        cout << "prob " << i << "is: " << slice_probabilities[i] << endl;
     }
 
     blockHolder = new int*[frameBlockHeight];
@@ -357,15 +333,15 @@ int main(int argc, char** argv)
     }
 
 #ifdef USE_OPENGL
-    pixels = (float*)malloc(frameWidth * frameHeight * 3 * sizeof(float));
-    for (int i = 0; i < frameWidth * frameHeight * 3; i++) {
-        pixels[i] = 0.0;
+    gl_pixels = (char*)malloc(gl_width * gl_height * 3 * sizeof(char));
+    for (int i = 0; i < gl_width * gl_height * 3; i++) {
+        gl_pixels[i] = 0;
     }
 
     glutInit(&argc, argv);
 
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    glutInitWindowSize(frameWidth, frameHeight);
+    glutInitWindowSize(gl_width, gl_height);
 
     glutCreateWindow(argv[1]);      //the name of the window is the name of the video
 
@@ -378,9 +354,9 @@ int main(int argc, char** argv)
 #endif
 
     //Create the windows we see the output in
-    cvNamedWindow("Video", 0);
-    cvNamedWindow("Video Pixels", 0);
-    cvNamedWindow("Video Blocks", 0);
+//    cvNamedWindow("Video", 0);
+//    cvNamedWindow("Video Pixels", 0);
+//    cvNamedWindow("Video Blocks", 0);
 
     //pixelValues = new int[504];
     //blockValues = new bool[504];
@@ -392,31 +368,20 @@ int main(int argc, char** argv)
     //cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, startFrame); 
 
     //Instead...
-    currentFrame = cvQueryFrame(capture);
-    startFrame = interval * framesInThreeMinutes;
+    IplImage *currentFrame = cvQueryFrame(capture);
+    int startFrame = slice_probabilities.size() * framesInThreeMinutes;
     for(int i = 0; i < startFrame; i++) {
         currentFrame = cvQueryFrame(capture);
     }
 
-    pixelFrame = cvCloneImage(currentFrame);
-    blockFrame = cvCloneImage(currentFrame);        
-    lastFrame = cvCloneImage(currentFrame);
+    IplImage *pixelFrame = cvCloneImage(currentFrame);
+    IplImage *blockFrame = cvCloneImage(currentFrame);        
+    IplImage *lastFrame = cvCloneImage(currentFrame);
 
     currentFrameNum = startFrame;	
     while(true) //quit when q is pressed
     {
 
-#ifdef _BOINC_APP_
-        boinc_fraction_done((double)((double)currentFrameNum / (double)frameCount));
-
-        if(boinc_time_to_checkpoint() || key == 's')
-        {
-            cout << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
-            write_checkpoint(checkpoint_filename, argv[1], currentFrameNum, interval, threeMinuteIntervalProbabilityArray);
-            boinc_checkpoint_completed();
-            if(key == 's')	boinc_finish(1);
-        }
-#endif
         currentFrame = cvQueryFrame(capture);
 
         if(!currentFrame) break; //quit when no frames remain
@@ -456,29 +421,15 @@ int main(int argc, char** argv)
                     for(int j = 0; j < BLOCK_WIDTH; j++){
                         int addr = (h * BLOCK_HEIGHT * frameWidth + w * BLOCK_WIDTH + i * frameWidth + j) * 3;
 
-                        int pixel_addr = (((frameHeight - ((h * BLOCK_HEIGHT) + i) - 1) * frameWidth) + (w * BLOCK_WIDTH + j)) * 3;
-
                         if(blockHolder[h][w] > BLOCK_THRESHOLD) {
                             blockFrame->imageDataOrigin[addr]     = 255 - currentFrame->imageDataOrigin[addr];
                             blockFrame->imageDataOrigin[addr + 1] = 255 - currentFrame->imageDataOrigin[addr + 1];
                             blockFrame->imageDataOrigin[addr + 2] = 255 - currentFrame->imageDataOrigin[addr + 2];
 
-#ifdef USE_OPENGL
-                            pixels[pixel_addr + 0]    = blockFrame->imageDataOrigin[addr];
-                            pixels[pixel_addr + 1]    = blockFrame->imageDataOrigin[addr + 1];
-                            pixels[pixel_addr + 2]    = blockFrame->imageDataOrigin[addr + 2];
-#endif
-
                         } else {
-                            blockFrame->imageDataOrigin[addr]     = currentFrame->imageDataOrigin[addr];
+                            blockFrame->imageDataOrigin[addr + 0] = currentFrame->imageDataOrigin[addr];
                             blockFrame->imageDataOrigin[addr + 1] = currentFrame->imageDataOrigin[addr + 1];
                             blockFrame->imageDataOrigin[addr + 2] = currentFrame->imageDataOrigin[addr + 2];
-
-#ifdef USE_OPENGL
-                            pixels[pixel_addr + 0]    = blockFrame->imageDataOrigin[addr];
-                            pixels[pixel_addr + 1]    = blockFrame->imageDataOrigin[addr + 1];
-                            pixels[pixel_addr + 2]    = blockFrame->imageDataOrigin[addr + 2];
-#endif
                         }
                     }
                 }
@@ -486,29 +437,45 @@ int main(int argc, char** argv)
             }
         }
 
+        draw_gl_pixels(0, frameHeight, frameWidth, frameHeight, currentFrame->imageDataOrigin);
+        draw_gl_pixels(frameWidth, 0, frameWidth, frameHeight, pixelFrame->imageDataOrigin);
+        draw_gl_pixels(frameWidth, frameHeight, frameWidth, frameHeight, blockFrame->imageDataOrigin);
+
+
         blockFractionArray[currentFrameNum % framesInThreeMinutes] = (float)((float) numFoundBlock/ (float) numBlocks);
 
-        if((currentFrameNum + 1) % framesInThreeMinutes == 0) {
-            threeMinuteIntervalProbabilityArray[interval] = 0;
+        if (((currentFrameNum + 1) % framesInThreeMinutes == 0) || (currentFrameNum + 1 == frameCount)) {
+            double probability = 0;
             for(int i = 0; i < framesInThreeMinutes; i++) {
-                threeMinuteIntervalProbabilityArray[interval] += blockFractionArray[i]; 
+                probability += blockFractionArray[i]; 
             }
 
-            threeMinuteIntervalProbabilityArray[interval] = threeMinuteIntervalProbabilityArray[interval] / framesInThreeMinutes;
+            slice_probabilities.push_back(probability / framesInThreeMinutes);
 
-            cout << "In interval " << interval << " probability is: " << threeMinuteIntervalProbabilityArray[interval] << endl;
-            interval++;
+            cout << "In interval " << slice_probabilities.size() - 1 << " probability is: " << slice_probabilities.back() << " for " << (currentFrameNum + 1) % framesInThreeMinutes << " frames." << endl;
+
+#ifdef _BOINC_APP_
+            boinc_fraction_done((double)((double)currentFrameNum / (double)frameCount));
+
+//            if(boinc_time_to_checkpoint() || key == 's')
+//            if (key == s) {
+            cout << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
+            write_checkpoint(checkpoint_filename, argv[1], slice_probabilities);
+            boinc_checkpoint_completed();
+//                if(key == 's')	boinc_finish(1);
+//            }
+#endif
         }
 
         cvReleaseImage(&lastFrame); //frame currently pointed too by lastFrame has been analyzed twice, no longer needed
 
         lastFrame = cvCloneImage(currentFrame);
 
-        cvShowImage("Video",currentFrame);
-        cvShowImage("Video Pixels", pixelFrame);
-        cvShowImage("Video Blocks",blockFrame);
+//        cvShowImage("Video", currentFrame);
+//        cvShowImage("Video Pixels", pixelFrame);
+//        cvShowImage("Video Blocks", blockFrame);
 
-        key = cvWaitKey( 1000/ fps );
+        key = cvWaitKey( 1000 / fps );
 
         /*myInt = 0;
           for(int i = 0; i < 504; i++) {
@@ -527,6 +494,13 @@ int main(int argc, char** argv)
         currentFrameNum++;
     }
 
+    fprintf(stderr, "<slice_time>%d</slice_time\n", SLICE_TIME_S);
+    fprintf(stderr, "<slice_probabilities>\n");
+    for (uint32_t i = 0; i < slice_probabilities.size(); i++) {
+        fprintf(stderr, "%1.5f\n", slice_probabilities[i]);
+    }
+    fprintf(stderr, "</slice_probabilities>\n");
+
     /*for(int i = 0; i < currentFrameNum; i++) 
       {
       fprintf(fPixel,   "%d\n",  receivedPixelChanges[i]);
@@ -542,12 +516,13 @@ int main(int argc, char** argv)
     cvReleaseCapture( &capture );
 
     //Destroy Windows
-    cvDestroyWindow("Video");
-    cvDestroyWindow("Video Pixels");
-    cvDestroyWindow("Video Blocks");
+//    cvDestroyWindow("Video");
+//    cvDestroyWindow("Video Pixels");
+//    cvDestroyWindow("Video Blocks");
 
 #ifdef USE_OPENGL
-    opengl_thread.join();
+    analysis_finished = true;
+//    opengl_thread.join();
 #endif
 
     //Finish
