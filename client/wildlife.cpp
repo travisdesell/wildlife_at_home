@@ -423,6 +423,7 @@ int main(int argc, char** argv)
 //                if(key == 's')	boinc_finish(1);
 //            }
 #endif
+        }
 
         cvReleaseImage(&lastFrame); //frame currently pointed too by lastFrame has been analyzed twice, no longer needed
 
