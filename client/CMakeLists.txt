@@ -15,12 +15,4 @@ link_directories(${OPENGL_LIBRARY_DIRS} ${GLUT_LIBRARY_DIRS} ${Boost_LIBRARY_DIR
 add_definitions( -DUSE_OPENGL )
 
 add_executable(wildlife wildlife)
-<<<<<<< HEAD
 target_link_libraries(wildlife ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
-
-add_executable(heat heat)
-target_link_libraries(heat ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES})
-
-=======
-target_link_libraries(wildlife ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
->>>>>>> 99aa9ec82d83a06be1fc04af691b3eedcec76ced
