@@ -136,12 +136,17 @@ function insert_video($archive_filename, $watermarked_filename, $project_id, $lo
     if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
     $video_id = mysql_insert_id();
 
+    /**
+     *  Insert information for the future video segment pieces to be generated
+     *  by the splitter.
+     */
     for ($i = 0; $i < $streaming_segments; $i++) {
         $streaming_filename = str_replace("archive", "streaming_2", $archive_filename);
         $streaming_filename = str_replace(".avi", "_CHILD$i.mp4", $streaming_filename);
 
         $query = "INSERT INTO video_segment_2 SET " .
                     "  video_id = '$video_id'" .
+                    ", number = $i" .
                     ", filename = '$streaming_filename'" .
                     ", crowd_obs_count = 0" .
                     ", expert_obs_count = 0" .
