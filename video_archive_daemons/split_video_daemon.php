@@ -1,162 +1,112 @@
 <?php
-/*
-Add4.php is the fourth version of the video adding script for this server.
-Methodology:
-- Upon given a target folder, will search for video files recursively in that folder and in folders contained within
-- The found video files will be added to an array.
-- When the search(es) has ended, the following operations will be applied to the video files:
-	- A search for any children videos in the video database will be executed
-	- If not found, they will be watermarked with the resulting parent video being put in the corresponding "watermarked" folder
-	- This parent folder will then be used to make "children" videos of 3:00 in length. These will be put in the corresponding "streaming" folder.
-- Upon given a video file, will apply the aforementioned operations to said video file.
-*/
 
-$item = $argv[2];
-$passwd = $argv[1];
+require_once("wildlife_db.php");
 
-mysql_connect("localhost", "wildlife_user", $passwd);
-mysql_select_db("wildlife_video");
+$video_table = "video_2";
+$segment_table = "video_segment_2";
+$observation_table = "observation_2";
+$species_table = "species";
+$location_table = "locations";
 
-$original = getcwd();
-$videolist = array();
-$i = 0;
-$finaliteration = 0;
-$end = 0;
-
-function sequence($item, $cwd) {
-    if(!sqlcheck($item)) {
-        echo "This item is already in the database.\n";
-        return 0;
-    }
-
-    splitter($item, $cwd);
-}
-
-function sqlcheck($item) {
-    $query = "Select id from archive_video where location LIKE '" . $item . "'"; //We're looking for the splitted versions of this vid in the database
-    $results = mysql_query($query);
-    $num = mysql_num_rows($results);
-
-    if(!empty($num)) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-/*
- * Should be able to apply the watermark during the splitting.
-function watermark($item) {
-    global $original;
-
-    $check = shell_exec("ls");
-    $check = explode("\n", $check);
-    for($i = 0; $i < count($check); $i++) {
-        if(strstr($check[$i], "watermark.png")) {
-            $tripper = true;
-            break;
-        }
-    }
-
-    if(empty($tripper)) {
-        die("No watermark found. Ending script...\n");
-    }
-
-    $name = explode(".", $item);
-    $newname = $name[0] . "_PARENT.flv";
-    $address = str_replace("archive", "watermarked", $newname);
-    $address = str_replace("testing", "watermarked", $newname);
-
-    $string = "ffmpeg -y -i " . $item . " -ar 44100 -vb 400000 -qmax 5 -vf \"movie=watermark.png [watermark]; [in] [watermark] overlay=10:10 [out]\" " . $address;
-    shell_exec($string);
-    return $address;
-}
+/**
+ * SCRIPT STARTS HERE
  */
 
-// function to explode on multiple delimiters, used in the splitter function.
-function multi_explode($pattern, $string, $standardDelimiter = ':') {
-    // replace delimiters with standard delimiter, also removing redundant delimiters
-    $string = preg_replace(array($pattern, "/{$standardDelimiter}+/s"), $standardDelimiter, $string);
-
-    // return the results of explode
-    return explode($standardDelimiter, $string);
+if (count($argv) != 2) {
+    die("Error, invalid arguments. usage: php $argv[0] <number of processes>\n");
 }
 
-//function splitter($item, $new) {
-function splitter($item, $cwd) {
-    $vidlisting = array();
+$number_of_processes = $argv[1];
+$modulo = -1;
 
-    echo "splitting: " . $item . "\n";
+$child_pids = array();
 
-    ob_start();
-    passthru("ffmpeg -y -i {$item} 2>&1");
-    $info = ob_get_contents();
-    ob_end_clean();
+/**
+ *  PHP has no threads, so we need to spawn a number of processes to 
+ *  watermark the video in parallel (to speed things up).
+ */
+for ($i = 0; $i < $number_of_processes; $i++) {
+    $pid = pcntl_fork();
 
-    $pattern = "/Duration:\s+([0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9]?)/";
-    $exists = preg_match($pattern, $info, $matches);
-    if(!$exists) {
-        die("No duration found.\n");
+    if ($pid == -1) {
+        die("Error, could not fork. Dying.\n");
+    } else if (!$pid) {
+        $modulo = $i;
+        break;
+
+    } else {
+        $child_pids[] = $pid;
     }
+}
 
-    $timetotalarray = multi_explode("/[:\.]/", $matches[1]);
+if ($modulo > -1) {
+    /**
+     *  Each process will have it's modulo, so, a process with modulo 1
+     *  of 7 will process any unwatermarked video in the database with
+     *  id % 7 == 1. This way no processes are working on the same videos.
+     */
+    echo "This is child $modulo of $number_of_processes\n";
 
-    echo "timetotalarray[0]: " . $timetotalarray[0] . "\n";
-    echo "timetotalarray[1]: " . $timetotalarray[1] . "\n";
-    echo "timetotalarray[2]: " . $timetotalarray[2] . "\n";
-    echo "timetotalarray[3]: " . $timetotalarray[3] . "\n";
+    //Connect to the database.
+    mysql_connect("localhost", $wildlife_user, $wildlife_pw);
+    mysql_select_db($wildlife_db);
 
-    echo "timetotalarray: " . $timetotalarray[0] . ":" . $timetotalarray[1] . ":" . $timetotalarray[2] . "." . $timetotalarray[3] . "\n";
+    while(true) {   //Loop until there are no streaming segments to generate
+        /* get a segment which needs to be generated from the watermarked file */
+        $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' LIMIT 1";
 
-    $total_seconds = ($timetotalarray[0] * 3600) + ($timetotalarray[1] * 60) + $timetotalarray[2];
+        $result = mysql_query($query);
+        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
-    echo "total_seconds: " . $total_seconds . "\n";
+        $row = mysql_fetch_assoc($result);
 
-    $start_time = 0;
-    $duration = 180;
+        if (!$row) {  //No segments left to generate, we can quit.
+            echo "No videos to watermark with modulo $modulo of $number_of_processes.\n";
+            break;
+        }
 
-    if ( substr($item, -4) != ".avi" && substr($item, -4) != ".wmv") {
-        echo "Item was not a video file: '" . $item . "'\n";
-        return;
-    }
+        $segment_id = $row['id'];
+        $segment_number = $row['number'];
+        $archive_video_id = $row['video_id'];
+        $segment_filename = $row['filename'];
 
-    $filename = substr($item, 0, -4); //this is the filename without the last 4 characeters (the .avi extension)
-    $filename = str_replace("archive", "streaming", $filename);
+        echo "query: '$query'\n";
+        echo "id: " . $segment_id . "\n";
+        echo "number: " . $segment_number . "\n";
+        echo "video_id: " . $archive_video_id . "\n";
+        echo "segment_filename: " . $segment_filename . "\n";
 
-    $iteration = 0;
+        /* Get required information about the file that the segment is being generated for */
+        $query = "SELECT watermarked_filename, duration_s, streaming_segments FROM video_2 WHERE id = " . $row['video_id'];
+        $result = mysql_query($query);
+        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
-    $long_flv = $filename . "_PARENT.flv";
-    $watermarked_flv = $filename . "_WATERMARKED.flv";
+        $row = mysql_fetch_assoc($result);
 
-    echo "creating PARENT: " . $long_flv . "\n";
-    echo "creating WATERMARKED: " . $watermarked_flv . "\n";
+        $watermarked_filename = $row['watermarked_filename'];
+        $archive_duration_s = $row['duration_s'];
+        $streaming_segments = $row['streaming_segments'];
 
-    echo "target dirname: " . dirname($long_flv) . "\n";
-    if (!is_dir(dirname($long_flv))) {
-        echo "directory does not exist.\n";
-        echo "creating directory.\n";
-        mkdir( dirname($long_flv), 0774, true );
-    }
+        echo "query: '$query'\n";
+        echo "watermarked_filename: " . $watermarked_filename . "\n";
+        echo "archive_duration_s: " . $archive_duration_s. "\n";
+        echo "streaming_segments: " . $streaming_segments . "\n";
 
-    if(strstr($item, ".avi") || strstr($item, ".wmv")) {
-        $resolutestring = "ffmpeg -i " . $item . " -sameq -copyts -ar 44100 -vb 400000 -qmax 5 " . $long_flv;
-        shell_exec($resolutestring);
-//        $item = $name[0] . ".flv";
-    }
-    $resolutestring = "ffmpeg -i " . $long_flv . " -sameq -copyts -ar 44100 -vb 400000 -qmax 5 -vf \"movie=" .$cwd . "/watermark.png [watermark]; [in] [watermark] overlay=10:10 [out]\" " . $watermarked_flv;
-    shell_exec($resolutestring);
 
-    //should add the archival video to the database here
-    $query = "Insert into archive_video (location, add_date, duration) values ('$item', NOW(), '" . $timetotalarray[0] . ":" . $timetotalarray[1] . ":" . $timetotalarray[2] . "." . $timetotalarray[3] . "')";
+        //Need to try and create the directories to the file.
+        $base_directory = substr($segment_filename, 0, strrpos($segment_filename, "/"));
+        echo "attempting to create directories if they don't exist: $base_directory\n";
+        mkdir($base_directory, 0755 /*all for owner, read/execute for others*/, true /*recursive*/);
 
-    if(!mysql_query($query)) {
-        die("Query failed inserting archival video entry.\n\tHere's why: " . mysql_error());
-    }
-    $archive_id = mysql_insert_id();
+        /**
+         *  Calculate the start and ending time for the video segment.
+         *  FFMPEG is a pain, so we need to convert from seconds to hh:mm:ss
+         */
+        $start_time = 180 * $segment_number;
 
-    while ($start_time < $total_seconds) {
-        if (($start_time + 180) > $total_seconds)  {
-            $duration = ($total_seconds - $start_time);
+        $duration = 180;    //duration should be 3 minutes or until the end of the video.
+        if (($start_time + 180) > $archive_duration_s)  {
+            $duration = ($archive_duration_s - $start_time);
         }
 
         $s_h = (int) ($start_time / 3600);
@@ -175,119 +125,54 @@ function splitter($item, $cwd) {
         if ($d_s < 10) $d_s = "0" . $d_s;
 
 
-        $outname = $filename . "_CHILD" . $iteration . ".flv";
+        //Run FFMPEG to create the 3 minute (or less) segment from the watermarked video 
+        $command = "ffmpeg -y -i " . $watermarked_filename . " -sameq -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename;
 
-        //Takes the video and splits it for the duration given by $start and $end
-        $command = "ffmpeg -y -i " . $watermarked_flv . " -sameq -copyts -ar 44100 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $outname;
 
-        echo $command . "\n";
+        echo "command:\n\n" . $command . "\n\n";
+
         shell_exec($command);
 
-        $command = "flvtool2 -UP " . $outname;
-        echo $command . "\n";
-        shell_exec($command);
+        /**
+         * Update the video_segment_2 table to specify that this segment is 'DONE'.
+         * If all segments are done for the archive video, set it's processing status to 'SPLIT'
+         */
+        $query = "UPDATE video_segment_2 SET processing_status = 'DONE' WHERE id = " . $segment_id;
+        $result = mysql_query($query);
+        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
-        echo "created: " . $outname .  "\n";
+        $query = "SELECT count(*) FROM video_segment_2 WHERE processing_status = 'DONE' AND video_id = " . $archive_video_id;
+        $result = mysql_query($query);
+        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
-        //add the streaming video to the database here
-        $query = "Insert into streaming_video (archive_id, location, add_date, duration) values ($archive_id, '$outname', NOW(), '". $d_h . ":" . $d_m . ":" . $d_s . "')";
+        $row = mysql_fetch_assoc($result);
 
-        if(!mysql_query($query)) {
-            die("Query failed inserting streaming video entry.\n\tHere's why: " . mysql_error());
+        $split_segments_generated = $row['count(*)'];
+
+        if ($split_segments_generated == $streaming_segments) {
+            //All the streaming segments for the video have been generated from the watermark,
+            //update it's entry in the database.
+
+            $query = "UPDATE video_2 SET processing_status = 'SPLIT' WHERE id = " . $segment_video_id;
+            $result = mysql_query($query);
+            if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
         }
-
-        $start_time += 180;
-        $iteration++;
-    }
-
-    echo "Removing: " . $long_flv . "\n";
-    shell_exec("rm " . $long_flv);
-
-    echo "Removing: " . $watermarked_flv . "\n";
-    shell_exec("rm " . $watermarked_flv);
-}
-
-
-function search($loc) {
-    global $current, $original, $videolist, $i, $finaliteration, $end;
-    $check = getcwd();
-
-    echo "check: " . $check . "\n";
-
-    $list = shell_exec("ls");
-
-    echo "result: " . $list . "\n";
-
-    $list = explode("\n", $list);
-
-    echo "loc: " . $loc . ", current: " . $current . "\n";
-
-    if($loc == $current) {
-        $end = count($list);
-        $iterate = $finaliteration;
-    } else {
-        $iterate = 0;
-    }
-
-    while($list[$iterate]) {
-        echo "list item: " . $list[$iterate] . "\n";
-
-        if($loc == $current) {
-            $finaliteration++;
-        }
-
-        if(is_dir($list[$iterate]) && $list[$iterate] != "FLVs" && $list[$iterate] != "Missouri_River_Project") {
-            chdir($list[$iterate]);
-            search($list[$iterate]);
-        } else {
-            if((strstr($list[$iterate], ".flv") || strstr($list[$iterate], ".avi") || strstr($list[$iterate], ".wmv")) && !strstr($list[$iterate], "filepart")) {
-                $temp = getcwd() . "/" . $list[$iterate];
-                $videolist[$i] = $temp;
-                $i++;
-            }
-        }
-
-        if($finaliteration == $end) {
-            return 0;
-        }
-        $iterate++;
-    }
-
-    chdir("..");
-    if($check == $original) {
-        return 0;
-    }
-}
-
-if(is_dir($item)) {
-    $cwd = getcwd();
-
-	if(!chdir($item)) {
-		die("Unable to change to the specified directory.\n");
-	}
-
-    /**
-     *  Get a recursive listing of every file in the specified directory
-     */
-    $current = getcwd();
-	search( $current );
-
-    echo "files to process:\n";
-	for($f = 0; $f < count($videolist); $f++) {
-		echo $videolist[$f] . "\n";
-    }
-    echo "\n\n";
-
-	for($f = 0; $f < count($videolist); $f++) {
-		echo $videolist[$f] . "\n";
-		sequence($videolist[$f], $cwd);
-    }
+     }
 
 } else {
-	$current = getcwd();
-	if(strstr($item, ".flv") || strstr($item, ".avi") || strstr($item, ".wmv")) {
-		sequence($item, $cwd);
-	}
+    /**
+     * This is the parent process. It just needs to wait for the child
+     * processes to complete.  $child_pids stored the process id (pid)
+     * of each child, so we can wait on them with the pcntl_waitpid
+     * function.
+     */
+    echo "This is the parent.\n";
+    for ($i = 0; $i < $number_of_processes; $i++) {
+        echo "\twaiting on child " . $child_pids[$i] . " to finish.\n";
+        pcntl_waitpid($child_pids[$i], $status);
+        echo "\tchild " . $child_pids[$i] . " has finished.\n\n";
+    }
 }
+
 
 ?>
