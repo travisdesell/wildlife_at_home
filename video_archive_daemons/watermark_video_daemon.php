@@ -35,26 +35,11 @@ for ($i = 0; $i < $number_of_processes; $i++) {
         break;
 
     } else {
-        pcntl_wait($status); //Protect against Zombie children
         $child_pids[] = $pid;
     }
 }
 
-if ($modulo == -1) {
-    /**
-     * This is the parent process. It just needs to wait for the child
-     * processes to complete.  $child_pids stored the process id (pid)
-     * of each child, so we can wait on them with the pcntl_waitpid
-     * function.
-     */
-    echo "This is the parent.\n";
-    for ($i = 0; $i < $number_of_processes; $i++) {
-        echo "\twaiting on child " . $child_pids[$i] . " to finish.\n";
-        pcntl_waitpid($child_pids[$i], $status);
-        echo "\tchild " . $child_pids[$i] . " has finished.\n\n";
-    }
-
-} else {
+if ($modulo > -1) {
     /**
      *  Each process will have it's modulo, so, a process with modulo 1
      *  of 7 will process any unwatermarked video in the database with
@@ -107,9 +92,22 @@ if ($modulo == -1) {
         $query = "UPDATE video_segment_2 SET processing_status = 'WATERMARKED' WHERE video_id = " . $row['id'];
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+    }
 
-        break;
+} else {
+    /**
+     * This is the parent process. It just needs to wait for the child
+     * processes to complete.  $child_pids stored the process id (pid)
+     * of each child, so we can wait on them with the pcntl_waitpid
+     * function.
+     */
+    echo "This is the parent.\n";
+    for ($i = 0; $i < $number_of_processes; $i++) {
+        echo "\twaiting on child " . $child_pids[$i] . " to finish.\n";
+        pcntl_waitpid($child_pids[$i], $status);
+        echo "\tchild " . $child_pids[$i] . " has finished.\n\n";
     }
 }
+
 
 ?>
