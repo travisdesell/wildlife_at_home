@@ -167,7 +167,7 @@ echo "
                 </p>
 
                 <div class='well'>
-                <p><b>Video classification is currently not working while I'm updating the project's webpages. --Travis</b></p>
+                <p><b>Update (Feb 5, 2013): The site redesign is still in progress, please feel free to take a look around. Videos are available for viewing from the Lostwood Wildlife Refuge. I expect entering video observations to be working again by tonight. --Travis</b></p>
                 </div>
 
                 <div class='row-fluid'>

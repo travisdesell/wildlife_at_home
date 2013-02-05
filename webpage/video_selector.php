@@ -1,5 +1,6 @@
 <?php
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
@@ -76,30 +77,59 @@ $active_items = array(
 
 print_navbar($active_items);
 
+
+/**
+ *  Get the progress of the videos for each species at each site.
+ */
+
+/*
+$grouse_belden_total_videos = get_count("video_segment_2", "and species_id = 1 and location_id = 1");
+$grouse_belden_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 1 and location_id = 1");
+$grouse_belden_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 1 and location_id = 1");
+
+$grouse_blaisdell_total_videos = get_count("video_segment_2", "and species_id = 1 and location_id = 2");
+$grouse_blaisdell_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 1 and location_id = 2");
+$grouse_blaisdell_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 1 and location_id = 2");
+
+$grouse_lostwood_total_videos = get_count("video_segment_2", "and species_id = 1 and location_id = 3");
+$grouse_lostwood_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 1 and location_id = 3");
+$grouse_lostwood_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 1 and location_id = 3");
+
+$least_tern_total_videos = get_count("video_segment_2", "and species_id = 2 and location_id = 4");
+$least_tern_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 2 and location_id = 4");
+$least_tern_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 2 and location_id = 4");
+
+$piping_plover_total_videos = get_count("video_segment_2", "and species_id = 3 and location_id = 4");
+$piping_plover_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 3 and location_id = 4");
+$piping_plover_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 3 and location_id = 4");
+ */
+
+
+
 $thumbnails = array('thumbnail_list' => array(
                         array(
                             'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_sharptailed_grouse.png',
                             'species_name' => 'Sharptailed Grouse',
-                            'species_id' => '0',
+                            'species_id' => '1',
                             'species_latin_name' => 'Tympanuchus phasianellus',
                             'project_description' => '<p>Species description...</p> <p><a href=\'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php\'>Learn more about the sharptailed grouse.</a></p>',
                             'site' => array(
                                 array (
                                     'site_name' => 'Belden, ND',
                                     'site_description' => 'Site description...',
-                                    'site_id' => '0',
+                                    'site_id' => '1',
                                     'progress_percentage' => '50'
                                 ), 
                                 array (
                                     'site_name' => 'Blaisdell, ND',
                                     'site_description' => 'Site description...',
-                                    'site_id' => '1',
+                                    'site_id' => '2',
                                     'progress_percentage' => '10'
                                 ), 
                                 array (
                                     'site_name' => 'Lostwood Wildlife Refuge, ND',
                                     'site_description' => 'Site description...',
-                                    'site_id' => '2',
+                                    'site_id' => '3',
                                     'progress_percentage' => '30'
                                 )
                             )
@@ -108,14 +138,14 @@ $thumbnails = array('thumbnail_list' => array(
                         array(
                             'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_least_tern.png',
                             'species_name' => 'Interior Least Tern',
-                            'species_id' => '1',
+                            'species_id' => '2',
                             'species_latin_name' => 'Sternula antillarum',
                             'project_description' => 'Species description...',
                             'site' => array(
                                 array (
                                     'site_name' => 'Missouri River, ND',
                                     'site_description' => 'Site description...',
-                                    'site_id' => '2',
+                                    'site_id' => '4',
                                     'progress_percentage' => '0'
                                 )
                             )
@@ -124,14 +154,14 @@ $thumbnails = array('thumbnail_list' => array(
                         array(
                             'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_piping_plover.png',
                             'species_name' => 'Piping Plover',
-                            'species_id' => '2',
+                            'species_id' => '3',
                             'species_latin_name' => 'Charadrius melodus',
                             'project_description' => 'Species description...',
                             'site' => array(
                                 array (
                                     'site_name' => 'Missouri River, ND',
                                     'site_description' => 'Site description...',
-                                    'site_id' => '2',
+                                    'site_id' => '4',
                                     'progress_percentage' => '0'
                                 )
                             )
@@ -144,20 +174,7 @@ $thumbnail_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/
 $m = new Mustache_Engine;
 echo $m->render($thumbnail_template, $thumbnails);
 
-
-echo "
-    <!-- Footer
-    ================================================== -->
-    <footer class='footer'>
-        <div class='container'>
-            <center>
-            <p>Designed by <a href='http://people.cs.und.edu'>Travis Desell</a> with much help from <a href='http://twitter.github.com/bootstrap/getting-started.html'>Twitter's Bootstrap</a>.</p>
-            <p>&copy; Travis Desell, Susan Ellis-Felege and the University of North Dakota 2013</p>
-            </center>
-        </div>
-    </footer>
-    ";
-
+print_footer();
 
 echo "
 </body>
