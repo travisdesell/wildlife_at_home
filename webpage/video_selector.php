@@ -1,9 +1,12 @@
 <?php
+require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-echo "<html>
+echo "
+<!DOCTYPE html>
+<html>
 <head>
         <meta charset='utf-8'>
         <title>Wildlife@Home: Video Selection</title>
@@ -24,34 +27,6 @@ echo "<html>
         <!--[if lt IE 9]>
         <script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script>
         <![endif]-->
-
-        <style>
-        .carousel { height:450px; }
-        .item {
-            height:450px;
-        }   
-
-        hr.news_line {
-            border: 0;
-            border-bottom: 1px solid rgb(200, 200, 200);
-        }
-
-        td.news {
-            background-color: #dff0ff;
-            border-color: #add8e6;
-        }
-
-        span.news_title {
-            font-weight: bold;
-        }
-
-        span.news_date {
-            color: rgb(100,100,100);
-            font-size: 0.9em;
-            float: right;
-        }
-
-        </style>
 
         <!-- Fav and touch icons -->
         <link rel='apple-touch-icon-precomposed' sizes='144x144' href='assets/ico/apple-touch-icon-144-precomposed.png'>
@@ -76,82 +51,31 @@ echo "<html>
         <script src='assets/js/bootstrap-collapse.js'></script>
         <script src='assets/js/bootstrap-carousel.js'></script>
         <script src='assets/js/bootstrap-typeahead.js'></script>
-        <script>
-          !function ($) {
-            $(function(){
-              // carousel demo
-              $('.item').eq(Math.floor((Math.random() * $('.item').length))).addClass('active');
-              $('#myCarousel').carousel({ interval: false })
-            })
-          }(window.jQuery)
     </script>
+
+    <style>
+    body {
+        padding-top: 60px;
+    }
+    @media (max-width: 979px) {
+        body {
+            padding-top: 0px;
+        }
+    }
+    </style>
 
 </head>
 <body>";
 
-echo "
-    <!-- NAVBAR
-    ================================================== -->
-    <div class='navbar navbar-inverse navbar-fixed-top'>
-        <div class='navbar-inner'>
-            <div class='container-fluid'>
-                <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
-                <a class='btn btn-navbar' data-toggle='collapse' data-target='.nav-collapse'>
-                  <span class='icon-bar'></span>
-                  <span class='icon-bar'></span>
-                  <span class='icon-bar'></span>
-                </a>
+$active_items = array(
+                    'home' => '',
+                    'message_boards' => '',
+                    'preferences' => '',
+                    'about_wildlife' => '',
+                    'community' => ''
+                );
 
-                <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
-                <div class='nav-collapse collapse'>
-                    <ul class='nav'>
-                        <li class='brand'>Wildlife@Home </li>
-                        <li><a href='http://volunteer.cs.und.edu/wildlife/index.php'>Home</a></li>
-                        <li><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
-
-                        <li class='dropdown'>
-                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
-                          <ul class='dropdown-menu'>
-                            <li><a href='home.php'>Your Preferences</a></li>
-                            <li><a href='team.php'>Teams</a></li>
-                            <li><a href='cert1.php'>Certificate</a></li>
-                            <li><a href='apps.php'>Applications</a></li>
-                          </ul>
-                        </li>
-
-                        <li class='dropdown'>
-                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
-                          <ul class='dropdown-menu'>
-                            <li><a href='sharptailed_grouse_info.php'>Sharptailed Grouse</a></li>
-                            <li><a href='#'>Piping Plover (Coming Soon)</a></li>
-                            <li><a href='#'>Least Tern (Coming Soon)</a></li>
-                          </ul>
-                        </li>
-
-                        
-                        <li class='dropdown'>
-                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
-                          <ul class='dropdown-menu'>
-                            <li><a href='profile_menu.php'>Profiles</a></li>
-                            <li><a href='user_search.php'>User Search</a></li>
-                            <li><a href='language_select.php'>Languages</a></li>
-                            <li class='nav-header'>Top Lists</li>
-                            <li><a href='top_bossa_users.php'>Top Video Watchers</li>
-                            <li><a href='top_users.php'>Top Users</li>
-                            <li><a href='top_hosts.php'>Top Hosts</li>
-                            <li><a href='top_teams.php'>Top Teams</li>
-                            <li><a href='stats.php'>More Statistics</a></li>
-                          </ul>
-                        </li>
-
-                        <li><a href='http://volunteer.cs.und.edu/wildlife/index.php#contact'>Contact</a></li>
-                    </ul>
-                </div> <!-- /.nav-collapse-->
-            </div>  <!-- container-fluid -->
-        </div>  <!-- navbar-inner -->
-    </div>  <!-- navbar -->
-
-    <br>";
+print_navbar($active_items);
 
 $thumbnails = array('thumbnail_list' => array(
                         array(
@@ -159,7 +83,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Sharptailed Grouse',
                             'species_id' => '0',
                             'species_latin_name' => 'Tympanuchus phasianellus',
-                            'project_description' => 'Species description... <a href=\'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php\'>Learn more about the sharptailed grouse</a>.',
+                            'project_description' => '<p>Species description...</p> <p><a href=\'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php\'>Learn more about the sharptailed grouse.</a></p>',
                             'site' => array(
                                 array (
                                     'site_name' => 'Belden, ND',
@@ -190,7 +114,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'project_description' => 'Species description...',
                             'site' => array(
                                 array (
-                                    'site_name' => 'Missouri River, MN',
+                                    'site_name' => 'Missouri River, ND',
                                     'site_description' => 'Site description...',
                                     'site_id' => '2',
                                     'progress_percentage' => '0'
@@ -206,7 +130,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'project_description' => 'Species description...',
                             'site' => array(
                                 array (
-                                    'site_name' => 'Missouri River, MN',
+                                    'site_name' => 'Missouri River, ND',
                                     'site_description' => 'Site description...',
                                     'site_id' => '2',
                                     'progress_percentage' => '0'
@@ -221,6 +145,7 @@ $thumbnail_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/
 $m = new Mustache_Engine;
 echo $m->render($thumbnail_template, $thumbnails);
 
+
 echo "
     <!-- Footer
     ================================================== -->
@@ -232,8 +157,10 @@ echo "
             </center>
         </div>
     </footer>
+    ";
 
 
+echo "
 </body>
 </html>
 ";
