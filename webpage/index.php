@@ -132,69 +132,73 @@ echo "
 echo "
     <!-- NAVBAR
     ================================================== -->
-    <div class='navbar-wrapper'>
-      <!-- Wrap the .navbar in .container to center it within the absolutely positioned parent. -->
+    <div class='navbar navbar-inverse navbar-fixed-top'>
+    <div class='navbar-inner'>
+    <div class='container-fluid'>
 
-        <div class='navbar navbar-inverse'>
-          <div class='navbar-inner'>
-            <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
-            <a class='btn btn-navbar' data-toggle='collapse' data-target='.nav-collapse'>
-              <span class='icon-bar'></span>
-              <span class='icon-bar'></span>
-              <span class='icon-bar'></span>
-            </a>
-            <a class='brand' href='#'><b>Wildlife@Home</b></a>
-            <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
-            <div class='nav-collapse collapse'>
-              <ul class='nav'>
-                <li class='active'><a href='#'>Home</a></li>
-                <li><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
+    <div class='nav-collapse collapse'>
+      <div class='nav'>
+        <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
+        <a class='btn btn-navbar' data-toggle='collapse' data-target='.nav-collapse'>
+          <span class='icon-bar'></span>
+          <span class='icon-bar'></span>
+          <span class='icon-bar'></span>
+        </a>
+        <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
+        <div class='nav-collapse collapse'>
+          <ul class='nav'>
+            <li <a class='brand'>Wildlife@Home</b></a> </li>
+            <li class='active'><a href='http://volunteer.cs.und.edu/wildlife/index.php'>Home</a></li>
+            <li><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
 
-                <li class='dropdown'>
-                  <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
-                  <ul class='dropdown-menu'>
-                    <li><a href='home.php'>Your Preferences</a></li>
-                    <li><a href='team.php'>Teams</a></li>
-                    <li><a href='cert1.php'>Certificate</a></li>
-                    <li><a href='apps.php'>Applications</a></li>
-                  </ul>
-                </li>
-
-                <li class='dropdown'>
-                  <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
-                  <ul class='dropdown-menu'>
-                    <li><a href='background.php'>Sharptailed Grouse</a></li>
-                    <li><a href='#'>Piping Plover (Coming Soon)</a></li>
-                    <li><a href='#'>Least Tern (Coming Soon)</a></li>
-                  </ul>
-                </li>
-
-                
-                <li class='dropdown'>
-                  <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
-                  <ul class='dropdown-menu'>
-                    <li><a href='profile_menu.php'>Profiles</a></li>
-                    <li><a href='user_search.php'>User Search</a></li>
-                    <li><a href='language_select.php'>Languages</a></li>
-                    <li class='nav-header'>Top Lists</li>
-                    <li><a href='top_bossa_users.php'>Top Video Watchers</li>
-                    <li><a href='top_users.php'>Top Users</li>
-                    <li><a href='top_hosts.php'>Top Hosts</li>
-                    <li><a href='top_teams.php'>Top Teams</li>
-                    <li><a href='stats.php'>More Statistics</a></li>
-                  </ul>
-                </li>
-
-                <li><a href='#contact'>Contact</a></li>
-
+            <li class='dropdown'>
+              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
+              <ul class='dropdown-menu'>
+                <li><a href='home.php'>Your Preferences</a></li>
+                <li><a href='team.php'>Teams</a></li>
+                <li><a href='cert1.php'>Certificate</a></li>
+                <li><a href='apps.php'>Applications</a></li>
               </ul>
-            </div><!--/.nav-collapse -->
-          </div><!-- /.navbar-inner -->
-        </div><!-- /.navbar -->
+            </li>
 
-    </div><!-- /.navbar-wrapper -->
+            <li class='dropdown'>
+              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
+              <ul class='dropdown-menu'>
+                <li><a href='background.php'>Sharptailed Grouse</a></li>
+                <li><a href='#'>Piping Plover (Coming Soon)</a></li>
+                <li><a href='#'>Least Tern (Coming Soon)</a></li>
+              </ul>
+            </li>
+
+            
+            <li class='dropdown'>
+              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
+              <ul class='dropdown-menu'>
+                <li><a href='profile_menu.php'>Profiles</a></li>
+                <li><a href='user_search.php'>User Search</a></li>
+                <li><a href='language_select.php'>Languages</a></li>
+                <li class='nav-header'>Top Lists</li>
+                <li><a href='top_bossa_users.php'>Top Video Watchers</li>
+                <li><a href='top_users.php'>Top Users</li>
+                <li><a href='top_hosts.php'>Top Hosts</li>
+                <li><a href='top_teams.php'>Top Teams</li>
+                <li><a href='stats.php'>More Statistics</a></li>
+              </ul>
+            </li>
+
+            <li><a href='#contact'>Contact</a></li>
+
+          </ul>
+        </div><!--/.nav-->
+    </div><!-- /.nav-collapse-->
+
+    </div>
+    </div>
+    </div>
 
 
+
+    <br>
 
     <div class='container'>
         <div class='row'>
@@ -208,10 +212,10 @@ echo "
                 The nest cameras will be set up both near western North Dakota's oil fields and also within protected state lands. We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse and other wildlife in North Dakota, as well as provide some interesting video for everyone to watch and discuss.
                 </p>
 
-                <p align=center>
-                    <a class='btn btn-large btn-primary' href='training.php'>New User Training</a>
-                    <a class='btn btn-large btn-primary' href='bossa_apps.php'>Classify Video</a>
-                </p>
+                <div class='row-fluid'>
+                    <a class='btn btn-large btn-primary span6' href='training.php'>New User Training</a>
+                    <a class='btn btn-large btn-primary span6' href='bossa_apps.php'>Classify Video</a>
+                </div>
 
                 <p>
                 If you don't have an account, feel free to create one <a href='create_account_form.php'>here</a>.
