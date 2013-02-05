@@ -87,130 +87,141 @@ echo "<html>
     </script>
 
 </head>
-<body>
+<body>";
 
+echo "
     <!-- NAVBAR
     ================================================== -->
     <div class='navbar navbar-inverse navbar-fixed-top'>
-    <div class='navbar-inner'>
-    <div class='container-fluid'>
+        <div class='navbar-inner'>
+            <div class='container-fluid'>
+                <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
+                <a class='btn btn-navbar' data-toggle='collapse' data-target='.nav-collapse'>
+                  <span class='icon-bar'></span>
+                  <span class='icon-bar'></span>
+                  <span class='icon-bar'></span>
+                </a>
 
-    <div class='nav-collapse collapse'>
-      <div class='nav'>
-        <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
-        <a class='btn btn-navbar' data-toggle='collapse' data-target='.nav-collapse'>
-          <span class='icon-bar'></span>
-          <span class='icon-bar'></span>
-          <span class='icon-bar'></span>
-        </a>
-        <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
-        <div class='nav-collapse collapse'>
-          <ul class='nav'>
-            <li <a class='brand'>Wildlife@Home</b></a> </li>
-            <li><a href='http://volunteer.cs.und.edu/wildlife/index.php'>Home</a></li>
-            <li><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
+                <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
+                <div class='nav-collapse collapse'>
+                    <ul class='nav'>
+                        <li class='brand'>Wildlife@Home </li>
+                        <li><a href='http://volunteer.cs.und.edu/wildlife/index.php'>Home</a></li>
+                        <li><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
 
-            <li class='dropdown'>
-              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
-              <ul class='dropdown-menu'>
-                <li><a href='home.php'>Your Preferences</a></li>
-                <li><a href='team.php'>Teams</a></li>
-                <li><a href='cert1.php'>Certificate</a></li>
-                <li><a href='apps.php'>Applications</a></li>
-              </ul>
-            </li>
+                        <li class='dropdown'>
+                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
+                          <ul class='dropdown-menu'>
+                            <li><a href='home.php'>Your Preferences</a></li>
+                            <li><a href='team.php'>Teams</a></li>
+                            <li><a href='cert1.php'>Certificate</a></li>
+                            <li><a href='apps.php'>Applications</a></li>
+                          </ul>
+                        </li>
 
-            <li class='dropdown'>
-              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
-              <ul class='dropdown-menu'>
-                <li><a href='background.php'>Sharptailed Grouse</a></li>
-                <li><a href='#'>Piping Plover (Coming Soon)</a></li>
-                <li><a href='#'>Least Tern (Coming Soon)</a></li>
-              </ul>
-            </li>
+                        <li class='dropdown'>
+                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
+                          <ul class='dropdown-menu'>
+                            <li><a href='sharptailed_grouse_info.php'>Sharptailed Grouse</a></li>
+                            <li><a href='#'>Piping Plover (Coming Soon)</a></li>
+                            <li><a href='#'>Least Tern (Coming Soon)</a></li>
+                          </ul>
+                        </li>
 
-            
-            <li class='dropdown'>
-              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
-              <ul class='dropdown-menu'>
-                <li><a href='profile_menu.php'>Profiles</a></li>
-                <li><a href='user_search.php'>User Search</a></li>
-                <li><a href='language_select.php'>Languages</a></li>
-                <li class='nav-header'>Top Lists</li>
-                <li><a href='top_bossa_users.php'>Top Video Watchers</li>
-                <li><a href='top_users.php'>Top Users</li>
-                <li><a href='top_hosts.php'>Top Hosts</li>
-                <li><a href='top_teams.php'>Top Teams</li>
-                <li><a href='stats.php'>More Statistics</a></li>
-              </ul>
-            </li>
+                        
+                        <li class='dropdown'>
+                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
+                          <ul class='dropdown-menu'>
+                            <li><a href='profile_menu.php'>Profiles</a></li>
+                            <li><a href='user_search.php'>User Search</a></li>
+                            <li><a href='language_select.php'>Languages</a></li>
+                            <li class='nav-header'>Top Lists</li>
+                            <li><a href='top_bossa_users.php'>Top Video Watchers</li>
+                            <li><a href='top_users.php'>Top Users</li>
+                            <li><a href='top_hosts.php'>Top Hosts</li>
+                            <li><a href='top_teams.php'>Top Teams</li>
+                            <li><a href='stats.php'>More Statistics</a></li>
+                          </ul>
+                        </li>
 
-            <li><a href='#contact'>Contact</a></li>
+                        <li><a href='http://volunteer.cs.und.edu/wildlife/index.php#contact'>Contact</a></li>
+                    </ul>
+                </div> <!-- /.nav-collapse-->
+            </div>  <!-- container-fluid -->
+        </div>  <!-- navbar-inner -->
+    </div>  <!-- navbar -->
 
-          </ul>
-        </div><!--/.nav-->
-    </div><!-- /.nav-collapse-->
+    <br>";
 
-    </div>
-    </div>
-    </div>
+$thumbnails = array('thumbnail_list' => array(
+                        array(
+                            'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_sharptailed_grouse.png',
+                            'species_name' => 'Sharptailed Grouse',
+                            'species_id' => '0',
+                            'species_latin_name' => 'Tympanuchus phasianellus',
+                            'project_description' => 'Species description... <a href=\'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php\'>Learn more about the sharptailed grouse</a>.',
+                            'site' => array(
+                                array (
+                                    'site_name' => 'Belden, ND',
+                                    'site_description' => 'Site description...',
+                                    'site_id' => '0',
+                                    'progress_percentage' => '50'
+                                ), 
+                                array (
+                                    'site_name' => 'Blaisdell, ND',
+                                    'site_description' => 'Site description...',
+                                    'site_id' => '1',
+                                    'progress_percentage' => '10'
+                                ), 
+                                array (
+                                    'site_name' => 'Lostwood Wildlife Refuge, ND',
+                                    'site_description' => 'Site description...',
+                                    'site_id' => '2',
+                                    'progress_percentage' => '30'
+                                )
+                            )
+                        ),
 
-    <br>
+                        array(
+                            'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_least_tern.png',
+                            'species_name' => 'Interior Least Tern',
+                            'species_id' => '1',
+                            'species_latin_name' => 'Sternula antillarum',
+                            'project_description' => 'Species description...',
+                            'site' => array(
+                                array (
+                                    'site_name' => 'Missouri River, MN',
+                                    'site_description' => 'Site description...',
+                                    'site_id' => '2',
+                                    'progress_percentage' => '0'
+                                )
+                            )
+                        ),
 
-    <div class='well well-large'>
-        <div class='container'>
-            <div class='row'>
-                <div class='span12'>
-                <ul class='thumbnails'>
-                    <li class='span4'>
-                        <div class='thumbnail'>
-                            <img src='http://volunteer.cs.und.edu/wildlife/images/thumbnail_sharptailed_grouse.png' alt=''>
-                            <h4>Sharptailed Grouse <small>Tympanuchus phasianellus</small></h4>
-                            <p>Project descriptions...
+                        array(
+                            'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_piping_plover.png',
+                            'species_name' => 'Piping Plover',
+                            'species_id' => '2',
+                            'species_latin_name' => 'Charadrius melodus',
+                            'project_description' => 'Species description...',
+                            'site' => array(
+                                array (
+                                    'site_name' => 'Missouri River, MN',
+                                    'site_description' => 'Site description...',
+                                    'site_id' => '2',
+                                    'progress_percentage' => '0'
+                                )
+                            )
+                        )
+                    )
+                );
 
-                            Videos Watched:  <br>
-                            Videos Available:   <br>
-                            </p>
+$thumbnail_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/thumbnail_template.html");
 
-                            <div class='row-fluid'>
-                                <a class='btn btn-medium btn-primary span12' href='training.php'>Belden, ND</a>
-                            </div>
-                            <div class='row-fluid'>
-                                <a class='btn btn-medium btn-primary span12' href='training.php'>Blaisdell, ND</a>
-                            </div>
-                            <div class='row-fluid'>
-                                <a class='btn btn-medium btn-primary span12' href='training.php'>Lostwood Wildlife Refuge, ND</a>
-                            </div>
-                        </div>
-                    </li>
+$m = new Mustache_Engine;
+echo $m->render($thumbnail_template, $thumbnails);
 
-                    <li class='span4'>
-                        <div class='thumbnail'>
-                            <img src='http://volunteer.cs.und.edu/wildlife/images/thumbnail_piping_plover.png' alt=''>
-                            <h4>Piping Plover <small>Charadrius melodus</small></h4>
-                            <p>Project descriptions...</p>
-                            <div class='row-fluid'>
-                                <a class='btn btn-medium btn-primary span12' href='training.php'>Missouri River, MN</a>
-                            </div>
-                        </div>
-                    </li>
-
-                    <li class='span4'>
-                        <div class='thumbnail'>
-                            <img src='http://volunteer.cs.und.edu/wildlife/images/thumbnail_least_tern.png' alt=''>
-                            <h4>Least Tern <small>Sternula antillarum</small></h4>
-                            <p>Project descriptions...</p>
-                            <div class='row-fluid'>
-                                <a class='btn btn-medium btn-primary span12' href='training.php'>Missouri River, MN</a>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
+echo "
     <!-- Footer
     ================================================== -->
     <footer class='footer'>

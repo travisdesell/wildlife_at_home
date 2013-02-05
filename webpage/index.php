@@ -133,88 +133,86 @@ echo "
     <!-- NAVBAR
     ================================================== -->
     <div class='navbar navbar-inverse navbar-fixed-top'>
-    <div class='navbar-inner'>
-    <div class='container-fluid'>
+        <div class='navbar-inner'>
+            <div class='container-fluid'>
+                <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
+                <a class='btn btn-navbar' data-toggle='collapse' data-target='.nav-collapse'>
+                  <span class='icon-bar'></span>
+                  <span class='icon-bar'></span>
+                  <span class='icon-bar'></span>
+                </a>
 
-    <div class='nav-collapse collapse'>
-      <div class='nav'>
-        <!-- Responsive Navbar Part 1: Button for triggering responsive navbar (not covered in tutorial). Include responsive CSS to utilize. -->
-        <a class='btn btn-navbar' data-toggle='collapse' data-target='.nav-collapse'>
-          <span class='icon-bar'></span>
-          <span class='icon-bar'></span>
-          <span class='icon-bar'></span>
-        </a>
-        <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
-        <div class='nav-collapse collapse'>
-          <ul class='nav'>
-            <li <a class='brand'>Wildlife@Home</b></a> </li>
-            <li class='active'><a href='http://volunteer.cs.und.edu/wildlife/index.php'>Home</a></li>
-            <li><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
+                <!-- Responsive Navbar Part 2: Place all navbar contents you want collapsed withing .navbar-collapse.collapse. -->
+                <div class='nav-collapse collapse'>
+                    <ul class='nav'>
+                        <li class='brand'> Wildlife@Home </li>
+                        <li class='active'><a href='http://volunteer.cs.und.edu/wildlife/index.php'>Home</a></li>
+                        <li><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
 
-            <li class='dropdown'>
-              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
-              <ul class='dropdown-menu'>
-                <li><a href='home.php'>Your Preferences</a></li>
-                <li><a href='team.php'>Teams</a></li>
-                <li><a href='cert1.php'>Certificate</a></li>
-                <li><a href='apps.php'>Applications</a></li>
-              </ul>
-            </li>
+                        <li class='dropdown'>
+                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
+                          <ul class='dropdown-menu'>
+                            <li><a href='home.php'>Your Preferences</a></li>
+                            <li><a href='team.php'>Teams</a></li>
+                            <li><a href='cert1.php'>Certificate</a></li>
+                            <li><a href='apps.php'>Applications</a></li>
+                          </ul>
+                        </li>
 
-            <li class='dropdown'>
-              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
-              <ul class='dropdown-menu'>
-                <li><a href='background.php'>Sharptailed Grouse</a></li>
-                <li><a href='#'>Piping Plover (Coming Soon)</a></li>
-                <li><a href='#'>Least Tern (Coming Soon)</a></li>
-              </ul>
-            </li>
+                        <li class='dropdown'>
+                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
+                          <ul class='dropdown-menu'>
+                            <li><a href='sharptailed_grouse_info.php'>Sharptailed Grouse</a></li>
+                            <li><a href='#'>Piping Plover (Coming Soon)</a></li>
+                            <li><a href='#'>Least Tern (Coming Soon)</a></li>
+                          </ul>
+                        </li>
 
-            
-            <li class='dropdown'>
-              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
-              <ul class='dropdown-menu'>
-                <li><a href='profile_menu.php'>Profiles</a></li>
-                <li><a href='user_search.php'>User Search</a></li>
-                <li><a href='language_select.php'>Languages</a></li>
-                <li class='nav-header'>Top Lists</li>
-                <li><a href='top_bossa_users.php'>Top Video Watchers</li>
-                <li><a href='top_users.php'>Top Users</li>
-                <li><a href='top_hosts.php'>Top Hosts</li>
-                <li><a href='top_teams.php'>Top Teams</li>
-                <li><a href='stats.php'>More Statistics</a></li>
-              </ul>
-            </li>
+                        
+                        <li class='dropdown'>
+                          <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
+                          <ul class='dropdown-menu'>
+                            <li><a href='profile_menu.php'>Profiles</a></li>
+                            <li><a href='user_search.php'>User Search</a></li>
+                            <li><a href='language_select.php'>Languages</a></li>
+                            <li class='nav-header'>Top Lists</li>
+                            <li><a href='top_bossa_users.php'>Top Video Watchers</li>
+                            <li><a href='top_users.php'>Top Users</li>
+                            <li><a href='top_hosts.php'>Top Hosts</li>
+                            <li><a href='top_teams.php'>Top Teams</li>
+                            <li><a href='stats.php'>More Statistics</a></li>
+                          </ul>
+                        </li>
 
-            <li><a href='#contact'>Contact</a></li>
+                        <li><a href='#contact'>Contact</a></li>
+                    </ul>
+                </div>  <!--nav-collapse-->
+            </div>  <!-- container-fluid -->
+        </div>  <!-- navbar-inner -->
+    </div>  <!-- navbar -->
 
-          </ul>
-        </div><!--/.nav-->
-    </div><!-- /.nav-collapse-->
-
-    </div>
-    </div>
-    </div>
-
-
-
-    <br>
+    <br><br><br>
 
     <div class='container'>
         <div class='row'>
             <div class='span6'>
                 <h3>Welcome to Wildlife@Home</h3>
                 <p>
-                Wildlife@Home is a joint effort between the <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>.  The project is aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project will be looking at video of <a href='background.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The goal of the project is to use your volunteered computers to 'sift' through the large amounts of video for interesting segments, and then letting you view this interesting video and help us analyze what is happening to the grouse and their nests. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action.
+                Wildlife@Home is a joint effort between the <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>.  The project is aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project will be looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The goal of the project is to use your volunteered computers to 'sift' through the large amounts of video for interesting segments, and then letting you view this interesting video and help us analyze what is happening to the grouse and their nests. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action.
                 </p>
 
                 <p>
                 The nest cameras will be set up both near western North Dakota's oil fields and also within protected state lands. We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse and other wildlife in North Dakota, as well as provide some interesting video for everyone to watch and discuss.
                 </p>
 
+                <div class='well'>
+                <p><b>Video classification is currently not working while I'm updating the project's webpages. --Travis</b></p>
+                </div>
+
                 <div class='row-fluid'>
                     <a class='btn btn-large btn-primary span6' href='training.php'>New User Training</a>
-                    <a class='btn btn-large btn-primary span6' href='bossa_apps.php'>Classify Video</a>
+                    <a class='btn btn-large btn-primary span6' href='video_selector.php'>Classify Video</a>
+                    <!-- <a class='btn btn-large btn-primary span6 disabled' href='bossa_apps.php'>Classify Video</a> -->
                 </div>
 
                 <p>
