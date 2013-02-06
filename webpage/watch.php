@@ -4,6 +4,7 @@ require_once('../inc/util.inc');
 
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 
 echo "
 <!DOCTYPE html>
@@ -101,8 +102,8 @@ mysql_select_db("wildlife_video", $wildlife_db);
 
 $query = "select filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
 
-$result = mysql_query($query);
-if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+$result = mysql_query($query, $wildlife_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $row = mysql_fetch_assoc($result);
 
@@ -116,8 +117,8 @@ $segment_filename = $row['filename'];
 //echo "location_id: $location_id\n";
 
 $query = "SELECT long_name FROM locations WHERE id = $location_id\n";
-$result = mysql_query($query);
-if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+$result = mysql_query($query, $wildlife_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $row = mysql_fetch_assoc($result);
 
@@ -125,8 +126,8 @@ if (!$row) $location_name = 'unknown location';
 else $location_name = $row['long_name'];
 
 $query = "SELECT name FROM species WHERE id = $species_id\n";
-$result = mysql_query($query);
-if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+$result = mysql_query($query, $wildlife_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $row = mysql_fetch_assoc($result);
 
@@ -149,12 +150,12 @@ if ($found) {
                         </div>  <!-- row-fluid -->
 
                         <div class='row-fluid'>
-                            <a class='btn btn-small btn-primary span5 pull-left' style='margin-top:0px;' id='fast_backward_button' value='fast backward'>fast backward</a>
+                            <a class='btn btn-primary span5 pull-left' style='margin-top:0px;' id='fast_backward_button' value='fast backward'>fast backward</a>
                             <div class='span2'>
                             <input style='width:100%; padding:3px; margin:1px;' type='text' id='speed_textbox' value='speed: 1' readonly='readonly'>
                             </div>
 
-                            <a class='btn btn-small btn-primary span5 pull-right' style='margin-top:0px;' id='fast_forward_button' value='fast forward'>fast forward</a>
+                            <a class='btn btn-primary span5 pull-right' style='margin-top:0px;' id='fast_forward_button' value='fast forward'>fast forward</a>
                         </div>
     ";
 } else {
@@ -164,6 +165,19 @@ if ($found) {
 
 echo "
                 </div>  <!-- span6 -->
+                <div class='span6'>
+
+                    <div class='row-fluid'>
+                        <div class='well well-small'>
+                            <h4 align=center>You are watching " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</h4>
+                        </div>
+                    </div>
+
+                    <div class='row-fluid pull-down'>
+                        <a class='btn btn-primary pull-right' style='margin-top0px;' id='submit_button' value='submit'>submit</a>
+                    </div>
+
+                </div> <!-- span6 -->
             </div>  <!-- container -->
         </div> <!-- row-fluid -->
     </div>  <!-- well -->

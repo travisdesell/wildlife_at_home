@@ -19,12 +19,18 @@
 
                                 <div class='row-fluid'>
                                     <div class='span9'>
-                                        <div class='progress'>
-                                            <div class='bar' style="width: {{progress_percentage}}%;"></div>
+                                        <div class='progress' id='{{progress_id}}'>
+                                            <div class='bar bar-success' style="width: {{validated_percentage}}%;"></div>
+                                            <div class='bar bar' style="width: {{available_percentage}}%;"></div>
                                         </div>
                                     </div>
                                     <div class='span3'>
+                                        {{#enabled}}
                                         <a class='btn btn-mini btn-primary pull-right' style='margin-top:0px;' href='watch.php?site={{site_id}}&species={{species_id}}'>Watch Video</a>
+                                        {{/enabled}}
+                                        {{^enabled}}
+                                        <a class='btn btn-mini pull-right disabled' style='margin-top:0px;'>Watch Video</a>
+                                        {{/enabled}}
                                     </div>
                                 </div>                        
                             </div>
