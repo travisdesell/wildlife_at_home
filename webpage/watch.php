@@ -5,6 +5,7 @@ require_once('../inc/util.inc');
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
 echo "
 <!DOCTYPE html>
@@ -82,7 +83,10 @@ $location_id = mysql_real_escape_string($_GET['site']);
  * first select one that has observations by OTHER users, then select one with no observations.
  */
 
-$wildlife_db = mysql_pconnect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+ini_set("mysql.connect_timeout", 300);
+ini_set("default_socket_timeout", 300);
+
+$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
 //$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
@@ -90,7 +94,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 $query = "SELECT id, filename from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND crowd_status = 'WATCHED' AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
-$result = mysql_query($query, $wildlife_db);
+$result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $row = mysql_fetch_assoc($result);
@@ -102,7 +106,7 @@ if (!$row) {
     $query = "SELECT id, filename from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
 //    echo "<!-- $query -->\n";
 
-    $result = mysql_query($query, $wildlife_db);
+    $result = attempt_query_with_ping($query, $wildlife_db);
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
     $row = mysql_fetch_assoc($result);
@@ -143,7 +147,7 @@ print_navbar($active_items);
 //echo "location_id: $location_id\n";
 
 $query = "SELECT long_name FROM locations WHERE id = $location_id\n";
-$result = mysql_query($query, $wildlife_db);
+$result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $row = mysql_fetch_assoc($result);
@@ -152,7 +156,7 @@ if (!$row) $location_name = 'unknown location';
 else $location_name = $row['long_name'];
 
 $query = "SELECT name FROM species WHERE id = $species_id\n";
-$result = mysql_query($query, $wildlife_db);
+$result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $row = mysql_fetch_assoc($result);

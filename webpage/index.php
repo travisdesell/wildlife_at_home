@@ -167,7 +167,7 @@ echo "
                 </p>
 
                 <div class='well'>
-                <p><b>Update (Feb 7, 2013): Watching videos and reporting observations is working, however it looks like the videos are only streaming in the Safari web browser.  I should have this fixed by the end of the night. --Travis</b></p>
+                <p><b>Update (Feb 7, 2013): Watching videos and reporting observations is working, except in the Firefox browser (IE 9, Chrome and Safari work).  I should have this fixed soon. Credit is also not yet being awarded for successfully observing a video, but that should be fixed shortly. --Travis</b></p>
                 </div>
 
                 <div class='row-fluid'>

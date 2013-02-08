@@ -2,6 +2,7 @@
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
 require_once('/projects/wildlife/html/inc/cache.inc');
 
@@ -61,7 +62,7 @@ echo "
 
 function get_count($table_name, $where_clause, $db) {
     $query = "SELECT count(*) FROM $table_name WHERE $where_clause";
-    $results = mysql_query($query, $db);
+    $results = attempt_query_with_ping($query, $db);
     if (!$results) die ("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "\nquery: $query\n");
 
     $row = mysql_fetch_assoc($results);
@@ -119,7 +120,10 @@ if ($cached_data) { //counts were in the cache, use them
     $piping_plover_validated_videos = $data->piping_plover_validated_videos;
 } else { //counts were too old or not in the cache, regenerate them
 
-    $wildlife_db = mysql_pconnect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+    ini_set("mysql.connect_timeout", 300);
+    ini_set("default_socket_timeout", 300);
+
+    $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
     mysql_select_db("wildlife_video", $wildlife_db);
 
     /**
@@ -171,15 +175,15 @@ if ($cached_data) { //counts were in the cache, use them
 }
 
 $grouse_belden_available = 100 * ($grouse_belden_processed_videos / $grouse_belden_total_videos);
-$grouse_belden_validated = 100 * ($grouse_belden_validated / $grouse_belden_total_videos);
+$grouse_belden_validated = 100 * ($grouse_belden_validated_videos / $grouse_belden_total_videos);
 $grouse_blaisdell_available = 100 * ($grouse_blaisdell_processed_videos / $grouse_blaisdell_total_videos);
-$grouse_blaisdell_validated = 100 * ($grouse_blaisdell_validated / $grouse_blaisdell_total_videos);
+$grouse_blaisdell_validated = 100 * ($grouse_blaisdell_validated_videos / $grouse_blaisdell_total_videos);
 $grouse_lostwood_available = 100 * ($grouse_lostwood_processed_videos / $grouse_lostwood_total_videos);
-$grouse_lostwood_validated = 100 * ($grouse_lostwood_validated / $grouse_lostwood_total_videos);
+$grouse_lostwood_validated = 100 * ($grouse_lostwood_validated_videos / $grouse_lostwood_total_videos);
 $least_tern_available = 100 * ($least_tern_processed_videos / $least_tern_total_videos);
-$least_tern_validated = 100 * ($least_tern_validated / $least_tern_total_videos);
+$least_tern_validated = 100 * ($least_tern_validated_videos / $least_tern_total_videos);
 $piping_plover_available = 100 * ($piping_plover_processed_videos / $piping_plover_total_videos);
-$piping_plover_validated = 100 * ($piping_plover_validated / $piping_plover_total_videos);
+$piping_plover_validated = 100 * ($piping_plover_validated_videos / $piping_plover_total_videos);
 
 echo "var grouse_belden_total = $grouse_belden_total_videos;\n";
 echo "var grouse_belden_processed = $grouse_belden_processed_videos;\n";
