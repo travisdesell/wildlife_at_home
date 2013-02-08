@@ -117,12 +117,14 @@ if (!$row) {
 
 $segment_filename = $row['filename'];
 
+$start_time = time();
 
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
     var species_id = $species_id;
     var location_id = $location_id;
     var video_segment_id = " . $row['id'] . ";
+    var start_time = $start_time;
 </script>";
 
 

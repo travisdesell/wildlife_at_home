@@ -267,7 +267,8 @@ $(document).ready(function () {
                 predator_presence : predator_presence,
                 nest_defense : nest_defense,
                 nest_success : nest_success,
-                interesting : interesting
+                interesting : interesting,
+                start_time : start_time
             };
 
 //            alert( JSON.stringify(submission_data) );
