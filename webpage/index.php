@@ -167,7 +167,7 @@ echo "
                 </p>
 
                 <div class='well'>
-                <p><b>Update (Feb 5, 2013): The site redesign is still in progress, please feel free to take a look around. Videos are available for viewing from the Lostwood Wildlife Refuge. I expect entering video observations to be working again by tonight. --Travis</b></p>
+                <p><b>Update (Feb 7, 2013): Watching videos and reporting observations is working, however it looks like the videos are only streaming in the Safari web browser.  I should have this fixed by the end of the night. --Travis</b></p>
                 </div>
 
                 <div class='row-fluid'>
