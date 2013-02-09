@@ -27,6 +27,7 @@ require_once("../inc/text_transform.inc");
 require_once("../project/project.inc");
 
 require_once("/home/tdesell/wildlife_at_home/webpage/navbar.php");
+require_once("/home/tdesell/wildlife_at_home/webpage/footer.php");
 
 $caching = false;
 
@@ -412,7 +413,7 @@ echo"
                             </div>
                             <div class='span5'>
                             <p>
-                                Wildlife@Home has been generously supported by a collaborative research award from University of North Dakota's Office of Research Development and Compliance.
+                                Wildlife@Home has been generously supported by a collaborative research award from UND's Office of Research Development and Compliance. The project's video streaming server is hosted by UND's <a href='http://crc.und.edu'>Computational Research Center</a> and the volunteer computing server is hosted by UND's <a href='http://www.aero.und.edu/about/SCC.aspx'>Scientific Computing Center</a>.
                             </p>
                             </div>
                         </div>
@@ -436,10 +437,15 @@ echo"
 
 
 if ($caching) {
-    page_tail_main(true);
+//    page_tail_main(true);
     end_cache(INDEX_PAGE_TTL);
 } else {
-    page_tail_main();
+//    page_tail_main();
 }
+
+echo "<hr>";
+print_footer();
+
+echo "</body></html>";
 
 ?>

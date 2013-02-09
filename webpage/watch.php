@@ -55,7 +55,6 @@ echo "
 
     <script type='text/javascript' src='watch.js'></script>
 
-
     <style>
     body {
         padding-top: 60px;
@@ -68,12 +67,11 @@ echo "
     </style>
 ";
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-
 $species_id = mysql_real_escape_string($_GET['species']);
 $location_id = mysql_real_escape_string($_GET['site']);
 
+$user = get_logged_in_user();
+$user_id = $user->id;
 /*
  * This is a little convoluted, but it will quickly select a random video_segment which has
  * been processed.
@@ -91,7 +89,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 
 //$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
 
-$query = "SELECT id, filename from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND crowd_status = 'WATCHED' AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
+$query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND crowd_status = 'WATCHED' AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -103,7 +101,7 @@ $found = true;
 if (!$row) {
     $found = true;
 
-    $query = "SELECT id, filename from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
+    $query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
 //    echo "<!-- $query -->\n";
 
     $result = attempt_query_with_ping($query, $wildlife_db);
@@ -116,6 +114,7 @@ if (!$row) {
 
 
 $segment_filename = $row['filename'];
+$duration_s = $row['duration_s'];
 
 $start_time = time();
 
@@ -125,6 +124,7 @@ echo "<script type='text/javascript'>
     var location_id = $location_id;
     var video_segment_id = " . $row['id'] . ";
     var start_time = $start_time;
+    var duration_s = $duration_s;
 </script>";
 
 

@@ -268,7 +268,10 @@ $(document).ready(function () {
                 nest_defense : nest_defense,
                 nest_success : nest_success,
                 interesting : interesting,
-                start_time : start_time
+                start_time : start_time,
+                species_id : species_id,
+                location_id : location_id,
+                duration_s : duration_s
             };
 
 //            alert( JSON.stringify(submission_data) );
