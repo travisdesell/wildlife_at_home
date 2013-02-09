@@ -9,6 +9,8 @@ require_once('/projects/wildlife/html/inc/cache.inc');
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
+$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+
 echo "
 <!DOCTYPE html>
 <html>
@@ -24,38 +26,7 @@ echo "
         <meta name='description' content=''>
         <meta name='author' content=''>
 
-        <!-- Le styles -->
-        <link href='assets/css/bootstrap.css' rel='stylesheet'>
-        <link href='assets/css/bootstrap-responsive.css' rel='stylesheet'>
-
-        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-        <!--[if lt IE 9]>
-        <script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script>
-        <![endif]-->
-
-        <!-- Fav and touch icons -->
-        <link rel='apple-touch-icon-precomposed' sizes='144x144' href='assets/ico/apple-touch-icon-144-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' sizes='114x114' href='assets/ico/apple-touch-icon-114-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' sizes='72x72' href='assets/ico/apple-touch-icon-72-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' href='assets/ico/apple-touch-icon-57-precomposed.png'>
-        <link rel='shortcut icon' href='assets/ico/favicon.png'>
-
-        <!-- Le javascript
-        ================================================== -->
-        <!-- Placed at the end of the document so the pages load faster -->
-        <script src='assets/js/jquery.js'></script>
-        <script src='assets/js/bootstrap-transition.js'></script>
-        <script src='assets/js/bootstrap-alert.js'></script>
-        <script src='assets/js/bootstrap-modal.js'></script>
-        <script src='assets/js/bootstrap-dropdown.js'></script>
-        <script src='assets/js/bootstrap-scrollspy.js'></script>
-        <script src='assets/js/bootstrap-tab.js'></script>
-        <script src='assets/js/bootstrap-tooltip.js'></script>
-        <script src='assets/js/bootstrap-popover.js'></script>
-        <script src='assets/js/bootstrap-button.js'></script>
-        <script src='assets/js/bootstrap-collapse.js'></script>
-        <script src='assets/js/bootstrap-carousel.js'></script>
-        <script src='assets/js/bootstrap-typeahead.js'></script>
+        $bootstrap_scripts
 
         <script type='text/javascript'>
 ";
@@ -184,7 +155,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
                             'info_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php',
                             'species_latin_name' => 'Tympanuchus phasianellus',
-                            'project_description' => '<p>Species description...</p> <p><a href=\'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php\'>Learn more about the sharptailed grouse.</a></p>',
+                            'project_description' => '<p>Species description...</p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
