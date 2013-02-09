@@ -1,3 +1,6 @@
 [submodule "undvc_common"]
 	path = undvc_common
 	url = https://github.com/travisdesell/undvc_common.git
+[submodule "mustache.php"]
+	path = mustache.php
+	url = https://github.com/bobthecow/mustache.php.git

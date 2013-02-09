@@ -1,0 +1,49 @@
+
+<div class='well well-large'>
+    <div class='container'>
+        <div class='row-fluid'>
+            <div class='span12'>
+                <ul class='thumbnails'>
+                    {{#thumbnail_list}}
+                    <li class='span4'>
+                        <div class='thumbnail'>
+                            <img src='{{thumbnail_image}}' alt=''></img>
+                            <h4>{{species_name}} <small>{{species_latin_name}}</small></h4>
+                            <p>{{{project_description}}}</p>
+
+                            {{#site}}
+                            <div class='well well-small'>
+                                <h5>{{site_name}}</h5>
+                                
+                                <p>{{site_description}}</p>
+
+                                <div class='row-fluid'>
+                                    <div class='span9'>
+                                        <div class='progress' id='{{progress_id}}'>
+                                            <div class='bar bar-success' style="width: {{validated_percentage}}%;"></div>
+                                            <div class='bar bar' style="width: {{available_percentage}}%;"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class='span3'>
+                                        {{#enabled}}
+                                        <a class='btn btn-mini btn-primary pull-right' style='margin-top:0px;' href='watch.php?site={{site_id}}&species={{species_id}}'>Watch Video</a>
+                                        {{/enabled}}
+                                        {{^enabled}}
+                                        <a class='btn btn-mini pull-right disabled' style='margin-top:0px;'>Watch Video</a>
+                                        {{/enabled}}
+                                    </div>
+
+                                </div>                        
+                            </div>
+                            {{/site}}
+                        </div>
+                    </li>
+                    {{/thumbnail_list}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
