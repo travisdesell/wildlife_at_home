@@ -51,8 +51,12 @@ if ($modulo > -1) {
     mysql_connect("localhost", $wildlife_user, $wildlife_pw);
     mysql_select_db($wildlife_db);
 
+    $iteration = 3;
+
     while(true) {   //Loop until there are no more videos to watermark.
-        $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' LIMIT 1";
+        $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND location_id = " . (($iteration % 4) + 1) . " LIMIT 1";
+
+        echo $query . "\n";
 
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
@@ -60,7 +64,8 @@ if ($modulo > -1) {
         $row = mysql_fetch_assoc($result);
 
         if (!$row) {  //No videos left to watermark, we can quit.
-            echo "No videos to watermark with modulo $modulo of $number_of_processes.\n";
+            echo "No videos to watermark with modulo $modulo of $number_of_processes for location: " . (($iteration %4) + 1 ) . ".\n";
+            $iteration++;
             break;
         }
 
@@ -77,7 +82,7 @@ if ($modulo > -1) {
         //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
         //use HTML5 to stream it
         $watermark_file = "/video/wildlife/watermark.png";
-        $command = "ffmpeg -y -i " . $row['archive_filename']. " -ar 44100 -vb 400000 -qmax 5 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" " . $row['watermarked_filename'];
+        $command = "ffmpeg -y -i " . $row['archive_filename']. " -ar 44100 -vb 400000 -qmax 5 -vcodec libx264 -vpre slow -vpre baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" " . $row['watermarked_filename'];
         shell_exec($command);
 
         /**
@@ -92,6 +97,8 @@ if ($modulo > -1) {
         $query = "UPDATE video_segment_2 SET processing_status = 'WATERMARKED' WHERE video_id = " . $row['id'];
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+
+        $iteration++;
     }
 
 } else {

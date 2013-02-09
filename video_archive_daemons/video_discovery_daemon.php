@@ -147,12 +147,15 @@ function insert_video($archive_filename, $watermarked_filename, $project_id, $lo
         $query = "INSERT INTO video_segment_2 SET " .
                     "  video_id = '$video_id'" .
                     ", number = $i" .
+                    ", species_id = $species_id" .
+                    ", location_id = $location_id" .
                     ", filename = '$streaming_filename'" .
                     ", crowd_obs_count = 0" .
                     ", expert_obs_count = 0" .
                     ", machine_obs_count = 0" .
                     ", interesting_count = 0" .
-                    ", processing_status = 'UNWATERMARKED'";
+                    ", processing_status = 'UNWATERMARKED'" .
+                    ", crowd_status = 'UNWATCHED'";
 
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
@@ -190,13 +193,16 @@ foreach($directory_iterator as $filename => $path_object) {
         $start = strlen("/video/wildlife/archive/");
 
         $project = parse_next_dir($filename, "/", $start);
-        if ($project == "missouri_river_project") continue;
         if ($project == "lekking") continue;
 
         if (already_inserted($filename)) continue;
 
         $species = parse_next_dir($filename, "/", $start);
-        $site = parse_next_dir($filename, "/", $start);
+        if ($project == "missouri_river_project") {
+            $site = "Missouri River";
+        } else {
+            $site = parse_next_dir($filename, "/", $start);
+        }
         $animal_id = parse_next_dir($filename, "/", $start);
 
         //if the bird id contains an underscore then there is also a nest id
@@ -243,33 +249,35 @@ foreach($directory_iterator as $filename => $path_object) {
         $processing_status = "UNWATERMARKED";
 
         if ($species == "sharptailed_grouse") {
-            $species_id = 0;
-        } else if ($species == "piping_plover") {
             $species_id = 1;
         } else if ($species == "least_tern") {
             $species_id = 2;
+        } else if ($species == "piping_plover") {
+            $species_id = 3;
         } else {
             die("Uknown species encountered: '$species'");
         }
 
         if ($project == "oil_development") {
-            $project_id = 0;
-        } else if ($project == "lekking") {
             $project_id = 1;
-        } else if ($project == "missouri_river_project") {
+        } else if ($project == "lekking") {
             $project_id = 2;
+        } else if ($project == "missouri_river_project") {
+            $project_id = 3;
         } else {
             die("Unknown project encountered: '$project'");
         }
 
         if ($site == "Belden") {
-            $site_id = 0;
-        } else if ($site == "Blaisdell") {
             $site_id = 1;
-        } else if ($site == "Lostwood") {
+        } else if ($site == "Blaisdell") {
             $site_id = 2;
+        } else if ($site == "Lostwood") {
+            $site_id = 3;
+        } else if ($site == "Missouri River") {
+            $site_id = 4;
         } else {
-            die("Unknown location encountered: '$location'");
+            die("Unknown location encountered: '$site'");
         }
         
         echo $filename . "\n";

@@ -51,9 +51,11 @@ if ($modulo > -1) {
     mysql_connect("localhost", $wildlife_user, $wildlife_pw);
     mysql_select_db($wildlife_db);
 
+    $iteration = 1;
+
     while(true) {   //Loop until there are no streaming segments to generate
         /* get a segment which needs to be generated from the watermarked file */
-        $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' LIMIT 1";
+        $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND location_id = " . (($iteration % 4) + 1) . " LIMIT 1";
 
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
@@ -61,8 +63,11 @@ if ($modulo > -1) {
         $row = mysql_fetch_assoc($result);
 
         if (!$row) {  //No segments left to generate, we can quit.
-            echo "No videos to watermark with modulo $modulo of $number_of_processes.\n";
-            break;
+            echo "No videos to split with modulo $modulo of $number_of_processes for location: " . (($iteration %4) + 1 ) . ", sleeping 60 seconds\n";
+            $iteration++;
+
+            sleep(60); //sleep 5 minutes
+            continue;
         }
 
         $segment_id = $row['id'];
@@ -77,7 +82,7 @@ if ($modulo > -1) {
         echo "segment_filename: " . $segment_filename . "\n";
 
         /* Get required information about the file that the segment is being generated for */
-        $query = "SELECT watermarked_filename, duration_s, streaming_segments FROM video_2 WHERE id = " . $row['video_id'];
+        $query = "SELECT location_id, species_id, watermarked_filename, duration_s, streaming_segments FROM video_2 WHERE id = " . $row['video_id'];
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
@@ -86,6 +91,8 @@ if ($modulo > -1) {
         $watermarked_filename = $row['watermarked_filename'];
         $archive_duration_s = $row['duration_s'];
         $streaming_segments = $row['streaming_segments'];
+        $location_id = $row['location_id'];
+        $species_id = $row['species_id'];
 
         echo "query: '$query'\n";
         echo "watermarked_filename: " . $watermarked_filename . "\n";
@@ -126,8 +133,7 @@ if ($modulo > -1) {
 
 
         //Run FFMPEG to create the 3 minute (or less) segment from the watermarked video 
-        $command = "ffmpeg -y -i " . $watermarked_filename . " -sameq -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename;
-
+        $command = "ffmpeg -y -i " . $watermarked_filename . " -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename;
 
         echo "command:\n\n" . $command . "\n\n";
 
@@ -137,7 +143,7 @@ if ($modulo > -1) {
          * Update the video_segment_2 table to specify that this segment is 'DONE'.
          * If all segments are done for the archive video, set it's processing status to 'SPLIT'
          */
-        $query = "UPDATE video_segment_2 SET processing_status = 'DONE' WHERE id = " . $segment_id;
+        $query = "UPDATE video_segment_2 SET processing_status = 'DONE', duration_s = $duration WHERE id = " . $segment_id;
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
@@ -149,14 +155,22 @@ if ($modulo > -1) {
 
         $split_segments_generated = $row['count(*)'];
 
+        echo "split segments generated: $split_segments_generated -- streaming_segments: $streaming_segments\n";
+
         if ($split_segments_generated == $streaming_segments) {
             //All the streaming segments for the video have been generated from the watermark,
             //update it's entry in the database.
 
-            $query = "UPDATE video_2 SET processing_status = 'SPLIT' WHERE id = " . $segment_video_id;
+            $query = "UPDATE video_2 SET processing_status = 'SPLIT' WHERE id = " . $archive_video_id;
             $result = mysql_query($query);
             if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
         }
+
+        $query = "UPDATE progress SET available_video_s = available_video_s + $duration WHERE progress.location_id = $location_id and progress.species_id = $species_id";
+        $result = mysql_query($query);
+        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+
+        $iteration++;
      }
 
 } else {
