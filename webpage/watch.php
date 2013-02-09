@@ -135,6 +135,7 @@ echo "
 
 $active_items = array(
                     'home' => '',
+                    'watch_video' => 'active',
                     'message_boards' => '',
                     'preferences' => '',
                     'about_wildlife' => '',

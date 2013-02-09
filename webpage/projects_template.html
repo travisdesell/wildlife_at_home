@@ -11,6 +11,13 @@
                             <h4>{{species_name}} <small>{{species_latin_name}}</small></h4>
                             <p>{{{project_description}}}</p>
 
+                            {{#training_webpage}}
+                            <div class='row-fluid'>
+                                    <a class='btn btn-small btn-primary span6' style='margin-bottom:10px;' href='{{training_webpage}}'>Training</a>
+                                    <a class='btn btn-small btn-primary span6 pull-right' style='margin-bottom:10px;' href='{{info_webpage}}'>Species Information</a>
+                            </div>
+                            {{/training_webpage}}
+
                             {{#site}}
                             <div class='well well-small'>
                                 <h5>{{site_name}}</h5>
