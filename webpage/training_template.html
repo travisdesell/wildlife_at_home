@@ -1,0 +1,39 @@
+<div class='container'>
+    <div class='row-fluid'>
+        <div class='span12'>
+
+            {{#page_intro}}
+            <section id='intro' class='well'>
+                {{{page_intro}}}
+            </section>
+            {{/page_intro}}
+
+            {{#video_explanation}}
+            <section id='presence' class='well'>
+                <div class='container'>
+                    <div class='row-fluid'>
+                        <div class='span6'>
+                            <video style='width:95%;' id='wildlife_video' controls='controls'>
+                                <source src='{{video_href}}.mp4' type='video/mp4'></source>
+                                <source src='{{video_href}}.ogv' type='video/ogg'></source>
+                                This video requires a browser that supports HTML5 video.
+                            </video> 
+                        </div>
+
+                        <div class='span6' style='padding-right:45px'>
+                            {{{video_description}}}
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {{/video_explanation}}
+
+            {{#page_end}}
+            <section id='intro' class='well'>
+                {{{page_end}}}
+            </section>
+            {{/page_end}}
+
+        </div>
+    </div>
+</div>

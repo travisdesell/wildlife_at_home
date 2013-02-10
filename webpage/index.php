@@ -54,10 +54,6 @@ echo "<html>
         <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
         <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <meta name='description' content=''>
-        <meta name='author' content=''>
-
         <style>
         hr.news_line {
             border: 0;
@@ -124,7 +120,7 @@ echo "
             <div class='span6'>
                 <h3>Welcome to Wildlife@Home</h3>
                 <p>
-                Wildlife@Home is a joint effort between the <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharptailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>
+                Wildlife@Home is a joint effort between the <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>
                 
                 <p>We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse, and better understand the behaviors of least terns and piping plovers to aid in their conservation, as well as provide some interesting video for everyone to watch and discuss. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action.
                 </p>
@@ -190,7 +186,7 @@ echo "
                       <img src='images/grouse_nest.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
-                          <p>A sharptailed grouse nest.</p>
+                          <p>A sharp-tailed grouse nest.</p>
                         </div>
                       </div>
                     </div>

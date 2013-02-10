@@ -22,10 +22,6 @@ echo "
         <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
         <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <meta name='description' content=''>
-        <meta name='author' content=''>
-
         $bootstrap_scripts
 
         <script type='text/javascript'>
@@ -150,7 +146,7 @@ echo "
 $thumbnails = array('thumbnail_list' => array(
                         array(
                             'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_sharptailed_grouse.png',
-                            'species_name' => 'Sharptailed Grouse',
+                            'species_name' => 'Sharp-Tailed Grouse',
                             'species_id' => '1',
                             'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
                             'info_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php',

@@ -25,7 +25,7 @@ function print_navbar($active_items) {
                               <ul class='dropdown-menu'>
                                 <li><a href='http://volunteer.cs.und.edu/wildlife/video_selector.php'>Site and Species Descriptions</a></li>
                                 <li class='divider'></li>
-                                <li class='nav-header'>Sharptailed Grouse</a></li>
+                                <li class='nav-header'>Sharp-Tailed Grouse</a></li>
                                 <li><a href='watch.php?site=1&species=1'>Belden, ND</a></li>
                                 <li><a href='watch.php?site=2&species=1'>Blaisdell, ND</a></li>
                                 <li><a href='watch.php?site=3&species=1'>Lostwood Wildlife Refuge, ND</a></li>
@@ -38,6 +38,16 @@ function print_navbar($active_items) {
                               </ul>
                             </li>
 
+                            <li class='dropdown " . $active_items['about_wildlife'] . "'>
+                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
+                              <ul class='dropdown-menu'>
+                                <li><a href='sharptailed_grouse_info.php'>Sharp-Tailed Grouse</a></li>
+                                <li><a href='#'>Piping Plover (Coming Soon)</a></li>
+                                <li><a href='#'>Least Tern (Coming Soon)</a></li>
+                              </ul>
+                            </li>
+
+
                             <li class='" . $active_items['message_boards'] . "'><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
 
                             <li class='dropdown " . $active_items['preferences'] . "'>
@@ -49,16 +59,6 @@ function print_navbar($active_items) {
                                 <li><a href='apps.php'>Applications</a></li>
                               </ul>
                             </li>
-
-                            <li class='dropdown " . $active_items['about_wildlife'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
-                              <ul class='dropdown-menu'>
-                                <li><a href='sharptailed_grouse_info.php'>Sharptailed Grouse</a></li>
-                                <li><a href='#'>Piping Plover (Coming Soon)</a></li>
-                                <li><a href='#'>Least Tern (Coming Soon)</a></li>
-                              </ul>
-                            </li>
-
                             
                             <li class='dropdown " . $active_items['community'] . "'>
                               <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
@@ -74,8 +74,6 @@ function print_navbar($active_items) {
                                 <li><a href='stats.php'>More Statistics</a></li>
                               </ul>
                             </li>
-
-                            <li><a href='http://volunteer.cs.und.edu/wildlife/index.php#contact'>Contact</a></li>
                         </ul>
                     </div> <!-- /.nav-collapse-->
                 </div>  <!-- container-fluid -->
