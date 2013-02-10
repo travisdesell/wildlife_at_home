@@ -32,6 +32,16 @@ $(document).ready(function () {
         $('#speed_textbox').val("speed: " + video.playbackRate);
     });
 
+    /**
+     * Use this to create a forum thread with the video.
+     */
+    $('#discuss-video-button').button();
+
+    $('#discuss-video-button').click(function() {
+        $("#discuss-video-form").submit();
+    });
+
+
 
     /**
      * Set controls for the radio buttons, comments and submit button.
