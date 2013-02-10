@@ -9,6 +9,8 @@ require_once('/projects/wildlife/html/inc/cache.inc');
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
+$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+
 echo "
 <!DOCTYPE html>
 <html>
@@ -20,42 +22,7 @@ echo "
         <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
         <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <meta name='description' content=''>
-        <meta name='author' content=''>
-
-        <!-- Le styles -->
-        <link href='assets/css/bootstrap.css' rel='stylesheet'>
-        <link href='assets/css/bootstrap-responsive.css' rel='stylesheet'>
-
-        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-        <!--[if lt IE 9]>
-        <script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script>
-        <![endif]-->
-
-        <!-- Fav and touch icons -->
-        <link rel='apple-touch-icon-precomposed' sizes='144x144' href='assets/ico/apple-touch-icon-144-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' sizes='114x114' href='assets/ico/apple-touch-icon-114-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' sizes='72x72' href='assets/ico/apple-touch-icon-72-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' href='assets/ico/apple-touch-icon-57-precomposed.png'>
-        <link rel='shortcut icon' href='assets/ico/favicon.png'>
-
-        <!-- Le javascript
-        ================================================== -->
-        <!-- Placed at the end of the document so the pages load faster -->
-        <script src='assets/js/jquery.js'></script>
-        <script src='assets/js/bootstrap-transition.js'></script>
-        <script src='assets/js/bootstrap-alert.js'></script>
-        <script src='assets/js/bootstrap-modal.js'></script>
-        <script src='assets/js/bootstrap-dropdown.js'></script>
-        <script src='assets/js/bootstrap-scrollspy.js'></script>
-        <script src='assets/js/bootstrap-tab.js'></script>
-        <script src='assets/js/bootstrap-tooltip.js'></script>
-        <script src='assets/js/bootstrap-popover.js'></script>
-        <script src='assets/js/bootstrap-button.js'></script>
-        <script src='assets/js/bootstrap-collapse.js'></script>
-        <script src='assets/js/bootstrap-carousel.js'></script>
-        <script src='assets/js/bootstrap-typeahead.js'></script>
+        $bootstrap_scripts
 
         <script type='text/javascript'>
 ";
@@ -72,139 +39,61 @@ function get_count($table_name, $where_clause, $db) {
 /**
  *  Getting the number of videos available is slow, so caching it is the way to go
  */
+ini_set("mysql.connect_timeout", 300);
+ini_set("default_socket_timeout", 300);
 
-$grouse_belden_total_videos = 0;
-$grouse_belden_processed_videos = 0;
-$grouse_belden_validated_videos = 0;
+$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+mysql_select_db("wildlife_video", $wildlife_db);
 
-$grouse_blaisdell_total_videos = 0;
-$grouse_blaisdell_processed_videos = 0;
-$grouse_blaisdell_validated_videos = 0;
+function get_video_progress(&$validated, &$available, &$total, $query, $db) {
+    $results = attempt_query_with_ping($query, $db);
+    if (!$results) die ("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "\nquery: $query\n");
 
-$grouse_lostwood_total_videos = 0;
-$grouse_lostwood_processed_videos = 0;
-$grouse_lostwood_validated_videos = 0;
-
-$least_tern_total_videos = 0;
-$least_tern_processed_videos = 0;
-$least_tern_validated_videos = 0;
-
-$piping_plover_total_videos = 0;
-$piping_plover_processed_videos = 0;
-$piping_plover_validated_videos = 0;
-
-$cache_args = "video_counts";
-$cached_data = get_cached_data(600 /*10 minute long cache*/, $cache_args);
-
-if ($cached_data) { //counts were in the cache, use them
-    $data = unserialize($cached_data);
-
-    $grouse_belden_total_videos = $data->grouse_belden_total_videos;
-    $grouse_belden_processed_videos = $data->grouse_belden_processed_videos;
-    $grouse_belden_validated_videos = $data->grouse_belden_validated_videos;
-
-    $grouse_blaisdell_total_videos = $data->grouse_blaisdell_total_videos;
-    $grouse_blaisdell_processed_videos = $data->grouse_blaisdell_processed_videos;
-    $grouse_blaisdell_validated_videos = $data->grouse_blaisdell_validated_videos;
-
-    $grouse_lostwood_total_videos = $data->grouse_lostwood_total_videos;
-    $grouse_lostwood_processed_videos = $data->grouse_lostwood_processed_videos;
-    $grouse_lostwood_validated_videos = $data->grouse_lostwood_validated_videos;
-
-    $least_tern_total_videos = $data->least_tern_total_videos;
-    $least_tern_processed_videos = $data->least_tern_processed_videos;
-    $least_tern_validated_videos = $data->least_tern_validated_videos;
-
-    $piping_plover_total_videos = $data->piping_plover_total_videos;
-    $piping_plover_processed_videos = $data->piping_plover_processed_videos;
-    $piping_plover_validated_videos = $data->piping_plover_validated_videos;
-} else { //counts were too old or not in the cache, regenerate them
-
-    ini_set("mysql.connect_timeout", 300);
-    ini_set("default_socket_timeout", 300);
-
-    $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-    mysql_select_db("wildlife_video", $wildlife_db);
-
-    /**
-     *  Get the progress of the videos for each species at each site.
-     */
-
-    $grouse_belden_total_videos = get_count("video_segment_2", "species_id = 1 and location_id = 1", $wildlife_db);
-    $grouse_belden_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 1 and location_id = 1", $wildlife_db);
-    $grouse_belden_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 1 and location_id = 1", $wildlife_db);
-
-    $grouse_blaisdell_total_videos = get_count("video_segment_2", "species_id = 1 and location_id = 2", $wildlife_db);
-    $grouse_blaisdell_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 1 and location_id = 2", $wildlife_db);
-    $grouse_blaisdell_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 1 and location_id = 2", $wildlife_db);
-
-    $grouse_lostwood_total_videos = get_count("video_segment_2", "species_id = 1 and location_id = 3", $wildlife_db);
-    $grouse_lostwood_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 1 and location_id = 3", $wildlife_db);
-    $grouse_lostwood_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 1 and location_id = 3", $wildlife_db);
-
-    $least_tern_total_videos = get_count("video_segment_2", "species_id = 2 and location_id = 4", $wildlife_db);
-    $least_tern_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 2 and location_id = 4", $wildlife_db);
-    $least_tern_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 2 and location_id = 4", $wildlife_db);
-
-    $piping_plover_total_videos = get_count("video_segment_2", "species_id = 3 and location_id = 4", $wildlife_db);
-    $piping_plover_processed_videos = get_count("video_segment_2", "processing_status = 'DONE' and species_id = 3 and location_id = 4", $wildlife_db);
-    $piping_plover_validated_videos = get_count("video_segment_2", "crowd_status = 'VALIDATED' and species_id = 3 and location_id = 4", $wildlife_db);
-
-    $data->grouse_belden_total_videos = $grouse_belden_total_videos;
-    $data->grouse_belden_processed_videos = $grouse_belden_processed_videos;
-    $data->grouse_belden_validated_videos = $grouse_belden_validated_videos;
-
-    $data->grouse_blaisdell_total_videos = $grouse_blaisdell_total_videos;
-    $data->grouse_blaisdell_processed_videos = $grouse_blaisdell_processed_videos;
-    $data->grouse_blaisdell_validated_videos = $grouse_blaisdell_validated_videos;
-
-    $data->grouse_lostwood_total_videos = $grouse_lostwood_total_videos;
-    $data->grouse_lostwood_processed_videos = $grouse_lostwood_processed_videos;
-    $data->grouse_lostwood_validated_videos = $grouse_lostwood_validated_videos;
-
-    $data->least_tern_total_videos = $least_tern_total_videos;
-    $data->least_tern_processed_videos = $least_tern_processed_videos;
-    $data->least_tern_validated_videos = $least_tern_validated_videos;
-
-    $data->piping_plover_total_videos = $piping_plover_total_videos;
-    $data->piping_plover_processed_videos = $piping_plover_processed_videos;
-    $data->piping_plover_validated_videos = $piping_plover_validated_videos;
-
-
-    set_cached_data(600 /* 10 minute cache*/, serialize($data), $cache_args);
+    $row = mysql_fetch_assoc($results);
+    $validated = $row['validated_video_s'];
+    $available = $row['available_video_s'];
+    $total = $row['total_video_s'];
 }
+/**
+ *  Get the progress of the videos for each species at each site.
+ */
 
-$grouse_belden_available = 100 * ($grouse_belden_processed_videos / $grouse_belden_total_videos);
-$grouse_belden_validated = 100 * ($grouse_belden_validated_videos / $grouse_belden_total_videos);
-$grouse_blaisdell_available = 100 * ($grouse_blaisdell_processed_videos / $grouse_blaisdell_total_videos);
-$grouse_blaisdell_validated = 100 * ($grouse_blaisdell_validated_videos / $grouse_blaisdell_total_videos);
-$grouse_lostwood_available = 100 * ($grouse_lostwood_processed_videos / $grouse_lostwood_total_videos);
-$grouse_lostwood_validated = 100 * ($grouse_lostwood_validated_videos / $grouse_lostwood_total_videos);
-$least_tern_available = 100 * ($least_tern_processed_videos / $least_tern_total_videos);
-$least_tern_validated = 100 * ($least_tern_validated_videos / $least_tern_total_videos);
-$piping_plover_available = 100 * ($piping_plover_processed_videos / $piping_plover_total_videos);
-$piping_plover_validated = 100 * ($piping_plover_validated_videos / $piping_plover_total_videos);
+get_video_progress($grouse_belden_validated_s, $grouse_belden_processed_s, $grouse_belden_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 1", $wildlife_db);
+get_video_progress($grouse_blaisdell_validated_s, $grouse_blaisdell_processed_s, $grouse_blaisdell_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 2", $wildlife_db);
+get_video_progress($grouse_lostwood_validated_s, $grouse_lostwood_processed_s, $grouse_lostwood_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 3", $wildlife_db);
+get_video_progress($least_tern_validated_s, $least_tern_processed_s, $least_tern_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 2 and location_id = 4", $wildlife_db);
+get_video_progress($piping_plover_validated_s, $piping_plover_processed_s, $piping_plover_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 3 and location_id = 4", $wildlife_db);
 
-echo "var grouse_belden_total = $grouse_belden_total_videos;\n";
-echo "var grouse_belden_processed = $grouse_belden_processed_videos;\n";
-echo "var grouse_belden_validated = $grouse_belden_validated_videos;\n";
+$grouse_belden_available = 100 * ($grouse_belden_processed_s / $grouse_belden_total_s);
+$grouse_belden_validated = 100 * ($grouse_belden_validated_s / $grouse_belden_total_s);
+$grouse_blaisdell_available = 100 * ($grouse_blaisdell_processed_s / $grouse_blaisdell_total_s);
+$grouse_blaisdell_validated = 100 * ($grouse_blaisdell_validated_s / $grouse_blaisdell_total_s);
+$grouse_lostwood_available = 100 * ($grouse_lostwood_processed_s / $grouse_lostwood_total_s);
+$grouse_lostwood_validated = 100 * ($grouse_lostwood_validated_s / $grouse_lostwood_total_s);
+$least_tern_available = 100 * ($least_tern_processed_s / $least_tern_total_s);
+$least_tern_validated = 100 * ($least_tern_validated_s / $least_tern_total_s);
+$piping_plover_available = 100 * ($piping_plover_processed_s / $piping_plover_total_s);
+$piping_plover_validated = 100 * ($piping_plover_validated_s / $piping_plover_total_s);
 
-echo "var grouse_blaisdell_total = $grouse_blaisdell_total_videos;\n";
-echo "var grouse_blaisdell_processed = $grouse_blaisdell_processed_videos;\n";
-echo "var grouse_blaisdell_validated = $grouse_blaisdell_validated_videos;\n";
+echo "var grouse_belden_total = $grouse_belden_total_s;\n";
+echo "var grouse_belden_processed = $grouse_belden_processed_s;\n";
+echo "var grouse_belden_validated = $grouse_belden_validated_s;\n";
 
-echo "var grouse_lostwood_total = $grouse_lostwood_total_videos;\n";
-echo "var grouse_lostwood_processed = $grouse_lostwood_processed_videos;\n";
-echo "var grouse_lostwood_validated = $grouse_lostwood_validated_videos;\n";
+echo "var grouse_blaisdell_total = $grouse_blaisdell_total_s;\n";
+echo "var grouse_blaisdell_processed = $grouse_blaisdell_processed_s;\n";
+echo "var grouse_blaisdell_validated = $grouse_blaisdell_validated_s;\n";
 
-echo "var least_tern_total = $least_tern_total_videos;\n";
-echo "var least_tern_processed = $least_tern_processed_videos;\n";
-echo "var least_tern_validated = $least_tern_validated_videos;\n";
+echo "var grouse_lostwood_total = $grouse_lostwood_total_s;\n";
+echo "var grouse_lostwood_processed = $grouse_lostwood_processed_s;\n";
+echo "var grouse_lostwood_validated = $grouse_lostwood_validated_s;\n";
 
-echo "var piping_plover_total = $piping_plover_total_videos;\n";
-echo "var piping_plover_processed = $piping_plover_processed_videos;\n";
-echo "var piping_plover_validated = $piping_plover_validated_videos;\n";
+echo "var least_tern_total = $least_tern_total_s;\n";
+echo "var least_tern_processed = $least_tern_processed_s;\n";
+echo "var least_tern_validated = $least_tern_validated_s;\n";
 
+echo "var piping_plover_total = $piping_plover_total_s;\n";
+echo "var piping_plover_processed = $piping_plover_processed_s;\n";
+echo "var piping_plover_validated = $piping_plover_validated_s;\n";
 
 echo "</script>
 
@@ -230,6 +119,7 @@ echo "
 
 $active_items = array(
                     'home' => '',
+                    'watch_video' => 'active',
                     'message_boards' => '',
                     'preferences' => '',
                     'about_wildlife' => '',
@@ -238,13 +128,30 @@ $active_items = array(
 
 print_navbar($active_items);
 
+
+echo "
+    <div class='well well-small'>
+        <div class='container'>
+            <div class='row-fluid'>
+                <div class='span12'>
+                <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is also a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>. 
+                </div>
+            </div>
+        </div>
+    </div>
+";
+
+
+
 $thumbnails = array('thumbnail_list' => array(
                         array(
                             'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_sharptailed_grouse.png',
-                            'species_name' => 'Sharptailed Grouse',
+                            'species_name' => 'Sharp-Tailed Grouse',
                             'species_id' => '1',
+                            'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
+                            'info_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php',
                             'species_latin_name' => 'Tympanuchus phasianellus',
-                            'project_description' => '<p>Species description...</p> <p><a href=\'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php\'>Learn more about the sharptailed grouse.</a></p>',
+                            'project_description' => '<p>Species description...</p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
@@ -316,10 +223,10 @@ $thumbnails = array('thumbnail_list' => array(
                     )
                 );
 
-$thumbnail_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/thumbnail_template.html");
+$projects_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/projects_template.html");
 
 $m = new Mustache_Engine;
-echo $m->render($thumbnail_template, $thumbnails);
+echo $m->render($projects_template, $thumbnails);
 
 print_footer();
 

@@ -43,6 +43,8 @@ header("Content-type: text/html; charset=utf-8");
 
 echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
+$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+
 echo "<html>
     <head>
         <meta charset='utf-8'>
@@ -52,25 +54,7 @@ echo "<html>
         <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
         <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 
-        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-        <meta name='description' content=''>
-        <meta name='author' content=''>
-
-        <!-- Le styles -->
-        <link href='assets/css/bootstrap.css' rel='stylesheet'>
-        <link href='assets/css/bootstrap-responsive.css' rel='stylesheet'>
-
-        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-        <!--[if lt IE 9]>
-        <script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script>
-        <![endif]-->
-
         <style>
-        .carousel { height:450px; }
-        .item {
-            height:450px;
-        }   
-
         hr.news_line {
             border: 0;
             border-bottom: 1px solid rgb(200, 200, 200);
@@ -91,31 +75,18 @@ echo "<html>
             float: right;
         }
 
+        body {
+            padding-top: 60px;
+        }
+        @media (max-width: 979px) {
+            body {
+                padding-top: 0px;
+            }
+        }
         </style>
 
-        <!-- Fav and touch icons -->
-        <link rel='apple-touch-icon-precomposed' sizes='144x144' href='assets/ico/apple-touch-icon-144-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' sizes='114x114' href='assets/ico/apple-touch-icon-114-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' sizes='72x72' href='assets/ico/apple-touch-icon-72-precomposed.png'>
-        <link rel='apple-touch-icon-precomposed' href='assets/ico/apple-touch-icon-57-precomposed.png'>
-        <link rel='shortcut icon' href='assets/ico/favicon.png'>
+        $bootstrap_scripts
 
-        <!-- Le javascript
-        ================================================== -->
-        <!-- Placed at the end of the document so the pages load faster -->
-        <script src='assets/js/jquery.js'></script>
-        <script src='assets/js/bootstrap-transition.js'></script>
-        <script src='assets/js/bootstrap-alert.js'></script>
-        <script src='assets/js/bootstrap-modal.js'></script>
-        <script src='assets/js/bootstrap-dropdown.js'></script>
-        <script src='assets/js/bootstrap-scrollspy.js'></script>
-        <script src='assets/js/bootstrap-tab.js'></script>
-        <script src='assets/js/bootstrap-tooltip.js'></script>
-        <script src='assets/js/bootstrap-popover.js'></script>
-        <script src='assets/js/bootstrap-button.js'></script>
-        <script src='assets/js/bootstrap-collapse.js'></script>
-        <script src='assets/js/bootstrap-carousel.js'></script>
-        <script src='assets/js/bootstrap-typeahead.js'></script>
         <script>
           !function ($) {
             $(function(){
@@ -125,18 +96,6 @@ echo "<html>
             })
           }(window.jQuery)
         </script>
-
-    <style>
-    body {
-        padding-top: 60px;
-    }
-    @media (max-width: 979px) {
-        body {
-            padding-top: 0px;
-        }
-    }
-    </style>
-
 ";
 
 include 'schedulers.txt';
@@ -146,6 +105,7 @@ echo "
 
 $active_items = array(
                     'home' => 'active',
+                    'watch_video' => '',
                     'message_boards' => '',
                     'preferences' => '',
                     'about_wildlife' => '',
@@ -160,26 +120,15 @@ echo "
             <div class='span6'>
                 <h3>Welcome to Wildlife@Home</h3>
                 <p>
-                Wildlife@Home is a joint effort between the <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>.  The project is aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project will be looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The goal of the project is to use your volunteered computers to 'sift' through the large amounts of video for interesting segments, and then letting you view this interesting video and help us analyze what is happening to the grouse and their nests. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action.
+                Wildlife@Home is a joint effort between the <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>
+                
+                <p>We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse, and better understand the behaviors of least terns and piping plovers to aid in their conservation, as well as provide some interesting video for everyone to watch and discuss. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action.
                 </p>
-
-                <p>
-                The nest cameras will be set up both near western North Dakota's oil fields and also within protected state lands. We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse and other wildlife in North Dakota, as well as provide some interesting video for everyone to watch and discuss.
-                </p>
-
-                <div class='well'>
-                <p><b>Update (Feb 7, 2013): Watching videos and reporting observations is working, except in the Firefox browser (IE 9, Chrome and Safari work).  I should have this fixed soon. --Travis</b></p>
-                </div>
 
                 <div class='row-fluid'>
-                    <a class='btn btn-large btn-primary span6' href='training.php'>New User Training</a>
-                    <a class='btn btn-large btn-primary span6' href='video_selector.php'>Classify Video</a>
+                    <a class='btn btn-large btn-primary span12' href='video_selector.php'>Get Started</a>
                     <!-- <a class='btn btn-large btn-primary span6 disabled' href='bossa_apps.php'>Classify Video</a> -->
                 </div>
-
-                <p>
-                If you don't have an account, feel free to create one <a href='create_account_form.php'>here</a>.
-                </p>
             </div>
 
             <div class='span6'>
