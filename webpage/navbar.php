@@ -41,9 +41,17 @@ function print_navbar($active_items) {
                             <li class='dropdown " . $active_items['about_wildlife'] . "'>
                               <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
-                                <li><a href='sharptailed_grouse_info.php'>Sharp-Tailed Grouse</a></li>
-                                <li><a href='#'>Piping Plover (Coming Soon)</a></li>
-                                <li><a href='#'>Least Tern (Coming Soon)</a></li>
+                                <li class='nav-header'>Sharp-Tailed Grouse</a></li>
+                                <li><a href='sharptailed_grouse_info.php'>Ecology and Information</a></li>
+                                <li><a href='sharptailed_grouse_training.php'>Training Videos</a></li>
+                                <li class='divider'></li>
+                                <li class='nav-header'>Interior Least Tern</a></li>
+                                <li><a href='#'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='#'>Training Videos (Coming Soon)</a></li>
+                                <li class='divider'></li>
+                                <li class='nav-header'>Piping Plover </a></li>
+                                <li><a href='#'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='#'>Training Videos (Coming Soon)</a></li>
                               </ul>
                             </li>
 

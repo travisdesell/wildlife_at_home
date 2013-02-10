@@ -260,11 +260,11 @@ echo "
 
                         <div class='modal-footer'>
                             <form id='discuss-video-form' action='forum_post.php?id=8' method='post'>
-                                <input type='hidden' name='content' value='<video>$segment_filename</video>'></input>
+                                <input type='hidden' name='content' value=\"I would like to discuss this video:\n \[video\]$segment_filename\[/video\]\"></input>
                             </form>
 
                             <button class= 'btn pull-left' data-dismiss='modal' aria-hidden='true' id='discuss-video-button'>Discuss This Video</button>
-                            <button class ='btn pull-right' data-dismiss='modal' aria-hidden='true' id='another-site-button'>Select Another Site</button>
+                            <button class ='btn pull-left' data-dismiss='modal' aria-hidden='true' id='another-site-button'>Select Another Site</button>
                             <button class ='btn btn-primary pull-right' data-dismiss='modal' aria-hidden='true' id='another-video-button'>Next Video</button>
                         </div>
                     </div>
