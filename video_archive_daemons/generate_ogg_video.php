@@ -55,7 +55,7 @@ if ($modulo > -1) {
 
     while(true) {   //Loop until there are no streaming segments to generate
         /* get a segment which needs to be generated from the watermarked file */
-        $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
+        $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'DONE' AND ogg_generated = false LIMIT 1";
 
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
@@ -133,48 +133,17 @@ if ($modulo > -1) {
 
 
         //Run FFMPEG to create the 3 minute (or less) segment from the watermarked video 
-        $command = "ffmpeg -y -i " . $watermarked_filename . " -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
-
-        echo "command:\n\n" . $command . "\n\n";
-
-        shell_exec($command);
-
-        //also generate an ogv file for firefox
         $command = "ffmpeg -y -i " . $watermarked_filename . " -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".ogv";
 
         echo "command:\n\n" . $command . "\n\n";
 
         shell_exec($command);
 
-
         /**
          * Update the video_segment_2 table to specify that this segment is 'DONE'.
          * If all segments are done for the archive video, set it's processing status to 'SPLIT'
          */
-        $query = "UPDATE video_segment_2 SET processing_status = 'DONE', ogg_generated = true, duration_s = $duration WHERE id = " . $segment_id;
-        $result = mysql_query($query);
-        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-
-        $query = "SELECT count(*) FROM video_segment_2 WHERE processing_status = 'DONE' AND video_id = " . $archive_video_id;
-        $result = mysql_query($query);
-        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-
-        $row = mysql_fetch_assoc($result);
-
-        $split_segments_generated = $row['count(*)'];
-
-        echo "split segments generated: $split_segments_generated -- streaming_segments: $streaming_segments\n";
-
-        if ($split_segments_generated == $streaming_segments) {
-            //All the streaming segments for the video have been generated from the watermark,
-            //update it's entry in the database.
-
-            $query = "UPDATE video_2 SET processing_status = 'SPLIT' WHERE id = " . $archive_video_id;
-            $result = mysql_query($query);
-            if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-        }
-
-        $query = "UPDATE progress SET available_video_s = available_video_s + $duration WHERE progress.location_id = $location_id and progress.species_id = $species_id";
+        $query = "UPDATE video_segment_2 SET ogg_generated = true WHERE id = " . $segment_id;
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
