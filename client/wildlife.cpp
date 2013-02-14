@@ -54,8 +54,8 @@
 
 #define PIXEL_THRESHOLD 10
 #define BLOCK_THRESHOLD 20
-#define BLOCK_WIDTH 5
-#define BLOCK_HEIGHT 5
+#define BLOCK_WIDTH 22
+#define BLOCK_HEIGHT 20
 
 using boost::thread;
 

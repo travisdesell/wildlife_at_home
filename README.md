@@ -19,3 +19,7 @@ Software Requirements:
     cmake
     opencv
     BOINC
+
+
+On Ubuntu you can get all of boost with:
+    sudo apt-get install libboost-all-dev
