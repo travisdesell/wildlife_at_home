@@ -35,6 +35,19 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
+
+#ifdef _BOINC_APP_
+#include "parse.h"
+#include "util.h"
+#include "gutil.h"
+#include "boinc_gl.h"
+#include "app_ipc.h"
+#include "boinc_api.h"
+#include "graphics2.h"
+#include "diagnostics.h"
+#endif
+
+
 #define SLICE_TIME_S 180
 
 #define PIXEL_THRESHOLD 10
@@ -109,6 +122,11 @@ void YUVtoRGB(char y, char u, char v, char &r, char &g, char &b) {
 	g = -1.7036 * y - 3.462 * u - 1.942 * v;
 	b = y + (u / 0.492);
 }
+
+void clear_gl_pixels() {
+    for (int i = 0; i < (gl_width * gl_height * 3); i++) gl_pixels[i] = 0;
+}
+
 void draw_gl_pixels(int gl_start_w, int gl_start_h, int image_width, int image_height, char* cl_pixels) {
 	for (int h = 0; h < image_height; h++) {
 		for (int w = 0; w < image_width; w++) {
@@ -210,33 +228,84 @@ void handle_keyboard(unsigned char key, int x, int y) {
 	}
 }
 
-void display() {
+bool resized = true;
+
+boost::mutex guard_render;
+
+void app_graphics_render(int xs, int ys, double time_of_day) {
+    boost::mutex::scoped_lock lock(guard_render);
+
+//    cout << "app_graphics_render -- xs: " << xs << ", ys: " << ys << endl;
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	currentFrame = cvQueryFrame(capture);
-	if(!currentFrame) 
-		exit(0);
+
+    if(!currentFrame) exit(0);
 
 	difference(avgFrame, globalAverageFrame, future_images->at(frame_range));
-	
+
 	draw_gl_pixels(0, 0, frameWidth, frameHeight, future_images->at(frame_range)->imageDataOrigin);
 	draw_gl_pixels(frameWidth, 0, frameWidth, frameHeight, avgFrame->imageDataOrigin);
 	draw_gl_pixels(0, frameHeight, frameWidth, frameHeight, globalAverageFrame->imageDataOrigin);
 
 	local_average_advance();	
-	
+
 	currentFrameNum++;
 
-	glDrawPixels(gl_width, gl_height, GL_BGR, GL_UNSIGNED_BYTE, gl_pixels);
+
+    //Setup a 2D projection
+    glMatrixMode (GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho (0, gl_width, gl_height, 0, 0, 1);
+    glDisable(GL_DEPTH_TEST);
+    glMatrixMode (GL_MODELVIEW);
+    glLoadIdentity();
+
+    glDrawPixels(gl_width, gl_height, GL_BGR, GL_UNSIGNED_BYTE, gl_pixels);
+
+    //Displacement trick for exact pixelization
+//    glTranslatef(0.375, 0.375, 0)
 
 	glFlush();
+
 	glutSwapBuffers();
 
 	glutPostRedisplay();
 }
 
+void app_graphics_resize(int w, int h) {
+    boost::mutex::scoped_lock lock(guard_render);
+
+    cout << "app_graphics_resize -- w: " << w << ", h: " << h << endl;
+//    gl_width = w;
+//    gl_height = h;
+
+    resized = true;
+//    glViewport(0, 0, gl_width, gl_height);
+}
+
+// mouse drag w/ left button rotates 3D objects;
+// mouse draw w/ right button zooms 3D objects
+//
+void boinc_app_mouse_move(int x, int y, int left, int middle, int right) {}
+
+void boinc_app_mouse_button(int x, int y, int which, int is_down) {}
+
+void boinc_app_key_press(int, int){}
+
+void boinc_app_key_release(int, int){}
+
+void app_graphics_init() {
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+
 int main(int argc, char** argv)
 {
-	assert(argc == 4);
+//	assert(argc == 4);
+
+    boinc_init_graphics_diagnostics(BOINC_DIAG_DEFAULTS);
 
 	capture = cvCaptureFromAVI(argv[1]);
 
@@ -256,19 +325,18 @@ int main(int argc, char** argv)
 	gl_width = frameWidth * 2;
 	gl_height = frameHeight * 2;
 
+    cout << "starting gl_width: " << gl_width << ", gl_height: " << gl_height << endl;
+
 	gl_pixels = (char*)malloc(gl_width * gl_height * 3 * sizeof(char));
+    clear_gl_pixels();
 
-	for (int i = 0; i < gl_width * gl_height * 3; i++) {
-		gl_pixels[i] = rand();
-	}
-
-	glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glutInitWindowSize(gl_width, gl_height);
-    glutCreateWindow(argv[1]);      //the name of the window is the name of the video
-    glutDisplayFunc(display);
-	glutKeyboardFunc(handle_keyboard);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+//	glutInit(&argc, argv);
+//    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+//    glutInitWindowSize(gl_width, gl_height);
+//    glutCreateWindow(argv[1]);      //the name of the window is the name of the video
+//    glutDisplayFunc(display);
+//	glutKeyboardFunc(handle_keyboard);
+//    glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	currentFrame = cvQueryFrame(capture);
 	startFrame = 0;
@@ -333,7 +401,11 @@ int main(int argc, char** argv)
 	
 	currentFrameNum = frame_range;	
 
-	glutMainLoop();
+    cout << "entering boinc graphics loop" << endl;
+
+    boinc_graphics_loop(argc, argv);
+
+    cout << "after boinc graphics loop" << endl;
 
 	cvReleaseCapture(&capture);
 
