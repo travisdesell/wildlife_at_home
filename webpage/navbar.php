@@ -75,10 +75,10 @@ function print_navbar($active_items) {
                                 <li><a href='user_search.php'>User Search</a></li>
                                 <li><a href='language_select.php'>Languages</a></li>
                                 <li class='nav-header'>Top Lists</li>
-                                <li><a href='top_bossa_users.php'>Top Video Watchers</li>
-                                <li><a href='top_users.php'>Top Users</li>
-                                <li><a href='top_hosts.php'>Top Hosts</li>
-                                <li><a href='top_teams.php'>Top Teams</li>
+                                <li><a href='top_bossa_users.php'>Top Bird Watchers</a></li>
+                                <li><a href='top_users.php'>Top Users</a></li>
+                                <li><a href='top_hosts.php'>Top Hosts</a></li>
+                                <li><a href='top_teams.php'>Top Teams</a></li>
                                 <li><a href='stats.php'>More Statistics</a></li>
                               </ul>
                             </li>
