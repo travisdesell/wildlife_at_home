@@ -12,507 +12,582 @@
 #include "stdint.h"
 
 #ifdef _BOINC_APP_
-	#ifdef _WIN32
-		#include "boinc_win.h"
-		#include "str_util.h"
-	#endif
+#ifdef _WIN32
+#include "boinc_win.h"
+#include "str_util.h"
+#endif
 
-	#include "diagnostics.h"
-	#include "util.h"
-	#include "filesys.h"
-	#include "boinc_api.h"
-	#include "mfile.h"
+#include "diagnostics.h"
+#include "util.h"
+#include "filesys.h"
+#include "boinc_api.h"
+#include "mfile.h"
 #endif
 
 #ifdef USE_OPENGL
-
-	#ifdef __APPLE__
-		#include <OpenGL/gl.h>
-		#include <OpenGL/glu.h>
-		#include <GLUT/glut.h>
-	#else
-		#include <GL/gl.h>
-		#include <GL/glu.h>
-		#include <GL/glut.h>
-	#endif
-
+#ifdef __APPLE__
+//#include <OpenGL/gl.h>
+//#include <OpenGL/glu.h>
+//#include <GLUT/glut.h>
+#else
+//#include <GL/gl.h>
+//#include <GL/glu.h>
+//#include <GL/glut.h>
+#endif
 #endif
 
-#include <boost/thread.hpp>
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
+//#include <boost/thread.hpp>
+//#include <boost/random.hpp>
+//#include <boost/generator_iterator.hpp>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
-
-#ifdef _BOINC_APP_
-#include "parse.h"
-#include "util.h"
-#include "gutil.h"
-#include "boinc_gl.h"
-#include "app_ipc.h"
-#include "boinc_api.h"
-#include "graphics2.h"
-#include "diagnostics.h"
-#endif
-
-
-#define SLICE_TIME_S 180
-#define PIXEL_THRESHOLD 10
-#define BLOCK_THRESHOLD 20
-#define BLOCK_WIDTH 5
-#define BLOCK_HEIGHT 5
-
-using boost::thread;
-using boost::variate_generator;
-using boost::mt19937;
-using boost::exponential_distribution;
-using boost::gamma_distribution;
-using boost::uniform_real;
+//using boost::thread;
+//using boost::variate_generator;
+//using boost::mt19937;
+//using boost::exponential_distribution;
+//using boost::gamma_distribution;
+//using boost::uniform_real;
 
 using namespace std;
 
-int startFrame;
-int currentFrameNum;
+int averageRange;
+int framesInThreeMinutes;
 
-int fps;
-int frameCount;
+int currentFrameNumber;
 
-int key = 0;
+int key;
 
 CvCapture *capture;
+int fps, frameCount, frameWidth, frameHeight;
 
 IplImage *currentFrame;
-IplImage *pixelFrame;
-IplImage *blockFrame;
-IplImage *convolveFrame;        
-IplImage *lastFrame;
-IplImage *avgFrame;
-IplImage *globalAverageFrame; 
+IplImage *averageFrame;
+IplImage *differenceFrame; 
 
 float ***avgImagePlaceholder;
-float ***avgImageFinal;
-
-variate_generator<mt19937, uniform_real<> > u_rand( mt19937(time(0)), uniform_real<>(0.0, 1.0));
-
-int frameWidth;
-int frameHeight;
 
 char *gl_pixels;
 
-int gl_width;
-int gl_height;
+int gl_width, gl_height;
 
 bool analysis_finished = false;
-
-int frame_range;
 
 vector<IplImage *> * future_images;
 
 ofstream outfile;
 
-int * indices;
+int * responseStrengths;
+char * responseGraph;
+
+int * intermediateResponses;
+
+vector<float> * probabilities;
+int numberOfSlices;
+
+float numberOfFramesInAverage;
+
+string checkpoint_filename;
+string checkpointed_video_file_name;
+string video_file_name;
 
 //from: http://en.wikipedia.org/wiki/YUV#Y.27UV420p_.28and_Y.27V12_or_YV12.29_to_RGB888_conversion
 void YprimeUV444toRGB888(char yp, char u, char v, char &r, char &g, char &b) {
-	char cr = u - 128;
-	char cb = v - 128;
+    char cr = u - 128;
+    char cb = v - 128;
 
-	r = yp + cr + (cr >> 2) + (cr >> 3) + (cr >> 5);
-	g = yp - ((cb >> 2) + (cb >> 4) + (cb >> 5)) - ((cr >> 1) + (cr >> 3) + (cr >> 4) + (cr >> 5));
-	b = yp + cb + (cb >> 1) + (cb >> 2) + (cb >> 6);
+    r = yp + cr + (cr >> 2) + (cr >> 3) + (cr >> 5);
+    g = yp - ((cb >> 2) + (cb >> 4) + (cb >> 5)) - ((cr >> 1) + (cr >> 3) + (cr >> 4) + (cr >> 5));
+    b = yp + cb + (cb >> 1) + (cb >> 2) + (cb >> 6);
 }
 
 void YprimeUV444toRGB888_2(char yp, char u, char v, char &r, char &g, char &b) {
-	char c = yp - 16;
-	char d = u - 128;
-	char e = v - 128;
-	r = (298 * c + 409 * e + 128) >> 8;
-	g = (298 * c - 100 * d - 208 * e + 128) >> 8;
-	b = (298 * c + 516 * d + 128) >> 8;
+    char c = yp - 16;
+    char d = u - 128;
+    char e = v - 128;
+    r = (298 * c + 409 * e + 128) >> 8;
+    g = (298 * c - 100 * d - 208 * e + 128) >> 8;
+    b = (298 * c + 516 * d + 128) >> 8;
 }
 
 void YUVtoRGB(char y, char u, char v, char &r, char &g, char &b) {
-	r = y + (v / 0.877);
-	g = -1.7036 * y - 3.462 * u - 1.942 * v;
-	b = y + (u / 0.492);
+    r = y + (v / 0.877);
+    g = -1.7036 * y - 3.462 * u - 1.942 * v;
+    b = y + (u / 0.492);
 }
 
-<<<<<<< HEAD
-void clear_gl_pixels() {
-    for (int i = 0; i < (gl_width * gl_height * 3); i++) gl_pixels[i] = 0;
-}
-
-=======
->>>>>>> 608fc08a05a3ce85f161352b6bad278a6802c6ad
 void draw_gl_pixels(int gl_start_w, int gl_start_h, int image_width, int image_height, char* cl_pixels) {
-	for (int h = 0; h < image_height; h++) {
-		for (int w = 0; w < image_width; w++) {
-			int cl_pos = (h * image_width + w) * 3;
+    for (int h = 0; h < image_height; h++) {
+        for (int w = 0; w < image_width; w++) {
+            int cl_pos = (h * image_width + w) * 3;
+            char b = cl_pixels[cl_pos];
+            char g = cl_pixels[cl_pos + 1];
+            char r = cl_pixels[cl_pos + 2];
 
-			char b = cl_pixels[cl_pos];
-			char g = cl_pixels[cl_pos + 1];
-			char r = cl_pixels[cl_pos + 2];
+            int gl_w = gl_start_w + w;
+            int gl_h = gl_start_h + (image_height - h - 1);
 
-			int gl_w = gl_start_w + w;
-			int gl_h = gl_start_h + (image_height - h - 1);
+            int gl_pos = ((gl_h * gl_width) + gl_w) * 3;
 
-			int gl_pos = ((gl_h * gl_width) + gl_w) * 3;
-
-			gl_pixels[gl_pos]       = b;
-			gl_pixels[gl_pos + 1]   = g;
-			gl_pixels[gl_pos + 2]   = r;
-		}
-	}
+            gl_pixels[gl_pos]       = b;
+            gl_pixels[gl_pos + 1]   = g;
+            gl_pixels[gl_pos + 2]   = r;
+        }
+    }
 }
 
-void ImageAverage() {
-	for(int y = 0; y < frameHeight; y++) {
-		for(int x = 0; x < frameWidth; x++) {
-			int pixelPos = (y * frameWidth + x) * 3;
-			
-			if(currentFrameNum == 0) { 
-				avgImagePlaceholder[y][x][0] = (unsigned char)currentFrame->imageDataOrigin[pixelPos];
-				avgImagePlaceholder[y][x][1] = (unsigned char)currentFrame->imageDataOrigin[pixelPos + 1];
-				avgImagePlaceholder[y][x][2] = (unsigned char)currentFrame->imageDataOrigin[pixelPos + 2];
-			} else {
-				float i1 = currentFrameNum;
-				float i2 = currentFrameNum + 1;
-				float a1 = avgImagePlaceholder[y][x][0];
-				float a2 = avgImagePlaceholder[y][x][1];
-				float a3 = avgImagePlaceholder[y][x][2];
-				float j1 = 1;
-				float j2 = currentFrameNum + 1;
-				float c1 = (unsigned char)currentFrame->imageDataOrigin[pixelPos    ];
-				float c2 = (unsigned char)currentFrame->imageDataOrigin[pixelPos + 1];
-				float c3 = (unsigned char)currentFrame->imageDataOrigin[pixelPos + 2];
+void write_checkpoint() {
+#ifdef _BOINC_APP_
+    string resolved_path;
+    int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
+    if (retval) {
+        cerr << "Couldn't resolve file name..." << endl;
+        return;
+    }
 
-				avgImagePlaceholder[y][x][0] = ( ( (i1 / i2) * a1) + ( (j1 / j2) * c1) );
-				avgImagePlaceholder[y][x][1] = ( ( (i1 / i2) * a2) + ( (j1 / j2) * c2) );
-				avgImagePlaceholder[y][x][2] = ( ( (i1 / i2) * a3) + ( (j1 / j2) * c3) );
-			}
+    ofstream checkpoint_file(resolved_path.c_str());
+#else
+    ofstream checkpoint_file(checkpoint_filename.c_str());
+#endif
 
-			avgFrame->imageDataOrigin[pixelPos    ] = (unsigned char)avgImagePlaceholder[y][x][0];
-			avgFrame->imageDataOrigin[pixelPos + 1] = (unsigned char)avgImagePlaceholder[y][x][1];
-			avgFrame->imageDataOrigin[pixelPos + 2] = (unsigned char)avgImagePlaceholder[y][x][2];
-		}
-	}
+    if (!checkpoint_file.is_open()) {
+        cerr << "Checkpoint file not open..." << endl;
+        return;
+    }
+
+    checkpoint_file << "VIDEO_FILE_NAME: " << video_file_name << endl;
+    checkpoint_file << "PROBABILITIES: " << probabilities->size() << endl;
+
+    for (uint32_t i = 0; i < probabilities->size(); i++) {
+        checkpoint_file << probabilities->at(i) << endl;
+    }
+    checkpoint_file << endl;
+
+    checkpoint_file.close();
 }
 
-void difference(IplImage * avg, IplImage * toFrame, IplImage * fromFrame) {
-	for(int y = 0; y < frameHeight; y++) {
-		for(int x = 0; x < frameWidth; x++) {
-			int pixelPos = (y * frameWidth + x) * 3;
+bool read_checkpoint() {
+#ifdef _BOINC_APP_
+    string resolved_path;
+    int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
+    if (retval) {
+        return false;
+    }
 
-			toFrame->imageDataOrigin[pixelPos]     = (unsigned char)abs((unsigned char)avg->imageDataOrigin[pixelPos] - (unsigned char)fromFrame->imageDataOrigin[pixelPos]);
-			toFrame->imageDataOrigin[pixelPos + 1] = (unsigned char)abs((unsigned char)avg->imageDataOrigin[pixelPos + 1] - (unsigned char)fromFrame->imageDataOrigin[pixelPos + 1]);
-			toFrame->imageDataOrigin[pixelPos + 2] = (unsigned char)abs((unsigned char)avg->imageDataOrigin[pixelPos + 2] - (unsigned char)fromFrame->imageDataOrigin[pixelPos + 2]);
+    ifstream checkpoint_file(resolved_path.c_str());
+#else
+    ifstream checkpoint_file(checkpoint_filename.c_str());
+#endif
+    if (!checkpoint_file.is_open()) return false;
 
-			unsigned int x_val = toFrame->imageDataOrigin[pixelPos];
-			unsigned int y_val = toFrame->imageDataOrigin[pixelPos + 1];
-			unsigned int z_val = toFrame->imageDataOrigin[pixelPos + 2];
+    string s;
+    checkpoint_file >> s >> checkpointed_video_file_name;
+    if (s.compare("VIDEO_FILE_NAME:") != 0) {
+        cerr << "ERROR: malformed checkpoint! could not read 'VIDEO_FILE_NAME'" << endl;
 
-			
-			unsigned int avg = (x_val + y_val + z_val) / 3;
-			if(avg < 0) {
-				avg = 0;
-			}
-			
-			if(avg > 255) {
-				avg = 255;
-			}
+#ifdef _BOINC_APP_
+        boinc_finish(1);
+#endif
+        exit(1);
+    }
 
-			indices[avg]++;
-		}
-	}
+    int intervals;
+    checkpoint_file >> s >> intervals;
+    if (s.compare("PROBABILITIES:") != 0) {
+        cerr << "ERROR: malformed checkpoint! could not read 'INTERVALS'" << endl;
+
+#ifdef _BOINC_APP_
+        boinc_finish(1);
+#endif
+        exit(1);
+    }
+
+    float current;
+    for(int i = 0; i < intervals; i++) {
+        checkpoint_file >> current;
+        probabilities->push_back(current);
+        if (!checkpoint_file.good()) {
+            cerr << "ERROR: malformed checkpoint! not enough probabilities present" << endl;
+
+#ifdef _BOINC_APP_
+            boinc_finish(1);
+#endif
+            exit(1);
+        }
+    }
+
+    return true;
+}
+
+    int absToRel(int absVal, int totalFrames, int avgRng) {
+        if(absVal < avgRng)
+            return absVal;
+        else if(absVal > totalFrames - avgRng) 
+            return avgRng + (absVal - (totalFrames - avgRng));
+        else
+            return avgRng;
+    }
+
+
+void difference(IplImage * average, IplImage * destination, IplImage * current) {
+    for(int y = 0; y < frameHeight; y++) {
+        for(int x = 0; x < frameWidth; x++) {
+            int pixelPos = (y * frameWidth + x) * 3;
+
+            //simply calculate the difference
+            destination->imageDataOrigin[pixelPos    ] = (unsigned char)abs((unsigned char)average->imageDataOrigin[pixelPos    ] - (unsigned char)current->imageDataOrigin[pixelPos    ]);
+            destination->imageDataOrigin[pixelPos + 1] = (unsigned char)abs((unsigned char)average->imageDataOrigin[pixelPos + 1] - (unsigned char)current->imageDataOrigin[pixelPos + 1]);
+            destination->imageDataOrigin[pixelPos + 2] = (unsigned char)abs((unsigned char)average->imageDataOrigin[pixelPos + 2] - (unsigned char)current->imageDataOrigin[pixelPos + 2]);
+
+            //calculate a scalar value for the difference, which is that pixel's response value
+            unsigned int xStrength = destination->imageDataOrigin[pixelPos    ];
+            unsigned int yStrength = destination->imageDataOrigin[pixelPos + 1];
+            unsigned int zStrength = destination->imageDataOrigin[pixelPos + 2];
+
+            unsigned int responseStrength = (xStrength + yStrength + zStrength) / 3;
+
+            if(responseStrength < 0) {
+                responseStrength = 0;
+            }
+
+            if(responseStrength > 255) {
+                responseStrength = 255;
+            }
+
+            responseStrengths[responseStrength]++;
+        }
+    }
 }
 
 void local_average_advance() {
-	IplImage * last = future_images->at(0);
-	
-	future_images->erase(future_images->begin());
-	future_images->push_back(cvCloneImage(currentFrame));
+    if(!currentFrame) return;
 
-	float num_frames_scanned = frame_range * 2 + 1;
-	
-	for(int y = 0; y < frameHeight; y++) {
-		for(int x = 0; x < frameWidth; x++) {
-			int pixelPos = (y * frameWidth + x) * 3;
+    IplImage * last = future_images->at(0);
 
-			if(x > (frameWidth * .8) && y > (frameHeight * .8)) {
-				avgFrame->imageDataOrigin[pixelPos    ] = future_images->at(frame_range)->imageDataOrigin[pixelPos];
-				avgFrame->imageDataOrigin[pixelPos + 1] = future_images->at(frame_range)->imageDataOrigin[pixelPos + 1];
-				avgFrame->imageDataOrigin[pixelPos + 2] = future_images->at(frame_range)->imageDataOrigin[pixelPos + 2];
-				continue;
-			} //account for clock
+    future_images->erase(future_images->begin());
+    future_images->push_back(cvCloneImage(currentFrame));
 
-			avgImagePlaceholder[y][x][0] -= (unsigned char)last->imageDataOrigin[pixelPos];
-			avgImagePlaceholder[y][x][1] -= (unsigned char)last->imageDataOrigin[pixelPos + 1];
-			avgImagePlaceholder[y][x][2] -= (unsigned char)last->imageDataOrigin[pixelPos + 2];
+    for(int y = 0; y < frameHeight; y++) {
+        for(int x = 0; x < frameWidth; x++) {
+            int pixelPos = (y * frameWidth + x) * 3;
 
-			avgImagePlaceholder[y][x][0] += (unsigned char)currentFrame->imageDataOrigin[pixelPos];
-			avgImagePlaceholder[y][x][1] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 1];
-			avgImagePlaceholder[y][x][2] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 2];
+            //Simply ignore the area the clock is located at by simply using the current frame's values there
+            if(x > (frameWidth * .8) && y > (frameHeight * .8)) {
+                averageFrame->imageDataOrigin[pixelPos    ] = future_images->at(absToRel(currentFrameNumber, frameCount, averageRange))->imageDataOrigin[pixelPos    ];
+                averageFrame->imageDataOrigin[pixelPos + 1] = future_images->at(absToRel(currentFrameNumber, frameCount, averageRange))->imageDataOrigin[pixelPos + 1];
+                averageFrame->imageDataOrigin[pixelPos + 2] = future_images->at(absToRel(currentFrameNumber, frameCount, averageRange))->imageDataOrigin[pixelPos + 2];
+                continue;
+            } 
 
-			avgFrame->imageDataOrigin[pixelPos    ] = (unsigned char)(avgImagePlaceholder[y][x][0] / num_frames_scanned);
-			avgFrame->imageDataOrigin[pixelPos + 1] = (unsigned char)(avgImagePlaceholder[y][x][1] / num_frames_scanned);
-			avgFrame->imageDataOrigin[pixelPos + 2] = (unsigned char)(avgImagePlaceholder[y][x][2] / num_frames_scanned);
-		}
-	}
+            //get rid of the oldest frame in the average
+            avgImagePlaceholder[y][x][0] -= (unsigned char)last->imageDataOrigin[pixelPos    ];
+            avgImagePlaceholder[y][x][1] -= (unsigned char)last->imageDataOrigin[pixelPos + 1];
+            avgImagePlaceholder[y][x][2] -= (unsigned char)last->imageDataOrigin[pixelPos + 2];
 
-	cvReleaseImage(&last);
+            //add in the newest frame to the average
+            avgImagePlaceholder[y][x][0] += (unsigned char)currentFrame->imageDataOrigin[pixelPos    ];
+            avgImagePlaceholder[y][x][1] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 1];
+            avgImagePlaceholder[y][x][2] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 2];
+
+            //cast the average stored in floats into the image's char array
+            averageFrame->imageDataOrigin[pixelPos    ] = (unsigned char)(avgImagePlaceholder[y][x][0] / numberOfFramesInAverage);
+            averageFrame->imageDataOrigin[pixelPos + 1] = (unsigned char)(avgImagePlaceholder[y][x][1] / numberOfFramesInAverage);
+            averageFrame->imageDataOrigin[pixelPos + 2] = (unsigned char)(avgImagePlaceholder[y][x][2] / numberOfFramesInAverage);
+        }
+    }
+
+    cvReleaseImage(&last);
 }
 
-void handle_keyboard(unsigned char key, int x, int y) {
+void display() {
+#ifdef OPENGL
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#endif
 
+#ifndef _BOINC_APP_
+    if (currentFrameNumber % 100 == 0) {
+        cout << "Frame: " << currentFrameNumber << endl;
+    }
+#endif
+
+    //end of video reached
+    if(currentFrameNumber == frameCount) {
+        //account for last fragment
+        float prob = 0;
+
+        for(int i = 0; i < currentFrameNumber % framesInThreeMinutes; i++) {
+            float inter = (float)((float)intermediateResponses[i] / (float)1000000.0f);
+            prob += inter;
+        }
+
+        probabilities->push_back(prob);
+
+        //output
+        cerr << "<video_name>" << video_file_name << "s</video_name>" << endl;
+        cerr << "<slice_time>" << 180 << "</slice_time>" << endl;
+        cerr << "<slice_probabilities>" << endl;
+
+        for (uint32_t i = 0; i < probabilities->size(); i++) {
+            cerr << fixed << setprecision(2) << probabilities->at(i) << endl;
+//            fprintf(stderr, "%1.5f\n", probabilities->at(i));
+        }
+
+        cerr << "</slice_probabilities>" << endl;
+
+#ifdef _BOINC_APP_
+        boinc_finish(0);
+#else
+        exit(0);
+#endif
+    }
+
+    responseStrengths = new int[256];
+    for(int i = 0; i < 256; i++) {
+        responseStrengths[i] = 0;
+    }
+
+    //beginning, end, or middle of video are handled slightly differently
+    difference(averageFrame, differenceFrame, future_images->at(absToRel(currentFrameNumber, frameCount, averageRange)));
+
+    responseGraph = new char[frameWidth * frameHeight * 3];
+    for(int i = 0; i < frameWidth * frameHeight * 3; i++) {
+        responseGraph[i] = 255;
+    }
+
+    int interestingFactor = 0;
+
+    for(int i = 1; i < 257; i++) {
+        if (i > 15) {
+            interestingFactor += i * responseStrengths[i - 1];
+        }
+
+        for(int x = i; x < i + 1; x++) {
+            for(int y = 0; y < responseStrengths[i - 1]; y++) {
+                int pixelPos = ((frameHeight - y) * frameWidth + x) * 3;
+
+                if(pixelPos > frameWidth * frameHeight * 3 - 3 || pixelPos < 0) {
+                    continue;
+                }
+
+                responseGraph[pixelPos    ] = 0;
+                responseGraph[pixelPos + 1] = 0;
+                responseGraph[pixelPos + 2] = 0;
+            }
+        }
+    }
+
+    //store am intermediate response for calculating the 3 minute response
+    intermediateResponses[currentFrameNumber % framesInThreeMinutes] = interestingFactor;
+
+    //Don't advance the average if we are near the beginning or end of the video;
+    if(averageRange == absToRel(currentFrameNumber, frameCount, averageRange)) {
+        currentFrame = cvQueryFrame(capture);
+        local_average_advance();    
+    }
+
+    //Calculate a three minute response
+    if((currentFrameNumber + 1) % framesInThreeMinutes == 0) {
+        float prob = 0;
+
+        for(int i = 0; i < framesInThreeMinutes; i++) {
+            float inter = (float)((float)intermediateResponses[i] / (float)1000000.0f);
+            prob += inter;
+        }
+
+        probabilities->push_back(prob);
+    }
+
+#ifdef _BOINC_APP_
+    boinc_fraction_done((double)((double)currentFrameNumber / (double)frameCount));
+
+    if(boinc_time_to_checkpoint() || key == 's') {
+        cerr << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
+        write_checkpoint();
+        boinc_checkpoint_completed();
+    }
+#endif
+
+    /*draw_gl_pixels(0,          0,           frameWidth, frameHeight, future_images->at(averageRange)->imageDataOrigin);
+      draw_gl_pixels(frameWidth, 0,           frameWidth, frameHeight, averageFrame->imageDataOrigin);
+      draw_gl_pixels(0,          frameHeight, frameWidth, frameHeight, differenceFrame->imageDataOrigin);
+      draw_gl_pixels(frameWidth, frameHeight, frameWidth, frameHeight, responseGraph);*/
+
+    delete responseGraph;
+    delete responseStrengths;
+
+    //  cout << "CurrentFrameNumber: " << currentFrameNumber << endl;
+    //  boost::this_thread::sleep( boost::posix_time::seconds(1) );
+
+    currentFrameNumber++;
+
+#ifdef OPENGL
+    //glDrawPixels(gl_width, gl_height, GL_BGR, GL_UNSIGNED_BYTE, gl_pixels);
+    //glFlush();
+    //glutSwapBuffers();
+    glutPostRedisplay();
+#endif
 }
 
-bool resized = true;
-
-boost::mutex guard_render;
-
-void app_graphics_render(int xs, int ys, double time_of_day) {
-    boost::mutex::scoped_lock lock(guard_render);
-
-//    cout << "app_graphics_render -- xs: " << xs << ", ys: " << ys << endl;
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	currentFrame = cvQueryFrame(capture);
-
-<<<<<<< HEAD
-    if(!currentFrame) exit(0);
-=======
-	if(!currentFrame) {
-		outfile.close();
-		exit(0);
-	}
->>>>>>> 608fc08a05a3ce85f161352b6bad278a6802c6ad
-
-	indices = new int[256];
-	
-	for(int i = 0; i < 256; i++) {
-		indices[i] = 0;
-	}
-	
-	difference(avgFrame, globalAverageFrame, future_images->at(frame_range));
-
-<<<<<<< HEAD
-=======
-	char * graph = new char[frameWidth * frameHeight * 3];
-	
-	for(int i = 0; i < frameWidth * frameHeight * 3; i++) {
-		graph[i] = 255;
-	}
-
-	int interestingFactor = 0;
-
-	for(int i = 1; i < 257; i++) {
-		if (i > 15) {
-			interestingFactor += i * indices[i - 1];
-		}
-
-		for(int x = i; x < i + 1; x++) {
-			for(int y = 0; y < indices[i - 1]; y++) {
-				int pixelPos = ((frameHeight - y) * frameWidth + x) * 3;
-				
-				if(pixelPos > frameWidth * frameHeight * 3 - 3 || pixelPos < 0) {
-					continue;
-				}
-
-				graph[pixelPos] = 0;
-				graph[pixelPos + 1] = 0;
-				graph[pixelPos + 2] = 0;
-			}
-		}
-	}
-
-	outfile << interestingFactor << "\n";
-
->>>>>>> 608fc08a05a3ce85f161352b6bad278a6802c6ad
-	draw_gl_pixels(0, 0, frameWidth, frameHeight, future_images->at(frame_range)->imageDataOrigin);
-	draw_gl_pixels(frameWidth, 0, frameWidth, frameHeight, avgFrame->imageDataOrigin);
-	draw_gl_pixels(0, frameHeight, frameWidth, frameHeight, globalAverageFrame->imageDataOrigin);
-	draw_gl_pixels(frameWidth, frameHeight, frameWidth, frameHeight, graph);
-
-	delete graph;
-	delete indices;
-
-	local_average_advance();	
-
-	currentFrameNum++;
-
-
-    //Setup a 2D projection
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho (0, gl_width, gl_height, 0, 0, 1);
-    glDisable(GL_DEPTH_TEST);
-    glMatrixMode (GL_MODELVIEW);
-    glLoadIdentity();
-
-    glDrawPixels(gl_width, gl_height, GL_BGR, GL_UNSIGNED_BYTE, gl_pixels);
-
-    //Displacement trick for exact pixelization
-//    glTranslatef(0.375, 0.375, 0)
-
-	glFlush();
-
-	glutSwapBuffers();
-
-	glutPostRedisplay();
-}
-
-void app_graphics_resize(int w, int h) {
-    boost::mutex::scoped_lock lock(guard_render);
-
-    cout << "app_graphics_resize -- w: " << w << ", h: " << h << endl;
-//    gl_width = w;
-//    gl_height = h;
-
-    resized = true;
-//    glViewport(0, 0, gl_width, gl_height);
-}
-
-// mouse drag w/ left button rotates 3D objects;
-// mouse draw w/ right button zooms 3D objects
-//
-void boinc_app_mouse_move(int x, int y, int left, int middle, int right) {}
-
-void boinc_app_mouse_button(int x, int y, int which, int is_down) {}
-
-void boinc_app_key_press(int, int){}
-
-void boinc_app_key_release(int, int){}
-
-void app_graphics_init() {
+#ifdef OPENGL
+void doGlut(int argc, char ** argv) {
+    glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glutInitWindowSize(gl_width, gl_height);
+    glutCreateWindow(video_file_name.c_str());
+    glutDisplayFunc(display);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
 }
+#endif
 
+int main(int argc, char** argv) {
+    video_file_name = string(argv[1]);
 
-int main(int argc, char** argv)
-{
-//	assert(argc == 4);
+    capture = cvCaptureFromAVI(video_file_name.c_str());
 
-    boinc_init_graphics_diagnostics(BOINC_DIAG_DEFAULTS);
+    if (!capture) {
+        cerr << "ERROR: could get capture from input file: '" << video_file_name << "'" << endl;
+        return 1;
+    }
 
-	capture = cvCaptureFromAVI(argv[1]);
+    key = 0;
 
-	int startAvgFrame = atoi(argv[2]);
+    fps = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
+    frameCount = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
+    frameWidth = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+    frameHeight = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
 
-	frame_range = atoi(argv[3]);
+    gl_width = frameWidth * 2;
+    gl_height = frameHeight * 2;
 
-	if(!capture) {
-		return 1;
-	}
+    gl_pixels = (char*)malloc(gl_width * gl_height * 3 * sizeof(char));
 
-	fps 				    = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FPS);
-	frameCount 			    = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
+    for (int i = 0; i < gl_width * gl_height * 3; i++) {
+        gl_pixels[i] = rand();
+    }
 
-	frameWidth 			        = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
-	frameHeight 		        = (int)cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+#ifdef OPENGL
+    doGlut(argc, argv);
+#endif
 
-	gl_width = frameWidth * 2;
-	gl_height = frameHeight * 2;
+    currentFrame = cvQueryFrame(capture);
 
-    cout << "starting gl_width: " << gl_width << ", gl_height: " << gl_height << endl;
+    //just to allocate the pointers some room easily.
+    averageFrame = cvCloneImage(currentFrame);
+    differenceFrame = cvCloneImage(currentFrame);
 
-	gl_pixels = (char*)malloc(gl_width * gl_height * 3 * sizeof(char));
-    clear_gl_pixels();
+    averageRange = fps * 5;
+    framesInThreeMinutes = fps * 180;
+    numberOfFramesInAverage = averageRange * 2 + 1;
 
-    /*
-<<<<<<< HEAD
-//	glutInit(&argc, argv);
-//    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-//    glutInitWindowSize(gl_width, gl_height);
-//    glutCreateWindow(argv[1]);      //the name of the window is the name of the video
-//    glutDisplayFunc(display);
-//	glutKeyboardFunc(handle_keyboard);
-//    glClearColor(0.0, 0.0, 0.0, 1.0);
-=======
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
-	glutInitWindowSize(gl_width, gl_height);
-	glutCreateWindow(argv[1]);      //the name of the window is the name of the video
-	glutDisplayFunc(display);
-	glutKeyboardFunc(handle_keyboard);
-	glClearColor(0.0, 0.0, 0.0, 1.0);
->>>>>>> 608fc08a05a3ce85f161352b6bad278a6802c6ad
-    */
+    intermediateResponses = new int[framesInThreeMinutes];
 
-	currentFrame = cvQueryFrame(capture);
-	startFrame = 0;
+    numberOfSlices = ceil((double)frameCount / (double)framesInThreeMinutes);
 
-	pixelFrame = 			cvCloneImage(currentFrame);
-	blockFrame = 			cvCloneImage(currentFrame);
-	convolveFrame = 		cvCloneImage(currentFrame);        
-	lastFrame = 			cvCloneImage(currentFrame);
-	avgFrame = 				cvCloneImage(currentFrame);
-	globalAverageFrame = 	cvCloneImage(currentFrame);
+    probabilities = new vector<float>();
 
-	avgImagePlaceholder = new float ** [frameHeight];
-	avgImageFinal = new float ** [frameHeight];
-	
-	for(int i = 0; i < frameHeight; i++) {
-		avgImagePlaceholder[i] = new float * [frameWidth];
-		avgImageFinal[i] = new float * [frameWidth];
-		
-		for(int j = 0; j < frameWidth; j++) {
-			avgImagePlaceholder[i][j] = new float[3];
-			avgImageFinal[i][j] = new float[3];
+#ifdef _BOINC_APP_  
+    boinc_init();
+#endif
 
-			int pixelPos = (i * frameWidth + j) * 3;
-			
-			avgFrame->imageDataOrigin[pixelPos] = 0;
-			avgFrame->imageDataOrigin[pixelPos + 1] = 0;
-			avgFrame->imageDataOrigin[pixelPos + 2] = 0;
+    cerr << "Video File Name: " << video_file_name.c_str() << endl;
+    cerr << "Frames Per Second: " << fps << endl;
+    cerr << "Frame Count: " << frameCount << endl;
+    cerr << "Frame Width: " << frameWidth << endl;
+    cerr << "Frame Height: " << frameHeight << endl; 
+    cerr << "Average Range: " << averageRange << endl;
+    cerr << "Number of Frames in Three Minutes: " << framesInThreeMinutes << endl;
+    cerr << "Number of Slices: " << numberOfSlices << endl;
+    cerr << "Number of Frames in Average: " << numberOfFramesInAverage << endl;
 
-			for(int k = 0; k < 3; k++) {
-				avgImagePlaceholder[i][j][k] = 0;
-				avgImageFinal[i][j][k] = 0;
-			}
-		}
-	}
+    checkpoint_filename = "checkpoint.txt";
 
-	for(int i = 0; i < startAvgFrame; i++) {
-		currentFrame = cvQueryFrame(capture);
-	}
+    if(read_checkpoint()) {
+        if(checkpointed_video_file_name.compare(video_file_name) != 0) {
+            cerr << "Checkpointed video filename was not the same as given video filename... Restarting" << endl;
+        } else {
+            cerr << "Continuing from checkpoint..." << endl;
+        }
+    } else {
+        cerr << "Unsuccessful checkpoint read" << endl << "Starting from beginning of video" << endl;
+    }
 
-	if(frame_range != -1) {
-		future_images = new vector<IplImage *>();
+    avgImagePlaceholder = new float ** [frameHeight];
 
-		for(int i = 0; i < frame_range * 2 + 1; i++) {
-			future_images->push_back(cvCloneImage(currentFrame));
-			
-			for(int y = 0; y < frameHeight; y++) {
-				for(int x = 0; x < frameWidth; x++) {
-					int pixelPos = (y * frameWidth + x) * 3;
+    for(int i = 0; i < frameHeight; i++) {
+        avgImagePlaceholder[i] = new float * [frameWidth];
 
-					avgImagePlaceholder[y][x][0] += (unsigned char)currentFrame->imageDataOrigin[pixelPos];
-					avgImagePlaceholder[y][x][1] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 1];
-					avgImagePlaceholder[y][x][2] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 2];
-				}
-			}
-		
-			currentFrame = cvQueryFrame(capture);
-		}
-	}
+        for(int j = 0; j < frameWidth; j++) {
+            avgImagePlaceholder[i][j] = new float[3];
 
-	currentFrameNum = frame_range;	
+            int pixelPos = (i * frameWidth + j) * 3;
 
-	outfile.open("output.txt", ios::out | ios::trunc);
+            averageFrame->imageDataOrigin[pixelPos] = 0;
+            averageFrame->imageDataOrigin[pixelPos + 1] = 0;
+            averageFrame->imageDataOrigin[pixelPos + 2] = 0;
 
-	outfile << frameCount << "\n";
-    cout << "entering boinc graphics loop" << endl;
+            for(int k = 0; k < 3; k++) {
+                avgImagePlaceholder[i][j][k] = 0;
+            }
+        }
+    }
 
-    boinc_graphics_loop(argc, argv);
+    future_images = new vector<IplImage *>();
 
-    cout << "after boinc graphics loop" << endl;
+    //Start either at frame 0 or at the frame next in line after checkpointing
+    currentFrameNumber = probabilities->size() * framesInThreeMinutes;
 
-	cvReleaseCapture(&capture);
+    cerr << "Starting at Frame: " << currentFrameNumber << endl;
 
-	analysis_finished = true;
-	exit(0);
+    //Advance the video to the appropriate spot, which is averageRange frames behind the current Frame
+    for(int i = 0; i < currentFrameNumber - averageRange; i++) {    
+        currentFrame = cvQueryFrame(capture);
+    }
+
+    //populate the Images used in the average calculation   
+    for(int i = 0; i < averageRange * 2 + 1; i++) {
+        future_images->push_back(cvCloneImage(currentFrame));
+
+        for(int y = 0; y < frameHeight; y++) {
+            for(int x = 0; x < frameWidth; x++) {
+                int pixelPos = (y * frameWidth + x) * 3;
+
+                avgImagePlaceholder[y][x][0] += (unsigned char)currentFrame->imageDataOrigin[pixelPos];
+                avgImagePlaceholder[y][x][1] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 1];
+                avgImagePlaceholder[y][x][2] += (unsigned char)currentFrame->imageDataOrigin[pixelPos + 2];
+
+                //The last time through this loop, calculate the average for real
+                if(i == averageRange * 2) {
+                    if(x > (frameWidth * .8) && y > (frameHeight * .8)) {
+                        averageFrame->imageDataOrigin[pixelPos    ] = future_images->at(absToRel(currentFrameNumber, frameCount, averageRange))->imageDataOrigin[pixelPos    ];
+                        averageFrame->imageDataOrigin[pixelPos + 1] = future_images->at(absToRel(currentFrameNumber, frameCount, averageRange))->imageDataOrigin[pixelPos + 1];
+                        averageFrame->imageDataOrigin[pixelPos + 2] = future_images->at(absToRel(currentFrameNumber, frameCount, averageRange))->imageDataOrigin[pixelPos + 2];
+                        continue;
+                    }
+
+                    averageFrame->imageDataOrigin[pixelPos    ] = (unsigned char)(avgImagePlaceholder[y][x][0] / numberOfFramesInAverage);
+                    averageFrame->imageDataOrigin[pixelPos + 1] = (unsigned char)(avgImagePlaceholder[y][x][1] / numberOfFramesInAverage);
+                    averageFrame->imageDataOrigin[pixelPos + 2] = (unsigned char)(avgImagePlaceholder[y][x][2] / numberOfFramesInAverage);
+                }
+            }
+        }
+
+        //Handle beginning of video by simply using the first frame multiple times
+        if((currentFrameNumber - averageRange) + i > 0) {
+            currentFrame = cvQueryFrame(capture);
+        }
+    }
+
+#ifdef OPENGL 
+    glutMainLoop();
+#else
+    while (true) {
+        display();
+    }
+#endif
+
+    //cvReleaseCapture(&capture);
+
+    //analysis_finished = true;
+    //exit(0);
 }
-

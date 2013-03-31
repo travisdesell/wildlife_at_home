@@ -50,3 +50,5 @@ find_package(BOINC)
 find_package(OpenCV COMPONENTS highgui imageproc)
 
 add_subdirectory(client)
+add_subdirectory(boinc_daemons)
+
