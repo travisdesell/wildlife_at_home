@@ -52,9 +52,16 @@ if ($modulo > -1) {
     mysql_select_db($wildlife_db);
 
     $iteration = 2;
+    $location_iteration = 1;
 
     while(true) {   //Loop until there are no more videos to watermark.
-        $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
+        $query = "";
+        if ((($iteration %3) + 1) == 1) {   //this is a grouse and we have 3 locations
+            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND location_id = " . (($location_iteration % 3) + 1) . " LIMIT 1";
+            $location_iteration++;
+        } else {
+            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
+        }
 
         echo $query . "\n";
 
@@ -64,9 +71,13 @@ if ($modulo > -1) {
         $row = mysql_fetch_assoc($result);
 
         if (!$row) {  //No videos left to watermark, we can quit.
-            echo "No videos to watermark with modulo $modulo of $number_of_processes for species: " . (($iteration %3) + 1 ) . ".\n";
+            echo "No videos to watermark with for query: '$query'\n";
             $iteration++;
-            break;
+
+            echo "sleeping 60 seconds.\n";
+
+            sleep(60); // sleep a minute
+            continue;
         }
 
         echo "query: '$query'\n";

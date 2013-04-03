@@ -51,6 +51,6 @@ find_package(OpenCV COMPONENTS highgui imageproc)
 
 add_subdirectory(undvc_common)
 
-#add_subdirectory(client)
+add_subdirectory(client)
 add_subdirectory(boinc_daemons)
 
