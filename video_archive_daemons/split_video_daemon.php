@@ -51,11 +51,18 @@ if ($modulo > -1) {
     mysql_connect("localhost", $wildlife_user, $wildlife_pw);
     mysql_select_db($wildlife_db);
 
-    $iteration = 1;
+    $iteration = 0;
+    $location_iteration = 0;
 
     while(true) {   //Loop until there are no streaming segments to generate
         /* get a segment which needs to be generated from the watermarked file */
-        $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
+        $query = "";
+        if ((($iteration % 3) + 1) == 1) {  //this is a grouse and we have 3 locations
+            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND location_id = " . (($location_iteration % 3) + 1) . " LIMIT 1";
+            $location_iteration++;
+        } else {
+            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
+        }
 
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
@@ -63,10 +70,10 @@ if ($modulo > -1) {
         $row = mysql_fetch_assoc($result);
 
         if (!$row) {  //No segments left to generate, we can quit.
-            echo "No videos to split with modulo $modulo of $number_of_processes for species: " . (($iteration %3) + 1 ) . ", sleeping 60 seconds\n";
+            echo "No videos to split with query '$query', sleeping 60 seconds\n";
             $iteration++;
 
-            sleep(60); //sleep 5 minutes
+            sleep(60); //sleep 60 seconds
             continue;
         }
 
@@ -151,7 +158,7 @@ if ($modulo > -1) {
          * Update the video_segment_2 table to specify that this segment is 'DONE'.
          * If all segments are done for the archive video, set it's processing status to 'SPLIT'
          */
-        $query = "UPDATE video_segment_2 SET processing_status = 'DONE', ogg_generated = true, duration_s = $duration WHERE id = " . $segment_id;
+        $query = "UPDATE video_segment_2 SET processing_status = 'DONE', duration_s = $duration WHERE id = " . $segment_id;
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
