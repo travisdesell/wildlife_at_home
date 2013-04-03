@@ -27,6 +27,8 @@
 //   the file (and the workunit names) contain a timestamp
 //   and sequence number, so they're unique.
 
+
+#include <iostream>
 #include <unistd.h>
 #include <cstdlib>
 #include <string>
@@ -48,55 +50,65 @@
 
 #include "mysql.h"
 
-#include "../common/n_choose_k.hpp"
+#include "undvc_common/arguments.hxx"
 
 #define CUSHION 100
     // maintain at least this many unsent results
 #define REPLICATION_FACTOR  1
 
-const char* app_name = "subset_sum";
-const char* in_template_file = "subset_sum_in.xml";
-const char* out_template_file = "subset_sum_out.xml";
+const char* app_name = "wildlife";
+const char* out_template_file = "wildlife_out.xml";
 
-char* in_template;
 DB_APP app;
 int start_time;
 int seqno;
 
-const uint64_t SETS_PER_WORKUNIT = 2203961430;
-
 using namespace std;
+
+#define mysql_query_check(conn, query) __mysql_check (conn, query, __FILE__, __LINE__)
+
+void __mysql_check(MYSQL *conn, string query, const char *file, const int line) {
+    mysql_query(conn, query.c_str());
+
+    if (mysql_errno(conn) != 0) {
+        ostringstream ex_msg;
+        ex_msg << "ERROR in MySQL query: '" << query.c_str() << "'. Error: " << mysql_errno(conn) << " -- '" << mysql_error(conn) << "'. Thrown on " << file << ":" << line;
+        cerr << ex_msg.str() << endl;
+        exit(1);
+    }   
+}
 
 
 // create one new job
 //
-int make_job(uint32_t max_set_value, uint32_t set_size, uint64_t starting_set, uint64_t sets_to_evaluate) {
+int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, string md5_hash) {
     DB_WORKUNIT wu;
 
     char name[256], path[256];
     char command_line[512];
     char additional_xml[512];
-    const char* infiles[0];
-    int retval;
+    const char* infiles[1];
+
+    cout << "job: " << video_id << ", species: " << species_id << ", location: " << location_id << ", video_address: " << video_address << ", durations_s: " << duration_s << endl;
 
     // make a unique name (for the job and its input file)
     //
-    sprintf(name, "%s_%u_%u_%lu", app_name, max_set_value, set_size, starting_set);
-//    fprintf(stdout, "name: '%s'\n", name);
+    sprintf(name, "video_%d_%lu", video_id, time(NULL));
+    cout << "workunit name: '" << name << "'" << endl;
 
-    // Create the input file.
-    // Put it at the right place in the download dir hierarchy
-    //
+    /**
+     * The input file is at a remote address so we don't need to create it.
+     *
     retval = config.download_path(name, path);
     if (retval) return retval;
     FILE* f = fopen(path, "w");
     if (!f) return ERR_FOPEN;
     fprintf(f, "This is the input file for job %s", name);
     fclose(f);
+    */
 
-    double fpops_per_set = set_size * log(max_set_value) * 1e2;         //TODO: figure out an estimate of how many fpops per set calculation
-    double fpops_est = fpops_per_set * SETS_PER_WORKUNIT;
-
+    //TODO: figure out an estimate of how many fpops per second of video
+    double fpops_est = duration_s * (2.5 * 10e8);
     double credit = fpops_est / (2.5 * 10e10);
 
     // Fill in the job parameters
@@ -114,183 +126,171 @@ int make_job(uint32_t max_set_value, uint32_t set_size, uint64_t starting_set, u
     wu.max_error_results = REPLICATION_FACTOR*4;
     wu.max_total_results = REPLICATION_FACTOR*8;
     wu.max_success_results = REPLICATION_FACTOR*4;
-//    infiles[0] = name;
+
+    string filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
+    infiles[0] = filename.c_str();
+//    infiles[0][filename.length()] = '\0';
+    cout << "infile: " << infiles[0] << endl;
+
+    sprintf(path, "templates/%s", out_template_file);
+
+    sprintf(command_line, " video.mp4");
+    cout << "command line: '" << command_line << "'" << endl;
+
+    sprintf(additional_xml, "<credit>%.3lf</credit>", credit);
+    cout << "credit: " << credit << endl;
+
+    //We actually need to automatically generate the in template file because the input files are going to
+    //be received from a URL.
+    ostringstream input_template_stream;
+    input_template_stream
+            << "<file_info>" << endl
+            << "    <number>0</number>" << endl
+//            << "    <url>http://wildlife.und.edu" << video_address.substr(0, video_address.find_last_of("/") + 1)<< "</url>" << endl
+            << "    <url>http://wildlife.und.edu" << video_address.substr(0, video_address.find_last_of("/") + 1)<< "</url>" << endl
+            << "    <nbytes>" << filesize << "</nbytes>" << endl
+            << "    <md5_cksum>" << md5_hash << "</md5_cksum>" << endl
+            << "</file_info>" << endl
+            << "<workunit>" << endl
+            << "    <file_ref>" << endl
+            << "        <file_number>0</file_number>" << endl
+            << "        <open_name>video.mp4</open_name>" << endl
+            << "    </file_ref>" << endl
+            << "    <rsc_memory_bound>5e9</rsc_memory_bound>" << endl
+            << "    <delay_bound>345600</delay_bound>" << endl
+            << "    <max_error_results>5</max_error_results>" << endl
+            << "    <min_quorum>2</min_quorum>" << endl
+            << "    <target_nresults>2</target_nresults>" << endl
+            << "    <max_total_results>7</max_total_results>" << endl
+            << "    <max_success_results>2</max_success_results>" << endl
+            << "</workunit>";
+
+    cout << "input template:" << endl << input_template_stream.str() << endl;
+
+//    exit(0);
 
     // Register the job with BOINC
     //
-    sprintf(path, "templates/%s", out_template_file);
-
-    sprintf(command_line, " %u %u %lu %lu", max_set_value, set_size, starting_set, sets_to_evaluate);
-//    fprintf(stdout, "command line: '%s'\n", command_line);
-
-//    uint64_t total_sets = n_choose_k(max_set_value - 1, set_size - 1);
-//    fprintf(stdout, "total sets: %lu, starting_set + sets_to_evaluate: %lu\n", total_sets, starting_set + sets_to_evaluate);
-
-    sprintf(additional_xml, "<credit>%.3lf</credit>", credit);
-
     return create_work(
         wu,
-        in_template,
+        input_template_stream.str().c_str(),
         path,
         config.project_path(path),
         infiles,
-        0,
+        1,
         config,
         command_line,
         additional_xml
     );
-    return 1;
 }
 
-void make_jobs(uint32_t max_set_value, uint32_t set_size) {
+void main_loop(const vector<string> &arguments) {
+    int number_jobs = 100;  //jobs to generate when under the cushion
     int unsent_results;
     int retval;
+    long total_generated = 0;
 
-    check_stop_daemons();   //This checks to see if there is a stop in place, if there is it will exit the work generator.
+    MYSQL *wildlife_db_conn = mysql_init(NULL);
+    string db_host, db_name, db_password, db_user;
+    get_argument(arguments, "--db_host", true, db_host);
+    get_argument(arguments, "--db_name", true, db_name);
+    get_argument(arguments, "--db_user", true, db_user);
+    get_argument(arguments, "--db_password", true, db_password);
 
-	//Aaron Comment: retval tells us if the count_unsent_results
-	//function is working properly. If it is, then it's value
-	//should be 0. Anything creater than 0 and the program exits.
-    retval = count_unsent_results(unsent_results, 0);
-    if (retval) {
-        log_messages.printf(MSG_CRITICAL,
-            "count_unsent_jobs() failed: %s\n", boincerror(retval)
-        );
-        exit(retval);
-    }
-
-    //divide up the sets into mostly equal sized workunits
-
-    uint64_t total_sets = n_choose_k(max_set_value - 1, set_size - 1);
-    uint64_t current_set = 0;
-    uint64_t total_generated = 0;
-
-    while (current_set < total_sets) {
-        if ((total_sets - current_set) > SETS_PER_WORKUNIT) {
-            make_job(max_set_value, set_size, current_set, SETS_PER_WORKUNIT);
-        } else {
-            make_job(max_set_value, set_size, current_set, total_sets - current_set);
-        }
-        current_set += SETS_PER_WORKUNIT;
-
-        total_generated++;
-    }
-
-    /**
-     *  Update create an entry in sss_runs table for this M and N
-     */
-    ostringstream query;
-    query << "INSERT INTO sss_runs SET "
-          << "max_value =  " << max_set_value << ", "
-          << "subset_size = " << set_size << ", "
-          << "slices = " << total_generated << ", "
-          << "completed = 0, errors = 0";
-
-    log_messages.printf(MSG_NORMAL, "%s\n", query.str().c_str());
-    mysql_query(boinc_db.mysql, query.str().c_str()); 
-
-    if (mysql_errno(boinc_db.mysql) != 0) {
-        log_messages.printf(MSG_CRITICAL, "ERROR: could not insert into sss_runs with query: '%s'. Error: %d -- '%s'. Thrown on %s:%d\n", query.str().c_str(), mysql_errno(boinc_db.mysql), mysql_error(boinc_db.mysql), __FILE__, __LINE__);
+    //shoud get database info from a file
+    if (mysql_real_connect(wildlife_db_conn, db_host.c_str(), db_user.c_str(), db_password.c_str(), db_name.c_str(), 0, NULL, 0) == NULL) {
+        cerr << "Error connecting to database: " << mysql_errno(wildlife_db_conn) << ", '" << mysql_error(wildlife_db_conn) << "'" << endl;
         exit(1);
     }
-
-
-    log_messages.printf(MSG_DEBUG, "workunits generated: %lu\n", total_generated);
-}
-
-void main_loop() {
-    int retval;
-
-    /**
-     *  Get max_set_value and subset_size from sss_progress table
-     */
-    uint32_t max_set_value, subset_size;
-
-    ostringstream query;
-    query << "SELECT current_max_value, current_subset_size FROM sss_progress";
-
-    log_messages.printf(MSG_NORMAL, "%s\n", query.str().c_str());
-    mysql_query(boinc_db.mysql, query.str().c_str());
-    MYSQL_RES *result = mysql_store_result(boinc_db.mysql);
-
-    if (mysql_errno(boinc_db.mysql) != 0) {
-        log_messages.printf(MSG_CRITICAL, "ERROR: getting sss_progress: '%s'. Error: %d -- '%s'. Thrown on %s:%d\n", query.str().c_str(), mysql_errno(boinc_db.mysql), mysql_error(boinc_db.mysql), __FILE__, __LINE__);
-        exit(1);
-    }   
-
-    MYSQL_ROW row = mysql_fetch_row(result);
-    if (mysql_errno(boinc_db.mysql) != 0) {
-        log_messages.printf(MSG_CRITICAL, "ERROR: getting sss_progress: '%s'. Error: %d -- '%s'. Thrown on %s:%d\n", query.str().c_str(), mysql_errno(boinc_db.mysql), mysql_error(boinc_db.mysql), __FILE__, __LINE__);
-    } else if (row == NULL) {
-        log_messages.printf(MSG_CRITICAL, "ERROR: getting sss_progres: '%s'. Error: %d -- '%s'. Thrown on %s:%d\n", query.str().c_str(), mysql_errno(boinc_db.mysql), mysql_error(boinc_db.mysql), __FILE__, __LINE__);
-        log_messages.printf(MSG_CRITICAL, "returned NULL for rows.\n");
-        exit(1);
-    }   
-
-    max_set_value = atoi(row[0]);
-    subset_size = atoi(row[1]);
-    mysql_free_result(result);
 
     while (1) {
+        //This checks to see if there is a stop in place, if there is it will exit the work generator.
         check_stop_daemons();
 
-        int n;
-        retval = count_unsent_results(n, app.id);
+        //Aaron Comment: retval tells us if the count_unsent_results
+        //function is working properly. If it is, then it's value
+        //should be 0. Anything creater than 0 and the program exits.
+        retval = count_unsent_results(unsent_results, app.id);
+
+        cout << "got unsent results: " << unsent_results << endl;
 
         if (retval) {
             log_messages.printf(MSG_CRITICAL,"count_unsent_jobs() failed: %s\n", boincerror(retval));
             exit(retval);
         }   
 
-        if (n > CUSHION) {
-            sleep(30);
-        } else {
-            log_messages.printf(MSG_DEBUG, "%d results are available, with a cushion of %d\n", n, CUSHION);
+        if (unsent_results < CUSHION) {
+            log_messages.printf(MSG_DEBUG, "%d results are available, with a cushion of %d\n", unsent_results, CUSHION);
 
-            make_jobs(max_set_value, subset_size);
-
-            subset_size++;
-
-            //If the set is odd, and the set size is > the (max_set_value - 1) / 2 or
-            //if the set is even and the set size is > max_set_value / 2, increase the max value
-            //and update the set size, ex:
-            //max_set_value = 32, set sizes should be 16, 17, 18
-            //max_set_value = 33, set sizes should be 16, 17, 18
-            //max_set_value = 34, set sizes should be 17, 18, 19
-            //etc.
-            if (max_set_value % 2 == 0) { //even
-                if (subset_size > (max_set_value / 2) + 2) {
-                    subset_size -= 3;
-                    max_set_value++;
-                }
-            } else { //odd
-                if (subset_size > ((max_set_value - 1) / 2) + 2) {
-                    subset_size -= 2;
-                    max_set_value++;
-                }
+            int retval = count_unsent_results(unsent_results, 0);
+            if (retval) {
+                log_messages.printf(MSG_CRITICAL, "count_unsent_jobs() failed: %s\n", boincerror(retval) );
+                exit(retval);
             }
 
-            //Now actually update the database
-            query.str("");
-            query.clear();
-            query << "UPDATE sss_progress SET "
-                << "current_max_value = " << max_set_value << ", "
-                << "current_subset_size = " << subset_size;
+            cout << " unsent results: " << unsent_results << endl;
+
+            /**
+             *  Get a set of videos (which haven't been sent out as workunits yet) from the database. We'll need
+             *  their video id (for tracking), duration in seconds (for calculating credits), and the video file's
+             *  address on wildlife.und.edu
+             */
+            ostringstream unclassified_video_query;
+            unclassified_video_query << "SELECT id, watermarked_filename, duration_s, species_id, location_id, size, md5_hash"
+                                     << " FROM video_2 WHERE"
+                                     << " processing_status != 'UNWATERMARKED'"
+                                     << " AND md5_hash IS NOT NULL"
+                                     << " AND size IS NOT NULL"
+//                                     << " AND species_id = 1"
+//                                     << " AND location_id = 1"
+                                     << " LIMIT " << number_jobs; 
+
+            mysql_query_check(wildlife_db_conn, unclassified_video_query.str());
+            MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
+
+            cout << " got video result" << endl;
+
+            MYSQL_ROW video_row;
+            while ((video_row = mysql_fetch_row(video_result)) != NULL) {
+                int video_id = atoi(video_row[0]);
+                string video_address = video_row[1];
+                double duration_s = atof(video_row[2]);
+                int species_id = atoi(video_row[3]);
+                int location_id = atoi(video_row[4]);
+                int filesize = atoi(video_row[5]);
+                string md5_hash = video_row[6];
+
+                make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash);
+                total_generated++;
+            }
+
+            exit(0);
+
+            mysql_free_result(video_result);
+
+            /**
+             *  Update create an entry in sss_runs table for this M and N
+             */
+            /*
+            ostringstream query;
+            query << "INSERT INTO sss_runs SET "
+                << "max_value =  " << max_set_value << ", "
+                << "subset_size = " << set_size << ", "
+                << "slices = " << total_generated << ", "
+                << "completed = 0, errors = 0";
 
             log_messages.printf(MSG_NORMAL, "%s\n", query.str().c_str());
-            mysql_query(boinc_db.mysql, query.str().c_str()); 
+            mysql_query_check(boinc_db.mysql, query.str()); 
+            */
 
-            if (mysql_errno(boinc_db.mysql) != 0) {
-                log_messages.printf(MSG_CRITICAL, "ERROR: could not update sss_progress with query: '%s'. Error: %d -- '%s'. Thrown on %s:%d\n", query.str().c_str(), mysql_errno(boinc_db.mysql), mysql_error(boinc_db.mysql), __FILE__, __LINE__);
-                exit(1);
-            }   
-
-
-            // Now sleep for a few seconds to let the transitioner
-            // create instances for the jobs we just created.
-            // Otherwise we could end up creating an excess of jobs.
-            sleep(30);
+            log_messages.printf(MSG_DEBUG, "workunits generated: %lu\n", total_generated);
         }   
+
+        // Now sleep for a few seconds to let the transitioner
+        // create instances for the jobs we just created.
+        // Otherwise we could end up creating an excess of jobs.
+        // Or sleep if we're above the cushion
+        sleep(30);
     }   
 }
 
@@ -308,7 +308,6 @@ void usage(char *name) {
         "Usage: %s [OPTION]...\n\n"
         "Options:\n"
         "  --app X                      Application name (default: example_app)\n"
-        "  --in_template_file           Input template (default: example_app_in)\n"
         "  --out_template_file          Output template (default: example_app_out)\n"
         "  [ -d X ]                     Sets debug level to X.\n"
         "  [ -h | --help ]              Shows this help text.\n"
@@ -334,8 +333,6 @@ int main(int argc, char** argv) {
             if (dl == 4) g_print_queries = true;
         } else if (!strcmp(argv[i], "--app")) {
             app_name = argv[++i];
-        } else if (!strcmp(argv[i], "--in_template_file")) {
-            in_template_file = argv[++i];
         } else if (!strcmp(argv[i], "--out_template_file")) {
             out_template_file = argv[++i];
         } else if (is_arg(argv[i], "h") || is_arg(argv[i], "help")) {
@@ -346,11 +343,13 @@ int main(int argc, char** argv) {
             exit(0);
 
         } else {
-            log_messages.printf(MSG_CRITICAL, "unknown command line argument: %s\n\n", argv[i]);
-            usage(argv[0]);
-            exit(1);
+//            log_messages.printf(MSG_CRITICAL, "unknown command line argument: %s\n\n", argv[i]);
+//            usage(argv[0]);
+//            exit(1);
         }
     }
+
+    cout << "parsed arugments" << endl;
 
 //Aaron Comment: if at any time the retval value is greater than 0, then the program
 //has failed in some manner, and the program then exits.
@@ -364,6 +363,8 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    cout << "parsed config file " << endl;
+
 //Aaron Comment: opening connection to database.
     retval = boinc_db.open(
         config.db_name, config.db_host, config.db_user, config.db_passwd
@@ -373,27 +374,25 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    cout << "opened the db" << endl;
+
 //Aaron Comment: looks for applicaiton to be run. If not found, program exits.
+
+    cout << "name: " << app_name << endl;
     sprintf(buf, "where name='%s'", app_name);
     if (app.lookup(buf)) {
         log_messages.printf(MSG_CRITICAL, "can't find app %s\n", app_name);
         exit(1);
     }
 
-//Aaron Comment: looks for work templates, if cannot find, or are corrupted,
-//the program exits.
-    sprintf(buf, "templates/%s", in_template_file);
-    if (read_file_malloc(config.project_path(buf), in_template)) {
-        log_messages.printf(MSG_CRITICAL, "can't read input template %s\n", buf);
-        exit(1);
-    }
+    cout << "looked up the name: " << app_name << endl;
 
-//Aaron Comment: if work generator passes all startup tests, the main work gneration
-//loop is called.
+    //Aaron Comment: if work generator passes all startup tests, the main work gneration
+    //loop is called.
     start_time = time(0);
     seqno = 0;
 
     log_messages.printf(MSG_NORMAL, "Starting\n");
 
-    main_loop();
+    main_loop(vector<string>(argv, argv + argc));
 }

@@ -21,11 +21,11 @@ SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 SET (CMAKE_CXX_FLAGS_RELEASE        "-O4 -DNDEBUG")
 SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-SET (CMAKE_AR      "/usr/bin/llvm-ar")
-SET (CMAKE_LINKER  "/usr/bin/llvm-ld")
-SET (CMAKE_NM      "/usr/bin/llvm-nm")
-SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
-SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
+#SET (CMAKE_AR      "/usr/bin/llvm-ar")
+#SET (CMAKE_LINKER  "/usr/bin/llvm-ld")
+#SET (CMAKE_NM      "/usr/bin/llvm-nm")
+#SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
+#SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
 
 #set(PLATFORM 64)
 
@@ -49,6 +49,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/c
 find_package(BOINC)
 find_package(OpenCV COMPONENTS highgui imageproc)
 
-add_subdirectory(client)
+add_subdirectory(undvc_common)
+
+#add_subdirectory(client)
 add_subdirectory(boinc_daemons)
 

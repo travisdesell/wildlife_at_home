@@ -172,81 +172,47 @@ echo "
 
                     <div class='row-fluid'>
                         <h4 align=center>You are watching " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</h4>
+                        </div>";
+
+function print_selection_row($text, $id) {
+    echo "<div class='row-fluid'>";
+    echo "  <div class ='btn-group span4'>";
+    echo "      <button class='btn' id='" . $id . "_yes'>yes</button>";
+    echo "      <button class='btn' id='" . $id . "_no'>no</button>";
+    if ($id != "interesting") {
+        echo "      <button class='btn' id='" . $id . "_unsure'>unsure</button>";
+    }
+    echo "  </div>";
+    echo "  <div class='span8'> <p style='margin-top:6px; margin-bottom-2px;'> $text </p> </div>";
+    echo " </div>";
+}
+
+print_selection_row("Bird left the nest.", "bird_leave");
+print_selection_row("Bird returns to the nest.", "bird_return");
+print_selection_row("Bird incubating the nest.", "bird_presence");
+print_selection_row("Bird absent from nest.", "bird_absence");
+print_selection_row("Predator at the nest.", "predator_presence");
+print_selection_row("Nest defense.", "nest_defense");
+print_selection_row("Nest success (eggs hatching).", "nest_success");
+print_selection_row("Chicks present at the nest.", "chick_presence");
+print_selection_row("Was the video interesting or educational?", "interesting");
+
+echo "
+                    <div class='row-fluid'>
+                        <div class='span12'>
+                            <p style='padding-top:8px;'>
+                            Any other comments (predator identifications, etc)?
+                            </p>
+                        </div>
                     </div>
 
                     <div class='row-fluid'>
-                        <table class='table table-bordered table-striped'>
-                        <col align='right'>
-                        <col align='center'>
-                        <col align='center'>
-                        <col align='center'>
-                        <tr>
-                        <td></td> <td>yes</td> <td>no</td> <td>unsure</td>
-                        </tr>
-
-                        <tr>
-                        <td>Bird left the nest:</td>
-                        <td> <input type='radio' name='bird_leave' id='bird_leave_yes'/> </td>
-                        <td> <input type='radio' name='bird_leave' id='bird_leave_no'/> </td>
-                        <td> <input type='radio' name='bird_leave' id='bird_leave_unsure'/> </td>
-                        </tr>
-
-                        <tr>
-                        <td>Bird returns to the nest:</td>
-                        <td> <input type='radio' name='bird_return' id='bird_return_yes'/> </td>
-                        <td> <input type='radio' name='bird_return' id='bird_return_no'/> </td>
-                        <td> <input type='radio' name='bird_return' id='bird_return_unsure'/> </td>
-                        </tr>
-
-                        <tr>
-                        <td>Bird incubating the nest:</td>
-                        <td> <input type='radio' name='bird_presence' id='bird_presence_yes'/> </td>
-                        <td> <input type='radio' name='bird_presence' id='bird_presence_no'/> </td>
-                        <td> <input type='radio' name='bird_presence' id='bird_presence_unsure'/> </td>
-                        </tr>
-
-                        <tr>
-                        <td>Bird absent from the nest:</td>
-                        <td> <input type='radio' name='bird_absence' id='bird_absence_yes'/> </td>
-                        <td> <input type='radio' name='bird_absence' id='bird_absence_no'/> </td>
-                        <td> <input type='radio' name='bird_absence' id='bird_absence_unsure'/> </td>
-                        </tr>
-
-                        <tr>
-                        <td>Predator at the nest:</td>
-                        <td> <input type='radio' name='predator_presence' id='predator_presence_yes'/> </td>
-                        <td> <input type='radio' name='predator_presence' id='predator_presence_no'/> </td>
-                        <td> <input type='radio' name='predator_presence' id='predator_presence_unsure'/> </td>
-                        </tr>
-
-                        <tr>
-                        <td>Nest defense:</td>
-                        <td> <input type='radio' name='nest_defense' id='nest_defense_yes'/> </td>
-                        <td> <input type='radio' name='nest_defense' id='nest_defense_no'/> </td>
-                        <td> <input type='radio' name='nest_defense' id='nest_defense_unsure'/> </td>
-                        </tr>
-
-                        <tr>
-                        <td>Nest success (eggs hatching):</td>
-                        <td> <input type='radio' name='nest_success' id='nest_success_yes'/> </td>
-                        <td> <input type='radio' name='nest_success' id='nest_success_no'/> </td>
-                        <td> <input type='radio' name='nest_success' id='nest_success_unsure'/> </td>
-                        </tr>
-
-                        <tr>
-                        <td>Was the video interesting or educational?</td>
-                        <td> <input type='radio' name='interesting' id='interesting_yes'/> </td>
-                        <td> <input type='radio' name='interesting' id='interesting_no'/> </td>
-                        <td> </td>
-                        </tr>
-
-                        </table>
-
-                        Any other comments (predator identifications, etc)?<br>
                         <input class='span12' type='text' name='comments' id='comments'/>
                     </div>
 
                     <div class='row-fluid pull-down'>
+                        <a class='btn pull-left' style='margin-top0px;' id='too_dark_button' value='too_dark' 'data-toggle='modal'>too dark</a>
+                        <a class='btn pull-left' style='margin-top0px;' id='corrupt_button' value='corrupt' 'data-toggle='modal'>corrupt video</a>
                         <a class='btn btn-primary pull-right disabled' style='margin-top0px;' id='submit_button' value='submit' 'data-toggle='modal'>submit</a>
                     </div>
 

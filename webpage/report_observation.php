@@ -15,9 +15,12 @@ function get_observation_data($data, $from_db = false) {
     $res->predator_presence = $data['predator_presence'];
     $res->nest_defense = $data['nest_defense'];
     $res->nest_success = $data['nest_success'];
+    $res->chick_presence = $data['chick_presence'];
     $res->interesting = $data['interesting'];
     $res->user_id = $data['user_id'];
     $res->video_segment_id = $data['video_segment_id'];
+    $res->too_dark = $data['too_dark'];
+    $res->corrupt = $data['corrupt'];
 
     if (!$from_db) {
         $res->status = 'UNVALIDATED';
@@ -68,7 +71,6 @@ while ($row = mysql_fetch_assoc($result)) {
     $db_observations[] = $observation;
 }
 
-
 /**
  * if there are enough obsevations try to validate it
  */
@@ -82,6 +84,9 @@ function calculate_sameness($val1, $val2) {
 function match($obs1, $obs2) {
     $same_val_count = 0;
 
+    if ($obs1->too_dark > 0 && $obs2->too_dark > 0) return 8;
+    if ($obs1->corrupt > 0 && $obs2->corrupt > 0) return 8;
+
     $same_val_count += calculate_sameness($obs1->bird_leave, $obs2->bird_leave);
     $same_val_count += calculate_sameness($obs1->bird_return, $obs2->bird_return);
     $same_val_count += calculate_sameness($obs1->bird_presence, $obs2->bird_presence);
@@ -89,6 +94,7 @@ function match($obs1, $obs2) {
     $same_val_count += calculate_sameness($obs1->predator_presence, $obs2->predator_presence);
     $same_val_count += calculate_sameness($obs1->nest_defense, $obs2->nest_defense);
     $same_val_count += calculate_sameness($obs1->nest_success, $obs2->nest_success);
+    $same_val_count += calculate_sameness($obs1->chick_presence, $obs2->chick_presence);
 
     return $same_val_count;
 }
@@ -117,10 +123,10 @@ if (is_null($canonical_observation)) {
 
     for ($i = 0; $i < count($db_observations); $i++) {
         /**
-         * If both observations have 7 or more matches (that aren't unsure), and no mistmatches, we've got a match
+         * If both observations have 8 or more matches (that aren't unsure), and no mistmatches, we've got a match
          */
         $match_count = match($post_observation, $db_observations[$i]);
-        if ( $match_count == 7 ) {
+        if ( $match_count >= 6 ) {
             $same_obs_id = $db_observations[$i]->id;
             break;
         }
@@ -136,7 +142,7 @@ if (is_null($canonical_observation)) {
 
             if ($match_count >= 0) {
                 $db_observations[$i]->status = 'VALID';
-                $db_observations[$i]->credit = ($MAX_CREDIT * $match_count) / 7.0;  //award credit
+                $db_observations[$i]->credit = ($MAX_CREDIT * $match_count) / 8.0;  //award credit
             } else {
                 $db_observations[$i]->status = 'INVALID';
                 $db_observations[$i]->credit = 0;
@@ -150,7 +156,7 @@ if (is_null($canonical_observation)) {
     $match_count = match($post_observation, $canonical_observation);
     if ($match_count >= 0) {
         $post_observation->status = 'VALID';
-        $post_observation->credit = ($MAX_CREDIT * $match_count) / 7.0; //award credit
+        $post_observation->credit = ($MAX_CREDIT * $match_count) / 8.0; //award credit
 
         $update_post_credit = true;
     } else {
@@ -173,8 +179,11 @@ $query = "INSERT INTO observations SET" .
     " predator_presence = $post_observation->predator_presence, " .
     " nest_defense = $post_observation->nest_defense, " .
     " nest_success = $post_observation->nest_success, " .
+    " chick_presence = $post_observation->chick_presence, " .
     " interesting = $post_observation->interesting, " .
     " user_id = $post_observation->user_id, " .
+    " too_dark = $post_observation->too_dark, " .
+    " corrupt = $post_observation->corrupt, " .
     " status = '$post_observation->status', " .
     " video_segment_id = $post_observation->video_segment_id";
 
@@ -190,7 +199,25 @@ if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_e
 $crowd_status = 'WATCHED';
 if ($update_db_obs_credit) $crowd_status = 'VALIDATED';
 
-$query = "UPDATE video_segment_2 SET crowd_status = '$crowd_status' WHERE id = $post_observation->video_segment_id";
+/**
+ * calculate the interesting count, the count of observations.
+ */
+
+$interesting_count = 0;
+if (isset($post_observation->interesting) && $post_observation->interesting > 0) {
+    $interesting_count = 1;
+}
+
+for ($i = 0; $i < count($db_observations); $i++) {
+    if (isset($db_observations[$i]->interesting) && $db_observations[$i]->interesting > 0) {
+        $interesting_count += 1;
+    }
+}
+
+$crowd_obs_count = 1 + count($db_observations);
+
+//$query = "UPDATE video_segment_2 SET crowd_status = '$crowd_status' WHERE id = $post_observation->video_segment_id";
+$query = "UPDATE video_segment_2 SET crowd_status = '$crowd_status', crowd_obs_count = $crowd_obs_count, interesting_count = $interesting_count WHERE id = $post_observation->video_segment_id";
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 

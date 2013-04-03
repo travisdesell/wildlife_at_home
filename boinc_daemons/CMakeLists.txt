@@ -5,6 +5,7 @@ find_path(BOINC_INCLUDE_DIR config.h PATHS /boinc/src/boinc/ /boinc/)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/undvc_common
 	${BOINC_INCLUDE_DIR}
     ${BOINC_INCLUDE_DIR}/api
     ${BOINC_INCLUDE_DIR}/db
