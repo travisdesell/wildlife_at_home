@@ -5,20 +5,23 @@ include_directories(${BOINC_INCLUDE_DIR}/api)
 include_directories(${BOINC_INCLUDE_DIR}/lib)
 
 find_package(Boost REQUIRED COMPONENTS system thread)
-find_package(OpenGL REQUIRED)
-find_package(GLUT REQUIRED)
+#find_package(OpenGL REQUIRED)
+#find_package(GLUT REQUIRED)
 
 include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
 link_directories(${OPENGL_LIBRARY_DIRS} ${GLUT_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 
-add_definitions( -DUSE_OPENGL)
+#add_definitions( -DUSE_OPENGL)
 add_definitions( -D_BOINC_APP_)
 
-add_executable(wildlife wildlife)
-target_link_libraries(wildlife ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
+#add_executable(wildlife wildlife)
+#target_link_libraries(wildlife ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
 #target_link_libraries(wildlife ${BOINC_APP_LIBRARIES} opencv_core opencv_highgui ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
 
+message(STATUS "opencv libraries: ${OpenCV_LIBRARIES}")
+
 add_executable(wildlife_average wildlife_average)
-target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
+target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
+#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
 #target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} opencv_core opencv_highgui ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})

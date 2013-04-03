@@ -40,8 +40,8 @@
 //#include <boost/random.hpp>
 //#include <boost/generator_iterator.hpp>
 
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+//#include "opencv2/opencv.hpp"
+#include "opencv2/highgui/highgui.hpp"
 
 //using boost::thread;
 //using boost::variate_generator;
