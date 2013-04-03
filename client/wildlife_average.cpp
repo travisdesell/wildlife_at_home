@@ -443,6 +443,18 @@ void doGlut(int argc, char ** argv) {
 int main(int argc, char** argv) {
     video_file_name = string(argv[1]);
 
+#ifdef _BOINC_APP_
+    string resolved_path;
+    int retval = boinc_resolve_filename_s(video_file_name.c_str(), resolved_path);
+    if (retval) {
+        cerr << "Error, could not open file: '" << video_file_name << "'" << endl;
+        cerr << "Resolved to: '" << resolved_path << "'" << endl;
+        return false;
+    }
+
+    video_file_name = resolved_path;
+#endif
+
     capture = cvCaptureFromAVI(video_file_name.c_str());
 
     if (!capture) {
