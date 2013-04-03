@@ -63,6 +63,10 @@ echo "
                 during mating season. Wings are short and rounded, used for short bursts of flight followed by
                 gliding. The tail is pale and pointed.
                 </p>
+
+                <p>
+                You can also view the training videos for identifying sharp-tailed grouse, their nests, and their predators <a href='http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php'>here</a>.
+                </p>
             </section>
 
             <section id='distribution' class='well'>

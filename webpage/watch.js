@@ -32,6 +32,16 @@ $(document).ready(function () {
         $('#speed_textbox').val("speed: " + video.playbackRate);
     });
 
+    /**
+     * Use this to create a forum thread with the video.
+     */
+    $('#discuss-video-button').button();
+
+    $('#discuss-video-button').click(function() {
+        $("#discuss-video-form").submit();
+    });
+
+
 
     /**
      * Set controls for the radio buttons, comments and submit button.
@@ -44,6 +54,33 @@ $(document).ready(function () {
     var nest_defense_selected = false;
     var nest_success_selected = false;
     var interesting_selected = false;
+
+    $('#bird_leave_yes').prop('checked', false);
+    $('#bird_leave_unsure').prop('checked', false);
+    $('#bird_leave_no').prop('checked', false);
+    $('#bird_return_yes').prop('checked', false);
+    $('#bird_return_unsure').prop('checked', false);
+    $('#bird_return_no').prop('checked', false);
+    $('#bird_absence_yes').prop('checked', false);
+    $('#bird_absence_unsure').prop('checked', false);
+    $('#bird_absence_no').prop('checked', false);
+    $('#bird_presence_yes').prop('checked', false);
+    $('#bird_presence_unsure').prop('checked', false);
+    $('#bird_presence_no').prop('checked', false);
+    $('#predator_presence_yes').prop('checked', false);
+    $('#predator_presence_unsure').prop('checked', false);
+    $('#predator_presence_no').prop('checked', false);
+    $('#nest_defense_yes').prop('checked', false);
+    $('#nest_defense_unsure').prop('checked', false);
+    $('#nest_defense_no').prop('checked', false);
+    $('#nest_success_yes').prop('checked', false);
+    $('#nest_success_unsure').prop('checked', false);
+    $('#nest_success_no').prop('checked', false);
+    $('#interesting_yes').prop('checked', false);
+    $('#interesting_no').prop('checked', false);
+
+
+    $('#comments').val("");
 
     /**
      *  1 : yes
@@ -254,6 +291,7 @@ $(document).ready(function () {
 
     $('#submit_button').click(function() {
         if (!$('#submit_button').hasClass("disabled")) {
+            $('#submit_button').addClass("disabled");
             var comments_html = $('#comments').val();
 
             var submission_data = {

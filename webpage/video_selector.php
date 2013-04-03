@@ -151,13 +151,13 @@ $thumbnails = array('thumbnail_list' => array(
                             'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
                             'info_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php',
                             'species_latin_name' => 'Tympanuchus phasianellus',
-                            'project_description' => '<p>Species description...</p>',
+                            'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
                                     'site_name' => 'Belden, ND',
                                     'progress_id' => 'grouse_belden_progress',
-                                    'site_description' => 'Site description...',
+                                    'site_description' => 'Cameras were placed at grouse nests in areas of intense gas and oil development.',
                                     'site_id' => '1',
                                     'validated_percentage' => $grouse_belden_validated,
                                     'available_percentage' => $grouse_belden_available - $grouse_belden_validated
@@ -166,7 +166,7 @@ $thumbnails = array('thumbnail_list' => array(
                                     'enabled' => ($grouse_blaisdell_available > 0),
                                     'site_name' => 'Blaisdell, ND',
                                     'progress_id' => 'grouse_blaisdell_progress',
-                                    'site_description' => 'Site description...',
+                                    'site_description' => 'Cameras were placed at grouse nests in areas of low intensity of gas and oil development.',
                                     'site_id' => '2',
                                     'validated_percentage' => $grouse_blaisdell_validated,
                                     'available_percentage' => $grouse_blaisdell_available - $grouse_blaisdell_validated
@@ -175,7 +175,7 @@ $thumbnails = array('thumbnail_list' => array(
                                     'enabled' => ($grouse_lostwood_available > 0),
                                     'site_name' => 'Lostwood Wildlife Refuge, ND',
                                     'progress_id' => 'grouse_lostwood_progress',
-                                    'site_description' => 'Site description...',
+                                    'site_description' => 'Cameras were placed at grouse nests in this National Wildlife Refuge, representing a historic grassland.',
                                     'site_id' => '3',
                                     'validated_percentage' => $grouse_lostwood_validated,
                                     'available_percentage' => $grouse_lostwood_available - $grouse_lostwood_validated
@@ -188,13 +188,13 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Interior Least Tern',
                             'species_id' => '2',
                             'species_latin_name' => 'Sternula antillarum',
-                            'project_description' => 'Species description...',
+                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($least_tern_available > 0),
                                     'site_name' => 'Missouri River, ND',
                                     'progress_id' => 'least_tern_progress',
-                                    'site_description' => 'Site description...',
+                                    'site_description' => 'Cameras were placed at least tern nests along the Missouri River in western North Dakota.',
                                     'site_id' => '4',
                                     'validated_percentage' => $least_tern_validated,
                                     'available_percentage' => $least_tern_available - $least_tern_validated
@@ -207,13 +207,13 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Piping Plover',
                             'species_id' => '3',
                             'species_latin_name' => 'Charadrius melodus',
-                            'project_description' => 'Species description...',
+                            'project_description' => 'Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.',
                             'site' => array(
                                 array (
                                     'enabled' => ($piping_plover_available > 0),
                                     'site_name' => 'Missouri River, ND',
                                     'progress_id' => 'piping_plover_progress',
-                                    'site_description' => 'Site description...',
+                                    'site_description' => 'Cameras were placed at piping plover nests along the Missouri River in western North Dakota.',
                                     'site_id' => '4',
                                     'validated_percentage' => $piping_plover_validated,
                                     'available_percentage' => $piping_plover_available - $piping_plover_validated
