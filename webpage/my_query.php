@@ -11,3 +11,4 @@ function attempt_query_with_ping($sql, &$db) {
 
     return mysql_query($sql, $db);
 }
+?>

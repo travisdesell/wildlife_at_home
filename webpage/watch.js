@@ -364,6 +364,8 @@ $(document).ready(function () {
     }
 
     function generate_modal(modal_body, submission_data) {
+        console.log("attempting to show modal: '" + modal_body + "'");
+
         $.ajax({
             type: 'POST',
             url: './report_observation.php',
@@ -461,6 +463,7 @@ $(document).ready(function () {
 
             console.log("flagging video as corrupt, generating modal: '" + modal_body + "'");
             generate_modal(modal_body, submission_data);
+            console.log("flagging video as corrupt, generated modal: '" + modal_body + "'");
 
             $('#corrupt_button').removeClass("disabled");
         }

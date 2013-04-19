@@ -1,5 +1,6 @@
 <?php
 
+require_once('/home/tdesell/wildlife_at_home/webpage/award_credit.inc');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/projects/wildlife/html/inc/util.inc');
@@ -45,6 +46,9 @@ $duration_s = $_POST['duration_s'];
 
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
+
+//echo "WILDLIFE_USER: $wildlife_user\n";
+//echo "WILDLIFE_PASSWD: $wildlife_passwd\n";
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
@@ -246,10 +250,15 @@ if ($update_db_obs_credit) {
     $query = "UPDATE progress SET validated_video_s = validated_video_s + " . $duration_s . " WHERE progress.species_id = $species_id AND progress.location_id = $location_id";
     error_log($query);
     $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    if (!$result) {
+        error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+        die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    }
 }
 
 $result = array( 'post_observation' => $post_observation, 'db_observations' => $db_observations );
+
+error_log( json_encode($result) );
 
 echo json_encode($result);
 ?>

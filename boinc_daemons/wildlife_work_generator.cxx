@@ -156,7 +156,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
             << "        <file_number>0</file_number>" << endl
             << "        <open_name>video.mp4</open_name>" << endl
             << "    </file_ref>" << endl
-            << "    <rsc_memory_bound>5e9</rsc_memory_bound>" << endl
+            << "    <rsc_memory_bound>2.5e9</rsc_memory_bound>" << endl
             << "    <delay_bound>345600</delay_bound>" << endl
             << "    <max_error_results>5</max_error_results>" << endl
             << "    <min_quorum>2</min_quorum>" << endl
@@ -185,7 +185,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
 }
 
 void main_loop(const vector<string> &arguments) {
-    int number_jobs = 100;  //jobs to generate when under the cushion
+    int number_jobs = 10;  //jobs to generate when under the cushion
     int unsent_results;
     int retval;
     long total_generated = 0;

@@ -69,8 +69,9 @@ function print_navbar($active_items) {
                             </li>
                             
                             <li class='dropdown " . $active_items['community'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
+                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Project Information<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
+                                <li><a href='server_status.php'>Server Status</a></li>
                                 <li><a href='profile_menu.php'>Profiles</a></li>
                                 <li><a href='user_search.php'>User Search</a></li>
                                 <li><a href='language_select.php'>Languages</a></li>
