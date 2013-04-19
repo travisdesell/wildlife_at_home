@@ -33,6 +33,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <algorithm>
 
 #include "undvc_common/parse_xml.hxx"
 #include "undvc_common/file_io.hxx"
@@ -41,68 +43,56 @@ using std::string;
 using std::vector;
 using std::ifstream;
 
+using std::string;
+using std::endl;
+
 struct SSS_RESULT {
     uint32_t checksum;
     vector<uint64_t> failed_sets;
 };
 
 int init_result(RESULT& result, void*& data) {
-    int retval;
-    vector<OUTPUT_FILE_INFO> files;
+    char *probabilities;
 
-    retval = get_output_file_infos(result, files);
-    if (retval) {
-        log_messages.printf(MSG_CRITICAL, "[RESULT#%d %s] check_set: can't get output filenames\n", result.id, result.name);
-        return retval;
-    }
+    try {
+        string prob_str = parse_xml<string>(result.stderr_out, "slice_probabilities");
 
-    if (files.size() > 1) {
-        log_messages.printf(MSG_CRITICAL, "[RESULT#%d %s] had more than one output file: %u\n", result.id, result.name, files.size());
-        for (uint32_t i = 0; i < files.size(); i++) {
-            log_messages.printf(MSG_CRITICAL, "    %s\n", files[i].path.c_str());
+        char chars[] = "\n\r";
+        for (unsigned int i = 0; i < strlen(chars); ++i) {
+            // you need include <algorithm> to use general algorithms like std::remove()
+            prob_str.erase (std::remove(prob_str.begin(), prob_str.end(), chars[i]), prob_str.end());
         }
-        exit(1);
-    }
 
-    OUTPUT_FILE_INFO& fi = files[0];
-    if (fi.no_validate) {
-        log_messages.printf(MSG_CRITICAL, "[RESULT#%d %s] had file set to no validate: %s\n", result.id, result.name, fi.path.c_str());
-        exit(1);
-        //continue;
-    }
+        probabilities = (char*)malloc(sizeof(char) * (strlen(prob_str.c_str()) + 1));
+        strcpy(probabilities, prob_str.c_str());
+        probabilities[strlen(prob_str.c_str())] = '\0';
 
-    string fc;
-
-    try {
-        fc = get_file_as_string(fi.path);
-    } catch (int err) {
-        log_messages.printf(MSG_CRITICAL, "[RESULT#%d %s] get_data_from_result: could not open file for result\n", result.id, result.name);
-        log_messages.printf(MSG_CRITICAL, "     file path: %s\n", fi.path.c_str());
-        return ERR_FOPEN;
-    }
-
-//    cout << "Parsing: " << endl << fc << endl;
-
-    SSS_RESULT* sss_result = new SSS_RESULT;
-    try {
-        sss_result->checksum = parse_xml<uint32_t>(fc, "checksum");
-
-//        cout << "checksum: " << sss_result->checksum << endl;
-
-        parse_xml_vector<uint64_t>(fc, "failed_subsets", sss_result->failed_sets);
-
-//        cout << "failed subsets size: " << sss_result->failed_sets.size() << endl;
+        cout << "probabilities: " << probabilities << endl;
     } catch (string error_message) {
         log_messages.printf(MSG_CRITICAL, "sss_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
-        log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", fc.c_str());
+        log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
 //        result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
 //        result.validate_state = VALIDATE_STATE_INVALID;
+
+        if (strstr(result.stderr_out, "frame") != NULL) {
+            probabilities = (char*)malloc(sizeof(char) * 6);
+            probabilities[0] = 'f';
+            probabilities[1] = 'r';
+            probabilities[2] = 'a';
+            probabilities[3] = 'm';
+            probabilities[4] = 'e';
+            probabilities[5] = '\0';
+
+            data = (void*)probabilities;
+            return 0;
+        }
+
+        exit(1);
         return ERR_XML_PARSE;
-//        exit(1);
-//        throw 0;
     }
 
-    data = (void*) sss_result;
+    data = (void*)probabilities;
+
     return 0;
 }
 
@@ -111,44 +101,27 @@ int compare_results(
     RESULT const& r2, void* data2,
     bool& match
 ) {
-    SSS_RESULT* f1 = (SSS_RESULT*) data1;
-    SSS_RESULT* f2 = (SSS_RESULT*) data2;
+    char *probabilities1 = (char*)data1;
+    char *probabilities2 = (char*)data2;
 
-    if (f1->checksum == f2->checksum) {
-        
-        if (f1->failed_sets.size() == f2->failed_sets.size()) {
-            bool all_match = true;
-            for (unsigned int i = 0; i < f1->failed_sets.size(); i++) {
-                if (f1->failed_sets[i] != f2->failed_sets[i]) {
-                    log_messages.printf(MSG_CRITICAL, "[RESULT#%d %s] and [RESULT#%d %s] failed sets[%d] did not match %llu vs %llu\n", r1.id, r1.name, r2.id, r2.name, i, f1->failed_sets[i], f2->failed_sets[i]);
-                    all_match = false;
-                    break;
-                }
-            }
+    match = (strcmp(probabilities1, probabilities2) == 0);
 
-            if (all_match) {
-                match = true;
-            } else {
-                match = false;
-                exit(1);
-            }
-        } else {
-            match = false;
-            log_messages.printf(MSG_CRITICAL, "[RESULT#%d %s] and [RESULT#%d %s] failed sets had different sizes %u vs %u\n", r1.id, r1.name, r2.id, r2.name, f1->failed_sets.size(), f2->failed_sets.size());
-            exit(1);
-        }
-    } else {
-        match = false;
-        log_messages.printf(MSG_CRITICAL, "[RESULT#%d %s] and [RESULT#%d %s] failed sets had different checksums %u vs %u\n", r1.id, r1.name, r2.id, r2.name, f1->checksum, f2->checksum);
+    if (!match) {
+        cout << "ERROR, probabilities do not match:" << endl;
+        cout << "probabilities1: " << endl;
+        cout << probabilities1 << endl << endl;
+        cout << "probabilities2: " << endl;
+        cout << probabilities2 << endl << endl;
+        exit(1);
     }
 
     return 0;
 }
 
 int cleanup_result(RESULT const& /*result*/, void* data) {
-    SSS_RESULT *sss_result = (SSS_RESULT*)data;
-//    delete sss_result->failed_sets;
-    delete sss_result;
+    char* result = (char*)data;
+
+    delete result;
 
     return 0;
 }
