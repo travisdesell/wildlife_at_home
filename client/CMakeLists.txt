@@ -22,6 +22,10 @@ add_definitions( -D_BOINC_APP_)
 message(STATUS "opencv libraries: ${OpenCV_LIBRARIES}")
 
 add_executable(wildlife_average wildlife_average)
-target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
+#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
+
+#COMPILE LINE FOR ROBERT
+target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} pthread /home/robert/ffmpeg/libavformat/libavformat.a /home/robert/ffmpeg/libavcodec/libavcodec.a /home/robert/ffmpeg/libswscale/libswscale.a /home/robert/ffmpeg/libavutil/libavutil.a /home/robert/x264/libx264.a /home/robert/OPENCV_SOURCE_REAL/3rdparty/lib/libzlib.a)
+
 #target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
 #target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} opencv_core opencv_highgui ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
