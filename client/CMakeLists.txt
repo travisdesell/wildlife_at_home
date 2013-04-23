@@ -30,5 +30,8 @@ link_directories(/Users/deselt/Dropbox/software/opencv/build/lib)
 add_executable(wildlife_average wildlife_average)
 target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread opencv_core opencv_highgui opencv_imgproc crt1.o)
 #target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} -Wl,-static -lopencv2 ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
-#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
-#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} opencv_core opencv_highgui ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
+
+#COMPILE LINE FOR ROBERT
+#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} pthread /home/robert/ffmpeg/libavformat/libavformat.a /home/robert/ffmpeg/libavcodec/libavcodec.a /home/robert/ffmpeg/libswscale/libswscale.a /home/robert/ffmpeg/libavutil/libavutil.a /home/robert/x264/libx264.a /home/robert/OPENCV_SOURCE_REAL/3rdparty/lib/libzlib.a)
+
+
