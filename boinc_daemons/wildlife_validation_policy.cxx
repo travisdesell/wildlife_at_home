@@ -30,11 +30,14 @@
 #include "error_numbers.h"
 #include "stdint.h"
 
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <iterator>
+
 
 #include "undvc_common/parse_xml.hxx"
 #include "undvc_common/file_io.hxx"
@@ -57,6 +60,8 @@ int init_result(RESULT& result, void*& data) {
     try {
         string prob_str = parse_xml<string>(result.stderr_out, "slice_probabilities");
 
+        replace( prob_str.begin(), prob_str.end(), '\n', ' ' );
+
         char chars[] = "\n\r";
         for (unsigned int i = 0; i < strlen(chars); ++i) {
             // you need include <algorithm> to use general algorithms like std::remove()
@@ -67,7 +72,7 @@ int init_result(RESULT& result, void*& data) {
         strcpy(probabilities, prob_str.c_str());
         probabilities[strlen(prob_str.c_str())] = '\0';
 
-        cout << "probabilities: " << probabilities << endl;
+//        cout << "probabilities: " << probabilities << endl;
     } catch (string error_message) {
         log_messages.printf(MSG_CRITICAL, "sss_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
@@ -104,16 +109,56 @@ int compare_results(
     char *probabilities1 = (char*)data1;
     char *probabilities2 = (char*)data2;
 
-    match = (strcmp(probabilities1, probabilities2) == 0);
+    vector<double> p1;
+    istringstream iss1(probabilities1);
+    copy(istream_iterator<double>(iss1), istream_iterator<double>(), back_inserter<vector<double> >(p1));
+    
+    vector<double> p2;
+    istringstream iss2(probabilities2);
+    copy(istream_iterator<double>(iss2), istream_iterator<double>(), back_inserter<vector<double> >(p2));
 
-    if (!match) {
-        cout << "ERROR, probabilities do not match:" << endl;
-        cout << "probabilities1: " << endl;
-        cout << probabilities1 << endl << endl;
-        cout << "probabilities2: " << endl;
-        cout << probabilities2 << endl << endl;
+    if (p1.size() != p2.size()) {
+        match = false;
+        log_messages.printf(MSG_CRITICAL, "ERROR, number of probabilities is different. %d vs %d\n", (int)p1.size(), (int)p2.size());
+
+        log_messages.printf(MSG_CRITICAL, "probabilities1:\n");
+        for (uint32_t i = 0; i < p1.size(); i++) {
+            log_messages.printf(MSG_CRITICAL, "\t%lf\n", p1[i]);
+        }
+
+        log_messages.printf(MSG_CRITICAL, "probabilities2:\n");
+        for (uint32_t i = 0; i < p2.size(); i++) {
+            log_messages.printf(MSG_CRITICAL, "\t%lf\n", p2[i]);
+        }
+
         exit(1);
     }
+
+    double threshold = 0.00025;
+
+    for (uint32_t i = 0; i < p1.size(); i++) {
+        if (fabs(p1[i] - p2[i]) > threshold) {
+            match = false;
+
+            log_messages.printf(MSG_CRITICAL, "probabilities1:\n");
+            for (uint32_t j = 0; j < p1.size(); j++) {
+                log_messages.printf(MSG_CRITICAL, "\t%lf\n", p1[j]);
+            }
+
+            log_messages.printf(MSG_CRITICAL, "probabilities2:\n");
+            for (uint32_t j = 0; j < p2.size(); j++) {
+                log_messages.printf(MSG_CRITICAL, "\t%lf\n", p2[j]);
+            }
+
+            log_messages.printf(MSG_CRITICAL, "ERROR, difference in probabilities (%lf) exceeded threshold (%lf):\n", fabs(p1[i]-p2[i]), threshold);
+            log_messages.printf(MSG_CRITICAL, "probabilities1[%d]: %lf\n", i, p1[i]);
+            log_messages.printf(MSG_CRITICAL, "probabilities2[%d]: %lf\n", i, p2[i]);
+
+            exit(1);
+        }
+    }
+
+    match = true;
 
     return 0;
 }

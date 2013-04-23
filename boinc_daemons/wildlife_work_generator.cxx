@@ -185,7 +185,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
 }
 
 void main_loop(const vector<string> &arguments) {
-    int number_jobs = 10;  //jobs to generate when under the cushion
+    int number_jobs = 100;  //jobs to generate when under the cushion
     int unsent_results;
     int retval;
     long total_generated = 0;
