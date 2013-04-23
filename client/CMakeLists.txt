@@ -23,5 +23,8 @@ message(STATUS "opencv libraries: ${OpenCV_LIBRARIES}")
 
 add_executable(wildlife_average wildlife_average)
 target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
+SET_TARGET_PROPERTIES(wildlife_average PROPERTIES LINK_FLAGS -static)
+
+
 #target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
 #target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} opencv_core opencv_highgui ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})

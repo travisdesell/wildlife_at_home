@@ -56,12 +56,12 @@ if ($modulo > -1) {
 
     while(true) {   //Loop until there are no more videos to watermark.
         $query = "";
-        if ((($iteration %3) + 1) == 1) {   //this is a grouse and we have 3 locations
+//        if ((($iteration %3) + 1) == 1) {   //this is a grouse and we have 3 locations
             $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND location_id = " . (($location_iteration % 3) + 1) . " LIMIT 1";
             $location_iteration++;
-        } else {
-            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
-        }
+//       } else {
+//            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
+//        }
 
         echo $query . "\n";
 
@@ -93,15 +93,22 @@ if ($modulo > -1) {
         //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
         //use HTML5 to stream it
         $watermark_file = "/video/wildlife/watermark.png";
-        $command = "ffmpeg -y -i " . $row['archive_filename']. " -ar 44100 -vb 400000 -qmax 5 -vcodec libx264 -vpre slow -vpre baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" " . $row['watermarked_filename'];
+        $command = "~/ffmpeg/ffmpeg -y -i " . $row['archive_filename']. " -ar 44100 -vb 400000 -qmax 5 -vcodec libx264 -level 30 -maxrate 10000000 -bufsize 10000000 -vprofile baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" " . $row['watermarked_filename'];
         shell_exec($command);
 
+        echo "shell exec completed\n\n";
+
         /**
-         *  After teh file has been successfully watermarked, update the processing_status to 'WATERMARKED'
+         *  After the file has been successfully watermarked, update the processing_status to 'WATERMARKED'
          *  for both the video and its segments. Now teh splitting daemon will be able to take the watermarked
          *  file and generate the segments.
+         *
+         *  We also need to add its md5 hash and the file size so boinc can use these to generate workunits
          */
-        $query = "UPDATE video_2 SET processing_status = 'WATERMARKED' WHERE id = " . $row['id'];
+        $md5_hash = md5_file($row['watermarked_filename']);
+        $filesize = filesize($row['watermarked_filename']);
+
+        $query = "UPDATE video_2 SET processing_status = 'WATERMARKED', size = $filesize, md5_hash = '$md5_hash' WHERE id = " . $row['id'];
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
