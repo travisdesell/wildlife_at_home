@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cstdio>
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -7,6 +8,8 @@
 #include <opencv2/calib3d/calib3d.hpp>
 
 using namespace cv;
+
+#define GUI
 
 void printUsage();
 
@@ -49,15 +52,17 @@ int main(int argc, char **argv) {
 	std::cerr << "<slice_probabilities>" << std::endl;
 	while ((double)framePos/total < 1.0) {
 		//std::cout << framePos/total << std::endl;
-		Mat frame(cvQueryFrame(capture), true);
+		Mat frame(cvarrToMat(cvQueryFrame(capture)));
 		framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
 		
 		// Check for 1800 frame mark.
 		if (framePos != 0 && framePos % 1800 == 0.0) {
-			double frameDiameter = sqrt(frame.cols^2 * frame.rows^2);
-			double roiDiameter = sqrt(finalRect.width^2 * finalRect.height^2);
-			double probability = 1/(roiDiameter/frameDiameter);
-			std::cerr << probability << std::endl;
+			double frameDiameter = sqrt(pow((double)frame.cols, 2) * pow((double)frame.rows, 2));
+			double roiDiameter = sqrt(pow((double)finalRect.width, 2) * pow((double)finalRect.height, 2));
+			double probability = 1-(roiDiameter/frameDiameter);
+			std::cout << frame.cols << " : " << frame.rows << std::endl;
+			std::cout << finalRect.width << " : " << finalRect.height << std::endl;
+			std::cerr << frameDiameter << " : " << roiDiameter << " : " << probability << std::endl;
 			boundingRects.clear();
 			tlPoints.clear();
 			brPoints.clear();
@@ -112,13 +117,18 @@ int main(int argc, char **argv) {
 		
 		// Code to draw the points.
 		Mat frame_points;
-		//drawKeypoints(frame, keypoints_matches, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+		#ifdef GUI
+		drawKeypoints(frame, keypoints_matches, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+		#endif
 		
 		//Get bounding rectangle.
 		if (matching_points.size() != 0) {
 			Rect boundRect = boundingRect(matching_points);
-			//color = Scalar(0, 0, 255); // Blue, Green, Red
-			//rectangle(frame_points, boundRect.tl(), boundRect.br(), color, 2, 8, 0);
+			
+			#ifdef GUI
+			color = Scalar(0, 0, 255); // Blue, Green, Red
+			rectangle(frame_points, boundRect.tl(), boundRect.br(), color, 2, 8, 0);
+			#endif
 		
 			boundingRects.push_back(boundRect);
 			tlPoints.push_back(boundRect.tl());
@@ -134,18 +144,26 @@ int main(int argc, char **argv) {
 			Point2f brPoint(brMean.at<float>(0,0), brMean.at<float>(0,1));
 		
 			Rect averageRect(tlPoint, brPoint);
-			//color = Scalar(255, 0, 0); // Blue, Green, Red
-			//rectangle(frame_points, averageRect.tl(), averageRect.br(), color, 2, 8, 0);
+			
+			#ifdef GUI
+			color = Scalar(255, 0, 0); // Blue, Green, Red
+			rectangle(frame_points, averageRect.tl(), averageRect.br(), color, 2, 8, 0);
+			#endif
+			
 			finalRect = averageRect;
 		}
-
-		//imshow("SURF", frame_points);
+		
+		#ifdef GUI
+		imshow("SURF", frame_points);
 		if(cvWaitKey(15)==27) break;
+		#endif
 	}
 	
 	std::cerr << "</slice_probabilities>" << std::endl;
 	
-	//cvDestroyWindow("SURF");
+	#ifdef GUI
+	cvDestroyWindow("SURF");
+	#endif
     cvReleaseCapture(&capture);
     return 0;
 }
