@@ -55,18 +55,19 @@ int main(int argc, char **argv) {
     std::cout << "Total Frames: " << total << std::endl;
     std::cerr << "<slice_probabilities>" << std::endl;
     while ((double)framePos/total < 1.0) {
-        std::cout << framePos << " / " << total << std::endl;
+        std::cout << framePos << " / " << total << " -- ";
 //        Mat frame(cvarrToMat(cvQueryFrame(capture)), true);
 //        Mat frame(cvarrToMat(cvQueryFrame(capture)));
         Mat frame(cvarrToMat(cvQueryFrame(capture)));
         framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
 
         // Check for 1800 frame mark.
-        if (framePos != 0 && framePos % 1800 == 0.0) {
             double frameDiameter = sqrt(frame.cols^2 * frame.rows^2);
             double roiDiameter = sqrt(finalRect.width^2 * finalRect.height^2);
             double probability = 1/(roiDiameter/frameDiameter);
             std::cerr << probability << std::endl;
+
+        if (framePos != 0 && framePos % 1800 == 0.0) {
             boundingRects.clear();
             tlPoints.clear();
             brPoints.clear();
