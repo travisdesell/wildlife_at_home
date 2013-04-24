@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
     std::cout << "Total Frames: " << total << std::endl;
     std::cerr << "<slice_probabilities>" << std::endl;
     while ((double)framePos/total < 1.0) {
-        //std::cout << framePos/total << std::endl;
+        std::cout << framePos << " / " << total << std::endl;
 //        Mat frame(cvarrToMat(cvQueryFrame(capture)), true);
 //        Mat frame(cvarrToMat(cvQueryFrame(capture)));
         Mat frame(cvarrToMat(cvQueryFrame(capture)));
@@ -121,13 +121,13 @@ int main(int argc, char **argv) {
 
             // Code to draw the points.
             Mat frame_points;
-            //drawKeypoints(frame, keypoints_matches, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+            drawKeypoints(frame, keypoints_matches, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
             //Get bounding rectangle.
             if (matching_points.size() != 0) {
                 Rect boundRect = boundingRect(matching_points);
-                //color = Scalar(0, 0, 255); // Blue, Green, Red
-                //rectangle(frame_points, boundRect.tl(), boundRect.br(), color, 2, 8, 0);
+                color = Scalar(0, 0, 255); // Blue, Green, Red
+                rectangle(frame_points, boundRect.tl(), boundRect.br(), color, 2, 8, 0);
 
                 boundingRects.push_back(boundRect);
                 tlPoints.push_back(boundRect.tl());
@@ -143,18 +143,18 @@ int main(int argc, char **argv) {
                 Point2f brPoint(brMean.at<float>(0,0), brMean.at<float>(0,1));
 
                 Rect averageRect(tlPoint, brPoint);
-                //color = Scalar(255, 0, 0); // Blue, Green, Red
-                //rectangle(frame_points, averageRect.tl(), averageRect.br(), color, 2, 8, 0);
+                color = Scalar(255, 0, 0); // Blue, Green, Red
+                rectangle(frame_points, averageRect.tl(), averageRect.br(), color, 2, 8, 0);
                 finalRect = averageRect;
             }
 
-            //imshow("SURF", frame_points);
+            imshow("SURF", frame_points);
             if(cvWaitKey(15)==27) break;
         }
 
         std::cerr << "</slice_probabilities>" << std::endl;
 
-        //cvDestroyWindow("SURF");
+        cvDestroyWindow("SURF");
         cvReleaseCapture(&capture);
         return 0;
     }
