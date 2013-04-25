@@ -45,6 +45,9 @@ compiling ffmpeg:
 
 Compile openCV:
 
+    Download repo:
+        git clone ssh://git@github.com/Itseez/opencv.git
+
     First (so cmake knows where to find things): 
 
     DONT DO THESE:
@@ -68,7 +71,7 @@ Compile openCV:
 
     This works a bit better, but still not perfect
 
-    cmake -DBUILD_SHARED_LIBS=OFF -DWITH_OPENCL=OFF -DWITH_WEBP_OFF CMAKE_VERBOSE=ON -DCMAKE_REQUIRED_INCLUDES=/Users/deselt/Documents/Dropbox/software/ffmpeg/include/ -DCMAKE_INSTALL_PREFIX=/Users/deselt/Documents/Dropbox/software/opencv/install/ ..
+    cmake -DBUILD_SHARED_LIBS=OFF -DWITH_OPENCL=OFF -DWITH_WEBP=OFF CMAKE_VERBOSE=ON -DCMAKE_REQUIRED_INCLUDES=/Users/deselt/Documents/Dropbox/software/ffmpeg/include/ -DCMAKE_INSTALL_PREFIX=/Users/deselt/Documents/Dropbox/software/opencv/install/ ..
     may also need: -DWITH_OPENCL=OFF -DWITH_WEBP=OFF
 
     In
