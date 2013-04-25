@@ -1,5 +1,8 @@
 include_directories(${OpenCV_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIR}/../)
+
+message( "boinc include dir: ${BOINC_INCLUDE_DIR}")
+
 include_directories(${BOINC_INCLUDE_DIR})
 include_directories(${BOINC_INCLUDE_DIR}/api)
 include_directories(${BOINC_INCLUDE_DIR}/lib)
@@ -8,6 +11,7 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 #find_package(OpenGL REQUIRED)
 #find_package(GLUT REQUIRED)
 
+include_directories(${BOINC_INCLUDE_DIR})
 include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
 link_directories(${OPENGL_LIBRARY_DIRS} ${GLUT_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
@@ -21,7 +25,10 @@ add_definitions( -D_BOINC_APP_)
 
 message(STATUS "opencv libraries: ${OpenCV_LIBRARIES}")
 
+link_directories(/Users/deselt/Dropbox/software/opencv/build/lib)
+
 add_executable(wildlife_average wildlife_average)
+<<<<<<< HEAD
 <<<<<<< HEAD
 target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
 SET_TARGET_PROPERTIES(wildlife_average PROPERTIES LINK_FLAGS -static)
@@ -32,6 +39,12 @@ SET_TARGET_PROPERTIES(wildlife_average PROPERTIES LINK_FLAGS -static)
 #COMPILE LINE FOR ROBERT
 target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} pthread /home/robert/ffmpeg/libavformat/libavformat.a /home/robert/ffmpeg/libavcodec/libavcodec.a /home/robert/ffmpeg/libswscale/libswscale.a /home/robert/ffmpeg/libavutil/libavutil.a /home/robert/x264/libx264.a /home/robert/OPENCV_SOURCE_REAL/3rdparty/lib/libzlib.a)
 >>>>>>> ebbabaeafc43e683674b2b9c36ada5a3a5eb403e
+=======
+target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread opencv_core opencv_highgui opencv_imgproc crt1.o)
+#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} -Wl,-static -lopencv2 ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
 
-#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
-#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} opencv_core opencv_highgui ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
+#COMPILE LINE FOR ROBERT
+#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} pthread /home/robert/ffmpeg/libavformat/libavformat.a /home/robert/ffmpeg/libavcodec/libavcodec.a /home/robert/ffmpeg/libswscale/libswscale.a /home/robert/ffmpeg/libavutil/libavutil.a /home/robert/x264/libx264.a /home/robert/OPENCV_SOURCE_REAL/3rdparty/lib/libzlib.a)
+
+>>>>>>> 86019ccb6c980352225a5aa340a28f877929f791
+

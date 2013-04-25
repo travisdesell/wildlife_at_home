@@ -6,7 +6,7 @@ set (WILDLIFE_AT_HOME_VERSION_MINOR 0)
 
 # These will make cmake use clang and clang++ instead of gcc and g++
 #SET (CMAKE_C_COMPILER             "/usr/bin/clang")
-SET (CMAKE_C_FLAGS                "-Wall -std=c99")
+SET (CMAKE_C_FLAGS                "-Wall -std=c99 -Wl,-Bstatic")
 SET (CMAKE_C_FLAGS_DEBUG          "-g")
 SET (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
 SET (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
@@ -15,6 +15,8 @@ SET (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 #looks like on OSX the c++ clang compiler is also clang, not clang++
 #SET (CMAKE_CXX_COMPILER             "/usr/bin/clang")
 #SET (CMAKE_CXX_COMPILER             "/opt/local/bin/clang++-mp-3.1")
+#SET (CMAKE_CXX_FLAGS                "-Wall -static")
+#SET (CMAKE_CXX_FLAGS                "-Wall -Wl,-Bstatic -lopencv ")
 SET (CMAKE_CXX_FLAGS                "-Wall")
 SET (CMAKE_CXX_FLAGS_DEBUG          "-g")
 SET (CMAKE_CXX_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
@@ -30,7 +32,7 @@ SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 #set(PLATFORM 64)
 
 #This may need to be updated or Linux/Windows
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /Users/deselt/Dropbox/software/opencv/lib /opt/local/lib)
 
 #this adds the undvc_common FindX.cmake modules to look for BOINC and OpenCV
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/cmake/Modules/")
@@ -49,10 +51,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/c
 include_directories (${PROJECT_SOURCE_DIR})
 
 find_package(BOINC)
-find_package(OpenCV COMPONENTS highgui imageproc)
+#find_package(OpenCV COMPONENTS highgui imageproc)
 
 add_subdirectory(undvc_common)
 
 add_subdirectory(client)
-add_subdirectory(boinc_daemons)
+#add_subdirectory(boinc_daemons)
 
