@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
 		}
 		
 		// Check for 1800 frame mark.
-		if (framePos != 0 && framePos % 1800 == 0.0) {
+		if (framePos != 0 && framePos % framesInThreeMin == 0.0) {
 			double frameDiameter = sqrt(pow((double)frame.cols, 2) * pow((double)frame.rows, 2));
 			double roiDiameter = sqrt(pow((double)finalRect.width, 2) * pow((double)finalRect.height, 2));
 			double probability = 1-(roiDiameter/frameDiameter);
