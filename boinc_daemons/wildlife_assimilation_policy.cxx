@@ -40,8 +40,72 @@
 
 using namespace std;
 
+#define mysql_query_check(conn, query) __mysql_check (conn, query, __FILE__, __LINE__)
+
+void __mysql_check(MYSQL *conn, string query, const char *file, const int line) {
+    mysql_query(conn, query.c_str());
+
+    if (mysql_errno(conn) != 0) {
+        ostringstream ex_msg;
+        ex_msg << "ERROR in MySQL query: '" << query.c_str() << "'. Error: " << mysql_errno(conn) << " -- '" << mysql_error(conn) << "'. Thrown on " << file << ":" << line;
+        cerr << ex_msg.str() << endl;
+        exit(1);
+    }   
+}
+
+MYSQL *wildlife_db_conn = NULL;
+
+void initialize_database() {
+    wildlife_db_conn = mysql_init(NULL);
+
+    //shoud get database info from a file
+    string db_host, db_name, db_password, db_user;
+    ifstream db_info_file("../wildlife_db_info");
+
+    db_info_file >> db_host >> db_name >> db_user >> db_password;
+    cout << "parsed db info:" << endl;
+    cout << "\thost: " << db_host << endl;
+    cout << "\tname: " << db_name << endl;
+    cout << "\tuser: " << db_user << endl;
+    cout << "\tpass: " << db_password << endl;
+
+    if (mysql_real_connect(wildlife_db_conn, db_host.c_str(), db_user.c_str(), db_password.c_str(), db_name.c_str(), 0, NULL, 0) == NULL) {
+        cerr << "Error connecting to database: " << mysql_errno(wildlife_db_conn) << ", '" << mysql_error(wildlife_db_conn) << "'" << endl;
+        exit(1);
+    }
+}
+
+
 //returns 0 on sucess
 int assimilate_handler(WORKUNIT& wu, vector<RESULT>& /*results*/, RESULT& canonical_result) {
+
+    if (wildlife_db_conn == NULL) initialize_database();
+
+    vector<double> p1;
+    try {
+        string prob_str = parse_xml<string>(result.stderr_out, "slice_probabilities");
+
+        istringstream iss1(prob_str);
+        copy(istream_iterator<double>(iss1), istream_iterator<double>(), back_inserter<vector<double> >(p1));
+
+    } catch (string error_message) {
+        log_messages.printf(MSG_CRITICAL, "wildlife_assimilation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
+        log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
+        result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
+        result.validate_state = VALIDATE_STATE_INVALID;
+
+        //        exit(1);
+        return ERR_XML_PARSE;
+    }
+
+    cout << "parsed probabilities: " << endl;
+    for (int i = 0; i < p1.size(); i++) {
+        cout << "\t" << p1[i] << endl;
+    }
+    exit(1);
+
+
+
     int retval;
     vector<OUTPUT_FILE_INFO> files;
     

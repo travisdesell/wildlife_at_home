@@ -1,0 +1,106 @@
+Before doing this make sure the libraries aren't previously installed by the system (you might link against the wrong ones or shared ones). eg.,
+
+OSX:
+sudo port remove ffmpeg x264 libx264-dev
+
+Linux:
+sudo apt-get remove ffmpeg x264 libx264-dev
+
+*********************************************************************************************
+
+Get libx264:
+
+    git clone git://git.videolan.org/x264.git
+
+    copmile libx264:
+
+    ./configure --enable-static
+
+    on linux: 
+    export PATH=$PATH:/home/tdesell/yasm-1.2.0 (so it can find the yasm install)
+    ./configure --enable-static
+
+*********************************************************************************************
+
+
+Get ffmpeg:
+
+    git clone git://source.ffmpeg.org/ffmpeg.git
+
+    swap to the stable version:
+
+    git checkout stable
+
+compiling ffmpeg:
+
+    ./configure --enable-gpl --enable-libx264 --enable-static
+    ./configure --enable-gpl --enable-libx264 --enable-static --disable-shared --extra-ldflags="-L../x264/" --extra-cflags="-I../x264/"
+
+    Compile it and specify the install directory so we can then later use it to tell OpenCV where to look:
+    ./configure --enable-gpl --enable-libx264 --enable-static --disable-shared --extra-ldflags="-L../x264/" --extra-cflags="-I../x264/" --prefix=/Users/deselt/Documents/Dropbox/software/ffmpeg/
+
+    on linux also add --enable-pthreads
+
+    and also do to find yasm:
+
+    tdesell@undhpcvideo:~/ffmpeg$ echo $PATH
+    /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+    tdesell@undhpcvideo:~/ffmpeg$ export PATH=$PATH:/home/tdesell/yasm-1.2.0/
+
+
+    make
+    make install
+
+
+*********************************************************************************************
+
+Compile openCV:
+
+    Download repo:
+        git clone ssh://git@github.com/Itseez/opencv.git
+
+    First (so cmake knows where to find things): 
+
+    DONT DO THESE:
+    export LD_LIBRARY_PATH=/Users/deselt/Documents/Dropbox/software/ffmpeg/lib/
+    export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/Users/deselt/Documents/Dropbox/software/ffmpeg/lib/pkgconfig
+    export PKG_CONFIG_LIBDIR=$PKG_CONFIG_LIBDIR:/Users/deselt/Documents/Dropbox/software/ffmpeg/lib/
+
+    export LD_LIBRARY_PATH=/home/tdesell/ffmpeg/lib/
+    export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/tdesell/ffmpeg/lib/pkgconfig
+    export PKG_CONFIG_LIBDIR=$PKG_CONFIG_LIBDIR:/home/tdesell/ffmpeg/lib/
+
+    INSTEAD, change in:
+        /cmake/OpenCVFindLibsVideo.cmake
+
+    change:
+        196       #      set(FFMPEG_LIB_DIR "${FFMPEG_INCLUDE_DIR}/../lib" CACHE PATH "Full path of FFMPEG library directory")
+
+    to:
+        set(FFMPEG_LIB_DIR "/Users/deselt/Documents/Dropbox/software/ffmpeg/lib")
+
+
+    Then:
+
+    cmake -DBUILD_SHARED_LIBS=OFF -DWITH_FFMPEG=1 CMAKE_VERBOSE=ON ..
+
+
+    For OSX:
+        cmake -DBUILD_SHARED_LIBS=OFF -DWITH_OPENCL=OFF -DWITH_WEBP=OFF CMAKE_VERBOSE=ON -DCMAKE_REQUIRED_INCLUDES=/Users/deselt/Documents/Dropbox/software/ffmpeg/include/ -DCMAKE_INSTALL_PREFIX=/Users/deselt/Documents/Dropbox/software/opencv/install/ ..
+
+    For Linux:
+        cmake -DBUILD_PYTHON_SUPPORT=OFF -DBUILD_SHARED_LIBS=OFF -DWITH_OPENCL=OFF -DWITH_WEBP=OFF CMAKE_VERBOSE=ON -DBUILD_WITH_STATIC_CRT=ON -DOPENCV_BUILD_3RDPARTY_LIBS=TRUE -DCMAKE_REQUIRED_INCLUDES=/home/tdesell/ffmpeg/include/ -DCMAKE_INSTALL_PREFIX=/home/tdesell/opencv/install/ ..
+
+    In
+        build/modules/highgui/CMakeFiles/opencv_perf_highgui.dir/link.txt
+        build/modules/highgui/CMakeFiles/opencv_test_highgui.dir/link.txt
+        build/modules/gpu/CMakeFiles/opencv_perf_gpu.dir/link.txt
+        build/modules/gpu/CMakeFiles/opencv_test_gpu.dir/link.txt
+        modules/java/CMakeFiles/opencv_java.dir/link.txt
+        modules/superres/CMakeFiles/opencv_perf_superres.dir/link.txt
+        modules/superres/CMakeFiles/opencv_test_superres.dir/link.txt
+
+    had to add (so it could find x264 -- do this at the end of the .a files but before the other stuff):
+        /Users/deselt/Documents/Dropbox/software/x264/libx264.a
+
+

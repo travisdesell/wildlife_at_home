@@ -74,25 +74,12 @@ int init_result(RESULT& result, void*& data) {
 
 //        cout << "probabilities: " << probabilities << endl;
     } catch (string error_message) {
-        log_messages.printf(MSG_CRITICAL, "sss_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
+        log_messages.printf(MSG_CRITICAL, "wildlife_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
-//        result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
-//        result.validate_state = VALIDATE_STATE_INVALID;
+        result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
+        result.validate_state = VALIDATE_STATE_INVALID;
 
-        if (strstr(result.stderr_out, "frame") != NULL) {
-            probabilities = (char*)malloc(sizeof(char) * 6);
-            probabilities[0] = 'f';
-            probabilities[1] = 'r';
-            probabilities[2] = 'a';
-            probabilities[3] = 'm';
-            probabilities[4] = 'e';
-            probabilities[5] = '\0';
-
-            data = (void*)probabilities;
-            return 0;
-        }
-
-        exit(1);
+//        exit(1);
         return ERR_XML_PARSE;
     }
 
@@ -120,6 +107,8 @@ int compare_results(
     if (p1.size() != p2.size()) {
         match = false;
         log_messages.printf(MSG_CRITICAL, "ERROR, number of probabilities is different. %d vs %d\n", (int)p1.size(), (int)p2.size());
+        log_messages.printf(MSG_CRITICAL, "p1 string: '%s'\n", probabilities1);
+        log_messages.printf(MSG_CRITICAL, "p2 string: '%s'\n", probabilities2);
 
         log_messages.printf(MSG_CRITICAL, "probabilities1:\n");
         for (uint32_t i = 0; i < p1.size(); i++) {
@@ -131,7 +120,7 @@ int compare_results(
             log_messages.printf(MSG_CRITICAL, "\t%lf\n", p2[i]);
         }
 
-        exit(1);
+        return 0;
     }
 
     double threshold = 0.00025;
@@ -154,7 +143,7 @@ int compare_results(
             log_messages.printf(MSG_CRITICAL, "probabilities1[%d]: %lf\n", i, p1[i]);
             log_messages.printf(MSG_CRITICAL, "probabilities2[%d]: %lf\n", i, p2[i]);
 
-            exit(1);
+            return 0;
         }
     }
 
