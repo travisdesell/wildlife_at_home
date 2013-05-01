@@ -123,7 +123,7 @@ int compare_results(
         return 0;
     }
 
-    double threshold = 0.00025;
+    double threshold = 0.00045;
 
     for (uint32_t i = 0; i < p1.size(); i++) {
         if (fabs(p1[i] - p2[i]) > threshold) {

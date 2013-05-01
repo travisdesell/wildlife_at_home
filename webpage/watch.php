@@ -197,6 +197,11 @@ print_selection_row("Nest success (eggs hatching).", "nest_success");
 print_selection_row("Chicks present at the nest.", "chick_presence");
 print_selection_row("Was the video interesting or educational?", "interesting");
 
+
+$discuss_video_content = "I would like to discuss this video:\n" . "[" . "video" . "]" . $segment_filename . "[/video" . "]";
+
+//I would like to discuss this video:\n \[video\]$segment_filename\[/video\]\"></input>
+
 echo "
                     <div class='row-fluid'>
                         <div class='span12'>
@@ -226,7 +231,7 @@ echo "
 
                         <div class='modal-footer'>
                             <form id='discuss-video-form' action='forum_post.php?id=8' method='post'>
-                                <input type='hidden' name='content' value=\"I would like to discuss this video:\n \[video\]$segment_filename\[/video\]\"></input>
+                            <input type='hidden' name='content' value=\"$discuss_video_content\"
                             </form>
 
                             <button class= 'btn pull-left' data-dismiss='modal' aria-hidden='true' id='discuss-video-button'>Discuss This Video</button>

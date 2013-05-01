@@ -4,6 +4,7 @@ $(document).ready(function () {
     $('#fast_backward_button').button();
     $('#too_dark_button').button();
     $('#corrupt_button').button();
+    $('#speed_textbox').val("speed: " + $('#wildlife_video').get(0).playbackRate);
 
     $('#fast_backward_button').click(function() {
         var video = $('#wildlife_video').get(0);
