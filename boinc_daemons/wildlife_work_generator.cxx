@@ -35,6 +35,7 @@
 #include <cstring>
 #include <sstream>
 #include <cmath>
+#include <fstream>
 
 #include "boinc_db.h"
 #include "error_numbers.h"
@@ -51,12 +52,13 @@
 #include "mysql.h"
 
 #include "undvc_common/arguments.hxx"
+#include "undvc_common/file_io.hxx"
 
 #define CUSHION 100
     // maintain at least this many unsent results
 #define REPLICATION_FACTOR  1
 
-const char* app_name = "wildlife";
+const char* app_name = NULL;
 const char* out_template_file = "wildlife_out.xml";
 
 DB_APP app;
@@ -81,13 +83,13 @@ void __mysql_check(MYSQL *conn, string query, const char *file, const int line) 
 
 // create one new job
 //
-int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, string md5_hash) {
+int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, string md5_hash, string features_file, string algorithm_type, string detection_type) {
     DB_WORKUNIT wu;
 
     char name[256], path[256];
     char command_line[512];
     char additional_xml[512];
-    const char* infiles[1];
+    const char* infiles[2];
 
     cout << "job: " << video_id << ", species: " << species_id << ", location: " << location_id << ", video_address: " << video_address << ", durations_s: " << duration_s << endl;
 
@@ -107,8 +109,15 @@ int make_job(int video_id, int species_id, int location_id, string video_address
     fclose(f);
     */
 
+
     //TODO: figure out an estimate of how many fpops per second of video
     double fpops_est = duration_s * (2.5 * 10e8);
+    int delay_bound = 86400;
+    if (0 == strcmp(app_name, "wildlife_surf")) {
+        fpops_est *= 40; //SURF seems to run approximately 40 times slower
+        delay_bound *= 2;
+    }
+
     double credit = fpops_est / (2.5 * 10e10);
 
     // Fill in the job parameters
@@ -118,44 +127,102 @@ int make_job(int video_id, int species_id, int location_id, string video_address
     strcpy(wu.name, name);
     wu.rsc_fpops_est = fpops_est;
     wu.rsc_fpops_bound = fpops_est * 100;
-    wu.rsc_memory_bound = 1e8;
+    wu.rsc_memory_bound = 1e7;
     wu.rsc_disk_bound = 1e8;
-    wu.delay_bound = 86400;
+    wu.delay_bound = delay_bound;
     wu.min_quorum = REPLICATION_FACTOR;
     wu.target_nresults = REPLICATION_FACTOR;
     wu.max_error_results = REPLICATION_FACTOR*4;
     wu.max_total_results = REPLICATION_FACTOR*8;
     wu.max_success_results = REPLICATION_FACTOR*4;
 
-    string filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
-    infiles[0] = filename.c_str();
-//    infiles[0][filename.length()] = '\0';
-    cout << "infile: " << infiles[0] << endl;
+
+    int n_files = 1;
+    string feats_filename, video_filename ;
+
+    if (0 == strcmp(app_name, "wildlife_surf")) {
+        wu.delay_bound *= 5;
+
+        copy_file_to_download_dir(features_file);
+        feats_filename = features_file.substr(features_file.find_last_of('/') + 1);
+        infiles[0] = feats_filename.c_str();
+
+        video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
+        infiles[1] = video_filename.c_str();
+
+        cout << "infile[0]: " << infiles[0] << endl;
+        cout << "infile[1]: " << infiles[1] << endl;
+        n_files = 2;
+    } else {
+        video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
+        infiles[0] = video_filename.c_str();
+
+        cout << "infile[0]: " << infiles[0] << endl;
+        n_files = 1;
+    }
 
     sprintf(path, "templates/%s", out_template_file);
 
-    sprintf(command_line, " video.mp4");
+    cout << "path: '" << path << "'" << endl;
+
+    if (0 == strcmp(app_name, "wildlife_surf")) {
+        sprintf(command_line, " video.mp4 input.feats");
+    } else {
+        sprintf(command_line, " video.mp4");
+    }
+
     cout << "command line: '" << command_line << "'" << endl;
 
-    sprintf(additional_xml, "<credit>%.3lf</credit>", credit);
+    //also put the detection type here
+    sprintf(additional_xml, "<credit>%.3lf</credit><type>%s</type><detection>%s</detection>", credit, algorithm_type.c_str(), detection_type.c_str());
     cout << "credit: " << credit << endl;
+    cout << "additional_xml: " << additional_xml << endl;
 
     //We actually need to automatically generate the in template file because the input files are going to
     //be received from a URL.
     ostringstream input_template_stream;
-    input_template_stream
+    if (0 == strcmp(app_name, "wildlife_surf")) {
+        input_template_stream
             << "<file_info>" << endl
             << "    <number>0</number>" << endl
-//            << "    <url>http://wildlife.und.edu" << video_address.substr(0, video_address.find_last_of("/") + 1)<< "</url>" << endl
+            << "</file_info>" << endl
+            << "<file_info>" << endl
+            << "    <number>1</number>" << endl
             << "    <url>http://wildlife.und.edu" << video_address.substr(0, video_address.find_last_of("/") + 1)<< "</url>" << endl
             << "    <nbytes>" << filesize << "</nbytes>" << endl
             << "    <md5_cksum>" << md5_hash << "</md5_cksum>" << endl
-            << "</file_info>" << endl
+            << "</file_info>" << endl;
+    } else {
+        input_template_stream
+                << "<file_info>" << endl
+                << "    <number>0</number>" << endl
+                << "    <url>http://wildlife.und.edu" << video_address.substr(0, video_address.find_last_of("/") + 1)<< "</url>" << endl
+                << "    <nbytes>" << filesize << "</nbytes>" << endl
+                << "    <md5_cksum>" << md5_hash << "</md5_cksum>" << endl
+                << "</file_info>" << endl;
+    }
+
+    if (0 == strcmp(app_name, "wildlife_surf")) {
+        input_template_stream
+            << "<workunit>" << endl
+            << "    <file_ref>" << endl
+            << "        <file_number>0</file_number>" << endl
+            << "        <open_name>input.feats</open_name>" << endl
+            << "    </file_ref>" << endl
+            << "    <file_ref>" << endl
+            << "        <file_number>1</file_number>" << endl
+            << "        <open_name>video.mp4</open_name>" << endl
+            << "    </file_ref>" << endl;
+    } else {
+        input_template_stream
             << "<workunit>" << endl
             << "    <file_ref>" << endl
             << "        <file_number>0</file_number>" << endl
             << "        <open_name>video.mp4</open_name>" << endl
-            << "    </file_ref>" << endl
+            << "    </file_ref>" << endl;
+    }
+
+    input_template_stream
             << "    <rsc_memory_bound>2.5e9</rsc_memory_bound>" << endl
             << "    <delay_bound>345600</delay_bound>" << endl
             << "    <max_error_results>5</max_error_results>" << endl
@@ -165,43 +232,76 @@ int make_job(int video_id, int species_id, int location_id, string video_address
             << "    <max_success_results>2</max_success_results>" << endl
             << "</workunit>";
 
-    cout << "input template:" << endl << input_template_stream.str() << endl;
+    cout << "input template:" << endl << input_template_stream.str() << endl << endl;
 
 //    exit(0);
 
-    // Register the job with BOINC
-    //
+    cout << "infiles[0]: " << infiles[0] << endl;
+    cout << "infiles[1]: " << infiles[1] << endl;
+
+// Register the job with BOINC
+//
     return create_work(
-        wu,
-        input_template_stream.str().c_str(),
-        path,
-        config.project_path(path),
-        infiles,
-        1,
-        config,
-        command_line,
-        additional_xml
-    );
+            wu,
+            input_template_stream.str().c_str(),
+            path,
+            config.project_path(path),
+            infiles,
+            n_files,
+            config,
+            command_line,
+            additional_xml
+            );
 }
 
+MYSQL *wildlife_db_conn = NULL;
+
+void initialize_database() {
+    wildlife_db_conn = mysql_init(NULL);
+
+    //shoud get database info from a file
+    string db_host, db_name, db_password, db_user;
+    ifstream db_info_file("../wildlife_db_info");
+
+    db_info_file >> db_host >> db_name >> db_user >> db_password;
+    db_info_file.close();
+
+    cout << "parsed db info:" << endl;
+    cout << "\thost: " << db_host << endl;
+    cout << "\tname: " << db_name << endl;
+    cout << "\tuser: " << db_user << endl;
+    cout << "\tpass: " << db_password << endl;
+
+    if (mysql_real_connect(wildlife_db_conn, db_host.c_str(), db_user.c_str(), db_password.c_str(), db_name.c_str(), 0, NULL, 0) == NULL) {
+        cerr << "Error connecting to database: " << mysql_errno(wildlife_db_conn) << ", '" << mysql_error(wildlife_db_conn) << "'" << endl;
+        exit(1);
+    }   
+}
+
+
 void main_loop(const vector<string> &arguments) {
-    int number_jobs = 100;  //jobs to generate when under the cushion
     int unsent_results;
     int retval;
     long total_generated = 0;
 
-    MYSQL *wildlife_db_conn = mysql_init(NULL);
-    string db_host, db_name, db_password, db_user;
-    get_argument(arguments, "--db_host", true, db_host);
-    get_argument(arguments, "--db_name", true, db_name);
-    get_argument(arguments, "--db_user", true, db_user);
-    get_argument(arguments, "--db_password", true, db_password);
+    int species_id = 0;
+    int location_id = 0;
+    int number_jobs = 100;  //jobs to generate when under the cushion
 
-    //shoud get database info from a file
-    if (mysql_real_connect(wildlife_db_conn, db_host.c_str(), db_user.c_str(), db_password.c_str(), db_name.c_str(), 0, NULL, 0) == NULL) {
-        cerr << "Error connecting to database: " << mysql_errno(wildlife_db_conn) << ", '" << mysql_error(wildlife_db_conn) << "'" << endl;
-        exit(1);
+    get_argument(arguments, "--species_id", false, species_id);
+    get_argument(arguments, "--location_id", false, location_id);
+    get_argument(arguments, "--number_jobs", false, number_jobs);
+
+    string detection_type, event_type;
+    get_argument(arguments, "--detection_type", true, detection_type);
+    get_argument(arguments, "--event_type", true, event_type);
+
+    string features_file;
+    if (0 == strcmp(app_name, "wildlife_surf")) {
+        get_argument(arguments, "--features_file", true, features_file);
     }
+
+    initialize_database();
 
     while (1) {
         //This checks to see if there is a stop in place, if there is it will exit the work generator.
@@ -240,10 +340,19 @@ void main_loop(const vector<string> &arguments) {
                                      << " FROM video_2 WHERE"
                                      << " processing_status != 'UNWATERMARKED'"
                                      << " AND md5_hash IS NOT NULL"
-                                     << " AND size IS NOT NULL"
-//                                     << " AND species_id = 1"
-//                                     << " AND location_id = 1"
-                                     << " LIMIT " << number_jobs; 
+                                     << " AND size IS NOT NULL";
+
+            if (species_id > 0) {
+                unclassified_video_query << " AND species_id = " << species_id;
+            }
+
+            if (location_id > 0) {
+                unclassified_video_query << " AND location_id = " << location_id;
+            }
+
+            if (number_jobs > 0) {
+                unclassified_video_query << " LIMIT " << number_jobs; 
+            } 
 
             mysql_query_check(wildlife_db_conn, unclassified_video_query.str());
             MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
@@ -260,11 +369,10 @@ void main_loop(const vector<string> &arguments) {
                 int filesize = atoi(video_row[5]);
                 string md5_hash = video_row[6];
 
-                make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash);
+                make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash, features_file, detection_type, event_type);
                 total_generated++;
             }
 
-            exit(0);
 
             mysql_free_result(video_result);
 
@@ -347,6 +455,10 @@ int main(int argc, char** argv) {
 //            usage(argv[0]);
 //            exit(1);
         }
+    }
+
+    if (app_name == NULL) {
+        cout << "'--app' not specified" << endl;
     }
 
     cout << "parsed arugments" << endl;
