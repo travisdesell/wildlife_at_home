@@ -55,7 +55,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 
 //$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
 
-$query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND crowd_status = 'WATCHED' AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
+$query = "SELECT id, filename, duration_s FROM video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND vs2.crowd_status = 'WATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -67,7 +67,7 @@ $found = true;
 if (!$row) {
     $found = true;
 
-    $query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
+    $query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE NOT EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND observations.video_segment_id = vs2.id) AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id ORDER BY RAND() limit 1";
 //    echo "<!-- $query -->\n";
 
     $result = attempt_query_with_ping($query, $wildlife_db);
@@ -176,21 +176,24 @@ echo "
 
 function print_selection_row($text, $id) {
     echo "<div class='row-fluid'>";
-    echo "  <div class ='btn-group span4'>";
+    echo "  <div class='span4'>";
+    echo "    <div class ='btn-group'>";
     echo "      <button class='btn' id='" . $id . "_yes'>yes</button>";
     echo "      <button class='btn' id='" . $id . "_no'>no</button>";
     if ($id != "interesting") {
         echo "      <button class='btn' id='" . $id . "_unsure'>unsure</button>";
     }
+    echo "    </div>";
     echo "  </div>";
-    echo "  <div class='span8'> <p style='margin-top:6px; margin-bottom-2px;'> $text </p> </div>";
+    echo "  <div class='span7'> <p style='margin-top:6px; margin-bottom-2px;'> $text </p> </div>";
+    echo "  <div class='span1'> <span class='badge badge-info pull-left' style='margin-top:8px' id='" .  $id . "_help'>?</span> </div>";
     echo " </div>";
 }
 
-print_selection_row("Bird left the nest.", "bird_leave");
-print_selection_row("Bird returns to the nest.", "bird_return");
-print_selection_row("Bird incubating the nest.", "bird_presence");
-print_selection_row("Bird absent from nest.", "bird_absence");
+print_selection_row("Parent leaves the nest.", "bird_leave");
+print_selection_row("Parent returns to the nest.", "bird_return");
+print_selection_row("Parent present at the nest.", "bird_presence");
+print_selection_row("Parent absent from the nest.", "bird_absence");
 print_selection_row("Predator at the nest.", "predator_presence");
 print_selection_row("Nest defense.", "nest_defense");
 print_selection_row("Nest success (eggs hatching).", "nest_success");
@@ -218,6 +221,7 @@ echo "
                     <div class='row-fluid pull-down'>
                         <a class='btn pull-left' style='margin-top0px;' id='too_dark_button' value='too_dark' 'data-toggle='modal'>too dark</a>
                         <a class='btn pull-left' style='margin-top0px;' id='corrupt_button' value='corrupt' 'data-toggle='modal'>corrupt video</a>
+                        <div class='span1'> <span class='badge badge-info pull-left' style='margin-top:8px' id='corrupt_too_dark_help'>?</span> </div>
                         <a class='btn btn-primary pull-right disabled' style='margin-top0px;' id='submit_button' value='submit' 'data-toggle='modal'>submit</a>
                     </div>
 
@@ -231,7 +235,7 @@ echo "
 
                         <div class='modal-footer'>
                             <form id='discuss-video-form' action='forum_post.php?id=8' method='post'>
-                            <input type='hidden' name='content' value=\"$discuss_video_content\"
+                            <input type='hidden' name='content' value=\"$discuss_video_content\">
                             </form>
 
                             <button class= 'btn pull-left' data-dismiss='modal' aria-hidden='true' id='discuss-video-button'>Discuss This Video</button>

@@ -1,5 +1,21 @@
 
 $(document).ready(function () {
+
+    $('#bird_leave_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird leaves the nest, no otherwise. Only select yes if the bird completely leaves the screen.", title : 'Instructions'});
+    $('#bird_return_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird returns to the nest, no otherwise. Only select yes if the bird comes from completely off the screen back to the nest.", title : 'Instructions'});
+
+    $('#bird_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the bird is incubating the nest for any frame of the video, no otherwise.</p> <p>If a parent is incubating the nest for part of the video, and leaves for part of the video mark this yes (along with yes for absence).</p>", title : 'Instructions'});
+    $('#bird_absence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the parent is not on the nest (off camera) for any portion of the video.</p> <p>If a parent is incubating the nest for part of the video, and leaves for part of the video mark this yes (along with yes for incubating).</p>", title : 'Instructions'});
+
+    $('#predator_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if a predator is in the video.</p>", title : 'Instructions'});
+    $('#nest_defense_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the bird actively tries to defend the nest from a predator. You can look at the training videos for examples of this.</p>", title : 'Instructions'});
+
+    $('#nest_success_help').popover({ placement : 'left', html : true,  content : "<p>Select yes only if chicks visibly hatch from the eggs. If chicks are simply present at the nest, mark chick presence yes and this no.</p>", title : 'Instructions'});
+    $('#chick_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if chicks are visible at the nest.</p>", title : 'Instructions'});
+    $('#interesting_help').popover({ placement : 'left', html : true,  content : "<p>This is up to you! Mark it yes if you found the video interesting.</p>", title : 'Instructions'});
+
+    $('#corrupt_too_dark_help').popover({ placement : 'top', html : true,  content: "<p>Click too dark if the video is too dark to determine if anything is happening.</p> <p>Click corrupt if there are video corruption problems (static, etc).</p> <p>In either case, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
+
     $('#fast_forward_button').button();
     $('#fast_backward_button').button();
     $('#too_dark_button').button();
@@ -403,14 +419,14 @@ $(document).ready(function () {
                     } else if (response.post_observation.corrupt == 1) {
                         body_text += print_modal_row('Corrupt', 'corrupt', response.post_observation, response.db_observations);
                     } else {
-                        body_text += print_modal_row('Bird left the nest', 'bird_leave', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird returns to the nest', 'bird_return', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird incubating the nest', 'bird_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
+                        body_text += print_modal_row('Parent leaves the nest', 'bird_leave', response.post_observation, response.db_observations);
+                        body_text += print_modal_row('Parent returns to the nest', 'bird_return', response.post_observation, response.db_observations);
+                        body_text += print_modal_row('Parent present at the nest', 'bird_presence', response.post_observation, response.db_observations);
+                        body_text += print_modal_row('Parent absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
                         body_text += print_modal_row('Predator at the nest', 'predator_presence', response.post_observation, response.db_observations);
                         body_text += print_modal_row('Nest defense', 'nest_defense', response.post_observation, response.db_observations);
                         body_text += print_modal_row('Nest success', 'nest_success', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Chicks at the nest', 'chick_presence', response.post_observation, response.db_observations);
+                        body_text += print_modal_row('Chicks present at the nest', 'chick_presence', response.post_observation, response.db_observations);
                         body_text += print_modal_row('Interesting', 'interesting', response.post_observation, response.db_observations);
                     }
                     body_text += print_modal_row('Comments', 'comments', response.post_observation, response.db_observations);
