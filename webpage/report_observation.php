@@ -117,7 +117,7 @@ function match($obs1, $obs2) {
  *      
  */
 
-$MAX_CREDIT = 300;
+$MAX_CREDIT = $duration_s;
 
 $update_db_obs_credit = false;
 $update_post_credit = false;
@@ -174,7 +174,7 @@ if (is_null($canonical_observation)) {
  *  insert the observation into the database
  */
 
-$query = "INSERT INTO observations SET" .
+$query = "REPLACE INTO observations SET" .
     " comments = '$post_observation->comments'," .
     " bird_leave = $post_observation->bird_leave, " .
     " bird_return = $post_observation->bird_return, " .
@@ -189,10 +189,26 @@ $query = "INSERT INTO observations SET" .
     " too_dark = $post_observation->too_dark, " .
     " corrupt = $post_observation->corrupt, " .
     " status = '$post_observation->status', " .
+    " species_id = $species_id, " .
+    " location_id = $location_id, " .
     " video_segment_id = $post_observation->video_segment_id";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+
+$affected_rows = mysql_affected_rows($wildlife_db);
+error_log("AFFECTED ROWS: $affected_rows");
+
+if ($affected_rows > 1) {
+    /**
+     * In this case, we replaced an observation.  This should not happen, it could mean that someone is gaming the
+     * project, trying to enter in multiple observations for the same video to award them credit.  If this is the
+     * case we need to not award credit or validate against that observaiton.
+     */
+
+    $update_db_obs_credit = false;
+    $update_post_credit = false;
+}
 
 
 /**
