@@ -95,7 +95,7 @@ $active_items = array(
 print_navbar($active_items);
 
 echo "
-    <div class='well well-large' style='padding-top:15px; padding-bottom:5px'>
+    <div class='well well-large' style='padding-top:5px; padding-bottom:5px'>
         <div class='row-fluid'>
             <div class='span12'>
                 <h3>Wildlife@Home and BOINC</h3>
@@ -105,7 +105,7 @@ echo "
         </div>
     </div>
 
-    <div class='well well-large' style='padding-top:15px'>
+    <div class='well well-large' style='padding-top:5px'>
         <div class='row-fluid'>
             <div class='span12'>
                 <h3>Instructions</h3>
@@ -120,7 +120,7 @@ echo "
         </div>
     </div>
 
-    <div class='well well-large' style='padding-top:15px'>
+    <div class='well well-large' style='padding-top:5px'>
         <div class='row-fluid'>
             <div class='span12'>
                 <h3>Rules and Policies</h3>
@@ -141,7 +141,7 @@ echo "
                 <h4>Is it safe to run Wildlife@Home?</h4></p>
                     <p>Any time you download a program through the Internet you are taking a chance: the program might have dangerous errors, or the download server might have been hacked. Wildlife@Home has made efforts to minimize these risks. We have tested our applications carefully. Our servers are behind a firewall and are configured for high security. To ensure the integrity of program downloads, all executable files are digitally signed on a secure computer not connected to the Internet.</p>
                     <p>The applications run by Wildlife@Home may cause some computers to overheat. If this happens, stop running Wildlife@Home or use a <a href='download_network.php'>utility program</a> that limits CPU usage.</p>
-                    <p>Wildlife@Home was developed by AstroInformatics Group. BOINC was developed at the University of California.</p>
+                    <p>Wildlife@Home was developed by the Wildlife@Home team at the University of North Dakota. BOINC was developed at the University of California.</p>
 
                 <h4>Liability</h4>
                     <p>Wildlife@Home and AstroInformatics Group assume no liability for damage to your computer, loss of data, or any other event or condition that may occur as a result of participating in Wildlife@Home.</p>
