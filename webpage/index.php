@@ -126,8 +126,8 @@ echo "
                 </p>
 
                 <div class='row-fluid'>
-                    <a class='btn btn-large btn-primary span12' href='video_selector.php'>Get Started</a>
-                    <!-- <a class='btn btn-large btn-primary span6 disabled' href='bossa_apps.php'>Classify Video</a> -->
+                    <a class='btn btn-large btn-primary span6' href='video_selector.php'>Watch Videos</a>
+                    <a class='btn btn-large btn-primary span6' href='boinc_instructions.php'>Volunteer Your Computer</a>
                 </div>
             </div>
 

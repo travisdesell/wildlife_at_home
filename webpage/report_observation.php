@@ -56,7 +56,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 /**
  *  We only need to get the canonical result and/or any other unvalidated observations
  */
-$query = "SELECT * FROM observations WHERE video_segment_id = $post_observation->video_segment_id AND (status = 'UNVALIDATED' OR status = 'CANONICAL')";
+$query = "SELECT * FROM observations WHERE video_segment_id = $post_observation->video_segment_id";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
@@ -235,6 +235,8 @@ for ($i = 0; $i < count($db_observations); $i++) {
 }
 
 $crowd_obs_count = 1 + count($db_observations);
+
+error_log("updating crowd_obs_count to $crowd_obs_count and crowd_status to $crowd_status");
 
 //$query = "UPDATE video_segment_2 SET crowd_status = '$crowd_status' WHERE id = $post_observation->video_segment_id";
 $query = "UPDATE video_segment_2 SET crowd_status = '$crowd_status', crowd_obs_count = $crowd_obs_count, interesting_count = $interesting_count WHERE id = $post_observation->video_segment_id";
