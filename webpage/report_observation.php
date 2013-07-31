@@ -208,6 +208,8 @@ if ($affected_rows > 1) {
 
     $update_db_obs_credit = false;
     $update_post_credit = false;
+
+    $post_observation->credit = 0;
 }
 
 
@@ -247,7 +249,7 @@ if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_e
 if ($update_post_credit) {
     /* add credit to the user */
 
-    bossa_award_credit($post_observation->user_id, $duration_s, $start_time, time());
+    bossa_award_credit($post_observation->user_id, $post_observation->credit, $start_time, time());
 }
 
 if ($update_db_obs_credit) {
@@ -260,7 +262,7 @@ if ($update_db_obs_credit) {
         if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
         if ($db_observations[$i]->status == 'VALID') {
-            bossa_award_credit($db_observations[$i]->user_id, $duration_s, $start_time, time());
+            bossa_award_credit($db_observations[$i]->user_id, $db_observations[$i]->credit, $start_time, time());
         }
     }
 

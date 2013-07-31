@@ -10,30 +10,41 @@ Mustache_Autoloader::register();
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
-$filter = mysql_real_escape_string($_POST['filter']);
 
-if ($filter == 'interesting-nav-pill') {
-    $filter = "observations.interesting > 0";
-} else if ($filter == 'invalid-nav-pill') {
-    $filter = "observations.status = 'INVALID'";
-} else if ($filter == 'bird-presence-nav-pill') {
-    $filter = "observations.bird_presence > 0";
-} else if ($filter == 'chick-presence-nav-pill') {
-    $filter = "observations.chick_presence > 0";
-} else if ($filter == 'predator-presence-nav-pill') {
-    $filter = "observations.predator_presence > 0";
-} else if ($filter == 'nest-defense-nav-pill') {
-    $filter = "observations.nest_defense > 0";
-} else if ($filter == 'nest-success-nav-pill') {
-    $filter = "observations.nest_success > 0";
-} else if ($filter == 'bird-leave-nav-pill') {
-    $filter = "observations.bird_leave > 0";
-} else if ($filter == 'bird-return-nav-pill') {
-    $filter = "observations.bird_return > 0";
-} else {
-    echo "";
+$species_id = mysql_real_escape_string($_POST['species_id']);
+$location_id = mysql_real_escape_string($_POST['location_id']);
+
+$filters = $_POST['filters'];
+
+$new_filter = '';
+
+if ($filters['interesting'] == 'true')        $new_filter .= " AND observations.interesting > 0";
+if ($filters['invalid'] == 'true')            $new_filter .= " AND observations.status = 'INVALID'";
+if ($filters['bird_presence'] == 'true')      $new_filter .= " AND observations.bird_presence > 0";
+if ($filters['bird_absence'] == 'true')      $new_filter .= " AND observations.bird_absence > 0";
+if ($filters['chick_presence'] == 'true')     $new_filter .= " AND observations.chick_presence > 0";
+if ($filters['predator_presence'] == 'true')  $new_filter .= " AND observations.predator_presence > 0";
+if ($filters['nest_defense'] == 'true')       $new_filter .= " AND observations.nest_defense > 0";
+if ($filters['nest_success'] == 'true')       $new_filter .= " AND observations.nest_success > 0";
+if ($filters['bird_return'] == 'true')        $new_filter .= " AND observations.bird_leave > 0";
+if ($filters['bird_leave'] == 'true')         $new_filter .= " AND observations.bird_return > 0";
+if ($filters['corrupt'] == 'true')            $new_filter .= " AND observations.corrupt > 0";
+if ($filters['too_dark'] == 'true')            $new_filter .= " AND observations.too_dark > 0";
+
+if (strlen($new_filter) > 5) $new_filter = substr($new_filter, 5);
+else {
+    echo "<div class='well well-large' style='padding-top:15px'>";
+    echo "<div class='span12'>";
+    echo "<p>Click on the above video types to display videos. You can select multiple types, and the videos displayed will be the ones that have all the selected types (not any of the selected types).<p>\n";
+    echo "</div>";
+    echo "</div>";
     die();
 }
+
+$filter = $new_filter;
+
+if ($species_id > 0)  $filter .= " AND species_id = $species_id";
+if ($location_id > 0) $filter .= " AND location_id = $location_id";
 
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
@@ -92,7 +103,21 @@ while ($row = mysql_fetch_assoc($result)) {
     $observation_result = attempt_query_with_ping($observation_query, $wildlife_db);
     if (!$observation_result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $observation_query\n");
 
+    $video_and_observations['names'] = array();
+    $video_and_observations['interesting'] = array();
+    $video_and_observations['bird_leave'] = array();
+    $video_and_observations['bird_return'] = array();
+    $video_and_observations['bird_presence'] = array();
+    $video_and_observations['bird_absence'] = array();
+    $video_and_observations['predator_presence'] = array();
+    $video_and_observations['nest_defense'] = array();
+    $video_and_observations['nest_success'] = array();
+    $video_and_observations['chick_presence'] = array();
+    $video_and_observations['too_dark'] = array();
+    $video_and_observations['corrupt'] = array();
+
     while ($observation_row = mysql_fetch_assoc($observation_result)) {
+        set_marks($observation_row['interesting']);
         set_marks($observation_row['bird_leave']);
         set_marks($observation_row['bird_return']);
         set_marks($observation_row['bird_presence']);
@@ -106,6 +131,23 @@ while ($row = mysql_fetch_assoc($result)) {
 
         $observation_row['user_id'] = get_user_from_id($observation_row['user_id'])->name;
         $video_and_observations['observations'][] = $observation_row;
+
+        /**
+         *  Make the list of users by columns instead of by rows.
+         */
+        $video_and_observations['names'][]['name'] = $observation_row['user_id'];
+        $video_and_observations['status'][]['status'] = $observation_row['status'];
+        $video_and_observations['interesting'][]['interesting'] = $observation_row['interesting'];
+        $video_and_observations['bird_leave'][]['bird_leave'] = $observation_row['bird_leave'];
+        $video_and_observations['bird_return'][]['bird_return'] = $observation_row['bird_return'];
+        $video_and_observations['bird_presence'][]['bird_presence'] = $observation_row['bird_presence'];
+        $video_and_observations['bird_absence'][]['bird_absence'] = $observation_row['bird_absence'];
+        $video_and_observations['predator_presence'][]['predator_presence'] = $observation_row['predator_presence'];
+        $video_and_observations['nest_defense'][]['nest_defense'] = $observation_row['nest_defense'];
+        $video_and_observations['nest_success'][]['nest_success'] = $observation_row['nest_success'];
+        $video_and_observations['chick_presence'][]['chick_presence'] = $observation_row['chick_presence'];
+        $video_and_observations['too_dark'][]['too_dark'] = $observation_row['too_dark'];
+        $video_and_observations['corrupt'][]['corrupt'] = $observation_row['corrupt'];
     }
 
     $video_list['video_list'][] = $video_and_observations;
@@ -123,7 +165,7 @@ if ($found) {
      */
     echo "<div class='well well-large' style='padding-top:15px'>";
     echo "<div class='span12'>";
-    echo "<p>No videos of this type have been watched.<p>\n";
+    echo "<p>Could not find any watched videos that match all the selected types.<p>\n";
     echo "</div>";
     echo "</div>";
 }
