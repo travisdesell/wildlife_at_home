@@ -134,7 +134,7 @@ echo "
         <div class='container'>
             <div class='row-fluid'>
                 <div class='span12'>
-                <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is also a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>. 
+                <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>, and you can go over the observations for videos you've already watched <a href='http://volunteer.cs.und.edu/wildlife/user_video_list.php'>here</a>. 
                 </div>
             </div>
         </div>

@@ -75,6 +75,10 @@ echo "
            border-radius: 4px 4px 0px 0px;
         }
 
+        .label {
+            cursor: pointer;
+        }
+
 .bottom-up {top: auto; bottom: 100%; }
 .dropdown-menu.bottom-up:before { border-bottom: 0px solid transparent !important; border-top: 7px solid rgba(0, 0, 0, 0.2); top: auto !important; bottom: -7px; }
 .dropdown-menu.bottom-up:after  { border-bottom: 0px solid transparent !important; border-top: 6px solid white;              top: auto !important; bottom: -6px; }
@@ -86,7 +90,6 @@ $user_id = $user->id;
 
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
-    var filter = '$filter';
 </script>";
 
 
@@ -112,17 +115,44 @@ echo "
         <div class='row-fluid'>
             <div class='container'>
                 <div class='span12'>
-                <ul class='nav nav-pills' style='margin-top:0px; margin-bottom: 0px; padding-top: 0px; padding-bottom: 8px'>
-                        <li class='nav-li' id='invalid-nav-pill'><a href='#'>Invalid</a></li>
-                        <li class='nav-li' id='interesting-nav-pill'><a href='#'>Interesting</a></li>
-                        <li class='nav-li' id='bird-presence-nav-pill'><a href='#'>Bird Presence</a></li>
-                        <li class='nav-li' id='chick-presence-nav-pill'><a href='#'>Chick Presence</a></li>
-                        <li class='nav-li' id='predator-presence-nav-pill'><a href='#'>Predator Presence</a></li>
-                        <li class='nav-li' id='nest-defense-nav-pill'><a href='#'>Nest Defense</a></li>
-                        <li class='nav-li' id='nest-success-nav-pill'><a href='#'>Nest Success</a></li>
-                        <li class='nav-li' id='bird-leave-nav-pill'><a href='#'>Bird Leave</a></li>
-                        <li class='nav-li' id='bird-return-nav-pill'><a href='#'>Bird Return</a></li>
-                    </ul>
+                    <div class='btn-group pull-right' style='margin-bottom:10px'>
+                        <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='species-button'>
+                        Any Species <span class='caret'></span>
+                        </button>
+                        <ul class='dropdown-menu'>
+                            <li><a href='#' id='display-any-species-dropdown'>Any Species</a></li>
+                            <li><a href='#' id='display-grouse-dropdown'>Sharp-tailed Grouse</a></li>
+                            <li><a href='#' id='display-tern-dropdown'>Interior Least Tern</a></li>
+                            <li><a href='#' id='display-plover-dropdown'>Piping Plover</a></li>
+                        </ul>
+                    </div>
+
+                    <div class='btn-group pull-right'>
+                        <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='location-button'>
+                        Any Location <span class='caret'></span>
+                        </button>
+                        <ul class='dropdown-menu'>
+                            <li><a href='#' id='display-any-location-dropdown'>Any Location</a></li>
+                            <li><a href='#' id='display-belden-dropdown'>Belden, ND</a></li>
+                            <li><a href='#' id='display-blaisdell-dropdown'>Blaisdell, ND</a></li>
+                            <li><a href='#' id='display-lostwood-dropdown'>Lostwood Wildlife Refuge, ND</a></li>
+                            <li><a href='#' id='display-missouri-river-dropdown'>Missouri River, ND</a></li>
+                        </ul>
+                    </div>
+
+                    <span style='margin-top:5px' class='label nav-li' id='invalid-nav-pill'>Invalid</span>
+                    <span class='label nav-li' id='interesting-nav-pill'>Interesting</span>
+                    <span class='label nav-li' id='bird-presence-nav-pill'>Bird Presence</span>
+                    <span class='label nav-li' id='bird-absence-nav-pill'>Bird Absence</span>
+                    <span class='label nav-li' id='chick-presence-nav-pill'>Chick Presence</span>
+                    <span class='label nav-li' id='predator-presence-nav-pill'>Predator Presence</span>
+                    <br>
+                    <span style='margin-bottom:15px' class='label nav-li' id='nest-defense-nav-pill'>Nest Defense</span>
+                    <span class='label nav-li' id='nest-success-nav-pill'>Nest Success</span>
+                    <span class='label nav-li' id='bird-leave-nav-pill'>Bird Leave</span>
+                    <span class='label nav-li' id='bird-return-nav-pill'>Bird Return</span>
+                    <span class='label nav-li' id='too-dark-nav-pill'>Too Dark</span>
+                    <span class='label nav-li' id='corrupt-nav-pill'>Corrupt</span>
                 </div>
             </div>
         </div>
