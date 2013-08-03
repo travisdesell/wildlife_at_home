@@ -16,26 +16,54 @@ $location_id = mysql_real_escape_string($_POST['location_id']);
 
 $filters = $_POST['filters'];
 
+//error_log("filters: " . json_encode($filters));
+
 $new_filter = '';
 
-if ($filters['interesting'] == 'true')        $new_filter .= " AND observations.interesting > 0";
-if ($filters['invalid'] == 'true')            $new_filter .= " AND observations.status = 'INVALID'";
-if ($filters['bird_presence'] == 'true')      $new_filter .= " AND observations.bird_presence > 0";
-if ($filters['bird_absence'] == 'true')      $new_filter .= " AND observations.bird_absence > 0";
-if ($filters['chick_presence'] == 'true')     $new_filter .= " AND observations.chick_presence > 0";
-if ($filters['predator_presence'] == 'true')  $new_filter .= " AND observations.predator_presence > 0";
-if ($filters['nest_defense'] == 'true')       $new_filter .= " AND observations.nest_defense > 0";
-if ($filters['nest_success'] == 'true')       $new_filter .= " AND observations.nest_success > 0";
-if ($filters['bird_return'] == 'true')        $new_filter .= " AND observations.bird_leave > 0";
-if ($filters['bird_leave'] == 'true')         $new_filter .= " AND observations.bird_return > 0";
-if ($filters['corrupt'] == 'true')            $new_filter .= " AND observations.corrupt > 0";
-if ($filters['too_dark'] == 'true')            $new_filter .= " AND observations.too_dark > 0";
+if ($filters['interesting'] == 'yes')           $new_filter .= " AND observations.interesting > 0";
+if ($filters['corrupt'] == 'yes')               $new_filter .= " AND observations.corrupt > 0";
+if ($filters['too_dark'] == 'yes')              $new_filter .= " AND observations.too_dark > 0";
+
+if ($filters['invalid'] == 'yes')               $new_filter .= " AND observations.status = 'INVALID'";
+
+if ($filters['bird_presence'] == 'yes')      $new_filter .= " AND observations.bird_presence > 0";
+if ($filters['bird_absence'] == 'yes')      $new_filter .= " AND observations.bird_absence > 0";
+if ($filters['chick_presence'] == 'yes')     $new_filter .= " AND observations.chick_presence > 0";
+if ($filters['predator_presence'] == 'yes')  $new_filter .= " AND observations.predator_presence > 0";
+if ($filters['nest_defense'] == 'yes')       $new_filter .= " AND observations.nest_defense > 0";
+if ($filters['nest_success'] == 'yes')       $new_filter .= " AND observations.nest_success > 0";
+if ($filters['bird_return'] == 'yes')        $new_filter .= " AND observations.bird_return > 0";
+if ($filters['bird_leave'] == 'yes')         $new_filter .= " AND observations.bird_leave > 0";
+
+if ($filters['invalid'] == 'unsure')               $new_filter .= " AND observations.status = 'UNVALIDATED'";
+if ($filters['bird_presence'] == 'unsure')      $new_filter .= " AND observations.bird_presence = 0";
+if ($filters['bird_absence'] == 'unsure')      $new_filter .= " AND observations.bird_absence = 0";
+if ($filters['chick_presence'] == 'unsure')     $new_filter .= " AND observations.chick_presence = 0";
+if ($filters['predator_presence'] == 'unsure')  $new_filter .= " AND observations.predator_presence = 0";
+if ($filters['nest_defense'] == 'unsure')       $new_filter .= " AND observations.nest_defense = 0";
+if ($filters['nest_success'] == 'unsure')       $new_filter .= " AND observations.nest_success = 0";
+if ($filters['bird_return'] == 'unsure')        $new_filter .= " AND observations.bird_return = 0";
+if ($filters['bird_leave'] == 'unsure')         $new_filter .= " AND observations.bird_leave = 0";
+
+if ($filters['invalid'] == 'no')               $new_filter .= " AND (observations.status = 'VALID' || observations.status = 'CANONICAL')";
+if ($filters['bird_presence'] == 'no')      $new_filter .= " AND observations.bird_presence < 0";
+if ($filters['bird_absence'] == 'no')      $new_filter .= " AND observations.bird_absence < 0";
+if ($filters['chick_presence'] == 'no')     $new_filter .= " AND observations.chick_presence < 0";
+if ($filters['predator_presence'] == 'no')  $new_filter .= " AND observations.predator_presence < 0";
+if ($filters['nest_defense'] == 'no')       $new_filter .= " AND observations.nest_defense < 0";
+if ($filters['nest_success'] == 'no')       $new_filter .= " AND observations.nest_success < 0";
+if ($filters['bird_return'] == 'no')        $new_filter .= " AND observations.bird_return < 0";
+if ($filters['bird_leave'] == 'no')         $new_filter .= " AND observations.bird_leave < 0";
+
+
 
 if (strlen($new_filter) > 5) $new_filter = substr($new_filter, 5);
 else {
-    echo "<div class='well well-large' style='padding-top:15px'>";
+    echo "<div class='well well-large' style='padding-top:15px; padding-bottom:5px'>";
+    echo "<div class='container'>";
     echo "<div class='span12'>";
-    echo "<p>Click on the above video types to display videos. You can select multiple types, and the videos displayed will be the ones that have all the selected types (not any of the selected types).<p>\n";
+    echo "<p>Click on the above observation types to display videos. Many will toggle bewteen yes, no, unsure, and unselected. Selecting observation types will show videos you've watched which have all of the highlighted types. So if you have selected <span class='label label-info'>interesting</span> and <span class='label label-info'>predator presence - yes</span> and <span class='label label-info'>nest defense - unsure</span>, the page will display all videos you've watched where you reported that it was interesting, there was a predator, and that you were unsure of nest defense.</p>\n";
+    echo "</div>";
     echo "</div>";
     echo "</div>";
     die();
@@ -103,6 +131,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $observation_result = attempt_query_with_ping($observation_query, $wildlife_db);
     if (!$observation_result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $observation_query\n");
 
+    /*
     $video_and_observations['names'] = array();
     $video_and_observations['interesting'] = array();
     $video_and_observations['bird_leave'] = array();
@@ -115,6 +144,7 @@ while ($row = mysql_fetch_assoc($result)) {
     $video_and_observations['chick_presence'] = array();
     $video_and_observations['too_dark'] = array();
     $video_and_observations['corrupt'] = array();
+     */
 
     while ($observation_row = mysql_fetch_assoc($observation_result)) {
         set_marks($observation_row['interesting']);
@@ -135,6 +165,7 @@ while ($row = mysql_fetch_assoc($result)) {
         /**
          *  Make the list of users by columns instead of by rows.
          */
+        /*
         $video_and_observations['names'][]['name'] = $observation_row['user_id'];
         $video_and_observations['status'][]['status'] = $observation_row['status'];
         $video_and_observations['interesting'][]['interesting'] = $observation_row['interesting'];
@@ -148,6 +179,7 @@ while ($row = mysql_fetch_assoc($result)) {
         $video_and_observations['chick_presence'][]['chick_presence'] = $observation_row['chick_presence'];
         $video_and_observations['too_dark'][]['too_dark'] = $observation_row['too_dark'];
         $video_and_observations['corrupt'][]['corrupt'] = $observation_row['corrupt'];
+         */
     }
 
     $video_list['video_list'][] = $video_and_observations;

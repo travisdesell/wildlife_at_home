@@ -36,10 +36,10 @@ function get_observation_data($data, $from_db = false) {
 
 $post_observation = get_observation_data($_POST);
 
-$start_time = $_POST['start_time'];
-$species_id = $_POST['species_id'];
-$location_id = $_POST['location_id'];
-$duration_s = $_POST['duration_s'];
+$start_time = mysql_real_escape_string($_POST['start_time']);
+$species_id = mysql_real_escape_string($_POST['species_id']);
+$location_id = mysql_real_escape_string($_POST['location_id']);
+$duration_s = mysql_real_escape_string($_POST['duration_s']);
 /**
  * Grab the other observations from the database.
  */
@@ -219,7 +219,7 @@ if ($affected_rows > 1) {
  * otherwise update it to 'WATCHED'
  */
 $crowd_status = 'WATCHED';
-if ($update_db_obs_credit) $crowd_status = 'VALIDATED';
+if ($update_db_obs_credit || !is_null($canonical_observation)) $crowd_status = 'VALIDATED';
 
 /**
  * calculate the interesting count, the count of observations.

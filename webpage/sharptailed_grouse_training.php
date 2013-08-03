@@ -65,32 +65,32 @@ $videos = array(
 
                 'video_explanation' => array(
                     array(
-                        'video_href' => 'http://wildlife.und.edu/video/wildlife/Website_Training/bird_leaving_nest',
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/bird_leaving_nest',
                         'video_description' => "<p>As you will notice, it can be challenging to determine if the bird is on the nest. Her coloration helps her to blend in with her surroundings, and she prefers to nest in areas with plenty of grass to conceal her and the nest.  Use this video where the bird is leaving the nest to see how difficult is to locate her until she moves, and how exposed the eggs become when she leaves the nest.</p>"
                     ),
 
                     array(
-                        'video_href' => 'http://wildlife.und.edu/video/wildlife/Website_Training/bird_returning',
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/bird_returning',
                         'video_description' => "<p>After the foraging event, she will return to the nest and resume incubation.</p>"
                     ),
 
                     array(
-                        'video_href' => 'http://wildlife.und.edu/video/wildlife/Website_Training/badger',
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/badger',
                         'video_description' => '<p>In addition, you will report when the presence of a predator (or any other species) is in the field of view. These may be difficult to identify to species because they can happen quickly or the predator can stand in front of the camera making it difficult to see anything but fur or feathers! Below is a video of a Badger eating eggs.</p>'
                     ),
 
                     array(
-                        'video_href' => 'http://wildlife.und.edu/video/wildlife/Website_Training/hawk',
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/hawk',
                         'video_description' => "<p>And here is a Swainson's Hawk which captures the hen from the nest.</p>"
                     ),
 
                     array(
-                        'video_href' => 'http://wildlife.und.edu/video/wildlife/Website_Training/defense',
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/defense',
                         'video_description' => "<p>You also will help us find events of nest defense. <i>Nest defense</i> is defined as any behavior where the parent increases its probability of injury or mortality in order to increase the probability of the contents of the nest surviving.  Therefore, if a grouse is directing attacking a bird is nest defense, as well as when a bird may be doing broken wing displays or distraction displays.  Based on some preliminary video observations, sharp-tailed grouse appear to dip their heads, hold out their wings, and have their tails up in a similar fashion to displays observed at the lek (dancing grounds).</p>"
                     ),
 
                     array(
-                        'video_href' => 'http://wildlife.und.edu/video/wildlife/Website_Training/hatch1',
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/hatch1',
                         'video_description' => '<p>Finally, we are interested in when a clutch hatches.  Below is an example of a clutch of grouse chicks leaving the nest.</p>'
                     )
                 ),

@@ -1,16 +1,6 @@
 
 $(document).ready(function () {
 
-    /**
-     * Use this to create a forum thread with the video.
-     */
-    var discuss_video_clicked = false;
-    $('#discuss-video-button').button();
-    $('#discuss-video-button').click(function() { 
-        discuss_video_clicked = true;
-        $("#discuss-video-form").submit();
-    });
-
     $('#display-any-location-dropdown').click(function() {
         if (location_id != -1) {
             location_id = -1;
@@ -128,18 +118,18 @@ $(document).ready(function () {
     var location_id = -1;
 
     var filters =   {
-                        invalid : false,
-                        interesting : false,
-                        bird_presence : false,
-                        bird_absence : false,
-                        chick_presence : false,
-                        predator_presence : false,
-                        nest_defense : false,
-                        nest_success : false,
-                        bird_leave : false,
-                        bird_return : false,
-                        too_dark : false,
-                        corrupt : false
+                        interesting : 'no',
+                        too_dark : 'no',
+                        corrupt : 'no',
+                        invalid : 'any',
+                        bird_presence : 'any',
+                        bird_absence : 'any',
+                        chick_presence : 'any',
+                        predator_presence : 'any',
+                        nest_defense : 'any',
+                        nest_success : 'any',
+                        bird_leave : 'any',
+                        bird_return : 'any'
                     };
 
     reload_videos();
@@ -182,6 +172,18 @@ $(document).ready(function () {
             success : function(response) {
 //                console.log("the response was:\n" + response);
                 $("#videos-placeholder").html(response);
+
+                /**
+                 * Use this to create a forum thread with the video.
+                 */
+                $('.discuss-video-button').button();
+                $('.discuss-video-button').click(function() { 
+                    var form_id = $(this).attr('id');
+                    form_id = '#' + form_id;
+                    form_id = form_id.replace('button', 'form');
+                    console.log('form id is: ' + form_id);
+                    $(form_id).submit();
+                });
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -192,25 +194,71 @@ $(document).ready(function () {
 
     $('.nav-li').click(function() {
         if ($(this).hasClass('label-info')) {
-            $(this).removeClass('label-info');
+            if ($(this).text().indexOf(' - Unsure') > 0) {
+                $(this).removeClass('label-info');
+                $(this).text( $(this).text().substr(0, $(this).text().indexOf(' - ')) );
+            } else if ($(this).text().indexOf(' - Yes') > 0) {
+                $(this).text( $(this).text().substr(0, $(this).text().indexOf(' - ')) );
+                $(this).text( $(this).text() + ' - No' );
+            } else if ($(this).text().indexOf(' - No') > 0) {
+                $(this).text( $(this).text().substr(0, $(this).text().indexOf(' - ')) );
+                $(this).text( $(this).text() + ' - Unsure' );
+
+            } else if ($(this).text() == 'Invalid') {
+                $(this).text('Unvalidated');
+            } else if ($(this).text() == 'Unvalidated') {
+                $(this).text('Valid');
+            } else if ($(this).text() == 'Valid') {
+                $(this).text('Invalid');
+                $(this).removeClass('label-info');
+
+            } else {
+                /**
+                 *  This will be the case for Corrupt and Too Dark
+                 */
+                $(this).removeClass('label-info');
+            }
+
         } else {
             $(this).addClass('label-info');
+            if ($(this).text() != 'Invalid' && $(this).text() != 'Too Dark' && $(this).text() != 'Corrupt' && $(this).text() != 'Interesting') {
+                $(this).text( $(this).text() + ' - Yes' );
+            }
         }
 
         filter = $(this).attr("id");
 
-        if (filter === 'interesting-nav-pill')  filters.interesting = !filters.interesting;
-        else if (filter === 'invalid-nav-pill') filters.invalid = !filters.invalid;
-        else if (filter === 'bird-presence-nav-pill') filters.bird_presence = !filters.bird_presence;
-        else if (filter === 'bird-absence-nav-pill') filters.bird_absence = !filters.bird_absence;
-        else if (filter === 'chick-presence-nav-pill')  filters.chick_presence = !filters.chick_presence;
-        else if (filter === 'predator-presence-nav-pill') filters.predator_presence = !filters.predator_presence;
-        else if (filter === 'nest-defense-nav-pill') filters.nest_defense = !filters.nest_defense;
-        else if (filter === 'nest-success-nav-pill') filters.nest_success = !filters.nest_success;
-        else if (filter === 'bird-leave-nav-pill') filters.bird_leave = !filters.bird_leave;
-        else if (filter === 'bird-return-nav-pill') filters.bird_return = !filters.bird_return;
-        else if (filter === 'too-dark-nav-pill') filters.too_dark = !filters.too_dark;
-        else if (filter === 'corrupt-nav-pill') filters.corrupt = !filters.corrupt;
+        function update_filters(filter_type, binary_filter) {
+            if (filter_type == 'invalid') {
+                if (filters[filter_type] === 'yes') filters[filter_type] = 'unsure';
+                else if (filters[filter_type] === 'unsure') filters[filter_type] = 'no';
+                else if (filters[filter_type] === 'no') filters[filter_type] = 'any';
+                else if (filters[filter_type] === 'any') filters[filter_type] = 'yes';
+
+            } else  if (binary_filter === undefined) {
+                if (filters[filter_type] === 'yes') filters[filter_type] = 'no';
+                else if (filters[filter_type] === 'no') filters[filter_type] = 'unsure';
+                else if (filters[filter_type] === 'unsure') filters[filter_type] = 'any';
+                else if (filters[filter_type] === 'any') filters[filter_type] = 'yes';
+            } else {
+                if (filters[filter_type] === 'yes') filters[filter_type] = 'no';
+                else if (filters[filter_type] === 'no') filters[filter_type] = 'yes';
+            }
+        }
+
+//        if (filter === 'interesting-nav-pill')  filters.interesting = !filters.interesting;
+        if (filter === 'interesting-nav-pill')  update_filters('interesting', true);
+        else if (filter === 'invalid-nav-pill') update_filters('invalid', true);
+        else if (filter === 'bird-presence-nav-pill') update_filters('bird_presence');
+        else if (filter === 'bird-absence-nav-pill') update_filters('bird_absence');
+        else if (filter === 'chick-presence-nav-pill')  update_filters('chick_presence');
+        else if (filter === 'predator-presence-nav-pill') update_filters('predator_presence');
+        else if (filter === 'nest-defense-nav-pill') update_filters('nest_defense');
+        else if (filter === 'nest-success-nav-pill') update_filters('nest_success');
+        else if (filter === 'bird-leave-nav-pill') update_filters('bird_leave');
+        else if (filter === 'bird-return-nav-pill') update_filters('bird_return');
+        else if (filter === 'too-dark-nav-pill') update_filters('too_dark', true);
+        else if (filter === 'corrupt-nav-pill') update_filters('corrupt', true);
 
         reload_videos();
     });

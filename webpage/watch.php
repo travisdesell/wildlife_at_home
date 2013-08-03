@@ -148,7 +148,7 @@ echo"
 if ($found) {
     echo "
                         <div class='row-fluid'>
-                            <video style='width:100%;' id='wildlife_video' controls='controls'>
+                            <video style='width:100%;' id='wildlife_video' controls='controls' preload='auto'>
                                 <source src='http://wildlife.und.edu/$segment_filename.mp4' type='video/mp4'></source>
                                 <source src='http://wildlife.und.edu/$segment_filename.ogv' type='video/ogg'></source>
                                 This video requires a browser that supports HTML5 video.
