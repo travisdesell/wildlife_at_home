@@ -6,6 +6,8 @@ $(document).ready(function () {
     var video_min = 0;
     var video_count = 10;
     var event_ids = {};
+    var comments = {};
+    var event_times = {};
     var video_observations = {};
 
     $('.species-dropdown').click(function() {
@@ -118,6 +120,7 @@ $(document).ready(function () {
                 $("#video-list-placeholder").html(response);
                 enable_accordion();
 
+                $(".tag-video-button").button();
                 $(".tag-video-button").click(function() {
                     var video_id = $(this).attr('video_id');
                     var video_button = $(this);
@@ -129,14 +132,15 @@ $(document).ready(function () {
                         dataType : 'JSON',
                         success : function(response) {
 //                            console.log("response: " + JSON.stringify(response));
-                            if (response['expert_finished'] === '1') {
+                            if (response['expert_finished'] === 'FINISHED') {
                                 video_button.removeClass("btn-primary");
                                 video_button.addClass("btn-success");
+                            } else if (response['expert_finished'] === 'WATCHED') {
+                                video_button.removeClass("btn-success");
+                                video_button.addClass("btn-primary");
                             } else {
                                 video_button.removeClass("btn-success");
-                                if (video_observations[video_id] !== null && video_observations[video_id] > 0) {
-                                    video_button.addClass("btn-primary");
-                                }
+                                video_button.removeClass("btn-primary");
                             }
 
                         },
@@ -204,6 +208,7 @@ $(document).ready(function () {
 
 //                            console.log( "Time: " + result);
                             $(this).val( result );
+                            event_times[video_id] = result;
                         });
 
                         $('.event-dropdown').click(function(ev) {
@@ -217,24 +222,87 @@ $(document).ready(function () {
 
                             if (event_id === '0') {
                                 $('#event-button-' + video_id).html('Event <span class="caret"></span>');
+                                event_ids[video_id] = 'UNSPECIFIED';
                             } else if (event_id === '1') {
                                 $('#event-button-' + video_id).html('Bird Leave <span class="caret"></span>');
+                                event_ids[video_id] = 'BIRD_LEAVE';
                             } else if (event_id === '2') {
                                 $('#event-button-' + video_id).html('Bird Return <span class="caret"></span>');
+                                event_ids[video_id] = 'BIRD_RETURN';
                             } else if (event_id === '3') {
                                 $('#event-button-' + video_id).html('Predator <span class="caret"></span>');
+                                event_ids[video_id] = 'PREDATOR';
                             } else if (event_id === '4') {
                                 $('#event-button-' + video_id).html('Other Animal <span class="caret"></span>');
+                                event_ids[video_id] = 'OTHER_ANIMAL';
                             } else if (event_id === '5') {
                                 $('#event-button-' + video_id).html('Nest Defense <span class="caret"></span>');
+                                event_ids[video_id] = 'NEST_DEFENSE';
                             } else if (event_id === '6') {
                                 $('#event-button-' + video_id).html('Nest Success <span class="caret"></span>');
+                                event_ids[video_id] = 'NEST_SUCCESS';
                             }
 
                             ev.preventDefault();
 //                            ev.stopPropagation();
                         });
 
+                        $('.submit-observation-button').click(function() {
+                            var video_id = $(this).attr("video_id");
+
+                            var submission_data = {
+                                                    video_id : video_id,
+                                                    user_id : user_id,
+                                                    event_type : event_ids[video_id],
+                                                    event_time : event_times[video_id],
+                                                    comments : $("#comments-" + video_id).val()
+                                                  };
+
+                            $.ajax({
+                                type: 'POST',
+                                url: './submit_expert_observation.php',
+                                data : submission_data,
+                                dataType : 'json',
+                                success : function(response) {
+                                    //console.log("the response was:\n" + response);
+
+                                    var observation_id = response['observation_id'];
+
+                                    if ($("#observations-table-div-" + video_id).html() == '') {
+                                        var text = "<table class='table table-striped table-bordered table-condensed observations-table' video_id='" + video_id + "' id='observations-table-" + video_id + "'>";
+                                        text += "<thead><th>User</th><th>Event</th><th>Time</th><th>Comments</th></thead>";
+                                        text += "<tbody>";
+                                        text += "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
+                                        text += "</tbody>";
+                                        text += "</table>";
+
+                                        $("#observations-table-div-" + video_id).html( text );
+
+                                        video_observations[video_id] = 1;
+                                        if ( ! $("#tag-video-button-" + video_id).hasClass("btn-success") ) {
+                                            $("#tag-video-button-" + video_id).addClass("btn-primary");
+                                        }
+                                    } else {
+                                        var text = "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
+
+                                        $("#observations-table-div-" + video_id + " tr:last").after( text );
+
+                                        video_observations[video_id] = 2;
+                                        if ( ! $("#tag-video-button-" + video_id).hasClass("btn-success") ) {
+                                            $("#tag-video-button-" + video_id).addClass("btn-primary");
+                                        }
+                                    }
+
+                                    enable_remove_observation_buttons();
+                                },
+                                error : function(jqXHR, textStatus, errorThrown) {
+                                    alert(errorThrown);
+                                },
+                                async: true
+                            });
+                        });
+
+                        enable_remove_observation_buttons();
                     },
                     error : function(jqXHR, textStatus, errorThrown) {
                         alert(errorThrown);
@@ -250,6 +318,46 @@ $(document).ready(function () {
             ev.stopPropagation();
         });
     }
+
+    function enable_remove_observation_buttons() {
+        $('.remove-observation-button').button();
+        $('.remove-observation-button').click(function() {
+            var observation_id = $(this).attr('observation_id');
+            console.log("observation id: " + observation_id);
+
+            var submission_data = {
+                                    observation_id : observation_id
+                                  };
+            $.ajax({
+                type: 'POST',
+                url: './remove_expert_observation.php',
+                data : submission_data,
+                dataType : 'json',
+                success : function(response) {
+                    var observation_count = response['observation_count'];
+
+                    $("#observation-row-" + observation_id).hide();
+
+                    if (observation_count === '0') {
+//                        console.log("hiding parent: " + $("#observation-row-" +observation_id).parent().parent().parent().html());
+                        var video_id = $("#observation-row-" + observation_id).parent().parent().attr('video_id');
+
+                        $("#observation-row-" + observation_id).parent().parent().parent().html("");
+
+                        /**
+                         * Need to update the tag button too
+                         */
+                        if ($("#tag-video-button-" + video_id).hasClass("btn-primary")) $("#tag-video-button-" + video_id).removeClass("btn-primary");
+                    }
+                },
+                error : function(jqXHR, textStatus, errorThrown) {
+                    alert(errorThrown);
+                },
+                async: true
+            });
+        });
+    }
+
 
     function init_dropdown() {
         $('.video-nav-list').click(function(ev) {
