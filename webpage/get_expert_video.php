@@ -1,5 +1,10 @@
 <?php
 
+require_once('/projects/wildlife/html/inc/util.inc');
+
+require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+
 $video_id = mysql_real_escape_string($_POST['video_id']);
 $video_file = mysql_real_escape_string($_POST['video_file']);
 
@@ -18,20 +23,44 @@ echo "
 echo "  <div class='span6'>
             <div class='row-fluid'>";
 
-echo "<table class='table table-striped table-bordered table-condensed'>
-        <thead>
-            <th>Event</th>
-            <th>Time</th>
-            <th>Comments</th>
-        </thead>";
+ini_set("mysql.connect_timeout", 300);
+ini_set("default_socket_timeout", 300);
+
+$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+mysql_select_db("wildlife_video", $wildlife_db);
+
+$query = "SELECT * FROM expert_observations WHERE video_id = $video_id";
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 
+$printed_header = false;
 
-for ($i = 0; $i < 5; $i++) {
-   echo "<tr> <td>Predator</td> <td>11:32:02</td> <td>Badger</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right' id='remove-observation-button-$i' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>"; 
+while ($row = mysql_fetch_assoc($result)) {
+    if (!$printed_header) {
+        echo "<div class='observations-table-div' id='observations-table-div-$video_id'>";
+        echo "<table class='table table-striped table-bordered table-condensed observations-table' video_id='$video_id' id='observations-table-$video_id'>
+                <thead>
+                    <th>User</th>
+                    <th>Event</th>
+                    <th>Time</th>
+                    <th>Comments</th>
+                </thead><tbody>";
+        $printed_header = true;
+    }
+
+    echo "<tr observation_id='" . $row['id'] . "' id='observation-row-" . $row['id'] . "'> ";
+
+    echo "<td> " . get_user_from_id($row['user_id'])->name . " </td>";
+   
+    echo " <td>" . $row['event_type'] . "</td> <td>" . $row['event_time'] . "</td> <td>" . $row['comments'] . "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" . $row['id'] . "' observation_id='" . $row['id'] . "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>"; 
 }
 
-echo "</table>";
+if ($printed_header) {
+    echo "</tbody></div></table>";
+} else {
+    echo "<div class='observations-table-div' id='observations-table-div-$video_id'></div>";
+}
 
 echo "      </div>
 
@@ -53,7 +82,7 @@ echo "      </div>
 
                 <input type='text' id='event-time-$video_id' video_id='$video_id' class='event-time-textbox' style='width:15%; margin-top:0px; padding-bottom:0px; margin-left:2px; margin-right:10px' value='Event Time'></input>
 
-                <button class='btn btn-small btn-primary pull-right' id='submit-observation-button' style='margin-right:4px;'> + </button>
+                <button class='btn btn-small btn-primary pull-right submit-observation-button' id='submit-observation-button-$video_id' video_id='$video_id' style='margin-right:4px;'> + </button>
             </div>
 
             <div class='row-fluid'>

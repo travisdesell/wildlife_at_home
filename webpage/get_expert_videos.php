@@ -37,11 +37,11 @@ while ($row = mysql_fetch_assoc($result)) {
     $found = true;
 
     $row['check_button_type'] = '';
-    if ($row['expert_obs_count'] > 0) {
-        $row['check_button_type'] = 'btn-primary';
-    }
-    if ($row['expert_finished'] == true) {
+
+    if ($row['expert_finished'] == 'FINISHED') {
         $row['check_button_type'] = 'btn-success';
+    } else if ($row['expert_finished'] == 'WATCHED') {
+        $row['check_button_type'] = 'btn-primary';
     }
 
     $wf = $row['watermarked_filename'];
