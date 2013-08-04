@@ -87,7 +87,7 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 
-$query = "SELECT id, filename, crowd_obs_count FROM video_segment_2 vs2 WHERE EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND $filter AND observations.video_segment_id = vs2.id) LIMIT $video_min, $video_count";
+$query = "SELECT id, filename, crowd_obs_count FROM video_segment_2 vs2 WHERE EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
 
 //echo "<!-- $query -->\n";
 

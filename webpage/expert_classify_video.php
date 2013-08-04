@@ -174,6 +174,18 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
 
     echo "
             <div class='btn-group'>
+                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='year-button'>
+                    Year <span class='caret'></span>
+                </button>
+                <ul class='dropdown-menu'>
+                    <li><a href='#' class='year-dropdown' year='' id='any-year-dropdown'>Any Year</a></li>
+                    <li><a href='#' class='year-dropdown' year='2011' id='year-2011-dropdown'>2011</a></li>
+                    <li><a href='#' class='year-dropdown' year='2012' id='year-2012-dropdown'>2012</a></li>
+                    <li><a href='#' class='year-dropdown' year='2013' id='year-2013-dropdown'>2013</a></li>
+                </ul>
+            </div>
+
+            <div class='btn-group'>
                 <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='species-button'>
                     Species <span class='caret'></span>
                 </button>
@@ -205,6 +217,19 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
                 <ul class='dropdown-menu' id='animal-id-dropdown-menu'>
                 </ul>
             </div>
+
+            <div class='btn-group pull-right'>
+                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='status-button'>
+                    Status <span class='caret'></span>
+                </button>
+                <ul class='dropdown-menu'>
+                    <li><a href='#' class='status-dropdown' video_status='' id='any-status-dropdown'>Any Status</a></li>
+                    <li><a href='#' class='status-dropdown' video_status='UNWATCHED' id='unwatched-dropdown'><button class='btn btn-mini pull-right'>&#x2713;</button> Unwatched</a></li>
+                    <li><a href='#' class='status-dropdown' video_status='WATCHED' id='watched-dropdown'><button class='btn btn-mini btn-primary pull-right'>&#x2713;</button> Watched</a></li>
+                    <li><a href='#' class='status-dropdown' video_status='FINISHED' id='finished-dropdown'><button class='btn btn-mini btn-success pull-right'>&#x2713;</button> Finished</a></li>
+                </ul>
+            </div>
+
         ";
 
     echo "

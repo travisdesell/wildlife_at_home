@@ -18,11 +18,15 @@ mysql_select_db("wildlife_video", $wildlife_db);
 $species_id = mysql_real_escape_string($_POST['species_id']);
 $location_id = mysql_real_escape_string($_POST['location_id']);
 $animal_id = mysql_real_escape_string($_POST['animal_id']);
+$year = mysql_real_escape_string($_POST['year']);
+$video_status = mysql_real_escape_string($_POST['video_status']);
 
 $filter = '';
 if ($species_id > 0) $filter .= " AND species_id = $species_id";
 if ($location_id > 0) $filter .= " AND location_id = $location_id";
 if ($animal_id !== '-1' && $animal_id !== '0') $filter .= " AND animal_id = '$animal_id'";
+if ($year !== '') $filter .= " AND DATE_FORMAT(start_time, '%Y') = $year";
+if ($video_status !== '') $filter .= " AND expert_finished = '$video_status'";
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
@@ -31,6 +35,8 @@ $video_count = mysql_real_escape_string($_POST['video_count']);
 
 $query = "SELECT id, watermarked_filename, expert_obs_count, expert_finished from video_2 WHERE processing_status != 'UNWATERMARKED' $filter LIMIT $video_min, $video_count";
 $result = attempt_query_with_ping($query, $wildlife_db);
+
+error_log("query: $query");
 
 $found = false;
 while ($row = mysql_fetch_assoc($result)) {
