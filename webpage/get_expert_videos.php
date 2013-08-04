@@ -29,12 +29,20 @@ $video_count = mysql_real_escape_string($_POST['video_count']);
 
 //fix query to filter by ids
 
-$query = "SELECT id, watermarked_filename from video_2 WHERE processing_status != 'UNWATERMARKED' $filter LIMIT $video_min, $video_count";
+$query = "SELECT id, watermarked_filename, expert_obs_count, expert_finished from video_2 WHERE processing_status != 'UNWATERMARKED' $filter LIMIT $video_min, $video_count";
 $result = attempt_query_with_ping($query, $wildlife_db);
 
 $found = false;
 while ($row = mysql_fetch_assoc($result)) {
     $found = true;
+
+    $row['check_button_type'] = '';
+    if ($row['expert_obs_count'] > 0) {
+        $row['check_button_type'] = 'btn-primary';
+    }
+    if ($row['expert_finished'] == true) {
+        $row['check_button_type'] = 'btn-success';
+    }
 
     $wf = $row['watermarked_filename'];
 

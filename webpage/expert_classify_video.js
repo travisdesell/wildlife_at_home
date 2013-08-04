@@ -6,6 +6,7 @@ $(document).ready(function () {
     var video_min = 0;
     var video_count = 10;
     var event_ids = {};
+    var video_observations = {};
 
     $('.species-dropdown').click(function() {
         var new_species_id = $(this).attr("species_id");
@@ -116,6 +117,32 @@ $(document).ready(function () {
 //                console.log("the response was:\n" + response);
                 $("#video-list-placeholder").html(response);
                 enable_accordion();
+
+                $(".tag-video-button").click(function() {
+                    var video_id = $(this).attr('video_id');
+                    var video_button = $(this);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: './toggle_expert_flag.php',
+                        data : { video_id : video_id },
+                        dataType : 'JSON',
+                        success : function(response) {
+//                            console.log("response: " + JSON.stringify(response));
+                            if (response['expert_finished'] === '1') {
+                                video_button.removeClass("btn-primary");
+                                video_button.addClass("btn-success");
+                            } else {
+                                video_button.removeClass("btn-success");
+                                if (video_observations[video_id] !== null && video_observations[video_id] > 0) {
+                                    video_button.addClass("btn-primary");
+                                }
+                            }
+
+                        },
+                        async: true
+                    });
+                });
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
