@@ -9,6 +9,45 @@ $(document).ready(function () {
     var comments = {};
     var event_times = {};
     var video_observations = {};
+    var year = '';
+    var video_status = '';
+
+    $('.status-dropdown').click(function() {
+        var new_status = $(this).attr("video_status");
+
+        if (new_status !== video_status) {
+            video_status = new_status;
+            if (video_status === '') {
+                $('#status-button').html("Any Status <span class='caret'></span>");
+            } else if (video_status === 'UNWATCHED') {
+                $('#status-button').html("Unwatched <span class='caret'></span>");
+            } else if (video_status === 'WATCHED') {
+                $('#status-button').html("Watched <span class='caret'></span>");
+            } else if (video_status === 'FINISHED') {
+                $('#status-button').html("Finished <span class='caret'></span>");
+            }
+
+            load_animal_ids();
+            load_videos();
+        }
+    });
+
+
+    $('.year-dropdown').click(function() {
+        var new_year = $(this).attr("year");
+
+        if (new_year !== year) {
+            year = new_year;
+            if (year === '') {
+                $('#year-button').html("Year <span class='caret'></span>");
+            } else {
+                $('#year-button').html(year + " <span class='caret'></span>");
+            }
+
+            load_animal_ids();
+            load_videos();
+        }
+    });
 
     $('.species-dropdown').click(function() {
         var new_species_id = $(this).attr("species_id");
@@ -106,8 +145,10 @@ $(document).ready(function () {
                                 species_id : species_id,
                                 location_id : location_id,
                                 animal_id : animal_id,
+                                year : year,
                                 video_min : video_min,
-                                video_count : video_count
+                                video_count : video_count,
+                                video_status : video_status
                               };
 
         $.ajax({
@@ -221,7 +262,7 @@ $(document).ready(function () {
 //                            console.log("event_ids = " + JSON.stringify(event_ids));
 
                             if (event_id === '0') {
-                                $('#event-button-' + video_id).html('Event <span class="caret"></span>');
+                                $('#event-button-' + video_id).html('Unspecified <span class="caret"></span>');
                                 event_ids[video_id] = 'UNSPECIFIED';
                             } else if (event_id === '1') {
                                 $('#event-button-' + video_id).html('Bird Leave <span class="caret"></span>');

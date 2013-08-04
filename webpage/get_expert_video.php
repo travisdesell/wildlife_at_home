@@ -70,7 +70,7 @@ echo "      </div>
                         Event <span class='caret'></span>
                     </button>
                     <ul class='dropdown-menu' id='event-dropdown-$video_id'>
-                        <li><a href='#' class='event-dropdown' event_id='0' video_id='$video_id' id='any-event-dropdown'>Any Event</a></li>
+                        <li><a href='#' class='event-dropdown' event_id='0' video_id='$video_id' id='any-event-dropdown'>Unspecified</a></li>
                         <li><a href='#' class='event-dropdown' event_id='1' video_id='$video_id' id='bird-leave-dropdown'>Bird Leave</a></li>
                         <li><a href='#' class='event-dropdown' event_id='2' video_id='$video_id' id='bird-return-dropdown'>Bird Return</a></li>
                         <li><a href='#' class='event-dropdown' event_id='3' video_id='$video_id' id='predator-dropdown'>Predator</a></li>
