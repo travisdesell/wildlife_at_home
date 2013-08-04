@@ -1,0 +1,99 @@
+{{#video_list}}
+<div class='well well-small'>
+    <div class='tab'>{{video_name}}</div>
+
+    <div class='container'>
+        <div class='row-fluid'>
+            <div class='container span4'>
+                <div class='row-fluid'>
+                    <video style='width:100%;' id='wildlife_video' controls='controls' preload='auto'>
+                        <source src='http://wildlife.und.edu/{{segment_filename}}.mp4' type='video/mp4'></source>
+                        <source src='http://wildlife.und.edu/{{segment_filename}}.ogv' type='video/ogg'></source>
+                        This video requires a browser that supports HTML5 video.
+                    </video>
+                </div>  <!-- row-fluid -->
+
+                <div class='row-fluid'>
+                    <button class='btn btn-danger  span6 pull-left disabled' style='margin-top:0px;' id='report_observations_button' value='report observations'>Report Observations</button>
+                    <button class='btn btn-primary span6 pull-right discuss-video-button' style='margin-top:0px;' id='discuss-video-button-{{video_segment_2_id}}' value='discuss video'>Discuss Video</button>
+                    <form id='discuss-video-form-{{video_segment_2_id}}' action='forum_post.php?id=8' method='post'>
+                        <input type='hidden' name='content' value='{{discuss_video_content}}'>
+                    </form>
+                </div>
+            </div>  <!-- span4 -->
+
+            <!--
+            <div class='span8'>
+                <table class='table table-striped table-bordered table-condensed'>
+                    <thead>
+                        <th></th>
+                        {{#names}}
+                        <th>{{name}}</th>
+                        {{/names}}
+                    </thead>
+
+                    <tr> <td><b>Status</b></td> {{#status}}<td>{{{status}}}</td>{{/status}} </tr>
+                    <tr> <td><b>Interesting</b></td> {{#interesting}}<td>{{{interesting}}}</td>{{/interesting}} </tr>
+                    <tr> <td><b>Bird Leave</b></td> {{#bird_leave}}<td>{{{bird_leave}}}</td>{{/bird_leave}} </tr>
+                    <tr> <td><b>Bird Return</b></td> {{#bird_return}}<td>{{{bird_return}}}</td>{{/bird_return}} </tr>
+                    <tr> <td><b>Bird Presence</b></td> {{#bird_presence}}<td>{{{bird_presence}}}</td>{{/bird_presence}} </tr>
+                    <tr> <td><b>Bird Absence</b></td> {{#bird_absence}}<td>{{{bird_absence}}}</td>{{/bird_absence}} </tr>
+                    <tr> <td><b>Predator Presence</b></td> {{#predator_presence}}<td>{{{predator_presence}}}</td>{{/predator_presence}} </tr>
+                    <tr> <td><b>Nest Defense</b></td> {{#nest_defense}}<td>{{{nest_defense}}}</td>{{/nest_defense}} </tr>
+                    <tr> <td><b>Nest Sucess</b></td> {{#nest_success}}<td>{{{nest_success}}}</td>{{/nest_success}} </tr>
+                    <tr> <td><b>Chick Presence</b></td> {{#chick_presence}}<td>{{{chick_presence}}}</td>{{/chick_presence}} </tr>
+                    <tr> <td><b>Too Dark</b></td> {{#too_dark}}<td>{{{too_dark}}}</td>{{/too_dark}} </tr>
+                    <tr> <td><b>Corrupt</b></td> {{#corrupt}}<td>{{{corrupt}}}</td>{{/corrupt}} </tr>
+
+                </table>
+            </div>
+            -->
+
+            <div class='container span8'>
+                <table class='table table-striped table-bordered table-condensed'>
+                    <thead>
+                        <th>User</th>
+                        <th>Status</th>
+                        <th>Interesting</th>
+                        <th>Bird Leave</th>
+                        <th>Bird Return</th>
+                        <th>Bird Presence</th>
+                        <th>Bird Absence</th>
+                        <th>Predator Presence</th>
+                        <th>Nest Defense</th>
+                        <th>Nest Success</th>
+                        <th>Chick Presence</th>
+                        <th>Too Dark</th>
+                        <th>Corrupt</th>
+                    </thead>
+
+                    {{#observations}}
+                    <tr>
+                        <td>{{user_id}}</td>
+                        <td>{{status}}</td>
+
+                        <td style='text-align:center'>{{{interesting}}}</td>
+                        <td style='text-align:center'>{{{bird_leave}}}</td>
+                        <td style='text-align:center'>{{{bird_return}}}</td>
+                        <td style='text-align:center'>{{{bird_presence}}}</td>
+                        <td style='text-align:center'>{{{bird_absence}}}</td>
+                        <td style='text-align:center'>{{{predator_presence}}}</td>
+                        <td style='text-align:center'>{{{nest_defense}}}</td>
+                        <td style='text-align:center'>{{{nest_success}}}</td>
+                        <td style='text-align:center'>{{{chick_presence}}}</td>
+                        <td style='text-align:center'>{{{too_dark}}}</td>
+                        <td style='text-align:center'>{{{corrupt}}}</td>
+                    </tr>
+
+                    <tr>
+                        <td></td>
+                        <td colspan='11'>{{comments}}</td>
+                    </tr>
+                    {{/observations}}
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{/video_list}}

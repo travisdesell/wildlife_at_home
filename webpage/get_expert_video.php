@@ -10,7 +10,7 @@ echo "
         <div class='span6'>
             <video style='width:100%;' id='wildlife-video-$video_id' controls='controls' preload='auto'>
                 <source src='http://wildlife.und.edu/$video_file' type='video/mp4'></source>
-                <!-- <source src='http://wildlife.und.edu/$segment_filename.ogv' type='video/ogg'></source> -->
+                <!-- <source src='http://wildlife.und.edu/$video_file.ogv' type='video/ogg'></source> -->
                 This video requires a browser that supports HTML5 video.
             </video>
         </div>";
