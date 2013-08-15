@@ -393,46 +393,36 @@ $(document).ready(function () {
 
                 console.log("response.post_observation.status = " + response.post_observation.status);
 
-                if (response.post_observation.status === "CANONICAL" || response.post_observation.status == "VALID") {
-                    body_text += "<p><b>Your observations were successfully validated!</b></p>";
-                    body_text += "<p><b>You have been awarded " + response.post_observation.credit + " credit.<b></p>";
-                } else if (response.post_observation.status === "INVALID") {
-                    body_text += "<p><b>Your observations did not match ones from the other users.</b></p>";
-                } else {
-                    body_text += "<p><b>We still need other observations to validate yours.</b>";
-                    body_text += "<p><b>You will be awarded credit later if it validates sucessfully.</b>";
+                body_text += "<p><b>Your observations has been successfully reported! It has been queued and is waiting validation. You can check the <a href='./user_video_list.php'>Watched Videos</a> page to check on its validation status.<b></p>";
+
+                body_text += "<p>Here is how your observations compare to other users:</p>";
+                body_text += "<table class='table table-bordered table-striped'>";
+                body_text += "<tr>";
+                body_text += "<td></td>";
+                body_text += "<td><b>You</b></td>";
+                for (var i = 0; i <response.db_observations.length; i++) {
+                    body_text += "<td>" + response.db_observations[i]['user_name'] + "</td>";
                 }
+                body_text += "</tr>";
 
-//                if (!(response.post_observation.status === "UNVALIDATED")) {
-                    body_text += "<p>Here is how your observations compare to the other users:</p>";
-                    body_text += "<table class='table table-bordered table-striped'>";
-                    body_text += "<tr>";
-                    body_text += "<td></td>";
-                    body_text += "<td><b>You</b></td>";
-                    for (var i = 0; i <response.db_observations.length; i++) {
-                        body_text += "<td>" + response.db_observations[i]['user_name'] + "</td>";
-                    }
-                    body_text += "</tr>";
+                if (response.post_observation.too_dark == 1) {
+                    body_text += print_modal_row('Too dark', 'too_dark', response.post_observation, response.db_observations);
+                } else if (response.post_observation.corrupt == 1) {
+                    body_text += print_modal_row('Corrupt', 'corrupt', response.post_observation, response.db_observations);
+                } else {
+                    body_text += print_modal_row('Parent leaves the nest', 'bird_leave', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent returns to the nest', 'bird_return', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent present at the nest', 'bird_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Predator at the nest', 'predator_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Nest defense', 'nest_defense', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Nest success', 'nest_success', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Chicks present at the nest', 'chick_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Interesting', 'interesting', response.post_observation, response.db_observations);
+                }
+                body_text += print_modal_row('Comments', 'comments', response.post_observation, response.db_observations);
 
-                    if (response.post_observation.too_dark == 1) {
-                        body_text += print_modal_row('Too dark', 'too_dark', response.post_observation, response.db_observations);
-                    } else if (response.post_observation.corrupt == 1) {
-                        body_text += print_modal_row('Corrupt', 'corrupt', response.post_observation, response.db_observations);
-                    } else {
-                        body_text += print_modal_row('Parent leaves the nest', 'bird_leave', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Parent returns to the nest', 'bird_return', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Parent present at the nest', 'bird_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Parent absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Predator at the nest', 'predator_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Nest defense', 'nest_defense', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Nest success', 'nest_success', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Chicks present at the nest', 'chick_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Interesting', 'interesting', response.post_observation, response.db_observations);
-                    }
-                    body_text += print_modal_row('Comments', 'comments', response.post_observation, response.db_observations);
-
-                    body_text += "</table>";
-//                }
+                body_text += "</table>";
 
                 console.log("showing modal: '" + modal_body + "'");
 

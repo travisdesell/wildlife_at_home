@@ -1,9 +1,10 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+
+require_once('/projects/wildlife/html/inc/util.inc');
+
 
 $video_id = mysql_real_escape_string($_POST['video_id']);
 $video_file = mysql_real_escape_string($_POST['video_file']);
@@ -13,12 +14,24 @@ $video_file = mysql_real_escape_string($_POST['video_file']);
 echo "
     <div class='row-fluid'>
         <div class='span6'>
-            <video style='width:100%;' id='wildlife-video-$video_id' controls='controls' preload='auto'>
-                <source src='http://wildlife.und.edu/$video_file' type='video/mp4'></source>
-                <!-- <source src='http://wildlife.und.edu/$video_file.ogv' type='video/ogg'></source> -->
-                This video requires a browser that supports HTML5 video.
-            </video>
-        </div>";
+            <div class='row-fluid'>
+                <video style='width:100%;' id='wildlife-video-$video_id' controls='controls' preload='auto'>
+                    <source src=\"http://wildlife.und.edu/$video_file\" type=\"video/mp4\">
+                    This video requires a browser that supports HTML5 video.
+                </video>
+            </div>
+
+            <div class='row-fluid'>
+                <button class='btn btn-primary span5 pull-left fast-backward-button' style='margin-top:0px;' video_id='$video_id'>fast backward</button>
+
+                <div class='span2'>
+                    <input style='width:100%; padding:3px; margin:1px;' type='text' id='speed-textbox-$video_id' value='speed: 1' readonly='readonly'></input>
+                </div>
+
+                <button class='btn btn-primary span5 pull-right fast-forward-button' style='margin-top:0px;' video_id='$video_id'>fast forward</button>
+            </div>
+
+        </div>"; 
 
 echo "  <div class='span6'>
             <div class='row-fluid'>";
@@ -57,7 +70,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($printed_header) {
-    echo "</tbody></div></table>";
+    echo "</tbody></table></div>";
 } else {
     echo "<div class='observations-table-div' id='observations-table-div-$video_id'></div>";
 }
@@ -98,7 +111,5 @@ echo "      </div>
             </div>
         </div>
     </div>";
-
-
 
 ?>
