@@ -8,6 +8,10 @@ require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
+$user = get_logged_in_user();
+$user_id = $user->id;
+$user_name = $user->name;
+
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
 echo "
@@ -88,10 +92,6 @@ echo "
     </style>
 ";
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-$user_name = $user->name;
-
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
     var user_name = '$user_name';
@@ -150,12 +150,21 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
     $row = mysql_fetch_assoc($result);
     $split_video_count = $row['count(*)'];
 
-    echo "<div class='span6'>";
-    echo "<p> " . ($watermarked_video_count + $split_video_count) . " of $video_count videos availble for expert observation.</p>";
-    echo "<div class='progress'> <div class='bar bar-success' style='width:" .floor(100.0 * ($watermarked_video_count + $split_video_count) / $video_count) . "%;'> </div> </div>";
+    $result = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE expert_finished = 'FINISHED'", $wildlife_db);
+    $row = mysql_fetch_assoc($result);
+    $finished_video_count = $row['count(*)'];
+
+    echo "<div class='span4'>";
+    echo "<p> " . $finished_video_count . " of $video_count videos with completed expert observation.</p>";
+    echo "<div class='progress'> <div class='bar bar-success' style='width:" .floor(100.0 * $finished_video_count / $video_count) . "%;'> </div> </div>";
     echo "</div>";
 
-    echo "<div class='span6'>";
+    echo "<div class='span4'>";
+    echo "<p> " . ($watermarked_video_count + $split_video_count) . " of $video_count videos availble for expert observation.</p>";
+    echo "<div class='progress'> <div class='bar bar-warning' style='width:" .floor(100.0 * ($watermarked_video_count + $split_video_count) / $video_count) . "%;'> </div> </div>";
+    echo "</div>";
+
+    echo "<div class='span4'>";
     echo "<p> $split_video_count of $video_count videos availble for volunteer observation.</p>";
     echo "<div class='progress'> <div class='bar bar-info' style='width:" .floor(100.0 * $split_video_count / $video_count) . "%;'> </div> </div>";
     echo "</div>";

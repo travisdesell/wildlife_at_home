@@ -55,7 +55,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 
 //$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
 
-$query = "SELECT id, filename, duration_s FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
+$query = "SELECT id, filename, duration_s FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -69,7 +69,7 @@ if (!$row) {
 
     $found = true;
 
-    $query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE vs2.crowd_status = 'UNWATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id  AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
+    $query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE vs2.crowd_status = 'UNWATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
 //    echo "<!-- $query -->\n";
 
     $result = attempt_query_with_ping($query, $wildlife_db);

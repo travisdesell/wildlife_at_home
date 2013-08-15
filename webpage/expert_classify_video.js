@@ -288,6 +288,40 @@ $(document).ready(function () {
 //                            ev.stopPropagation();
                         });
 
+                        $('.fast-forward-button').button();
+                        $('.fast-backward-button').button();
+
+                        $('.fast-backward-button').click(function() {
+                            var video_id = $(this).attr('video_id');
+                            var video = $('#wildlife-video-' + video_id).get(0);
+                            var rate = video.playbackRate;
+
+                            rate -= 2.0;
+                            if (rate < -9.0) rate = -9.0;
+
+                            video.playbackRate = rate;
+
+                            //console.log("clicking fast backward!, playback rate: " + video.playbackRate);
+
+                            $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
+                        });
+
+                        $('.fast-forward-button').click(function() {
+                            var video_id = $(this).attr('video_id');
+                            var video = $('#wildlife-video-' + video_id).get(0);
+                            var rate = video.playbackRate;
+
+                            rate += 2.0;
+                            if (rate > 9.0) rate = 9.0;
+
+                            video.playbackRate = rate;
+
+                            //console.log("clicking fast forward!, playback rate: " + video.playbackRate);
+
+                            $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
+                        });
+
+
                         $('.submit-observation-button').click(function() {
                             var video_id = $(this).attr("video_id");
 
@@ -354,6 +388,17 @@ $(document).ready(function () {
 
             $( $(this).attr('href') ).collapse('toggle');
     //            console.log("toggle: " + $( $(this).attr('href') ).toggled);
+
+            var video_id = $( $(this).attr('href') ).attr("video_id");
+
+            /**
+             *  For some reason I need this for snow leopard's safari
+             */
+            if ($("#wildlife-video-" + video_id).is(":hidden")) {
+                $("#wildlife-video-" + video_id).show();
+            } else {
+                $("#wildlife-video-" + video_id).hide();
+            }
 
             ev.preventDefault();
             ev.stopPropagation();

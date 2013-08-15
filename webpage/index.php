@@ -284,7 +284,7 @@ echo "
     <p>
 ";
 include("motd.php");
-show_news(0, 3);
+show_news(0, 5);
 echo "
     </td>
     </tr></table>
@@ -311,10 +311,6 @@ echo"
                         </li>
 
                         <li>
-                        Robert Bergman, Graduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
-
-                        <li>
                         Paul Burr, Graduate Research Assistant in Biology, University of North Dakota
                         </li>
 
@@ -330,6 +326,17 @@ echo"
                         </li>
 
                         <li>
+                        Aaron Robinson, North Dakota Game and Fish.
+                        </li>
+
+                        <li>
+                        Terry Shaffer, U.S.G.S. Northern Prairie Wildlife Research Center.
+                        </li>
+                        <li>
+                        Mark Sherfy, U.S.G.S. Northern Prairie Wildlife Research Center.
+                        </li>
+
+                        <li>
                         Rebecca VanderClute, Undergraduate Research Assistant in Computer Science, University of North Dakota
                         </li>
                         </ul>
@@ -337,15 +344,19 @@ echo"
                         With previous support from:
                         <ul>
                         <li>
+                        Robert Bergman, Graduate Research Assistant in Computer Science, University of North Dakota
+                        </li>
+
+                        <li>
                         Adam Pachl, Undergraduate Research Assistant in Biology, University of North Dakota
                         </li>
 
                         <li>
-                        Eric Kjeldergaard, Graduate Research Assistant in Computer Science, University of North Dakota
+                        Nitin Karodiya, Graduate Research Assistant in Computer Science, University of North Dakota
                         </li>
 
                         <li>
-                        Nitin Karodiya, Graduate Research Assistant in Computer Science, University of North Dakota
+                        Eric Kjeldergaard, Graduate Research Assistant in Computer Science, University of North Dakota
                         </li>
                         </ul>
 
@@ -354,29 +365,52 @@ echo"
 
                     <section id='support'>
                         <div class='page-header'><h2>Support</h2></div>
-                        <div class='row'>
-                            <div class='span1'>
+
+                        <div class='row-fluid'>
+                            <div class='span2'>
                                 <p align=center>
-                                <img src='images/und_logo.png'>
+                                <a href='http://und.edu'><img src='images/und_logo.png'></a>
                                 </p>
                             </div>
-                            <div class='span5'>
+                            <div class='span10'>
                             <p>
-                                Wildlife@Home has been generously supported by a collaborative research award from UND's Office of Research Development and Compliance. The project's video streaming server is hosted by UND's <a href='http://crc.und.edu'>Computational Research Center</a> and the volunteer computing server is hosted by UND's <a href='http://www.aero.und.edu/about/SCC.aspx'>Scientific Computing Center</a>.
+                                Wildlife@Home has been generously supported by a collaborative research award and new faculty SEED grant from UND's Office of Research Development and Compliance. The project's video streaming server is hosted by UND's <a href='http://crc.und.edu'>Computational Research Center</a> and the volunteer computing server is hosted by UND's <a href='http://www.aero.und.edu/about/SCC.aspx'>Scientific Computing Center</a>.
                             </p>
                             </div>
                         </div>
                         <br>
-                        <div class='row'>
-                            <div class='span1'>
-                                <a href=\"http://boinc.berkeley.edu/\"><img src=\"img/pb_boinc.gif\" alt=\"Powered by BOINC\"></a>
+
+                        <div class='row-fluid'>
+                            <div class='span2'>
+                                <a href=\"http://gf.nd.gov\"><img src=\"images/ndgf_logo.png\"></a>
                             </div>
-                            <div class='span5'>
+                            <div class='span10'>
+                                ND Game Fish has provided financial support for field logistics to collect sharp-tailed grouse videos.
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class='row-fluid'>
+                            <div class='span2'>
+                                <a href=\"http://www.npwrc.usgs.gov\"><img src=\"images/usgs_logo.png\"></a>
+                            </div>
+                            <div class='span10'>
+                                USGS has provided financial support for camera equipment, video storage, and field assistance to collect data for the piping plover and interior least tern.
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class='row-fluid'>
+                            <div class='span2'>
+                                <a href=\"http://boinc.berkeley.edu/\" style='display:block; margin-left:auto; margin-right:auto;'><img src=\"img/pb_boinc.gif\" alt=\"Powered by BOINC\"></a>
+                            </div>
+                            <div class='span10'>
                                 <p>
                                 Wildlife@Home is in part powered by the <a href='http://boinc.berkeley.edu/'>Berkeley Open Infrastructure for Network Computing (BOINC)</a>.
                                 </p>
                             </div>
                         </div>
+
                     </section>
             </div> <!-- span -->
 
