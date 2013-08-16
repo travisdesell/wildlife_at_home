@@ -130,6 +130,26 @@ class Observation {
             return oss.str();
         }
 
+        /**
+         *  Scale down awarded credit for unsures.
+         */
+        double get_credit_percentage() {
+            if (too_dark == 1) return 1.0;
+            if (corrupt == 1) return 1.0;
+
+            double unsure_count = 0.0;
+            if (bird_leave == 0) unsure_count += 1;
+            if (bird_return == 0) unsure_count += 1;
+            if (bird_presence == 0) unsure_count += 1;
+            if (bird_absence == 0) unsure_count += 1;
+            if (predator_presence == 0) unsure_count += 1;
+            if (nest_defense == 0) unsure_count += 1;
+            if (nest_success == 0) unsure_count += 1;
+            if (chick_presence == 0) unsure_count += 1;
+
+            return (8.0 - unsure_count) / 8.0;
+        }
+
         bool possible_canonical() {
             if (too_dark == 1) return true;
             if (corrupt == 1) return true;
@@ -344,7 +364,7 @@ int main(int argc, char** argv) {
             int max_match = 0;
             int canonical = -1;
             for (uint32_t i = 0; i < observations.size(); i++) {
-                if (matches[i] >= 2 && matches[i] > max_match) {
+                if (matches[i] >= 1 && matches[i] > max_match) {
                     if (observations[i]->possible_canonical()) {
                         canonical = i;
                         max_match = matches[i];
@@ -400,7 +420,7 @@ int main(int argc, char** argv) {
 
                         if (0 == observations[i]->new_status.compare("VALID") || 0 == observations[i]->new_status.compare("CANONICAL")) {
                             //The status was valid, award credit and increment the users valid observations count
-                            user_query << "UPDATE user SET valid_observations = valid_observations + 1, bossa_total_credit = bossa_total_credit + " << duration_s << " WHERE id = " << observations[i]->user_id;
+                            user_query << "UPDATE user SET valid_observations = valid_observations + 1, bossa_total_credit = bossa_total_credit + " << (observations[i]->get_credit_percentage() * duration_s) << " WHERE id = " << observations[i]->user_id;
 
                             log_messages.printf(MSG_DEBUG, "%s\n", user_query.str().c_str());
                             mysql_query_check(boinc_db_conn, user_query.str());
@@ -430,7 +450,7 @@ int main(int argc, char** argv) {
                 progress_query << "UPDATE progress SET validated_video_s = validated_video_s + " << duration_s << " WHERE progress.species_id = " << species_id << " AND progress.location_id = " << location_id;
 
                 log_messages.printf(MSG_DEBUG, "%s\n", progress_query.str().c_str());
-                mysql_query_check(wildlife_db_conn, vs2_query.str());
+                mysql_query_check(wildlife_db_conn, progress_query.str());
             }
 
             for (uint32_t i = 0; i < observations.size(); i++) {
