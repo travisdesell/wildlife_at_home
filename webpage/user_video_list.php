@@ -4,6 +4,7 @@ require_once('/projects/wildlife/html/inc/util.inc');
 
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
@@ -109,6 +110,35 @@ $active_items = array(
                 );
 
 print_navbar($active_items);
+
+$boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+mysql_select_db("wildlife", $boinc_db);
+
+$result = mysql_query("SELECT bossa_total_credit, valid_observations, invalid_observations FROM user WHERE id=$user_id", $boinc_db);
+$row = mysql_fetch_assoc($result);
+
+$bossa_total_credit = $row['bossa_total_credit'];
+$valid_observations = $row['valid_observations'];
+$invalid_observations = $row['invalid_observations'];
+
+$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+mysql_select_db("wildlife_video", $wildlife_db);
+
+$result = mysql_query("SELECT count(*) FROM observations WHERE user_id=$user_id", $wildlife_db);
+$row = mysql_fetch_assoc($result);
+
+$total_observations = $row['count(*)'];
+
+
+
+echo "
+<div class='well well-small' style='padding-top: 10px; padding-bottom: 0px; margin-top 3px; margin-bottom: 10px'>
+    <div class='container'>
+        <div class='span12'>
+            <p>You have $bossa_total_credit credit from $total_observations observations. $valid_observations have been marked valid and $invalid_observations marked invalid (" . round((100 * $valid_observations / ($valid_observations + $invalid_observations)), 2) . "% accuracy). " . ($total_observations - ($valid_observations + $invalid_observations)) . " observations are awaiting validation. You have averaged " . round(($bossa_total_credit / $valid_observations), 2) . " credit per valid observation.</p>
+        </div>
+    </div>
+</div>";
 
 echo "
     <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 3px; margin-bottom: 5px'> 
