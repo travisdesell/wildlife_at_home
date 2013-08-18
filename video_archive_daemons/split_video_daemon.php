@@ -53,14 +53,16 @@ if ($modulo > -1) {
     mysql_select_db($wildlife_db);
 
     $iteration = 0;
-    $location_iteration = 0;
+    $location_iteration = 1;
 
     while(true) {   //Loop until there are no streaming segments to generate
         /* get a segment which needs to be generated from the watermarked file */
         $query = "";
         if ($species_id == 1) {  //this is a grouse and we have 3 locations
-            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = $species_id AND location_id = " . (($location_iteration % 3) + 1) . " LIMIT 1";
+            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = $species_id AND location_id = $location_iteration LIMIT 1";
             $location_iteration++;
+            if ($location_iteration == 4) $location_iteration = 5;
+            if ($location_iteration == 7) $location_iteration = 1;
         } else {
             $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = $species_id LIMIT 1";
         }

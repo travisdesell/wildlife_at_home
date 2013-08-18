@@ -1,9 +1,26 @@
 
 $(document).ready(function () {
+
+    $('#bird_leave_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird leaves the nest, no otherwise. Only select yes if the bird completely leaves the screen.", title : 'Instructions'});
+    $('#bird_return_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird returns to the nest, no otherwise. Only select yes if the bird comes from completely off the screen back to the nest.", title : 'Instructions'});
+
+    $('#bird_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the bird is incubating the nest for any frame of the video, no otherwise.</p> <p>If a parent is incubating the nest for part of the video, and leaves for part of the video mark this yes (along with yes for absence).</p>", title : 'Instructions'});
+    $('#bird_absence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the parent is not on the nest (off camera) for any portion of the video.</p> <p>If a parent is incubating the nest for part of the video, and leaves for part of the video mark this yes (along with yes for incubating).</p>", title : 'Instructions'});
+
+    $('#predator_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if a predator is in the video.</p>", title : 'Instructions'});
+    $('#nest_defense_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the bird actively tries to defend the nest from a predator. You can look at the training videos for examples of this.</p>", title : 'Instructions'});
+
+    $('#nest_success_help').popover({ placement : 'left', html : true,  content : "<p>Select yes only if chicks visibly hatch from the eggs. If chicks are simply present at the nest, mark chick presence yes and this no.</p>", title : 'Instructions'});
+    $('#chick_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if chicks are visible at the nest.</p>", title : 'Instructions'});
+    $('#interesting_help').popover({ placement : 'left', html : true,  content : "<p>This is up to you! Mark it yes if you found the video interesting.</p>", title : 'Instructions'});
+
+    $('#corrupt_too_dark_help').popover({ placement : 'top', html : true,  content: "<p>Click too dark if the video is too dark to determine if anything is happening.</p> <p>Click corrupt if there are video corruption problems (static, etc).</p> <p>In either case, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
+
     $('#fast_forward_button').button();
     $('#fast_backward_button').button();
     $('#too_dark_button').button();
     $('#corrupt_button').button();
+    $('#speed_textbox').val("speed: " + $('#wildlife_video').get(0).playbackRate);
 
     $('#fast_backward_button').click(function() {
         var video = $('#wildlife_video').get(0);
@@ -364,6 +381,8 @@ $(document).ready(function () {
     }
 
     function generate_modal(modal_body, submission_data) {
+        console.log("attempting to show modal: '" + modal_body + "'");
+
         $.ajax({
             type: 'POST',
             url: './report_observation.php',
@@ -374,46 +393,36 @@ $(document).ready(function () {
 
                 console.log("response.post_observation.status = " + response.post_observation.status);
 
-                if (response.post_observation.status === "CANONICAL" || response.post_observation.status == "VALID") {
-                    body_text += "<p><b>Your observations were successfully validated!</b></p>";
-                    body_text += "<p><b>You have been awarded " + response.post_observation.credit + " credit.<b></p>";
-                } else if (response.post_observation.status === "INVALID") {
-                    body_text += "<p><b>Your observations did not match ones from the other users.</b></p>";
-                } else {
-                    body_text += "<p><b>We still need other observations to validate yours.</b>";
-                    body_text += "<p><b>You will be awarded credit later if it validates sucessfully.</b>";
+                body_text += "<p><b>Your observations has been successfully reported! It has been queued and is waiting validation. You can check the <a href='./user_video_list.php'>Watched Videos</a> page to check on its validation status.<b></p>";
+
+                body_text += "<p>Here is how your observations compare to other users:</p>";
+                body_text += "<table class='table table-bordered table-striped'>";
+                body_text += "<tr>";
+                body_text += "<td></td>";
+                body_text += "<td><b>You</b></td>";
+                for (var i = 0; i <response.db_observations.length; i++) {
+                    body_text += "<td>" + response.db_observations[i]['user_name'] + "</td>";
                 }
+                body_text += "</tr>";
 
-//                if (!(response.post_observation.status === "UNVALIDATED")) {
-                    body_text += "<p>Here is how your observations compare to the other users:</p>";
-                    body_text += "<table class='table table-bordered table-striped'>";
-                    body_text += "<tr>";
-                    body_text += "<td></td>";
-                    body_text += "<td><b>You</b></td>";
-                    for (var i = 0; i <response.db_observations.length; i++) {
-                        body_text += "<td>" + response.db_observations[i]['user_name'] + "</td>";
-                    }
-                    body_text += "</tr>";
+                if (response.post_observation.too_dark == 1) {
+                    body_text += print_modal_row('Too dark', 'too_dark', response.post_observation, response.db_observations);
+                } else if (response.post_observation.corrupt == 1) {
+                    body_text += print_modal_row('Corrupt', 'corrupt', response.post_observation, response.db_observations);
+                } else {
+                    body_text += print_modal_row('Parent leaves the nest', 'bird_leave', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent returns to the nest', 'bird_return', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent present at the nest', 'bird_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Predator at the nest', 'predator_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Nest defense', 'nest_defense', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Nest success', 'nest_success', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Chicks present at the nest', 'chick_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Interesting', 'interesting', response.post_observation, response.db_observations);
+                }
+                body_text += print_modal_row('Comments', 'comments', response.post_observation, response.db_observations);
 
-                    if (response.post_observation.too_dark == 1) {
-                        body_text += print_modal_row('Too dark', 'too_dark', response.post_observation, response.db_observations);
-                    } else if (response.post_observation.corrupt == 1) {
-                        body_text += print_modal_row('Corrupt', 'corrupt', response.post_observation, response.db_observations);
-                    } else {
-                        body_text += print_modal_row('Bird left the nest', 'bird_leave', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird returns to the nest', 'bird_return', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird incubating the nest', 'bird_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Predator at the nest', 'predator_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Nest defense', 'nest_defense', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Nest success', 'nest_success', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Chicks at the nest', 'chick_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Interesting', 'interesting', response.post_observation, response.db_observations);
-                    }
-                    body_text += print_modal_row('Comments', 'comments', response.post_observation, response.db_observations);
-
-                    body_text += "</table>";
-//                }
+                body_text += "</table>";
 
                 console.log("showing modal: '" + modal_body + "'");
 
@@ -461,6 +470,7 @@ $(document).ready(function () {
 
             console.log("flagging video as corrupt, generating modal: '" + modal_body + "'");
             generate_modal(modal_body, submission_data);
+            console.log("flagging video as corrupt, generated modal: '" + modal_body + "'");
 
             $('#corrupt_button').removeClass("disabled");
         }
