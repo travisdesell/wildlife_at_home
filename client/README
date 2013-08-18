@@ -27,6 +27,10 @@ Get ffmpeg:
 
     git clone git://source.ffmpeg.org/ffmpeg.git
 
+    swap to the stable version:
+
+    git checkout stable
+
 compiling ffmpeg:
 
     ./configure --enable-gpl --enable-libx264 --enable-static
@@ -37,6 +41,13 @@ compiling ffmpeg:
 
     on linux also add --enable-pthreads
 
+    and also do to find yasm:
+
+    tdesell@undhpcvideo:~/ffmpeg$ echo $PATH
+    /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+    tdesell@undhpcvideo:~/ffmpeg$ export PATH=$PATH:/home/tdesell/yasm-1.2.0/
+
+
     make
     make install
 
@@ -45,12 +56,19 @@ compiling ffmpeg:
 
 Compile openCV:
 
+    Download repo:
+        git clone ssh://git@github.com/Itseez/opencv.git
+
     First (so cmake knows where to find things): 
 
     DONT DO THESE:
     export LD_LIBRARY_PATH=/Users/deselt/Documents/Dropbox/software/ffmpeg/lib/
     export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/Users/deselt/Documents/Dropbox/software/ffmpeg/lib/pkgconfig
     export PKG_CONFIG_LIBDIR=$PKG_CONFIG_LIBDIR:/Users/deselt/Documents/Dropbox/software/ffmpeg/lib/
+
+    export LD_LIBRARY_PATH=/home/tdesell/ffmpeg/lib/
+    export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/tdesell/ffmpeg/lib/pkgconfig
+    export PKG_CONFIG_LIBDIR=$PKG_CONFIG_LIBDIR:/home/tdesell/ffmpeg/lib/
 
     INSTEAD, change in:
         /cmake/OpenCVFindLibsVideo.cmake
@@ -66,10 +84,12 @@ Compile openCV:
 
     cmake -DBUILD_SHARED_LIBS=OFF -DWITH_FFMPEG=1 CMAKE_VERBOSE=ON ..
 
-    This works a bit better, but still not perfect
 
-    cmake -DBUILD_SHARED_LIBS=OFF -DWITH_OPENCL=OFF -DWITH_WEBP_OFF CMAKE_VERBOSE=ON -DCMAKE_REQUIRED_INCLUDES=/Users/deselt/Documents/Dropbox/software/ffmpeg/include/ -DCMAKE_INSTALL_PREFIX=/Users/deselt/Documents/Dropbox/software/opencv/install/ ..
-    may also need: -DWITH_OPENCL=OFF -DWITH_WEBP=OFF
+    For OSX:
+        cmake -DBUILD_SHARED_LIBS=OFF -DWITH_OPENCL=OFF -DWITH_WEBP=OFF CMAKE_VERBOSE=ON -DCMAKE_REQUIRED_INCLUDES=/Users/deselt/Documents/Dropbox/software/ffmpeg/include/ -DCMAKE_INSTALL_PREFIX=/Users/deselt/Documents/Dropbox/software/opencv/install/ ..
+
+    For Linux:
+        cmake -DBUILD_PYTHON_SUPPORT=OFF -DBUILD_SHARED_LIBS=OFF -DWITH_OPENCL=OFF -DWITH_WEBP=OFF CMAKE_VERBOSE=ON -DBUILD_WITH_STATIC_CRT=ON -DOPENCV_BUILD_3RDPARTY_LIBS=TRUE -DCMAKE_REQUIRED_INCLUDES=/home/tdesell/ffmpeg/include/ -DCMAKE_INSTALL_PREFIX=/home/tdesell/opencv/install/ ..
 
     In
         build/modules/highgui/CMakeFiles/opencv_perf_highgui.dir/link.txt
