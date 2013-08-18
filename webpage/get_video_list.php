@@ -87,7 +87,7 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 
-$query = "SELECT id, filename, crowd_obs_count FROM video_segment_2 vs2 WHERE EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
+$query = "SELECT id, filename, crowd_obs_count, video_id FROM video_segment_2 vs2 WHERE EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
 
 //echo "<!-- $query -->\n";
 
@@ -122,6 +122,14 @@ while ($row = mysql_fetch_assoc($result)) {
     $video_and_observations['segment_filename'] = $segment_filename;
     $video_and_observations['video_name'] = trim(substr($segment_filename, strrpos($segment_filename, '/') + 1));
     $video_and_observations['crowd_obs_count'] = $row['crowd_obs_count'];
+
+    $video2_query = "SELECT animal_id FROM video_2 WHERE id = " . $row['video_id'];
+    $video2_result = attempt_query_with_ping($video2_query, $wildlife_db);
+    if (!$video2_result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video2_query\n");
+
+    $video2_row = mysql_fetch_assoc($video2_result);
+
+    $video_and_observations['animal_id'] = $video2_row['animal_id'];
 
     $video_and_observations['discuss_video_content']= "I would like to discuss this video:\n" . "[" . "video" . "]" . $segment_filename . "[/video" . "]";
 

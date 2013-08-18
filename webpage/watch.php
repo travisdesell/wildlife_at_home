@@ -2,6 +2,7 @@
 
 require_once('../inc/util.inc');
 
+require_once('/home/tdesell/wildlife_at_home/webpage/display_badges.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
@@ -55,7 +56,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 
 //$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
 
-$query = "SELECT id, filename, duration_s FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
+$query = "SELECT id, filename, duration_s, video_id FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -69,7 +70,7 @@ if (!$row) {
 
     $found = true;
 
-    $query = "SELECT id, filename, duration_s from video_segment_2 vs2 WHERE vs2.crowd_status = 'UNWATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
+    $query = "SELECT id, filename, duration_s, video_id from video_segment_2 vs2 WHERE vs2.crowd_status = 'UNWATCHED' AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
 //    echo "<!-- $query -->\n";
 
     $result = attempt_query_with_ping($query, $wildlife_db);
@@ -82,7 +83,6 @@ if (!$row) {
         error_log("did not find a watched video segment 2 on second try");
     }
 }
-
 
 $segment_filename = $row['filename'];
 $duration_s = $row['duration_s'];
@@ -98,6 +98,14 @@ echo "<script type='text/javascript'>
     var duration_s = $duration_s;
 </script>";
 
+if ($found) {
+    $video2_query = "SELECT animal_id FROM video_2 WHERE id = " . $row['video_id'];
+    $video2_result = attempt_query_with_ping($video2_query, $wildlife_db);
+    if (!$video2_result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video2_query\n");
+
+    $video2_row = mysql_fetch_assoc($video2_result);
+    $animal_id = $video2_row['animal_id'];
+}
 
 echo "
 </head>
@@ -164,6 +172,15 @@ if ($found) {
 
                             <a class='btn btn-primary span5 pull-right' style='margin-top:0px;' id='fast_forward_button' value='fast forward'>fast forward</a>
                         </div>
+
+                        <div class='row-fluid' style='margin-top:25px'>
+                            <div class='span6'>
+                                <p align='center'>" .  number_format($user->bossa_total_credit) . " seconds watched.</p>
+                            </div>
+                            <div class='span6'>
+                                <p align='center'>" . round(100 * ($user->valid_observations / ($user->valid_observations + $user->invalid_observations)), 2) . "% accurate.</p>
+                            </div>
+                        </div>
     ";
 
 } else {
@@ -176,7 +193,7 @@ echo "
                 <div class='span6'>
 
                     <div class='row-fluid'>
-                        <h4 align=center>You are watching " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</h4>
+                        <h4 align=center>$animal_id - " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</h4>
                         </div>";
 
 function print_selection_row($text, $id) {
