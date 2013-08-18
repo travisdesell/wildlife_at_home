@@ -56,7 +56,8 @@ while ($row = mysql_fetch_assoc($result)) {
                 <thead>
                     <th>User</th>
                     <th>Event</th>
-                    <th>Time</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
                     <th>Comments</th>
                 </thead><tbody>";
         $printed_header = true;
@@ -66,7 +67,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     echo "<td> " . get_user_from_id($row['user_id'])->name . " </td>";
    
-    echo " <td>" . $row['event_type'] . "</td> <td>" . $row['event_time'] . "</td> <td>" . $row['comments'] . "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" . $row['id'] . "' observation_id='" . $row['id'] . "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>"; 
+    echo " <td>" . $row['event_type'] . "</td> <td>" . $row['start_time'] . "</td> <td>" . $row['end_time'] . "</td> <td>" . $row['comments'] . "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" . $row['id'] . "' observation_id='" . $row['id'] . "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>"; 
 }
 
 if ($printed_header) {
@@ -84,16 +85,18 @@ echo "      </div>
                     </button>
                     <ul class='dropdown-menu' id='event-dropdown-$video_id'>
                         <li><a href='#' class='event-dropdown' event_id='0' video_id='$video_id' id='any-event-dropdown'>Unspecified</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='1' video_id='$video_id' id='bird-leave-dropdown'>Bird Leave</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='2' video_id='$video_id' id='bird-return-dropdown'>Bird Return</a></li>
+                        <li><a href='#' class='event-dropdown' event_id='1' video_id='$video_id' id='bird-leave-dropdown'>Bird Presence</a></li>
+                        <li><a href='#' class='event-dropdown' event_id='2' video_id='$video_id' id='bird-return-dropdown'>Bird Absence</a></li>
                         <li><a href='#' class='event-dropdown' event_id='3' video_id='$video_id' id='predator-dropdown'>Predator</a></li>
                         <li><a href='#' class='event-dropdown' event_id='4' video_id='$video_id' id='other-animal-dropdown'>Other Animal</a></li>
                         <li><a href='#' class='event-dropdown' event_id='5' video_id='$video_id' id='nest-defense-dropdown'>Nest Defense</a></li>
                         <li><a href='#' class='event-dropdown' event_id='6' video_id='$video_id' id='nest-success-dropdown'>Nest Success</a></li>
+                        <li><a href='#' class='event-dropdown' event_id='7' video_id='$video_id' id='nest-success-dropdown'>Chick Presence</a></li>
                     </ul>
                 </div>
 
-                <input type='text' id='event-time-$video_id' video_id='$video_id' class='event-time-textbox' style='width:15%; margin-top:0px; padding-bottom:0px; margin-left:2px; margin-right:10px' value='Event Time'></input>
+                <input type='text' id='event-start-time-$video_id' video_id='$video_id' class='event-start-time-textbox' style='width:15%; margin-top:0px; padding-bottom:0px; margin-left:2px; margin-right:0px' value='Start Time'></input>
+                <input type='text' id='event-end-time-$video_id' video_id='$video_id' class='event-end-time-textbox' style='width:15%; margin-top:0px; padding-bottom:0px; margin-left:2px; margin-right:10px' value='End Time'></input>
 
                 <button class='btn btn-small btn-primary pull-right submit-observation-button' id='submit-observation-button-$video_id' video_id='$video_id' style='margin-right:4px;'> + </button>
             </div>

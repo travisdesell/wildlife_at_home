@@ -7,7 +7,8 @@ $(document).ready(function () {
     var video_count = 10;
     var event_ids = {};
     var comments = {};
-    var event_times = {};
+    var event_end_times = {};
+    var event_start_times = {};
     var video_observations = {};
     var year = '';
     var video_status = '';
@@ -235,7 +236,7 @@ $(document).ready(function () {
         //                console.log("the response was:\n" + response);
                         $(target).html(response);
 
-                        $('.event-time-textbox').click(function() {
+                        $('.event-start-time-textbox').click(function() {
                             var video_id = $(this).attr("video_id");
 //                            console.log("setting text for #wildlife-video-" + video_id);
 
@@ -249,7 +250,24 @@ $(document).ready(function () {
 
 //                            console.log( "Time: " + result);
                             $(this).val( result );
-                            event_times[video_id] = result;
+                            event_start_times[video_id] = result;
+                        });
+
+                        $('.event-end-time-textbox').click(function() {
+                            var video_id = $(this).attr("video_id");
+//                            console.log("setting text for #wildlife-video-" + video_id);
+
+                            var time = Math.floor( $("#wildlife-video-" + video_id).get(0).currentTime );
+
+                            var hours = parseInt( time / 3600 ) % 24;
+                            var minutes = parseInt( time / 60 ) % 60;
+                            var seconds = time % 60;
+
+                            var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
+
+//                            console.log( "Time: " + result);
+                            $(this).val( result );
+                            event_end_times[video_id] = result;
                         });
 
                         $('.event-dropdown').click(function(ev) {
@@ -265,11 +283,11 @@ $(document).ready(function () {
                                 $('#event-button-' + video_id).html('Unspecified <span class="caret"></span>');
                                 event_ids[video_id] = 'UNSPECIFIED';
                             } else if (event_id === '1') {
-                                $('#event-button-' + video_id).html('Bird Leave <span class="caret"></span>');
-                                event_ids[video_id] = 'BIRD_LEAVE';
+                                $('#event-button-' + video_id).html('Bird Presence <span class="caret"></span>');
+                                event_ids[video_id] = 'BIRD_PRESENCE';
                             } else if (event_id === '2') {
-                                $('#event-button-' + video_id).html('Bird Return <span class="caret"></span>');
-                                event_ids[video_id] = 'BIRD_RETURN';
+                                $('#event-button-' + video_id).html('Bird Absence <span class="caret"></span>');
+                                event_ids[video_id] = 'BIRD_ABSENCE';
                             } else if (event_id === '3') {
                                 $('#event-button-' + video_id).html('Predator <span class="caret"></span>');
                                 event_ids[video_id] = 'PREDATOR';
@@ -282,6 +300,9 @@ $(document).ready(function () {
                             } else if (event_id === '6') {
                                 $('#event-button-' + video_id).html('Nest Success <span class="caret"></span>');
                                 event_ids[video_id] = 'NEST_SUCCESS';
+                            } else if (event_id === '7') {
+                                $('#event-button-' + video_id).html('Chick Presence <span class="caret"></span>');
+                                event_ids[video_id] = 'CHICK_PRESENCE';
                             }
 
                             ev.preventDefault();
@@ -329,7 +350,8 @@ $(document).ready(function () {
                                                     video_id : video_id,
                                                     user_id : user_id,
                                                     event_type : event_ids[video_id],
-                                                    event_time : event_times[video_id],
+                                                    start_time : event_start_times[video_id],
+                                                    end_time : event_end_times[video_id],
                                                     comments : $("#comments-" + video_id).val()
                                                   };
 
@@ -345,9 +367,9 @@ $(document).ready(function () {
 
                                     if ($("#observations-table-div-" + video_id).html() == '') {
                                         var text = "<table class='table table-striped table-bordered table-condensed observations-table' video_id='" + video_id + "' id='observations-table-" + video_id + "'>";
-                                        text += "<thead><th>User</th><th>Event</th><th>Time</th><th>Comments</th></thead>";
+                                        text += "<thead><th>User</th><th>Event</th><th>Start Time</th><th>End Time</th></th><th>Comments</th></thead>";
                                         text += "<tbody>";
-                                        text += "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
+                                        text += "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_start_times[video_id] + "</td> <td>" + event_end_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
                                         text += "</tbody>";
                                         text += "</table>";
 
@@ -358,7 +380,7 @@ $(document).ready(function () {
                                             $("#tag-video-button-" + video_id).addClass("btn-primary");
                                         }
                                     } else {
-                                        var text = "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
+                                        var text = "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_start_times[video_id] + "</td> <td>" + event_end_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
 
                                         $("#observations-table-div-" + video_id + " tr:last").after( text );
 
