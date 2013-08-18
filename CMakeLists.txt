@@ -53,8 +53,9 @@ include_directories (${PROJECT_SOURCE_DIR})
 find_package(BOINC)
 #find_package(OpenCV COMPONENTS highgui imageproc)
 
+add_definitions( -D_BOINC_ )
+
 add_subdirectory(undvc_common)
 
-add_subdirectory(client)
-#add_subdirectory(boinc_daemons)
-
+#add_subdirectory(client)
+add_subdirectory(boinc_daemons)

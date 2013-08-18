@@ -58,8 +58,10 @@ if ($modulo > -1) {
     while(true) {   //Loop until there are no more videos to watermark.
         $query = "";
         if ($species_id == 1) {
-            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = $species_id AND location_id = " . (($location_iteration % 3) + 1) . " LIMIT 1";
+            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_iteration LIMIT 1";
             $location_iteration++;
+            if ($location_iteration == 4) $location_iteration = 5;
+            if ($location_iteration == 7) $location_iteration = 1;
         } else {
             $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = $species_id LIMIT 1";
         }
