@@ -6,7 +6,8 @@ require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 $video_id = mysql_real_escape_string($_POST['video_id']);
 $user_id = mysql_real_escape_string($_POST['user_id']);
 $event_type = mysql_real_escape_string($_POST['event_type']);
-$event_time = mysql_real_escape_string($_POST['event_time']);
+$start_time = mysql_real_escape_string($_POST['start_time']);
+$end_time = mysql_real_escape_string($_POST['end_time']);
 $comments = mysql_real_escape_string($_POST['comments']);
 
 error_log("post: " . json_encode($_POST));
@@ -17,7 +18,7 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$query = "INSERT INTO expert_observations SET user_id = $user_id, event_time = '$event_time', event_type ='$event_type', comments = '$comments', video_id = '$video_id'";
+$query = "INSERT INTO expert_observations SET user_id = $user_id, start_time = '$start_time', end_time = '$end_time', event_type ='$event_type', comments = '$comments', video_id = '$video_id'";
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 

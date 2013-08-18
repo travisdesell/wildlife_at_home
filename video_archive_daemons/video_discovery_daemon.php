@@ -171,7 +171,7 @@ mysql_connect("localhost", $wildlife_user, $wildlife_pw);
 mysql_select_db($wildlife_db);
 
 
-$dir = "/video/wildlife/archive";
+$dir = "/share/wildlife/archive";
 
 $count = 0;
 $directory_iterator = new RecursiveIteratorIterator(new 
@@ -248,7 +248,7 @@ foreach($directory_iterator as $filename => $path_object) {
         $machine_obs_count = 0;
         $processing_status = "UNWATERMARKED";
 
-        if ($species == "sharptailed_grouse") {
+        if ($species == "sharptailed_grouse" || $species == "sharptailed_grouse_2013") {
             $species_id = 1;
         } else if ($species == "least_tern") {
             $species_id = 2;
@@ -276,6 +276,10 @@ foreach($directory_iterator as $filename => $path_object) {
             $site_id = 3;
         } else if ($site == "Missouri River") {
             $site_id = 4;
+        } else if ($site == "Belden_2013") {
+            $site_id = 5;
+        } else if ($site == "Blaisdell_2013") {
+            $site_id = 6;
         } else {
             die("Unknown location encountered: '$site'");
         }

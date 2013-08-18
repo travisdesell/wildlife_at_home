@@ -61,7 +61,7 @@ if (strlen($new_filter) > 5) $new_filter = substr($new_filter, 5);
 else {
     echo "<div class='well well-large' style='padding-top:15px; padding-bottom:5px'>";
     echo "<div class='container'>";
-    echo "<div class='span12'>";
+    echo "<div class='span12' style='margin-left:0px;'>";
     echo "<p>Click on the above observation types to display videos. Many will toggle bewteen yes, no, unsure, and unselected. Selecting observation types will show videos you've watched which have all of the highlighted types. So if you have selected <span class='label label-info'>interesting</span> and <span class='label label-info'>predator presence - yes</span> and <span class='label label-info'>nest defense - unsure</span>, the page will display all videos you've watched where you reported that it was interesting, there was a predator, and that you were unsure of nest defense.</p>\n";
     echo "</div>";
     echo "</div>";
