@@ -184,6 +184,62 @@ $(document).ready(function () {
                     console.log('form id is: ' + form_id);
                     $(form_id).submit();
                 });
+
+                $(".report-observations-button").button();
+                $(".report-observations-button").click(function() {
+                    var video_segment_id = $(this).attr("video_segment_id");
+                    console.log("video segment 2 id is: " + video_segment_id);
+
+                    var text = "<p>Please enter a description of why you are reporting this video:</p>" +
+                               "<textarea style='width:97%;' rows=5 class='report-comments' id='report-comments-" + video_segment_id + "' video_segment_id=" + video_segment_id + "></textarea>" +
+                               "<div class='btn btn-primary disabled pull-right report-final' style='margin-right:4px;' video_segment_id=" + video_segment_id + " id='report-final-" + video_segment_id + "'>Submit Report</div>";
+                    $("#report-placeholder-" + video_segment_id).html(text);
+
+                    $(".report-comments").bind('input propertychange', function() {
+                        var video_segment_id = $(this).attr("video_segment_id");
+                        if (this.value.length) {
+                            $("#report-final-" + video_segment_id).removeClass("disabled");
+                        } else {
+                            $("#report-final-" + video_segment_id).addClass("disabled");
+                        }
+                    });
+
+                    $(".report-final").button();
+                    $(".report-final").click(function() {
+                        if (!$(this).hasClass('disabled')) {
+                            $(this).addClass('disabled');
+                            var video_segment_id = $(this).attr("video_segment_id");
+                            var comments = $("#report-comments-" + video_segment_id).val();
+                            console.log("logging report for video " + video_segment_id + " with comments: '" + comments + "'");
+
+                            $("#report-observations-" + video_segment_id).replaceWith("<button class='btn btn-warning disabled span6 pull-left' style='margin-top:0px;'>Pending Review</button>");
+
+                            var text = "<p>This video was reported by " + user_name + " with the following description:</p>" +
+                                       "<textarea readonly style='width:97%;' rows=5 class='report-comments' id='report-comments-" + video_segment_id + "' video_segment_id=" + video_segment_id + ">" + comments + "</textarea>";
+                            $("#report-placeholder-" + video_segment_id).html(text);
+
+                            $.ajax({
+                                type: 'POST',
+                                url: './report_video_segment.php',
+                                data : { 
+                                    user_id : user_id,
+                                    user_name : user_name,
+                                    report_comments : comments
+                                },
+                                dataType : 'json',
+                                success : function(response) {
+                                    console.log("successfully reported video");
+                                },
+                                error : function(jqXHR, textStatus, errorThrown) {
+                                    alert(errorThrown);
+                                },
+                                async: true
+                            });
+
+                        }
+                    });
+                });
+
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);

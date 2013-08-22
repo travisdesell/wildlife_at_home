@@ -87,7 +87,7 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 
-$query = "SELECT id, filename, crowd_obs_count, video_id FROM video_segment_2 vs2 WHERE EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
+$query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
 
 //echo "<!-- $query -->\n";
 
@@ -122,6 +122,32 @@ while ($row = mysql_fetch_assoc($result)) {
     $video_and_observations['segment_filename'] = $segment_filename;
     $video_and_observations['video_name'] = trim(substr($segment_filename, strrpos($segment_filename, '/') + 1));
     $video_and_observations['crowd_obs_count'] = $row['crowd_obs_count'];
+
+    if ($row['report_status'] == 'UNREPORTED') {
+        $video_and_observations['unreported'] = true;
+    } else if ($row['report_status'] == 'REPORTED') {
+        $video_and_observations['reported'] = true;
+
+        $report_query = "SELECT report_comments, reporter_name FROM reported_video WHERE video_segment_id = " . $video_segment_2_id;
+        $report_result = attempt_query_with_ping($report_query, $wildlife_db);
+        if (!$report_result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $report_query\n");
+        $report_row = mysql_fetch_assoc($report_result);
+
+        $video_and_observations['reporter_name'] = $report_row['reporter_name'];
+        $video_and_observations['report_comments'] = $report_row['report_comments'];
+    } else if ($row['report_status'] == 'REVIEWED') {
+        $video_and_observations['reviewed'] = true;
+
+        $report_query = "SELECT report_comments, reporter_name, review_comments, reviewer_name FROM reported_video WHERE video_segment_id = " . $video_segment_2_id;
+        $report_result = attempt_query_with_ping($report_query, $wildlife_db);
+        if (!$report_result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $report_query\n");
+        $report_row = mysql_fetch_assoc($report_result);
+
+        $video_and_observations['reporter_name'] = $report_row['reporter_name'];
+        $video_and_observations['report_comments'] = $report_row['report_comments'];
+        $video_and_observations['reviewer_name'] = $report_row['reviewer_name'];
+        $video_and_observations['review_comments'] = $report_row['review_comments'];
+    }
 
     $video2_query = "SELECT animal_id FROM video_2 WHERE id = " . $row['video_id'];
     $video2_result = attempt_query_with_ping($video2_query, $wildlife_db);

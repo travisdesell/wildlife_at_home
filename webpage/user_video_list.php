@@ -88,9 +88,11 @@ echo "
 
 $user = get_logged_in_user();
 $user_id = $user->id;
+$user_name = $user->name;
 
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
+    var user_name = '$user_name'; 
 </script>";
 
 

@@ -142,6 +142,10 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
     $row = mysql_fetch_assoc($result);
     $video_count = $row['count(*)'];
 
+    $result = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE ogv_generated = true", $wildlife_db);
+    $row = mysql_fetch_assoc($result);
+    $ogv_generated_count = $row['count(*)'];
+
     $result = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE processing_status = 'WATERMARKED'", $wildlife_db);
     $row = mysql_fetch_assoc($result);
     $watermarked_video_count = $row['count(*)'];
@@ -154,17 +158,22 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
     $row = mysql_fetch_assoc($result);
     $finished_video_count = $row['count(*)'];
 
-    echo "<div class='span4'>";
+    echo "<div class='span3'>";
     echo "<p> " . $finished_video_count . " of $video_count videos with completed expert observation.</p>";
     echo "<div class='progress'> <div class='bar bar-success' style='width:" .floor(100.0 * $finished_video_count / $video_count) . "%;'> </div> </div>";
     echo "</div>";
 
-    echo "<div class='span4'>";
+    echo "<div class='span3'>";
+    echo "<p> " . $ogv_generated_count . " of " . ($watermarked_video_count + $split_video_count) . " watermarked videos have ogv generated for firefox.</p>";
+    echo "<div class='progress'> <div class='bar bar-success' style='width:" .floor(100.0 * $ogv_generated_count / ($watermarked_video_count + $split_video_count)) . "%;'> </div> </div>";
+    echo "</div>";
+
+    echo "<div class='span3'>";
     echo "<p> " . ($watermarked_video_count + $split_video_count) . " of $video_count videos availble for expert observation.</p>";
     echo "<div class='progress'> <div class='bar bar-warning' style='width:" .floor(100.0 * ($watermarked_video_count + $split_video_count) / $video_count) . "%;'> </div> </div>";
     echo "</div>";
 
-    echo "<div class='span4'>";
+    echo "<div class='span3'>";
     echo "<p> $split_video_count of $video_count videos availble for volunteer observation.</p>";
     echo "<div class='progress'> <div class='bar bar-info' style='width:" .floor(100.0 * $split_video_count / $video_count) . "%;'> </div> </div>";
     echo "</div>";

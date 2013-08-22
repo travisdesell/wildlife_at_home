@@ -77,6 +77,7 @@ function print_navbar($active_items) {
                                 <li><a href='user_search.php'>User Search</a></li>
                                 <li><a href='language_select.php'>Languages</a></li>
                                 <li><a href='boinc_instructions.php'>BOINC Instructions</a></li>
+                                <li><a href='badge_list.php'>Badge Descriptions</a></li>
                                 <li class='nav-header'>Top Lists</li>
                                 <li><a href='top_bossa_users.php'>Top Bird Watchers</a></li>
                                 <li><a href='top_users.php'>Top Users</a></li>
