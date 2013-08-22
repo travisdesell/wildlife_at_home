@@ -172,7 +172,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
                                     'site_name' => 'Belden, ND',
-                                    'year' => '2012',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'grouse_belden_progress',
                                     'site_description' => 'Cameras were placed at grouse nests in areas of intense gas and oil development.',
                                     'site_id' => '1',
@@ -183,7 +183,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($grouse_blaisdell_available > 0),
                                     'site_name' => 'Blaisdell, ND',
-                                    'year' => '2012',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'grouse_blaisdell_progress',
                                     'site_description' => 'Cameras were placed at grouse nests in areas of low intensity of gas and oil development.',
                                     'site_id' => '2',
@@ -200,28 +200,6 @@ $thumbnails = array('thumbnail_list' => array(
                                     'site_id' => '3',
                                     'validated_percentage' => $grouse_lostwood_validated,
                                     'available_percentage' => $grouse_lostwood_available - $grouse_lostwood_validated
-                                ),
-
-                                array (
-                                    'enabled' => ($grouse_belden_available > 0),
-                                    'site_name' => 'Belden, ND',
-                                    'year' => '2013',
-                                    'progress_id' => 'grouse_belden_progress_2013',
-                                    'site_description' => 'Cameras were placed at grouse nests in areas of intense gas and oil development.',
-                                    'site_id' => '5',
-                                    'validated_percentage' => $grouse_belden_validated_2013,
-                                    'available_percentage' => $grouse_belden_available_2013 - $grouse_belden_validated_2013
-                                ), 
-
-                                array (
-                                    'enabled' => ($grouse_blaisdell_available > 0),
-                                    'site_name' => 'Blaisdell, ND',
-                                    'year' => '2013',
-                                    'progress_id' => 'grouse_blaisdell_progress_2013',
-                                    'site_description' => 'Cameras were placed at grouse nests in areas of low intensity of gas and oil development.',
-                                    'site_id' => '6',
-                                    'validated_percentage' => $grouse_blaisdell_validated_2013,
-                                    'available_percentage' => $grouse_blaisdell_available_2013 - $grouse_blaisdell_validated_2013
                                 )
                             )
                         ),

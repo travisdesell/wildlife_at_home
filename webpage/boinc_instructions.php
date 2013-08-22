@@ -14,7 +14,7 @@ echo "
 <html>
 <head>
     <meta charset='utf-8'>
-    <title>Wildlife@Home: Watched Videos</title>
+    <title>Wildlife@Home: BOINC Instructions</title>
 
     <!-- For bootstrap -->
     $bootstrap_scripts
