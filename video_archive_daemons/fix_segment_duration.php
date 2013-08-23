@@ -18,7 +18,7 @@ function multi_explode($pattern, $string, $standardDelimiter = ':') {
  *  TODO: there might be a bug here because some of the video durations seem kind of weird.
  */
 function get_video_duration($filename) {
-    $command = "ffmpeg -y -i {$filename} 2>&1";
+    $command = "/usr/bin/ffmpeg -y -i {$filename} 2>&1";
     echo "command: '$command'\n";
     ob_start();
     passthru($command);

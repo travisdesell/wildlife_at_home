@@ -31,7 +31,7 @@
 using namespace std;
 using namespace cv;
 
-#define GUI
+//#define GUI
 
 void write_checkpoint();
 bool read_checkpoint();
@@ -112,7 +112,6 @@ int main(int argc, char **argv) {
     cerr << "Frames Per Second: " << fps << endl;
     cerr << "Frame Count: " << total << endl;
     cerr << "Number of Frames in Three Minutes: " << framesInThreeMin << endl;
-    cerr << "<slice_probabilities>" << endl;
 
     checkpoint_filename = "checkpoint.txt";
 
@@ -279,6 +278,20 @@ int main(int argc, char **argv) {
 			rectangle(frame_points, medianRect.tl(), medianRect.br(), color, 2, 8, 0);
 #endif
 
+<<<<<<< HEAD
+                finalRect = averageRect;
+            }
+
+            // Check for 1800 frame mark.
+            if (framePos != 0 && framePos % 1800 == 0.0) {
+                double frameDiameter = sqrt(pow((double)frame.cols, 2) * pow((double)frame.rows, 2));
+                double roiDiameter = sqrt(pow((double)finalRect.width, 2) * pow((double)finalRect.height, 2));
+                double probability = 1-(roiDiameter/frameDiameter);
+
+                percentages.push_back(probability);
+#ifndef _BOINC_APP_
+                cerr << framePos << " -- " << probability << endl;
+=======
 			finalRect = averageRect;
 		}
 
@@ -299,6 +312,7 @@ int main(int argc, char **argv) {
 #ifndef _BOINC_APP_
 			cout << "Min Dist: " << min_dist << endl;
             cout << probability << endl;
+>>>>>>> 0cdb87747e90d68f12c0956b3be43790f442d002
 #endif
 			boundingRects.clear();
 			tlPoints.clear();
@@ -309,11 +323,19 @@ int main(int argc, char **argv) {
 #ifdef _BOINC_APP_
 		boinc_fraction_done((double)framePos/total);
 
+<<<<<<< HEAD
+            if(boinc_time_to_checkpoint()) {
+                cerr << "checkpointing" << endl;
+                write_checkpoint();
+                boinc_checkpoint_completed();
+            }
+=======
 		if(boinc_time_to_checkpoint() || key == 's') {
 			cerr << "checkpointing" << endl;
 			write_checkpoint();
 			boinc_checkpoint_completed();
 		}
+>>>>>>> 0cdb87747e90d68f12c0956b3be43790f442d002
 #endif
 
 #ifdef GUI
@@ -440,5 +462,5 @@ int skipNFrames(CvCapture* capture, int n) {
 }
 
 void printUsage() {
-    std::cout << "Usage: cv_surf <vid> <feats>" << std::endl;
+	cout << "Usage: cv_surf <vid> <feats>" << endl;
 }

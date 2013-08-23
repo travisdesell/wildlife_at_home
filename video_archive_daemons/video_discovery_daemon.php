@@ -42,7 +42,7 @@ function multi_explode($pattern, $string, $standardDelimiter = ':') {
  *  TODO: there might be a bug here because some of the video durations seem kind of weird.
  */
 function get_video_duration($filename) {
-    $command = "ffmpeg -y -i {$filename} 2>&1";
+    $command = "/usr/bin/ffmpeg -y -i {$filename} 2>&1";
     echo "command: '$command'\n";
     ob_start();
     passthru($command);
@@ -194,8 +194,9 @@ foreach($directory_iterator as $filename => $path_object) {
 
         $project = parse_next_dir($filename, "/", $start);
         if ($project == "lekking") continue;
-
         if (already_inserted($filename)) continue;
+
+        $directory_year = parse_next_dir($filename, "/", $start);
 
         $species = parse_next_dir($filename, "/", $start);
         if ($project == "missouri_river_project") {
@@ -268,26 +269,37 @@ foreach($directory_iterator as $filename => $path_object) {
             die("Unknown project encountered: '$project'");
         }
 
-        if ($site == "Belden") {
-            $site_id = 1;
-        } else if ($site == "Blaisdell") {
-            $site_id = 2;
-        } else if ($site == "Lostwood") {
-            $site_id = 3;
-        } else if ($site == "Missouri River") {
-            $site_id = 4;
-        } else if ($site == "Belden_2013") {
-            $site_id = 5;
-        } else if ($site == "Blaisdell_2013") {
-            $site_id = 6;
+        if ($directory_year == 2012) {
+            if ($site == "Belden") {
+                $site_id = 1;
+            } else if ($site == "Blaisdell") {
+                $site_id = 2;
+            } else if ($site == "Lostwood") {
+                $site_id = 3;
+            } else if ($site == "Missouri River") {
+                $site_id = 4;
+            } else {
+                echo "filename: $filename \n";
+                die("Unknown location encountered: '$site' for year '$directory_year'\n");
+            }
+        } else if ($directory_year = 2013) {
+            if ($site == "Belden") {
+                $site_id = 5;
+            } else if ($site == "Blaisdell") {
+                $site_id = 6;
+            } else {
+                echo "filename: $filename \n";
+                die("Unknown location encountered: '$site' for year '$directory_year'\n");
+            }
         } else {
-            die("Unknown location encountered: '$site'");
+                die("Unknown year encountered: '$directory_year'");
         }
-        
+
         echo $filename . "\n";
         echo $watermarked_filename . "\n";
         echo "\tproject: '" . $project . "'\n";
         echo "\tproject_id: '" . $project_id . "'\n";
+        echo "\tdirectory_year: '" . $directory_year . "'\n";
         echo "\tspecies: '" . $species . "'\n";
         echo "\tspecies_id: '" . $species_id . "'\n";
         echo "\tlocation: '" . $site . "'\n";
