@@ -8,6 +8,9 @@ require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
+require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+Mustache_Autoloader::register();
+
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
 echo "
@@ -132,66 +135,152 @@ $row = mysql_fetch_assoc($result);
 $total_observations = $row['count(*)'];
 
 
+function append_trinary_filter(&$filter_list, $id_name, $text_name) {
+    $filter_list['filter_type'] [] = array(
+            'dropdown_id' => "$id_name-filter-dropdown",
+            'filter_name' => "$id_name",
+            'default_text' => "$text_name - Any",
+            'filter_option' => array(
+                array( "dropdown_text" => "$text_name - Any",     "filter_value" => "null" ),
+                array( "dropdown_text" => "$text_name - Yes",     "filter_value" => "1" ),
+                array( "dropdown_text" => "$text_name - No",      "filter_value" => "-1" ),
+                array( "dropdown_text" => "$text_name - Unsure",  "filter_value" => "0" )
+            )
+        );
+}
+
+
+$filter_list['filter_type'] = array();
+$filter_list['filter_type'][] = array(
+            'dropdown_id' => 'interesting-filter-dropdown',
+            'filter_name' => 'interesting',
+            'default_text' => 'Interesting - Any',
+            'filter_option' => array(
+                array( 'dropdown_text' => 'Interesting - Any', 'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Interesting - Yes', 'filter_value' => '1' ),
+                array( 'dropdown_text' => 'Interesting - No',  'filter_value' => '0' )
+            )
+        );
+
+$filter_list['filter_type'][] = array(
+            'dropdown_id' => 'status-filter-dropdown',
+            'filter_name' => 'status',
+            'default_text' => 'Status - Any',
+            'filter_option' => array(
+                array( 'dropdown_text' => 'Status - Any',         'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Status - Valid',       'filter_value' => 'VALID or CANONICAL' ),
+                array( 'dropdown_text' => 'Status - Invalid',     'filter_value' => 'INVALID' ),
+                array( 'dropdown_text' => 'Status - Unvalidated', 'filter_value' => 'UNVALIDATED' )
+            )
+        );
+
+$filter_list['filter_type'][] = array(
+            'dropdown_id' => 'reported-filter-dropdown',
+            'filter_name' => 'report_status',
+            'default_text' => 'Reported - Any',
+            'filter_option' => array(
+                array( 'dropdown_text' => 'Reported - Any', 'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Unreported',     'filter_value' => 'UNREPORTED' ),
+                array( 'dropdown_text' => 'Reported',       'filter_value' => 'REPORTED' ),
+                array( 'dropdown_text' => 'Reviewed',       'filter_value' => 'REVIEWED' )
+            )
+        );
+
+$filter_list['filter_type'][] = array('divider' => true);
+
+append_trinary_filter($filter_list, "bird_presence", "Bird Presence");
+append_trinary_filter($filter_list, "bird_absence", "Bird Absence");
+append_trinary_filter($filter_list, "bird_leave", "Bird Leave");
+append_trinary_filter($filter_list, "bird_return", "Bird Return");
+append_trinary_filter($filter_list, "predator_presence", "Predator");
+append_trinary_filter($filter_list, "nest_defense", "Nest Defense");
+append_trinary_filter($filter_list, "nest_success", "Nest Success");
+append_trinary_filter($filter_list, "chick_presence", "Chicks");
+
+$filter_list['filter_type'][] = array('divider' => true);
+
+$filter_list['filter_type'][] = array(
+            'dropdown_id' => 'too-dark-filter-dropdown',
+            'filter_name' => 'too_dark',
+            'default_text' => 'Too Dark - Any',
+            'filter_option' => array(
+                array( 'dropdown_text' => 'Too Dark - Any', 'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Too Dark - Yes', 'filter_value' => '1' ),
+                array( 'dropdown_text' => 'Too Dark - No',  'filter_value' => '0' )
+            )
+        );
+
+$filter_list['filter_type'][] = array(
+            'dropdown_id' => 'corrupt-filter-dropdown',
+            'filter_name' => 'corrupt',
+            'default_text' => 'Corrupt - Any',
+            'filter_option' => array(
+                array( 'dropdown_text' => 'Corrupt - Any', 'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Corrupt - Yes', 'filter_value' => '1' ),
+                array( 'dropdown_text' => 'Corrupt - No',  'filter_value' => '0' )
+            )
+        );
+
+$filter_list['filter_type'][] = array('divider' => true);
+
+$filter_list['filter_type'][] = array(
+            'dropdown_id' => 'location-dropdown',
+            'filter_name' => 'location_id',
+            'default_text' => 'Location - Any',
+            'filter_option' => array(
+                array( 'dropdown_text' => 'Any Location', 'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Belden, ND', 'filter_value' => '1' ),
+                array( 'dropdown_text' => 'Blaisdell, ND', 'filter_value' => '2' ),
+                array( 'dropdown_text' => 'Lostwood, ND',  'filter_value' => '3' ),
+                array( 'dropdown_text' => 'Missouri River, ND',  'filter_value' => '4' )
+            )
+        );
+
+$filter_list['filter_type'][] = array(
+            'dropdown_id' => 'species-dropdown',
+            'filter_name' => 'species_id',
+            'default_text' => 'Species - Any',
+            'filter_option' => array(
+                array( 'dropdown_text' => 'Any Species', 'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Sharp-tailed Grouse', 'filter_value' => '1' ),
+                array( 'dropdown_text' => 'Interior Least Tern', 'filter_value' => '2' ),
+                array( 'dropdown_text' => 'Piping Plover',  'filter_value' => '3' )
+            )
+        );
+
+
+$filter_list_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/filter_list_template.html");
+$mustache_engine = new Mustache_Engine;
 
 echo "
-<div class='well well-small' style='padding-top: 10px; padding-bottom: 0px; margin-top 3px; margin-bottom: 10px'>
-    <div class='container'>
-        <div class='span12' style='margin-left: 0px;'>
-            <p>You have $bossa_total_credit credit from $total_observations observations. $valid_observations have been marked valid and $invalid_observations marked invalid (" . round((100 * $valid_observations / ($valid_observations + $invalid_observations)), 2) . "% accuracy). " . ($total_observations - ($valid_observations + $invalid_observations)) . " observations are awaiting validation. You have averaged " . round(($bossa_total_credit / $valid_observations), 2) . " credit per valid observation.</p>
+    <div class='row-fluid'>
+        <div class='span2'>
+            <div class='well well-large span2' style='padding-top: 10px; padding-bottom: 10px; margin-top: 3px; margin-bottom: 5px; position:fixed;'>";
+
+echo $mustache_engine->render($filter_list_template, $filter_list);
+
+echo "      </div>
+        </div>";
+
+echo "  <div class='span10' style='margin-left:5px;'>
+            <div class='row-fluid'>";
+
+echo "
+<div class='well well-small' style='padding-top: 5px; padding-bottom: 0px; margin-top:3px; margin-bottom: 10px'>
+    <div class='row-fluid'>
+        <div class='span12'>
+                <p>You have $bossa_total_credit credit from $total_observations observations. $valid_observations have been marked valid and $invalid_observations marked invalid (" . round((100 * $valid_observations / ($valid_observations + $invalid_observations)), 2) . "% accuracy). " . ($total_observations - ($valid_observations + $invalid_observations)) . " observations are awaiting validation. You have averaged " . round(($bossa_total_credit / $valid_observations), 2) . " credit per valid observation.</p>
         </div>
     </div>
 </div>";
 
-echo "
-    <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 3px; margin-bottom: 5px'> 
-        <div class='row-fluid'>
-            <div class='container'>
-                <div class='span12'>
-                    <div class='btn-group pull-right' style='margin-bottom:10px'>
-                        <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='species-button'>
-                        Any Species <span class='caret'></span>
-                        </button>
-                        <ul class='dropdown-menu'>
-                            <li><a href='#' id='display-any-species-dropdown'>Any Species</a></li>
-                            <li><a href='#' id='display-grouse-dropdown'>Sharp-tailed Grouse</a></li>
-                            <li><a href='#' id='display-tern-dropdown'>Interior Least Tern</a></li>
-                            <li><a href='#' id='display-plover-dropdown'>Piping Plover</a></li>
-                        </ul>
-                    </div>
-
-                    <div class='btn-group pull-right'>
-                        <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='location-button'>
-                        Any Location <span class='caret'></span>
-                        </button>
-                        <ul class='dropdown-menu'>
-                            <li><a href='#' id='display-any-location-dropdown'>Any Location</a></li>
-                            <li><a href='#' id='display-belden-dropdown'>Belden, ND</a></li>
-                            <li><a href='#' id='display-blaisdell-dropdown'>Blaisdell, ND</a></li>
-                            <li><a href='#' id='display-lostwood-dropdown'>Lostwood Wildlife Refuge, ND</a></li>
-                            <li><a href='#' id='display-missouri-river-dropdown'>Missouri River, ND</a></li>
-                        </ul>
-                    </div>
-
-                    <span style='margin-top:5px' class='label nav-li' id='invalid-nav-pill'>Invalid</span>
-                    <span class='label nav-li' id='interesting-nav-pill'>Interesting</span>
-                    <span class='label nav-li' id='bird-presence-nav-pill'>Bird Presence</span>
-                    <span class='label nav-li' id='bird-absence-nav-pill'>Bird Absence</span>
-                    <span class='label nav-li' id='chick-presence-nav-pill'>Chick Presence</span>
-                    <span class='label nav-li' id='predator-presence-nav-pill'>Predator Presence</span>
-                    <br>
-                    <span style='margin-bottom:15px' class='label nav-li' id='nest-defense-nav-pill'>Nest Defense</span>
-                    <span class='label nav-li' id='nest-success-nav-pill'>Nest Success</span>
-                    <span class='label nav-li' id='bird-leave-nav-pill'>Bird Leave</span>
-                    <span class='label nav-li' id='bird-return-nav-pill'>Bird Return</span>
-                    <span class='label nav-li' id='too-dark-nav-pill'>Too Dark</span>
-                    <span class='label nav-li' id='corrupt-nav-pill'>Corrupt</span>
-                </div>
-            </div>
-        </div>
-    </div>";
 
 echo "<div id='videos-placeholder'></div>";
 echo "<div id='videos-nav-placeholder'></div>";
+
+echo "  </div>
+      </div>";
+echo "</div>";
 
 print_footer();
 

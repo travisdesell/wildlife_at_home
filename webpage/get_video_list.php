@@ -11,74 +11,49 @@ Mustache_Autoloader::register();
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
 
-$species_id = mysql_real_escape_string($_POST['species_id']);
-$location_id = mysql_real_escape_string($_POST['location_id']);
-
-$filters = $_POST['filters'];
-
-//error_log("filters: " . json_encode($filters));
-
-$new_filter = '';
-
-if ($filters['interesting'] == 'yes')           $new_filter .= " AND observations.interesting > 0";
-if ($filters['corrupt'] == 'yes')               $new_filter .= " AND observations.corrupt > 0";
-if ($filters['too_dark'] == 'yes')              $new_filter .= " AND observations.too_dark > 0";
-
-if ($filters['invalid'] == 'yes')               $new_filter .= " AND observations.status = 'INVALID'";
-
-if ($filters['bird_presence'] == 'yes')      $new_filter .= " AND observations.bird_presence > 0";
-if ($filters['bird_absence'] == 'yes')      $new_filter .= " AND observations.bird_absence > 0";
-if ($filters['chick_presence'] == 'yes')     $new_filter .= " AND observations.chick_presence > 0";
-if ($filters['predator_presence'] == 'yes')  $new_filter .= " AND observations.predator_presence > 0";
-if ($filters['nest_defense'] == 'yes')       $new_filter .= " AND observations.nest_defense > 0";
-if ($filters['nest_success'] == 'yes')       $new_filter .= " AND observations.nest_success > 0";
-if ($filters['bird_return'] == 'yes')        $new_filter .= " AND observations.bird_return > 0";
-if ($filters['bird_leave'] == 'yes')         $new_filter .= " AND observations.bird_leave > 0";
-
-if ($filters['invalid'] == 'unsure')               $new_filter .= " AND observations.status = 'UNVALIDATED'";
-if ($filters['bird_presence'] == 'unsure')      $new_filter .= " AND observations.bird_presence = 0";
-if ($filters['bird_absence'] == 'unsure')      $new_filter .= " AND observations.bird_absence = 0";
-if ($filters['chick_presence'] == 'unsure')     $new_filter .= " AND observations.chick_presence = 0";
-if ($filters['predator_presence'] == 'unsure')  $new_filter .= " AND observations.predator_presence = 0";
-if ($filters['nest_defense'] == 'unsure')       $new_filter .= " AND observations.nest_defense = 0";
-if ($filters['nest_success'] == 'unsure')       $new_filter .= " AND observations.nest_success = 0";
-if ($filters['bird_return'] == 'unsure')        $new_filter .= " AND observations.bird_return = 0";
-if ($filters['bird_leave'] == 'unsure')         $new_filter .= " AND observations.bird_leave = 0";
-
-if ($filters['invalid'] == 'no')               $new_filter .= " AND (observations.status = 'VALID' || observations.status = 'CANONICAL')";
-if ($filters['bird_presence'] == 'no')      $new_filter .= " AND observations.bird_presence < 0";
-if ($filters['bird_absence'] == 'no')      $new_filter .= " AND observations.bird_absence < 0";
-if ($filters['chick_presence'] == 'no')     $new_filter .= " AND observations.chick_presence < 0";
-if ($filters['predator_presence'] == 'no')  $new_filter .= " AND observations.predator_presence < 0";
-if ($filters['nest_defense'] == 'no')       $new_filter .= " AND observations.nest_defense < 0";
-if ($filters['nest_success'] == 'no')       $new_filter .= " AND observations.nest_success < 0";
-if ($filters['bird_return'] == 'no')        $new_filter .= " AND observations.bird_return < 0";
-if ($filters['bird_leave'] == 'no')         $new_filter .= " AND observations.bird_leave < 0";
-
-
-
-if (strlen($new_filter) > 5) $new_filter = substr($new_filter, 5);
-else {
-    echo "<div class='well well-large' style='padding-top:15px; padding-bottom:5px'>";
-    echo "<div class='container'>";
-    echo "<div class='span12' style='margin-left:0px;'>";
-    echo "<p>Click on the above observation types to display videos. Many will toggle bewteen yes, no, unsure, and unselected. Selecting observation types will show videos you've watched which have all of the highlighted types. So if you have selected <span class='label label-info'>interesting</span> and <span class='label label-info'>predator presence - yes</span> and <span class='label label-info'>nest defense - unsure</span>, the page will display all videos you've watched where you reported that it was interesting, there was a predator, and that you were unsure of nest defense.</p>\n";
-    echo "</div>";
-    echo "</div>";
-    echo "</div>";
-    die();
-}
-
-$filter = $new_filter;
-
-if ($species_id > 0)  $filter .= " AND species_id = $species_id";
-if ($location_id > 0) $filter .= " AND location_id = $location_id";
-
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
 
 $user = get_logged_in_user();
 $user_id = $user->id;
+
+$filters = array();
+if (array_key_exists('filters', $_POST)) {
+    $filters = $_POST['filters'];
+}
+
+
+$filter = '';
+$reported_filter = '';
+
+foreach ($filters as $key => $value) {
+//    error_log("    '$key' => '$value'");
+
+    if ($key == 'report_status') {
+        $reported_filter .= " vs2.report_status = '" . mysql_real_escape_string($value) . "' AND ";
+    } else {
+        if ($value == 'VALID or CANONICAL') {
+            $filter .= " AND (observations." . mysql_real_escape_string($key) . " = 'VALID' OR observations." . mysql_real_escape_string($key) . " = 'CANONICAL') ";
+        } else if (!is_numeric($value)) {
+            $filter .= " AND observations." . mysql_real_escape_string($key) . " = '" . mysql_real_escape_string($value) . "' ";
+        } else {
+            $filter .= " AND observations." . mysql_real_escape_string($key) . " = " . mysql_real_escape_string($value) . " ";
+        }
+    }
+}
+
+//error_log("filter string: '$filter'");
+
+if (empty($filters)) {
+    echo "<div class='well well-large' style='padding-top:15px; padding-bottom:5px'>";
+    echo "<div class='row-fluid>";
+    echo "<div class='span12' style='margin-left:0px;'>";
+    echo "<p>You can select how to filter your watched videos using the dropdowns to the left. Selecting these will show videos you've watched which match all of the highlighted filters. So if you have selected 'Interesting - Yes' and 'Predator Presence - Yes' and 'Nest Defense - Unsure', the page will display all videos you've watched where you reported that it was interesting, there was a predator, and that you were unsure of nest defense.</p>\n";
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
+    die();
+}
 
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
@@ -86,10 +61,15 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
+$query = "";
+if (array_key_exists('all_users', $_POST)) {
+    $reported_filter = substr($reported_filter, 0, -4);
+    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter ORDER BY filename LIMIT $video_min, $video_count";
+} else {
+    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
+}
 
-$query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE EXISTS (SELECT id FROM observations WHERE user_id = $user_id AND $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
-
-//echo "<!-- $query -->\n";
+error_log($query);
 
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");

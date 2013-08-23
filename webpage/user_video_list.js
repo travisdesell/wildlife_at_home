@@ -1,136 +1,32 @@
 
 $(document).ready(function () {
+    var filters = {};
 
-    $('#display-any-location-dropdown').click(function() {
-        if (location_id != -1) {
-            location_id = -1;
-            
-            $('#location-button').html('Any Location <span class="caret"></span>');
+    $('.filter-dropdown').click(function() {
+        var filter_name = $(this).attr("filter_name");
+        var filter_value = $(this).attr("filter_value");
+        var dropdown_text = $(this).attr("dropdown_text");
 
-            if (filter != '') {
-                reload_videos();
+        if (filters[filter_name] !== filter_value) {
+            var dropdown_id = $(this).attr("dropdown_id");
+
+            if (filter_value !== 'null') {
+                $("#" + dropdown_id).addClass("btn-primary");
+                filters[filter_name] = filter_value;
+            } else {
+                $("#" + dropdown_id).removeClass("btn-primary");
+                delete filters[filter_name];
             }
+
+            $("#" + dropdown_id).html(dropdown_text + " <span class='caret'></span>");
+
+            console.log( JSON.stringify(filters) );
+            reload_videos();
         }
     });
-
-    $('#display-belden-dropdown').click(function() {
-        if (location_id != 1) {
-            location_id = 1;
-            
-            $('#location-button').html('Belden, ND <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
-    $('#display-blaisdell-dropdown').click(function() {
-        if (location_id != 2) {
-            location_id = 2;
-            
-            $('#location-button').html('Blaisdell, ND <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
-    $('#display-lostwood-dropdown').click(function() {
-        if (location_id != 3) {
-            location_id = 3;
-            
-            $('#location-button').html('Lostwood Wildlife Refuge, ND <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
-    $('#display-missouri-river-dropdown').click(function() {
-        if (location_id != 4) {
-            location_id = 4;
-            
-            $('#location-button').html('Missouri River, ND <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
-    $('#display-any-species-dropdown').click(function() {
-        if (species_id != -1) {
-            species_id = -1;
-            
-            $('#species-button').html('Any Species <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
-
-    $('#display-grouse-dropdown').click(function() {
-        if (species_id != 1) {
-            species_id = 1;
-            
-            $('#species-button').html('Sharp-tailed Grouse <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
-    $('#display-tern-dropdown').click(function() {
-        if (species_id != 2) {
-            species_id = 2;
-            
-            $('#species-button').html('Interior Least Tern <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
-    $('#display-plover-dropdown').click(function() {
-        if (species_id != 3) {
-            species_id = 3;
-            
-            $('#species-button').html('Piping Plover <span class="caret"></span>');
-
-            if (filter != '') {
-                reload_videos();
-            }
-        }
-    });
-
 
     var video_min = 0;
     var video_count = 5;
-    var filter = '';
-    var species_id = -1;
-    var location_id = -1;
-
-    var filters =   {
-                        interesting : 'no',
-                        too_dark : 'no',
-                        corrupt : 'no',
-                        invalid : 'any',
-                        bird_presence : 'any',
-                        bird_absence : 'any',
-                        chick_presence : 'any',
-                        predator_presence : 'any',
-                        nest_defense : 'any',
-                        nest_success : 'any',
-                        bird_leave : 'any',
-                        bird_return : 'any'
-                    };
 
     reload_videos();
 
@@ -138,9 +34,6 @@ $(document).ready(function () {
         if (reset_video_min === undefined) video_min = 0;
 
         var submission_data = {
-                                filter : filter,
-                                species_id : species_id,
-                                location_id : location_id,
                                 video_min : video_min,
                                 video_count : video_count,
                                 filters : filters
@@ -222,9 +115,8 @@ $(document).ready(function () {
                                 type: 'POST',
                                 url: './report_video_segment.php',
                                 data : { 
-                                    user_id : user_id,
-                                    user_name : user_name,
-                                    report_comments : comments
+                                    report_comments : comments,
+                                    video_segment_id : video_segment_id
                                 },
                                 dataType : 'json',
                                 success : function(response) {
@@ -248,90 +140,19 @@ $(document).ready(function () {
         });
     }
 
-    $('.nav-li').click(function() {
-        if ($(this).hasClass('label-info')) {
-            if ($(this).text().indexOf(' - Unsure') > 0) {
-                $(this).removeClass('label-info');
-                $(this).text( $(this).text().substr(0, $(this).text().indexOf(' - ')) );
-            } else if ($(this).text().indexOf(' - Yes') > 0) {
-                $(this).text( $(this).text().substr(0, $(this).text().indexOf(' - ')) );
-                $(this).text( $(this).text() + ' - No' );
-            } else if ($(this).text().indexOf(' - No') > 0) {
-                $(this).text( $(this).text().substr(0, $(this).text().indexOf(' - ')) );
-                $(this).text( $(this).text() + ' - Unsure' );
-
-            } else if ($(this).text() == 'Invalid') {
-                $(this).text('Unvalidated');
-            } else if ($(this).text() == 'Unvalidated') {
-                $(this).text('Valid');
-            } else if ($(this).text() == 'Valid') {
-                $(this).text('Invalid');
-                $(this).removeClass('label-info');
-
-            } else {
-                /**
-                 *  This will be the case for Corrupt and Too Dark
-                 */
-                $(this).removeClass('label-info');
-            }
-
-        } else {
-            $(this).addClass('label-info');
-            if ($(this).text() != 'Invalid' && $(this).text() != 'Too Dark' && $(this).text() != 'Corrupt' && $(this).text() != 'Interesting') {
-                $(this).text( $(this).text() + ' - Yes' );
-            }
-        }
-
-        filter = $(this).attr("id");
-
-        function update_filters(filter_type, binary_filter) {
-            if (filter_type == 'invalid') {
-                if (filters[filter_type] === 'yes') filters[filter_type] = 'unsure';
-                else if (filters[filter_type] === 'unsure') filters[filter_type] = 'no';
-                else if (filters[filter_type] === 'no') filters[filter_type] = 'any';
-                else if (filters[filter_type] === 'any') filters[filter_type] = 'yes';
-
-            } else  if (binary_filter === undefined) {
-                if (filters[filter_type] === 'yes') filters[filter_type] = 'no';
-                else if (filters[filter_type] === 'no') filters[filter_type] = 'unsure';
-                else if (filters[filter_type] === 'unsure') filters[filter_type] = 'any';
-                else if (filters[filter_type] === 'any') filters[filter_type] = 'yes';
-            } else {
-                if (filters[filter_type] === 'yes') filters[filter_type] = 'no';
-                else if (filters[filter_type] === 'no') filters[filter_type] = 'yes';
-            }
-        }
-
-//        if (filter === 'interesting-nav-pill')  filters.interesting = !filters.interesting;
-        if (filter === 'interesting-nav-pill')  update_filters('interesting', true);
-        else if (filter === 'invalid-nav-pill') update_filters('invalid', true);
-        else if (filter === 'bird-presence-nav-pill') update_filters('bird_presence');
-        else if (filter === 'bird-absence-nav-pill') update_filters('bird_absence');
-        else if (filter === 'chick-presence-nav-pill')  update_filters('chick_presence');
-        else if (filter === 'predator-presence-nav-pill') update_filters('predator_presence');
-        else if (filter === 'nest-defense-nav-pill') update_filters('nest_defense');
-        else if (filter === 'nest-success-nav-pill') update_filters('nest_success');
-        else if (filter === 'bird-leave-nav-pill') update_filters('bird_leave');
-        else if (filter === 'bird-return-nav-pill') update_filters('bird_return');
-        else if (filter === 'too-dark-nav-pill') update_filters('too_dark', true);
-        else if (filter === 'corrupt-nav-pill') update_filters('corrupt', true);
-
-        reload_videos();
-    });
-
     function init_dropdown() {
         $('.video-nav-list').click(function(ev) {
-                var new_min = $(this).attr("id");
+            var new_min = $(this).attr("id");
 
-                new_min = new_min.substring(11);
+            new_min = new_min.substring(11);
 
-                if (video_min != new_min) {
-                    video_min = new_min;
-                    reload_videos(false);
-                }
+            if (video_min != new_min) {
+                video_min = new_min;
+                reload_videos(false);
+            }
 
-                ev.preventDefault();
-                ev.stopPropagation();
+            ev.preventDefault();
+            ev.stopPropagation();
         });
 
         $('#go-to-button').button();

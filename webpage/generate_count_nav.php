@@ -5,7 +5,6 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
     echo "
         <div class='well well-large' style='padding-top: 10px; padding-bottom: 5px; margin-top: 3px; margin-bottom: 15px'> 
             <div class='row-fluid'>
-                <div class='container'>
                     <div class='span12'>";
 
 
@@ -86,7 +85,6 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
                     </div>
                 </div>
-            </div>
         </div>
     ";
 
