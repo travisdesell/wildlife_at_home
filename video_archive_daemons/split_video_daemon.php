@@ -12,11 +12,12 @@ $location_table = "locations";
  * SCRIPT STARTS HERE
  */
 
-if (count($argv) != 2) {
-    die("Error, invalid arguments. usage: php $argv[0] <number of processes>\n");
+if (count($argv) != 3) {
+    die("Error, invalid arguments. usage: php $argv[0] <species_id> <number of processes>\n");
 }
 
-$number_of_processes = $argv[1];
+$species_id = $argv[1];
+$number_of_processes = $argv[2];
 $modulo = -1;
 
 $child_pids = array();
@@ -52,16 +53,18 @@ if ($modulo > -1) {
     mysql_select_db($wildlife_db);
 
     $iteration = 0;
-    $location_iteration = 0;
+    $location_iteration = 1;
 
     while(true) {   //Loop until there are no streaming segments to generate
         /* get a segment which needs to be generated from the watermarked file */
         $query = "";
-        if ((($iteration % 3) + 1) == 1) {  //this is a grouse and we have 3 locations
-            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND location_id = " . (($location_iteration % 3) + 1) . " LIMIT 1";
+        if ($species_id == 1) {  //this is a grouse and we have 3 locations
+            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = $species_id AND location_id = $location_iteration LIMIT 1";
             $location_iteration++;
+            if ($location_iteration == 4) $location_iteration = 5;
+            if ($location_iteration == 7) $location_iteration = 1;
         } else {
-            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = " . (($iteration % 3) + 1) . " LIMIT 1";
+            $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = $species_id LIMIT 1";
         }
 
         $result = mysql_query($query);
@@ -140,14 +143,14 @@ if ($modulo > -1) {
 
 
         //Run FFMPEG to create the 3 minute (or less) segment from the watermarked video 
-        $command = "ffmpeg -y -i " . $watermarked_filename . " -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
+        $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . " -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
 
         echo "command:\n\n" . $command . "\n\n";
 
         shell_exec($command);
 
         //also generate an ogv file for firefox
-        $command = "ffmpeg -y -i " . $watermarked_filename . " -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".ogv";
+        $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . " -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".ogv";
 
         echo "command:\n\n" . $command . "\n\n";
 
