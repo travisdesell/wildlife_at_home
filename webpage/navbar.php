@@ -52,9 +52,10 @@ function print_navbar($active_items) {
                             <li class='" . $active_items['home'] . "'> <a class='brand' href='http://volunteer.cs.und.edu/wildlife/'>Wildlife@Home</a> </li>
 
                             <li class='dropdown " . $active_items['watch_video'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Watch Video<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Watch Video<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li><a href='http://volunteer.cs.und.edu/wildlife/video_selector.php'>Site and Species Descriptions</a></li>
+                                <li><a href='http://volunteer.cs.und.edu/wildlife/instructional_videos.php'>Instructional Videos</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Sharp-Tailed Grouse</a></li>
                                 <li><a href='watch.php?site=1&species=1'>Belden, ND</a></li>
@@ -70,19 +71,19 @@ function print_navbar($active_items) {
                             </li>
 
                             <li class='dropdown " . $active_items['about_wildlife'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li class='nav-header'>Sharp-Tailed Grouse</a></li>
                                 <li><a href='sharptailed_grouse_info.php'>Ecology and Information</a></li>
                                 <li><a href='sharptailed_grouse_training.php'>Training Videos</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Interior Least Tern</a></li>
-                                <li><a href='#'>Ecology and Information (Coming Soon)</a></li>
-                                <li><a href='#'>Training Videos (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Training Videos (Coming Soon)</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Piping Plover </a></li>
-                                <li><a href='#'>Ecology and Information (Coming Soon)</a></li>
-                                <li><a href='#'>Training Videos (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Training Videos (Coming Soon)</a></li>
                               </ul>
                             </li>
 
@@ -90,7 +91,7 @@ function print_navbar($active_items) {
                             <li class='" . $active_items['message_boards'] . "'><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
 
                             <li class='dropdown " . $active_items['community'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Project Information<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Project Information<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li><a href='server_status.php'>Server Status</a></li>
                                 <li><a href='profile_menu.php'>Profiles</a></li>
@@ -124,7 +125,7 @@ if ($project_scientist) {
     $waiting_review = $row['count(*)'];
 
     echo "                  <li class='dropdown " . $active_items['project_management'] . " '>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Project Mangement<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Project Mangement<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li><a href='expert_classify_video.php'>Expert Video Classification</a></li>
                                 <li><a href='review_reported_videos.php'>Review Reported Videos ($waiting_review waiting)</a></li>
@@ -135,7 +136,7 @@ if ($project_scientist) {
 
 
 echo "                      <li class='dropdown " . $active_items['preferences'] . " '>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>$user_name<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>$user_name<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li><a href='home.php'>Your Preferences</a></li>
                                 <li><a href='user_video_list.php'>Watched Videos</a></li>

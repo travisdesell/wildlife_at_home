@@ -3,6 +3,14 @@ $(document).ready(function () {
     var filters = {};
     var sort_by = 'filename';
 
+    var all_users = false;
+    if (typeof is_instructional !== 'undefined') {
+        all_users = true;
+        filters['report_status'] = 'REVIEWED';
+        filters['instructional'] = true;
+        sort_by = 'recently viewed';
+    }
+
     $('.filter-dropdown').click(function() {
         var filter_name = $(this).attr("filter_name");
         var filter_value = $(this).attr("filter_value");
@@ -35,6 +43,7 @@ $(document).ready(function () {
         if (reset_video_min === undefined) video_min = 0;
 
         var submission_data = {
+                                all_users : all_users,
                                 video_min : video_min,
                                 video_count : video_count,
                                 filters : filters,

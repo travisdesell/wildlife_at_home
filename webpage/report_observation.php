@@ -155,7 +155,7 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
     error_log("UPDATED REPORTED  VIDEO WITH: $query");
 
-    $query = "UPDATE video_segment_2 SET report_status = 'REVIEWED', validate_for_review = true WHERE id = $post_observation->video_segment_id";
+    $query = "UPDATE video_segment_2 SET report_status = 'REVIEWED', validate_for_review = true, instructional = $post_observation->interesting WHERE id = $post_observation->video_segment_id";
     error_log(" UPDATING VIDEO SEGMENT 2 WITH: $query");
     $result = attempt_query_with_ping($query, $wildlife_db);
     error_log(" dying? ");

@@ -197,10 +197,10 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
                     Year <span class='caret'></span>
                 </button>
                 <ul class='dropdown-menu'>
-                    <li><a href='#' class='year-dropdown' year='' id='any-year-dropdown'>Any Year</a></li>
-                    <li><a href='#' class='year-dropdown' year='2011' id='year-2011-dropdown'>2011</a></li>
-                    <li><a href='#' class='year-dropdown' year='2012' id='year-2012-dropdown'>2012</a></li>
-                    <li><a href='#' class='year-dropdown' year='2013' id='year-2013-dropdown'>2013</a></li>
+                    <li><a href='javascript:;' class='year-dropdown' year='' id='any-year-dropdown'>Any Year</a></li>
+                    <li><a href='javascript:;' class='year-dropdown' year='2011' id='year-2011-dropdown'>2011</a></li>
+                    <li><a href='javascript:;' class='year-dropdown' year='2012' id='year-2012-dropdown'>2012</a></li>
+                    <li><a href='javascript:;' class='year-dropdown' year='2013' id='year-2013-dropdown'>2013</a></li>
                 </ul>
             </div>
 
@@ -209,10 +209,10 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
                     Species <span class='caret'></span>
                 </button>
                 <ul class='dropdown-menu'>
-                    <li><a href='#' class='species-dropdown' species_id='0' id='any-species-dropdown'>Any Species</a></li>
-                    <li><a href='#' class='species-dropdown' species_id='1' id='grouse-dropdown'>Sharp-tailed Grouse</a></li>
-                    <li><a href='#' class='species-dropdown' species_id='2' id='tern-dropdown'>Interior Least Tern</a></li>
-                    <li><a href='#' class='species-dropdown' species_id='3' id='plover-dropdown'>Piping Plover</a></li>
+                    <li><a href='javascript:;' class='species-dropdown' species_id='0' id='any-species-dropdown'>Any Species</a></li>
+                    <li><a href='javascript:;' class='species-dropdown' species_id='1' id='grouse-dropdown'>Sharp-tailed Grouse</a></li>
+                    <li><a href='javascript:;' class='species-dropdown' species_id='2' id='tern-dropdown'>Interior Least Tern</a></li>
+                    <li><a href='javascript:;' class='species-dropdown' species_id='3' id='plover-dropdown'>Piping Plover</a></li>
                 </ul>
             </div>
 
@@ -221,11 +221,11 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
                     Location <span class='caret'></span>
                 </button>
                 <ul class='dropdown-menu'>
-                    <li><a href='#' class='location-dropdown' location_id='0' id='any-location-dropdown'>Any Location</a></li>
-                    <li><a href='#' class='location-dropdown' location_id='1' id='belden-dropdown'>Belden, ND</a></li>
-                    <li><a href='#' class='location-dropdown' location_id='2' id='blaisdell-dropdown'>Blaisdell, ND</a></li>
-                    <li><a href='#' class='location-dropdown' location_id='3' id='lostwood-dropdown'>Lostwood Wildlife Refuge, ND</a></li>
-                    <li><a href='#' class='location-dropdown' location_id='4' id='missouri-river-dropdown'>Missouri River, ND</a></li>
+                    <li><a href='javascript:;' class='location-dropdown' location_id='0' id='any-location-dropdown'>Any Location</a></li>
+                    <li><a href='javascript:;' class='location-dropdown' location_id='1' id='belden-dropdown'>Belden, ND</a></li>
+                    <li><a href='javascript:;' class='location-dropdown' location_id='2' id='blaisdell-dropdown'>Blaisdell, ND</a></li>
+                    <li><a href='javascript:;' class='location-dropdown' location_id='3' id='lostwood-dropdown'>Lostwood Wildlife Refuge, ND</a></li>
+                    <li><a href='javascript:;' class='location-dropdown' location_id='4' id='missouri-river-dropdown'>Missouri River, ND</a></li>
                 </ul>
             </div>
 
@@ -242,10 +242,10 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
                     Status <span class='caret'></span>
                 </button>
                 <ul class='dropdown-menu'>
-                    <li><a href='#' class='status-dropdown' video_status='' id='any-status-dropdown'>Any Status</a></li>
-                    <li><a href='#' class='status-dropdown' video_status='UNWATCHED' id='unwatched-dropdown'><button class='btn btn-mini pull-right'>&#x2713;</button> Unwatched</a></li>
-                    <li><a href='#' class='status-dropdown' video_status='WATCHED' id='watched-dropdown'><button class='btn btn-mini btn-primary pull-right'>&#x2713;</button> Watched</a></li>
-                    <li><a href='#' class='status-dropdown' video_status='FINISHED' id='finished-dropdown'><button class='btn btn-mini btn-success pull-right'>&#x2713;</button> Finished</a></li>
+                    <li><a href='javascript:;' class='status-dropdown' video_status='' id='any-status-dropdown'>Any Status</a></li>
+                    <li><a href='javascript:;' class='status-dropdown' video_status='UNWATCHED' id='unwatched-dropdown'><button class='btn btn-mini pull-right'>&#x2713;</button> Unwatched</a></li>
+                    <li><a href='javascript:;' class='status-dropdown' video_status='WATCHED' id='watched-dropdown'><button class='btn btn-mini btn-primary pull-right'>&#x2713;</button> Watched</a></li>
+                    <li><a href='javascript:;' class='status-dropdown' video_status='FINISHED' id='finished-dropdown'><button class='btn btn-mini btn-success pull-right'>&#x2713;</button> Finished</a></li>
                 </ul>
             </div>
 
