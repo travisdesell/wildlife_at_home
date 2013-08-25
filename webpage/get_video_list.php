@@ -13,6 +13,11 @@ $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
 
 $sort_by = mysql_real_escape_string($_POST['sort_by']);
+if ($sort_by != 'filename') {
+    if ($_POST['all_users'] == 'true') {
+        $sort_by = "(SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND observations.status = 'EXPERT') DESC";
+    }
+}
 
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
@@ -47,11 +52,16 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 $query = "";
-if (array_key_exists('all_users', $_POST)) {
-    $reported_filter = substr($reported_filter, 0, -4);
-    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter ORDER BY $sort_by LIMIT $video_min, $video_count";
+if ($_POST['all_users'] == 'true') {
+    if (strlen($filter) > 0) {
+        $filter = substr($filter, 5);
+        $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE $filter AND observations.status = 'EXPERT' AND observations.video_segment_id = vs2.id) ORDER BY $sort_by LIMIT $video_min, $video_count";
+    } else {
+        $reported_filter = substr($reported_filter, 0, -4);
+        $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter ORDER BY $sort_by LIMIT $video_min, $video_count";
+    }
 } else {
-    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id) ORDER BY $sort_by LIMIT $video_min, $video_count";
+    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id) ORDER BY $sort_by LIMIT $video_min, $video_count";
 }
 
 error_log($query);

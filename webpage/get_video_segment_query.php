@@ -10,6 +10,8 @@ function create_filter($filters, &$filter, &$reported_filter) {
 
         if ($key == 'report_status') {
             $reported_filter .= " vs2.report_status = '" . mysql_real_escape_string($value) . "' AND ";
+        } else if ($key == 'instructional') {
+            $reported_filter .= " vs2.instructional = true AND ";
         } else {
             if ($value == 'VALID or CANONICAL') {
                 $filter .= " AND (observations." . mysql_real_escape_string($key) . " = 'VALID' OR observations." . mysql_real_escape_string($key) . " = 'CANONICAL') ";

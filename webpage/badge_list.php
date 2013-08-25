@@ -20,8 +20,6 @@ echo "
     <!-- For bootstrap -->
     $bootstrap_scripts
 
-    <script type='text/javascript' src='user_video_list.js'></script>
-
     <style>
     body {
         padding-top: 60px;

@@ -85,14 +85,14 @@ echo "      </div>
                         Event <span class='caret'></span>
                     </button>
                     <ul class='dropdown-menu' id='event-dropdown-$video_id'>
-                        <li><a href='#' class='event-dropdown' event_id='0' video_id='$video_id' id='any-event-dropdown'>Unspecified</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='1' video_id='$video_id' id='bird-leave-dropdown'>Bird Presence</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='2' video_id='$video_id' id='bird-return-dropdown'>Bird Absence</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='3' video_id='$video_id' id='predator-dropdown'>Predator</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='4' video_id='$video_id' id='other-animal-dropdown'>Other Animal</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='5' video_id='$video_id' id='nest-defense-dropdown'>Nest Defense</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='6' video_id='$video_id' id='nest-success-dropdown'>Nest Success</a></li>
-                        <li><a href='#' class='event-dropdown' event_id='7' video_id='$video_id' id='nest-success-dropdown'>Chick Presence</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='0' video_id='$video_id' id='any-event-dropdown'>Unspecified</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='1' video_id='$video_id' id='bird-leave-dropdown'>Bird Presence</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='2' video_id='$video_id' id='bird-return-dropdown'>Bird Absence</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='3' video_id='$video_id' id='predator-dropdown'>Predator</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='4' video_id='$video_id' id='other-animal-dropdown'>Other Animal</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='5' video_id='$video_id' id='nest-defense-dropdown'>Nest Defense</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='6' video_id='$video_id' id='nest-success-dropdown'>Nest Success</a></li>
+                        <li><a href='javascript:;' class='event-dropdown' event_id='7' video_id='$video_id' id='nest-success-dropdown'>Chick Presence</a></li>
                     </ul>
                 </div>
 

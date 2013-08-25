@@ -29,11 +29,11 @@ $query = "SELECT DISTINCT animal_id FROM video_2 $filter";
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
-echo "<li><a href='#' class='animal-id-dropdown' animal_id='0' id='animal-id-dropdown-0'>Any Animal ID</a></li>";
+echo "<li><a href='javascript:;' class='animal-id-dropdown' animal_id='0' id='animal-id-dropdown-0'>Any Animal ID</a></li>";
 
 while ($row = mysql_fetch_assoc($result)) {
     $animal_id = $row['animal_id'];
-    echo "<li><a href='#' class='animal-id-dropdown' animal_id='$animal_id' id='animal-id-dropdown-$animal_id'>$animal_id</a></li>";
+    echo "<li><a href='javascript:;' class='animal-id-dropdown' animal_id='$animal_id' id='animal-id-dropdown-$animal_id'>$animal_id</a></li>";
 }
 
 ?>

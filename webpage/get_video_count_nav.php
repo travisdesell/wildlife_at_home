@@ -37,11 +37,16 @@ if (empty($filters)) {
     mysql_select_db("wildlife_video", $wildlife_db);
 
     $query = "";
-    if (array_key_exists('all_users', $_POST)) {
-        $reported_filter = substr($reported_filter, 0, -4);
-        $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE $reported_filter";
+    if ($_POST['all_users'] == 'true') {
+        if (strlen($filter) > 0) {
+            $filter = substr($filter, 4);
+            $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE $filter AND observations.status = 'EXPERT' AND observations.video_segment_id = vs2.id)";
+        } else {
+            $reported_filter = substr($reported_filter, 0, -4);
+            $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter";
+        }
     } else {
-        $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id)";
+        $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id)";
     }
 
     //echo "<!-- $query -->\n";
