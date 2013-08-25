@@ -30,12 +30,12 @@ $(document).ready(function () {
     $('#chick_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if chicks are visible at the nest.</p>", title : 'Instructions'});
     $('#interesting_help').popover({ placement : 'left', html : true,  content : "<p>This is up to you! Mark it yes if you found the video interesting.</p>", title : 'Instructions'});
 
-    $('#corrupt_too_dark_help').popover({ placement : 'top', html : true,  content: "<p>Click too dark if the video is too dark to determine if anything is happening.</p> <p>Click camera error if there are video corruption problems (static, etc) or if something has happened to the camera preventing viewing the nest (eg., if the camera was knocked over).</p> <p>In either case, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
+    $('#video_issue_help').popover({ placement : 'top', html : true,  content: "<p>Click video problem if the video is too dark to determine if anything is happening, if there are video corruption problems (static, etc) or if something has happened to the camera preventing viewing the nest (eg., if the camera was knocked over).</p> <p>In these cases, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
 
     $('#fast_forward_button').button();
     $('#fast_backward_button').button();
     $('#too_dark_button').button();
-    $('#corrupt_button').button();
+    $('#video_issue_button').button();
     $('#speed_textbox').val("speed: " + $('#wildlife_video').get(0).playbackRate);
 
     $('#fast_backward_button').click(function() {
@@ -76,10 +76,6 @@ $(document).ready(function () {
             discuss_video_clicked = true;
             $("#discuss-video-form").submit();
     });
-//    $('#discuss-video-button-too-dark').button();
-//    $('#discuss-video-button-too-dark').click(function() { $("#discuss-video-form-too-dark").submit(); });
-//    $('#discuss-video-button-corrupt').button();
-//    $('#discuss-video-button-corrupt').click(function() { $("#discuss-video-form-corrupt").submit(); });
 
 
 
@@ -447,10 +443,8 @@ $(document).ready(function () {
                 }
                 body_text += "</tr>";
 
-                if (response.post_observation.too_dark == 1) {
-                    body_text += print_modal_row('Too dark', 'too_dark', response.post_observation, response.db_observations);
-                } else if (response.post_observation.corrupt == 1) {
-                    body_text += print_modal_row('Corrupt', 'corrupt', response.post_observation, response.db_observations);
+                if (response.post_observation.video_issue == 1) {
+                    body_text += print_modal_row('Video Issue', 'video_issue', response.post_observation, response.db_observations);
                 } else {
                     body_text += print_modal_row('Parent leaves the nest', 'bird_leave', response.post_observation, response.db_observations);
                     body_text += print_modal_row('Parent returns to the nest', 'bird_return', response.post_observation, response.db_observations);
@@ -477,13 +471,13 @@ $(document).ready(function () {
 
 
 
-    $('#corrupt_button').click(function() {
-        console.log("corrupt!");
+    $('#video_issue_button').click(function() {
+        console.log("video_issue!");
 
-        if (!$('#corrupt_button').hasClass("disabled")) {
-            $('#corrupt_button').addClass("disabled");
+        if (!$('#video_issue_button').hasClass("disabled")) {
+            $('#video_issue_button').addClass("disabled");
 
-            var body_text = "You flagged the video as corrupt.";
+            var body_text = "You flagged the video as video_issue.";
 
             var comments_html = $('#comments').val();
             if (!interesting_selected) interesting = -1;
@@ -505,65 +499,19 @@ $(document).ready(function () {
                 species_id : species_id,
                 location_id : location_id,
                 duration_s : duration_s,
-                too_dark : 0,
-                corrupt : 1
+                video_issue : 1
             };
             if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
             var modal_body = '#submit-modal';
 
-            console.log("flagging video as corrupt, generating modal: '" + modal_body + "'");
+            console.log("flagging video as video_issue, generating modal: '" + modal_body + "'");
             generate_modal(modal_body, submission_data);
-            console.log("flagging video as corrupt, generated modal: '" + modal_body + "'");
+            console.log("flagging video as video_issue, generated modal: '" + modal_body + "'");
 
-            $('#corrupt_button').removeClass("disabled");
+            $('#video_issue_button').removeClass("disabled");
         }
     });
-
-    $('#too_dark_button').click(function() {
-        console.log("too dark!");
-
-        if (!$('#too_dark_button').hasClass("disabled")) {
-            $('#too_dark_button').addClass("disabled");
-
-            var body_text = "You flagged the video as too dark.";
-
-            var comments_html = $('#comments').val();
-
-            if (!interesting_selected) interesting = -1;
-            var submission_data = {
-                reviewing_reported : reviewing_reported,
-                user_id : user_id,
-                video_segment_id : video_segment_id,
-                comments : comments_html,
-                bird_leave : 0,
-                bird_return : 0,
-                bird_presence : 0,
-                bird_absence : 0,
-                predator_presence : 0,
-                nest_defense : 0,
-                nest_success : 0,
-                chick_presence: 0,
-                interesting : interesting,
-                start_time : start_time,
-                species_id : species_id,
-                location_id : location_id,
-                duration_s : duration_s,
-                too_dark : 1,
-                corrupt : 0
-            };
-            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
-
-            var modal_body = '#submit-modal';
-
-            console.log("flagging video as too dark, generating modal: '" + modal_body + "'");
-            generate_modal(modal_body, submission_data);
-
-            $('#too_dark_button').removeClass("disabled");
-        }
-    });
-
-
 
     $('#submit_button').click(function() {
         if (!$('#submit_button').hasClass("disabled")) {
@@ -588,8 +536,7 @@ $(document).ready(function () {
                 species_id : species_id,
                 location_id : location_id,
                 duration_s : duration_s,
-                too_dark : 0,
-                corrupt : 0
+                video_issue : 0
             };
             if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
