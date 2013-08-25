@@ -200,24 +200,13 @@ append_trinary_filter($filter_list, "chick_presence", "Chicks");
 $filter_list['filter_type'][] = array('divider' => true);
 
 $filter_list['filter_type'][] = array(
-            'dropdown_id' => 'too-dark-filter-dropdown',
-            'filter_name' => 'too_dark',
-            'default_text' => 'Too Dark - Any',
+            'dropdown_id' => 'video_issue-filter-dropdown',
+            'filter_name' => 'video_issue',
+            'default_text' => 'Video Issue - Any',
             'filter_option' => array(
-                array( 'dropdown_text' => 'Too Dark - Any', 'filter_value' => 'null' ),
-                array( 'dropdown_text' => 'Too Dark - Yes', 'filter_value' => '1' ),
-                array( 'dropdown_text' => 'Too Dark - No',  'filter_value' => '0' )
-            )
-        );
-
-$filter_list['filter_type'][] = array(
-            'dropdown_id' => 'corrupt-filter-dropdown',
-            'filter_name' => 'corrupt',
-            'default_text' => 'Corrupt - Any',
-            'filter_option' => array(
-                array( 'dropdown_text' => 'Corrupt - Any', 'filter_value' => 'null' ),
-                array( 'dropdown_text' => 'Corrupt - Yes', 'filter_value' => '1' ),
-                array( 'dropdown_text' => 'Corrupt - No',  'filter_value' => '0' )
+                array( 'dropdown_text' => 'Video Issue - Any', 'filter_value' => 'null' ),
+                array( 'dropdown_text' => 'Video Issue - Yes', 'filter_value' => '1' ),
+                array( 'dropdown_text' => 'Video Issue - No',  'filter_value' => '0' )
             )
         );
 

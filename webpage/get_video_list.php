@@ -135,25 +135,10 @@ while ($row = mysql_fetch_assoc($result)) {
     $video_and_observations['discuss_video_content']= "I would like to discuss this video:\n" . "[" . "video" . "]" . $segment_filename . "[/video" . "]";
 
 
-    $observation_query = "SELECT id, bird_leave, bird_return, bird_presence, bird_absence, predator_presence, nest_defense, nest_success, interesting, user_id, comments, status, corrupt, too_dark, chick_presence FROM observations WHERE video_segment_id = $video_segment_2_id";
+    $observation_query = "SELECT id, bird_leave, bird_return, bird_presence, bird_absence, predator_presence, nest_defense, nest_success, interesting, user_id, comments, status, video_issue, chick_presence, awarded_credit FROM observations WHERE video_segment_id = $video_segment_2_id";
 
     $observation_result = attempt_query_with_ping($observation_query, $wildlife_db);
     if (!$observation_result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $observation_query\n");
-
-    /*
-    $video_and_observations['names'] = array();
-    $video_and_observations['interesting'] = array();
-    $video_and_observations['bird_leave'] = array();
-    $video_and_observations['bird_return'] = array();
-    $video_and_observations['bird_presence'] = array();
-    $video_and_observations['bird_absence'] = array();
-    $video_and_observations['predator_presence'] = array();
-    $video_and_observations['nest_defense'] = array();
-    $video_and_observations['nest_success'] = array();
-    $video_and_observations['chick_presence'] = array();
-    $video_and_observations['too_dark'] = array();
-    $video_and_observations['corrupt'] = array();
-     */
 
     while ($observation_row = mysql_fetch_assoc($observation_result)) {
         set_marks($observation_row['interesting']);
@@ -165,30 +150,10 @@ while ($row = mysql_fetch_assoc($result)) {
         set_marks($observation_row['nest_defense']);
         set_marks($observation_row['nest_success']);
         set_marks($observation_row['chick_presence']);
-        set_marks($observation_row['too_dark'], true);
-        set_marks($observation_row['corrupt'], true);
+        set_marks($observation_row['video_issue'], true);
 
         $observation_row['user_id'] = get_user_from_id($observation_row['user_id'])->name;
         $video_and_observations['observations'][] = $observation_row;
-
-        /**
-         *  Make the list of users by columns instead of by rows.
-         */
-        /*
-        $video_and_observations['names'][]['name'] = $observation_row['user_id'];
-        $video_and_observations['status'][]['status'] = $observation_row['status'];
-        $video_and_observations['interesting'][]['interesting'] = $observation_row['interesting'];
-        $video_and_observations['bird_leave'][]['bird_leave'] = $observation_row['bird_leave'];
-        $video_and_observations['bird_return'][]['bird_return'] = $observation_row['bird_return'];
-        $video_and_observations['bird_presence'][]['bird_presence'] = $observation_row['bird_presence'];
-        $video_and_observations['bird_absence'][]['bird_absence'] = $observation_row['bird_absence'];
-        $video_and_observations['predator_presence'][]['predator_presence'] = $observation_row['predator_presence'];
-        $video_and_observations['nest_defense'][]['nest_defense'] = $observation_row['nest_defense'];
-        $video_and_observations['nest_success'][]['nest_success'] = $observation_row['nest_success'];
-        $video_and_observations['chick_presence'][]['chick_presence'] = $observation_row['chick_presence'];
-        $video_and_observations['too_dark'][]['too_dark'] = $observation_row['too_dark'];
-        $video_and_observations['corrupt'][]['corrupt'] = $observation_row['corrupt'];
-         */
     }
 
     $video_list['video_list'][] = $video_and_observations;

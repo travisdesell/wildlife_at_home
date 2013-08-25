@@ -300,9 +300,8 @@ echo "
                     </div>
 
                     <div class='row-fluid pull-down'>
-                        <a class='btn pull-left' style='margin-top:0px;' id='too_dark_button' value='too_dark' 'data-toggle='modal'>too dark</a>
-                        <a class='btn pull-left' style='margin-top:0px;' id='corrupt_button' value='corrupt' 'data-toggle='modal'>camera error</a>
-                        <div class='span1'> <span class='badge badge-info pull-left' style='margin-top:8px' id='corrupt_too_dark_help'>?</span> </div>
+                        <a class='btn pull-left' style='margin-top:0px;' id='video_issue_button' value='video_issue' 'data-toggle='modal'>video problem</a>
+                        <div class='span1'> <span class='badge badge-info pull-left' style='margin-top:8px' id='video_issue_help'>?</span> </div>
                         <a class='btn btn-primary pull-right disabled' style='margin-top:0px;' id='submit_button' value='submit' 'data-toggle='modal'>submit</a>
                     </div>
 

@@ -21,8 +21,7 @@ function get_observation_data($data, $from_db = false) {
     $res->interesting = $data['interesting'];
     $res->user_id = $data['user_id'];
     $res->video_segment_id = $data['video_segment_id'];
-    $res->too_dark = $data['too_dark'];
-    $res->corrupt = $data['corrupt'];
+    $res->video_issue = $data['video_issue'];
 
     if (!$from_db) {
         $res->status = 'UNVALIDATED';
@@ -93,8 +92,7 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
         " chick_presence = $post_observation->chick_presence, " .
         " interesting = $post_observation->interesting, " .
         " user_id = $post_observation->user_id, " .
-        " too_dark = $post_observation->too_dark, " .
-        " corrupt = $post_observation->corrupt, " .
+        " video_issue = $post_observation->video_issue, " .
         " status = 'EXPERT', " .
         " species_id = $species_id, " .
         " location_id = $location_id, " .
@@ -117,8 +115,7 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
         " chick_presence = $post_observation->chick_presence, " .
         " interesting = $post_observation->interesting, " .
         " user_id = $post_observation->user_id, " .
-        " too_dark = $post_observation->too_dark, " .
-        " corrupt = $post_observation->corrupt, " .
+        " video_issue = $post_observation->video_issue, " .
         " status = '$post_observation->status', " .
         " species_id = $species_id, " .
         " location_id = $location_id, " .

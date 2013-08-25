@@ -411,8 +411,7 @@ while ($observation_row = mysql_fetch_assoc($result)) {
     set_marks($observation_row['nest_defense']);
     set_marks($observation_row['nest_success']);
     set_marks($observation_row['chick_presence']);
-    set_marks($observation_row['too_dark'], true);
-    set_marks($observation_row['corrupt'], true);
+    set_marks($observation_row['video_issue'], true);
 
     $observation_row['user_id'] = get_user_from_id($observation_row['user_id'])->name;
     $observations['observations'][] = $observation_row;
