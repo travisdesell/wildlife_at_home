@@ -369,6 +369,19 @@ echo"
                         <div class='row-fluid'>
                             <div class='span2'>
                                 <p align=center>
+                                <a href='http://www.nsf.gov/'><img class ='floating' border='0' src='images/nsf1.png' width ='83' height='83' alt='Funded through a grant from the National Science Foundation (NSF).' /></a>
+                                </p>
+                            </div>
+                            <div class='span10'>
+                                <p>
+                                    Wildlife@Home is currently being supported by <a href='http://www.nsf.gov/awardsearch/showAward?AWD_ID=1319700&HistoricalAwards=false'>NSF award no. 1319700</a> through the <a href='http://www.nsf.gov/div/index.jsp?div=IIS'>Division of Intelligent Information Systems</a>'s Information Integration and Informatics (III) program.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class='row-fluid'>
+                            <div class='span2'>
+                                <p align=center>
                                 <a href='http://und.edu'><img src='images/und_logo.png'></a>
                                 </p>
                             </div>

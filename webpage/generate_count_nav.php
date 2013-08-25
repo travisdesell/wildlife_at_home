@@ -1,6 +1,7 @@
 <?php
 
 function generate_count_nav($max_items, $video_min, $video_count, $display_nav_numbers) {
+    global $user_id;
 
     echo "
         <div class='well well-large' style='padding-top: 10px; padding-bottom: 5px; margin-top: 3px; margin-bottom: 15px'> 
@@ -68,6 +69,17 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
     echo "
                         <div class='span4'>
+
+                            <div class='btn-group pull-right'>
+                                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='sort-by-dropdown'>
+                                Sort by <span class='caret'></span>
+                                </button>
+                                <ul class='dropdown-menu bottom-up'>
+                                    <li><a href='#' class='sort-by-dropdown' sort_value='filename' id='sort-by-filename'>Video Name</a></li>
+                                    <li><a href='#' class='sort-by-dropdown' sort_value='(SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND observations.user_id = $user_id) DESC' id='sort-by-observation'>Recently Viewed</a></li>
+                                </ul>
+                            </div>
+
                             <div class='btn-group pull-right'>
                                 <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='display-videos-button'>
                                 Display $video_count videos <span class='caret'></span>

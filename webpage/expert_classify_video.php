@@ -106,8 +106,9 @@ $active_items = array(
                     'home' => '',
                     'watch_video' => '',
                     'message_boards' => '',
-                    'preferences' => 'active',
+                    'preferences' => '',
                     'about_wildlife' => '',
+                    'project_management' => 'active',
                     'community' => ''
                 );
 

@@ -1,6 +1,22 @@
 
 $(document).ready(function () {
 
+    if (reviewing_reported) {
+        $('#valid-report-button').click(function() {
+            if ($(this).hasClass('active')) {
+                $(this).removeClass('active');
+                $(this).text("valid report");
+                $(this).addClass("btn-success");
+                $(this).removeClass("btn-danger");
+            } else {
+                $(this).addClass('active');
+                $(this).text("invalid report");
+                $(this).removeClass("btn-success");
+                $(this).addClass("btn-danger");
+            }
+        });
+    }
+
     $('#bird_leave_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird leaves the nest, no otherwise. Only select yes if the bird completely leaves the screen.", title : 'Instructions'});
     $('#bird_return_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird returns to the nest, no otherwise. Only select yes if the bird comes from completely off the screen back to the nest.", title : 'Instructions'});
 
@@ -14,7 +30,7 @@ $(document).ready(function () {
     $('#chick_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if chicks are visible at the nest.</p>", title : 'Instructions'});
     $('#interesting_help').popover({ placement : 'left', html : true,  content : "<p>This is up to you! Mark it yes if you found the video interesting.</p>", title : 'Instructions'});
 
-    $('#corrupt_too_dark_help').popover({ placement : 'top', html : true,  content: "<p>Click too dark if the video is too dark to determine if anything is happening.</p> <p>Click corrupt if there are video corruption problems (static, etc).</p> <p>In either case, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
+    $('#corrupt_too_dark_help').popover({ placement : 'top', html : true,  content: "<p>Click too dark if the video is too dark to determine if anything is happening.</p> <p>Click camera error if there are video corruption problems (static, etc) or if something has happened to the camera preventing viewing the nest (eg., if the camera was knocked over).</p> <p>In either case, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
 
     $('#fast_forward_button').button();
     $('#fast_backward_button').button();
@@ -146,16 +162,38 @@ $(document).ready(function () {
     }
 
     function fake_radio(name, which) {
-        if (which === 'yes') $('#' + name + '_yes').addClass("active");
-        else $('#' + name + '_yes').removeClass("active");
+        if (which === 'yes') {
+            $('#' + name + '_yes').addClass("active");
 
-        if (name != 'interesting') {
-            if (which === 'unsure') $('#' + name + '_unsure').addClass("active");
-            else $('#' + name + '_unsure').removeClass("active");
+            $('#' + name + '_yes').addClass("btn-success");
+
+            $('#' + name + '_no').removeClass("btn-danger");
+            if (name != 'interesting') $('#' + name + '_unsure').removeClass("btn-warning");
+        }  else {
+            $('#' + name + '_yes').removeClass("active");
         }
 
-        if (which === 'no') $('#' + name + '_no').addClass("active");
-        else $('#' + name + '_no').removeClass("active");
+        if (name != 'interesting') {
+            if (which === 'unsure') {
+                $('#' + name + '_unsure').addClass("active");
+
+                $('#' + name + '_yes').removeClass("btn-success");
+                $('#' + name + '_no').removeClass("btn-danger");
+                $('#' + name + '_unsure').addClass("btn-warning");
+            } else {
+                $('#' + name + '_unsure').removeClass("active");
+            }
+        }
+
+        if (which === 'no') {
+            $('#' + name + '_no').addClass("active");
+
+            $('#' + name + '_yes').removeClass("btn-success");
+            $('#' + name + '_no').addClass("btn-danger");
+            if (name != 'interesting') $('#' + name + '_unsure').removeClass("btn-warning");
+        } else {
+            $('#' + name + '_no').removeClass("active");
+        }
     }
 
     $('#bird_leave_yes').click(function() {
@@ -393,7 +431,11 @@ $(document).ready(function () {
 
                 console.log("response.post_observation.status = " + response.post_observation.status);
 
-                body_text += "<p><b>Your observations has been successfully reported! It has been queued and is waiting validation. You can check the <a href='./user_video_list.php'>Watched Videos</a> page to check on its validation status.<b></p>";
+                if (reviewing_reported === true) {
+                    body_text += "<p><b>Your review has been successfully submitted.<b></p>";
+                } else {
+                    body_text += "<p><b>Your observations has been successfully reported! It has been queued and is waiting validation. You can check the <a href='./user_video_list.php'>Watched Videos</a> page to check on its validation status.<b></p>";
+                }
 
                 body_text += "<p>Here is how your observations compare to other users:</p>";
                 body_text += "<table class='table table-bordered table-striped'>";
@@ -446,6 +488,7 @@ $(document).ready(function () {
             var comments_html = $('#comments').val();
             if (!interesting_selected) interesting = -1;
             var submission_data = {
+                reviewing_reported : reviewing_reported,
                 user_id : user_id,
                 video_segment_id : video_segment_id,
                 comments : comments_html,
@@ -465,6 +508,7 @@ $(document).ready(function () {
                 too_dark : 0,
                 corrupt : 1
             };
+            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
             var modal_body = '#submit-modal';
 
@@ -488,6 +532,7 @@ $(document).ready(function () {
 
             if (!interesting_selected) interesting = -1;
             var submission_data = {
+                reviewing_reported : reviewing_reported,
                 user_id : user_id,
                 video_segment_id : video_segment_id,
                 comments : comments_html,
@@ -507,6 +552,7 @@ $(document).ready(function () {
                 too_dark : 1,
                 corrupt : 0
             };
+            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
             var modal_body = '#submit-modal';
 
@@ -525,6 +571,7 @@ $(document).ready(function () {
             var comments_html = $('#comments').val();
 
             var submission_data = {
+                reviewing_reported : reviewing_reported,
                 user_id : user_id,
                 video_segment_id : video_segment_id,
                 comments : comments_html,
@@ -544,6 +591,7 @@ $(document).ready(function () {
                 too_dark : 0,
                 corrupt : 0
             };
+            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
 //            alert( JSON.stringify(submission_data) );
 
