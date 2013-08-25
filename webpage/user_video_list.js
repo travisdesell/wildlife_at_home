@@ -1,6 +1,7 @@
 
 $(document).ready(function () {
     var filters = {};
+    var sort_by = 'filename';
 
     $('.filter-dropdown').click(function() {
         var filter_name = $(this).attr("filter_name");
@@ -36,7 +37,8 @@ $(document).ready(function () {
         var submission_data = {
                                 video_min : video_min,
                                 video_count : video_count,
-                                filters : filters
+                                filters : filters,
+                                sort_by : sort_by
                               };
 
         $("#videos-placeholder").html("<div class=well well-large style='padding-top:15px'><div class='span12'><p>Loading videos...</p></div></div>");
@@ -169,6 +171,20 @@ $(document).ready(function () {
             }
         });
 
+        $("#go-to-textbox").keyup(function (e) {
+            if (e.keyCode == 13) {
+                var value = $('#go-to-textbox').val();
+
+                if (Math.floor(value) == value && $.isNumeric(value)) {
+    //                console.log("value is an integer!: " + value);
+                    if (video_min != value) {
+                        video_min = value;
+                        video_min = video_min - (video_min % video_count);
+                        reload_videos(false);
+                    }
+                }
+            }
+        });
 
         $('#display-5-dropdown').click(function(ev) {
             if (video_count != 5) {
@@ -193,6 +209,18 @@ $(document).ready(function () {
         $('#display-20-dropdown').click(function(ev) {
             if (video_count != 20) {
                 video_count = 20;
+                reload_videos(false);
+            }
+
+            ev.preventDefault();
+            ev.stopPropagation();
+        });
+
+        $('.sort-by-dropdown').click(function(ev) {
+            var value = $(this).attr("sort_value");
+
+            if (value !== sort_by) {
+                sort_by = value;
                 reload_videos(false);
             }
 

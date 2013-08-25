@@ -10,6 +10,12 @@ require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
+$species_id = mysql_real_escape_string($_GET['species']);
+$location_id = mysql_real_escape_string($_GET['site']);
+
+$user = get_logged_in_user();
+$user_id = $user->id;
+
 echo "
 <!DOCTYPE html>
 <html>
@@ -20,6 +26,9 @@ echo "
     <!-- For bootstrap -->
     $bootstrap_scripts
 
+    <script type='text/javascript'>
+        var reviewing_reported = false;
+    </script>
     <script type='text/javascript' src='watch.js'></script>
 
     <style>
@@ -31,14 +40,72 @@ echo "
             padding-top: 0px;
         }
     }
+
+        .well {
+           position: relative;
+           margin: 15px 5px;
+           padding: 39px 19px 14px;
+           *padding-top: 19px;
+           border: 1px solid #ddd;
+           -webkit-border-radius: 4px;
+           -moz-border-radius: 4px;
+           border-radius: 4px; 
+        }
+
+        .tab {
+           position: absolute;
+           top: -1px;
+           left: -1px;
+           padding: 3px 7px;
+           font-size: 14px;
+           font-weight: bold;
+           background-color: #f5f5f5;
+           border: 1px solid #ddd;
+           color: #606060; 
+           -webkit-border-radius: 4px 0 4px 0;
+           -moz-border-radius: 4px 0 4px 0;
+           border-radius: 4px 0 4px 0;
+        }
+
+        .tab-right {
+           position: absolute;
+           top: -1px;
+           right: -1px;
+           padding: 3px 7px;
+           font-size: 14px;
+           font-weight: bold;
+           background-color: #f5f5f5;
+           border: 1px solid #ddd;
+           color: #606060; 
+           -webkit-border-radius: 4px 0 4px 0;
+           -moz-border-radius: 4px 0 4px 0;
+           border-radius: 4px 0 4px 0;
+        }
+
+        .title {
+            text-align: center;
+           position: absolute;
+           top: -1px;
+           left: -1px;
+           width: 100%;
+           padding: 3px 0px 0px 0px;
+           font-size: 14px;
+           font-weight: bold;
+           background-color: #f5f5f5;
+           border: 1px solid #ddd;
+           color: #606060; 
+           -webkit-border-radius: 4px 4px 0px 0px;
+           -moz-border-radius: 4px 4px 0px 0px;
+           border-radius: 4px 4px 0px 0px;
+        }
+
+        .label {
+            cursor: pointer;
+        }
+
     </style>
 ";
 
-$species_id = mysql_real_escape_string($_GET['species']);
-$location_id = mysql_real_escape_string($_GET['site']);
-
-$user = get_logged_in_user();
-$user_id = $user->id;
 /*
  * This is a little convoluted, but it will quickly select a random video_segment which has
  * been processed.
@@ -118,6 +185,7 @@ $active_items = array(
                     'message_boards' => '',
                     'preferences' => '',
                     'about_wildlife' => '',
+                    'project_management' => '',
                     'community' => ''
                 );
 
@@ -148,7 +216,10 @@ else $species_name = $row['name'];
 
 
 echo"
-    <div class='well well-large'>
+    <div class='well well-small' style='margin-top:0px;'>
+        <div class='tab'>$animal_id - " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</div>
+        <div class='tab-right'>" . number_format($user->bossa_total_credit) . "s watched - " . round(100 * ($user->valid_observations / ($user->valid_observations + $user->invalid_observations)), 2) . "% accuracy</div>
+
         <div class='row-fluid'>
             <div class='container'>
                 <div class='span6'>";
@@ -173,14 +244,6 @@ if ($found) {
                             <a class='btn btn-primary span5 pull-right' style='margin-top:0px;' id='fast_forward_button' value='fast forward'>fast forward</a>
                         </div>
 
-                        <div class='row-fluid' style='margin-top:25px'>
-                            <div class='span6'>
-                                <p align='center'>" .  number_format($user->bossa_total_credit) . " seconds watched.</p>
-                            </div>
-                            <div class='span6'>
-                                <p align='center'>" . round(100 * ($user->valid_observations / ($user->valid_observations + $user->invalid_observations)), 2) . "% accurate.</p>
-                            </div>
-                        </div>
     ";
 
 } else {
@@ -190,11 +253,7 @@ if ($found) {
 
 echo "
                 </div>  <!-- span6 -->
-                <div class='span6'>
-
-                    <div class='row-fluid'>
-                        <h4 align=center>$animal_id - " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</h4>
-                        </div>";
+                <div class='span6'>";
 
 function print_selection_row($text, $id) {
     echo "<div class='row-fluid'>";
@@ -237,14 +296,14 @@ echo "
                     </div>
 
                     <div class='row-fluid'>
-                        <input class='span12' type='text' name='comments' id='comments'/>
+                        <input class='span12' type='text' name='comments' id='comments' style='margin-top:-4px; margin-bottom:5px;'/>
                     </div>
 
                     <div class='row-fluid pull-down'>
-                        <a class='btn pull-left' style='margin-top0px;' id='too_dark_button' value='too_dark' 'data-toggle='modal'>too dark</a>
-                        <a class='btn pull-left' style='margin-top0px;' id='corrupt_button' value='corrupt' 'data-toggle='modal'>camera error</a>
+                        <a class='btn pull-left' style='margin-top:0px;' id='too_dark_button' value='too_dark' 'data-toggle='modal'>too dark</a>
+                        <a class='btn pull-left' style='margin-top:0px;' id='corrupt_button' value='corrupt' 'data-toggle='modal'>camera error</a>
                         <div class='span1'> <span class='badge badge-info pull-left' style='margin-top:8px' id='corrupt_too_dark_help'>?</span> </div>
-                        <a class='btn btn-primary pull-right disabled' style='margin-top0px;' id='submit_button' value='submit' 'data-toggle='modal'>submit</a>
+                        <a class='btn btn-primary pull-right disabled' style='margin-top:0px;' id='submit_button' value='submit' 'data-toggle='modal'>submit</a>
                     </div>
 
                     <div id = 'submit-modal' class='modal hide fade' tabindex='-1' role='dialog' aria-labelledby='submit-modal-label'>

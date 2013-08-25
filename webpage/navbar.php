@@ -1,6 +1,37 @@
 <?php
 
+require_once('../inc/util.inc');
+require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+
 function print_navbar($active_items) {
+    global $boinc_passwd, $boinc_user, $wildlife_passwd, $wildlife_user;
+
+    $project_scientist = false;
+    $user = get_logged_in_user(false);
+    $user_name = "";
+    if ($user != null) {
+        $user_id = $user->id;
+        $user_name = $user->name;
+
+        ini_set("mysql.connect_timeout", 300);
+        ini_set("default_socket_timeout", 300);
+
+        $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+        mysql_select_db("wildlife", $boinc_db);
+
+        $result = mysql_query("SELECT special_user FROM forum_preferences WHERE userid=$user_id", $boinc_db);
+        $row = mysql_fetch_assoc($result);
+
+        $special_user = $row['special_user'];
+
+        if (strlen($special_user) > 6 && $special_user{6} == 1) $project_scientist = true;
+
+    } else {
+        $user_name = "Your Account";
+    }
+
 
     echo "
         <!-- NAVBAR
@@ -58,17 +89,6 @@ function print_navbar($active_items) {
 
                             <li class='" . $active_items['message_boards'] . "'><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
 
-                            <li class='dropdown " . $active_items['preferences'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
-                              <ul class='dropdown-menu'>
-                                <li><a href='home.php'>Your Preferences</a></li>
-                                <li><a href='user_video_list.php'>Watched Videos</a></li>
-                                <li><a href='team.php'>Teams</a></li>
-                                <li><a href='cert1.php'>Certificate</a></li>
-                                <li><a href='apps.php'>Applications</a></li>
-                              </ul>
-                            </li>
-                            
                             <li class='dropdown " . $active_items['community'] . "'>
                               <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Project Information<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
@@ -86,6 +106,52 @@ function print_navbar($active_items) {
                                 <li><a href='stats.php'>More Statistics</a></li>
                               </ul>
                             </li>
+                        </ul>
+
+                        <ul class='nav pull-right'>";
+
+if ($project_scientist) {
+    $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+    mysql_select_db("wildlife_video", $wildlife_db);
+
+    $query = "SELECT count(*) FROM video_segment_2 WHERE report_status = 'REPORTED'";
+
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+
+    $row = mysql_fetch_assoc($result);
+
+    $waiting_review = $row['count(*)'];
+
+    echo "                  <li class='dropdown " . $active_items['project_management'] . " '>
+                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Project Mangement<b class='caret'></b></a>
+                              <ul class='dropdown-menu'>
+                                <li><a href='expert_classify_video.php'>Expert Video Classification</a></li>
+                                <li><a href='review_reported_videos.php'>Review Reported Videos ($waiting_review waiting)</a></li>
+                              </ul>
+                            </li>";
+
+}
+
+
+echo "                      <li class='dropdown " . $active_items['preferences'] . " '>
+                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>$user_name<b class='caret'></b></a>
+                              <ul class='dropdown-menu'>
+                                <li><a href='home.php'>Your Preferences</a></li>
+                                <li><a href='user_video_list.php'>Watched Videos</a></li>
+                                <li><a href='team.php'>Teams</a></li>
+                                <li><a href='cert1.php'>Certificate</a></li>
+                                <li><a href='apps.php'>Applications</a></li>";
+
+if ($user != null) {
+    $url_tokens = url_tokens($user->authenticator);
+    echo "                      <li class='divider'></li>
+                                <li><a href='logout.php?$url_tokens'>Log Out</a></li>";
+}
+
+echo "                          </ul>
+                            </li>
+
                         </ul>
                     </div> <!-- /.nav-collapse-->
                 </div>  <!-- container-fluid -->

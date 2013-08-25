@@ -2,14 +2,17 @@
 
 require_once('/projects/wildlife/html/inc/util.inc');
 
-require('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/get_video_segment_query.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
+
+$sort_by = mysql_real_escape_string($_POST['sort_by']);
 
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
@@ -22,26 +25,8 @@ if (array_key_exists('filters', $_POST)) {
     $filters = $_POST['filters'];
 }
 
-
-$filter = '';
-$reported_filter = '';
-
-foreach ($filters as $key => $value) {
-//    error_log("    '$key' => '$value'");
-
-    if ($key == 'report_status') {
-        $reported_filter .= " vs2.report_status = '" . mysql_real_escape_string($value) . "' AND ";
-    } else {
-        if ($value == 'VALID or CANONICAL') {
-            $filter .= " AND (observations." . mysql_real_escape_string($key) . " = 'VALID' OR observations." . mysql_real_escape_string($key) . " = 'CANONICAL') ";
-        } else if (!is_numeric($value)) {
-            $filter .= " AND observations." . mysql_real_escape_string($key) . " = '" . mysql_real_escape_string($value) . "' ";
-        } else {
-            $filter .= " AND observations." . mysql_real_escape_string($key) . " = " . mysql_real_escape_string($value) . " ";
-        }
-    }
-}
-
+create_filter($filters, $filter, $reported_filter);
+//
 //error_log("filter string: '$filter'");
 
 if (empty($filters)) {
@@ -64,9 +49,9 @@ mysql_select_db("wildlife_video", $wildlife_db);
 $query = "";
 if (array_key_exists('all_users', $_POST)) {
     $reported_filter = substr($reported_filter, 0, -4);
-    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter ORDER BY filename LIMIT $video_min, $video_count";
+    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter ORDER BY $sort_by LIMIT $video_min, $video_count";
 } else {
-    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id) ORDER BY filename LIMIT $video_min, $video_count";
+    $query = "SELECT id, filename, crowd_obs_count, video_id, report_status FROM video_segment_2 vs2 WHERE $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id) ORDER BY $sort_by LIMIT $video_min, $video_count";
 }
 
 error_log($query);

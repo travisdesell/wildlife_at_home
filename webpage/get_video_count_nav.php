@@ -5,6 +5,7 @@ require_once('/projects/wildlife/html/inc/util.inc');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/generate_count_nav.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/get_video_segment_query.php');
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
@@ -20,25 +21,7 @@ if (array_key_exists('filters', $_POST)) {
     $filters = $_POST['filters'];
 }
 
-$filter = '';
-
-$reported_filter = '';
-
-foreach ($filters as $key => $value) {
-//    error_log("    '$key' => '$value'");
-
-    if ($key == 'report_status') {
-        $reported_filter .= " vs2.report_status = '" . mysql_real_escape_string($value) . "' AND ";
-    } else {
-        if ($value == 'VALID or CANONICAL') {
-            $filter .= " AND (observations." . mysql_real_escape_string($key) . " = 'VALID' OR observations." . mysql_real_escape_string($key) . " = 'CANONICAL') ";
-        } else if (!is_numeric($value)) {
-            $filter .= " AND observations." . mysql_real_escape_string($key) . " = '" . mysql_real_escape_string($value) . "' ";
-        } else {
-            $filter .= " AND observations." . mysql_real_escape_string($key) . " = " . mysql_real_escape_string($value) . " ";
-        }
-    }
-}
+create_filter($filters, $filter, $reported_filter);
 
 $display_nav_numbers = true;
 if (empty($filters)) {
