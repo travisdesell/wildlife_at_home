@@ -8,7 +8,7 @@ require_once('/projects/wildlife/html/inc/bossa_impl.inc');
 
 $user = get_logged_in_user();
 $reporter_id = $user->id;
-$reporter_name = $user->name;
+$reporter_name = mysql_real_escape_string($user->name);
 
 $report_comments = mysql_real_escape_string($_POST['report_comments']);
 $video_segment_id = mysql_real_escape_string($_POST['video_segment_id']);
