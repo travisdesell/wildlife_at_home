@@ -1,4 +1,4 @@
-#/opt/local/bin/g++-mp-4.7 -std=c++11 \
+#/opt/local/bin/g++-mp-4.7 \
 g++ \
     -D_BOINC_APP_ \
 	-I../../ffmpeg \
