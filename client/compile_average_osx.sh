@@ -6,7 +6,7 @@ g++ \
     -I../../boinc/api \
     -I../../boinc/lib \
 	wildlife_average.cpp \
-    -o test \
+    -o wildlife_average \
     ../../ffmpeg/libavformat/libavformat.a \
 	../../ffmpeg/libavcodec/libavcodec.a \
     ../../ffmpeg/libswscale/libswscale.a \

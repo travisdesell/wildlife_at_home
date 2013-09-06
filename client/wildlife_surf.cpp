@@ -2,17 +2,6 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/nonfree/features2d.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-//
-//#include <opencv2/core/types_c.h>
-//#include <opencv2/imgproc/imgproc_c.h>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/core_c.h>
-#include <opencv2/highgui/highgui_c.h>
 
 #ifdef _BOINC_APP_
 #ifdef _WIN32
@@ -26,6 +15,19 @@
 #include "boinc_api.h"
 #include "mfile.h"
 #endif
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+//
+//#include <opencv2/core/types_c.h>
+//#include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core_c.h>
+#include <opencv2/highgui/highgui_c.h>
+
 
 using namespace std;
 using namespace cv;
@@ -54,8 +56,8 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    Rect finalRect;
-    vector<Rect> boundingRects;
+    cv::Rect finalRect;
+    vector<cv::Rect> boundingRects;
     vector<Point2f> tlPoints;
     vector<Point2f> brPoints;
 
@@ -111,7 +113,7 @@ int main(int argc, char **argv) {
     cerr << "Frames Per Second: " << fps << endl;
     cerr << "Frame Count: " << total << endl;
     cerr << "Number of Frames in Three Minutes: " << framesInThreeMin << endl;
-    cerr << "<slice_probabilities>" << endl;
+//    cerr << "<slice_probabilities>" << endl;
 
     checkpoint_filename = "checkpoint.txt";
 
@@ -129,7 +131,14 @@ int main(int argc, char **argv) {
     framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
     cerr << "Starting at Frame: " << framePos << endl;
 
+    long start_time = time(NULL);
+
     while ((double)framePos/total < 1.0) {
+
+        if (framePos % 10 == 0) {
+            cout << "FPS: " << framePos/((double)time(NULL) - (double)start_time) << endl;
+        }
+
         //cout << framePos/total << endl;
         Mat frame(cvarrToMat(cvQueryFrame(capture)));
         framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
@@ -189,7 +198,7 @@ int main(int argc, char **argv) {
 
             //Get bounding rectangle.
             if (matching_points.size() != 0) {
-                Rect boundRect = boundingRect(matching_points);
+                cv::Rect boundRect = boundingRect(matching_points);
 
 #ifdef GUI
                 color = Scalar(0, 0, 255); // Blue, Green, Red
@@ -209,7 +218,7 @@ int main(int argc, char **argv) {
                 Point2f tlPoint(tlMean.at<float>(0,0), tlMean.at<float>(0,1));
                 Point2f brPoint(brMean.at<float>(0,0), brMean.at<float>(0,1));
 
-                Rect averageRect(tlPoint, brPoint);
+                cv::Rect averageRect(tlPoint, brPoint);
 
 #ifdef GUI
                 color = Scalar(255, 0, 0); // Blue, Green, Red
@@ -237,7 +246,7 @@ int main(int argc, char **argv) {
 #ifdef _BOINC_APP_
             boinc_fraction_done((double)framePos/total);
 
-            if(boinc_time_to_checkpoint() || key == 's') {
+            if ( boinc_time_to_checkpoint() ) {
                 cerr << "checkpointing" << endl;
                 write_checkpoint();
                 boinc_checkpoint_completed();
