@@ -63,8 +63,6 @@ get_video_progress($grouse_blaisdell_validated_s, $grouse_blaisdell_processed_s,
 get_video_progress($grouse_lostwood_validated_s, $grouse_lostwood_processed_s, $grouse_lostwood_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 3", $wildlife_db);
 get_video_progress($least_tern_validated_s, $least_tern_processed_s, $least_tern_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 2 and location_id = 4", $wildlife_db);
 get_video_progress($piping_plover_validated_s, $piping_plover_processed_s, $piping_plover_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 3 and location_id = 4", $wildlife_db);
-get_video_progress($grouse_belden_validated_s_2013, $grouse_belden_processed_s_2013, $grouse_belden_total_s_2013, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 5", $wildlife_db);
-get_video_progress($grouse_blaisdell_validated_s_2013, $grouse_blaisdell_processed_s_2013, $grouse_blaisdell_total_s_2013, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 6", $wildlife_db);
 
 $grouse_belden_available = 100 * ($grouse_belden_processed_s / $grouse_belden_total_s);
 $grouse_belden_validated = 100 * ($grouse_belden_validated_s / $grouse_belden_total_s);
@@ -76,11 +74,6 @@ $least_tern_available = 100 * ($least_tern_processed_s / $least_tern_total_s);
 $least_tern_validated = 100 * ($least_tern_validated_s / $least_tern_total_s);
 $piping_plover_available = 100 * ($piping_plover_processed_s / $piping_plover_total_s);
 $piping_plover_validated = 100 * ($piping_plover_validated_s / $piping_plover_total_s);
-
-$grouse_belden_available_2013 = 100 * ($grouse_belden_processed_s_2013 / $grouse_belden_total_s_2013);
-$grouse_belden_validated_2013 = 100 * ($grouse_belden_validated_s_2013 / $grouse_belden_total_s_2013);
-$grouse_blaisdell_available_2013 = 100 * ($grouse_blaisdell_processed_s_2013 / $grouse_blaisdell_total_s_2013);
-$grouse_blaisdell_validated_2013 = 100 * ($grouse_blaisdell_validated_s_2013 / $grouse_blaisdell_total_s_2013);
 
 echo "var grouse_belden_total = $grouse_belden_total_s;\n";
 echo "var grouse_belden_processed = $grouse_belden_processed_s;\n";
@@ -101,15 +94,6 @@ echo "var least_tern_validated = $least_tern_validated_s;\n";
 echo "var piping_plover_total = $piping_plover_total_s;\n";
 echo "var piping_plover_processed = $piping_plover_processed_s;\n";
 echo "var piping_plover_validated = $piping_plover_validated_s;\n";
-
-echo "var grouse_belden_total_2013 = $grouse_belden_total_s_2013;\n";
-echo "var grouse_belden_processed_2013  = $grouse_belden_processed_s_2013;\n";
-echo "var grouse_belden_validated_2013  = $grouse_belden_validated_s_2013;\n";
-
-echo "var grouse_blaisdell_total_2013  = $grouse_blaisdell_total_s_2013;\n";
-echo "var grouse_blaisdell_processed_2013  = $grouse_blaisdell_processed_s_2013;\n";
-echo "var grouse_blaisdell_validated_2013  = $grouse_blaisdell_validated_s_2013;\n";
-
 
 echo "</script>
 
@@ -200,28 +184,6 @@ $thumbnails = array('thumbnail_list' => array(
                                     'site_id' => '3',
                                     'validated_percentage' => $grouse_lostwood_validated,
                                     'available_percentage' => $grouse_lostwood_available - $grouse_lostwood_validated
-                                ),
-
-                                array (
-                                    'enabled' => ($grouse_belden_available > 0),
-                                    'site_name' => 'Belden, ND',
-                                    'year' => '2013',
-                                    'progress_id' => 'grouse_belden_progress_2013',
-                                    'site_description' => 'Cameras were placed at grouse nests in areas of intense gas and oil development.',
-                                    'site_id' => '5',
-                                    'validated_percentage' => $grouse_belden_validated_2013,
-                                    'available_percentage' => $grouse_belden_available_2013 - $grouse_belden_validated_2013
-                                ), 
-
-                                array (
-                                    'enabled' => ($grouse_blaisdell_available > 0),
-                                    'site_name' => 'Blaisdell, ND',
-                                    'year' => '2013',
-                                    'progress_id' => 'grouse_blaisdell_progress_2013',
-                                    'site_description' => 'Cameras were placed at grouse nests in areas of low intensity of gas and oil development.',
-                                    'site_id' => '6',
-                                    'validated_percentage' => $grouse_blaisdell_validated_2013,
-                                    'available_percentage' => $grouse_blaisdell_available_2013 - $grouse_blaisdell_validated_2013
                                 )
                             )
                         ),

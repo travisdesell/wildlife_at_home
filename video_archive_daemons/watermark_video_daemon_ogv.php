@@ -12,12 +12,11 @@ $location_table = "locations";
  * SCRIPT STARTS HERE
  */
 
-if (count($argv) != 3) {
-    die("Error, invalid arguments. usage: php $argv[0] <species_id> <number of processes>\n");
+if (count($argv) != 2) {
+    die("Error, invalid arguments. usage: php $argv[0] <number of processes>\n");
 }
 
-$species_id = $argv[1];
-$number_of_processes = $argv[2];
+$number_of_processes = $argv[1];
 $modulo = -1;
 
 $child_pids = array();
@@ -57,14 +56,9 @@ if ($modulo > -1) {
 
     while(true) {   //Loop until there are no more videos to watermark.
         $query = "";
-        if ($species_id == 1) {
-            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_iteration LIMIT 1";
-            $location_iteration++;
-            if ($location_iteration == 4) $location_iteration = 1;
-        } else {
-            $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = $species_id LIMIT 1";
-        }
-
+        $query = "SELECT id, archive_filename, watermarked_filename FROM video_2 WHERE (id % $number_of_processes) = $modulo AND (processing_status = 'WATERMARKED' OR processing_status = 'SPLIT') AND ogv_generated = false LIMIT 1";
+        $location_iteration++;
+        if ($location_iteration == 5) $location_iteration = 1;
         echo $query . "\n";
 
         $result = mysql_query($query);
@@ -86,26 +80,19 @@ if ($modulo > -1) {
         echo "id: " . $row['id'] . "\n";
         echo "archive_filename: " . $row['archive_filename'] . "\n";
         echo "watermarked_filename: " . $row['watermarked_filename'] . "\n\n";
+        $watermarked_filename = $row['watermarked_filename'];
 
         //Need to try and create the directories to the file.
         $base_directory = substr($row['watermarked_filename'], 0, strrpos($row['watermarked_filename'], "/"));
         echo "attempting to create directories if they don't exist: $base_directory\n";
         mkdir($base_directory, 0755 /*all for owner, read/execute for others*/, true /*recursive*/);
 
-        //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
-        //use HTML5 to stream it
-        $watermark_file = "/video/wildlife/watermark.png";
-        $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i " . $row['archive_filename']. " -ar 44100 -vb 400000 -qmax 5 -vcodec libx264 -level 30 -maxrate 10000000 -bufsize 10000000 -vprofile baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" " . $row['watermarked_filename'];
-        echo "\n\n$command\n\n";
+        //Run FFMPEG to do convert another version of the in ogv for streaming on firefox and chrome
+        $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . " -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 " . $watermarked_filename . ".ogv";
+        echo "$command\n";
         shell_exec($command);
 
-        echo "shell exec 1 completed\n\n";
-
-        $command = "/usr/bin/ffmpeg -y -i " . $row['watermarked_filename'] . " -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 " . $row['watermarked_filename'] . ".ogv";
-        echo "\n\n$command\n\n";
-        shell_exec($command);
-
-        echo "shell exec 2 completed\n\n";
+        echo "shell exec completed\n\n";
 
         /**
          *  After the file has been successfully watermarked, update the processing_status to 'WATERMARKED'
@@ -117,11 +104,7 @@ if ($modulo > -1) {
         $md5_hash = md5_file($row['watermarked_filename']);
         $filesize = filesize($row['watermarked_filename']);
 
-        $query = "UPDATE video_2 SET processing_status = 'WATERMARKED', size = $filesize, md5_hash = '$md5_hash', ogv_generated = true WHERE id = " . $row['id'];
-        $result = mysql_query($query);
-        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-
-        $query = "UPDATE video_segment_2 SET processing_status = 'WATERMARKED' WHERE video_id = " . $row['id'];
+        $query = "UPDATE video_2 SET ogv_generated = true WHERE id = " . $row['id'];
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 

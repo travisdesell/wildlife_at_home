@@ -61,8 +61,7 @@ if ($modulo > -1) {
         if ($species_id == 1) {  //this is a grouse and we have 3 locations
             $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = $species_id AND location_id = $location_iteration LIMIT 1";
             $location_iteration++;
-            if ($location_iteration == 4) $location_iteration = 5;
-            if ($location_iteration == 7) $location_iteration = 1;
+            if ($location_iteration == 4) $location_iteration = 1;
         } else {
             $query = "SELECT id, video_id, number, filename FROM video_segment_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'WATERMARKED' AND species_id = $species_id LIMIT 1";
         }
@@ -116,13 +115,17 @@ if ($modulo > -1) {
         mkdir($base_directory, 0755 /*all for owner, read/execute for others*/, true /*recursive*/);
 
         /**
+         * Make duration 5 minutes, 10 minutes or 20 minutes (instead of 3)
+         */
+        $duration = 180;    //duration should be 3 minutes or until the end of the video.
+
+        /**
          *  Calculate the start and ending time for the video segment.
          *  FFMPEG is a pain, so we need to convert from seconds to hh:mm:ss
          */
-        $start_time = 180 * $segment_number;
+        $start_time = $duration * $segment_number;
 
-        $duration = 180;    //duration should be 3 minutes or until the end of the video.
-        if (($start_time + 180) > $archive_duration_s)  {
+        if (($start_time + $duration) > $archive_duration_s)  {
             $duration = ($archive_duration_s - $start_time);
         }
 
