@@ -1,11 +1,11 @@
 <?php
 
 function generate_count_nav($max_items, $video_min, $video_count, $display_nav_numbers) {
+    global $user_id;
 
     echo "
         <div class='well well-large' style='padding-top: 10px; padding-bottom: 5px; margin-top: 3px; margin-bottom: 15px'> 
             <div class='row-fluid'>
-                <div class='container'>
                     <div class='span12'>";
 
 
@@ -16,7 +16,7 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
             $new_min = $video_min - $video_count;
             if ($new_min < 0) $new_min = 0;
 
-            echo "<li><a class='video-nav-list' id = 'video-list-$new_min' href='#'>Prev</a> </li>";
+            echo "<li><a class='video-nav-list' id = 'video-list-$new_min' href='javascript:;'>Prev</a> </li>";
         }
 
         $count = 0;
@@ -25,7 +25,7 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
         if ($current < 0) $current = 0;
 
         if ($current > 0) {
-            echo "<li> <a class='video-nav-list' id = 'video-list-0' href='#'>0..$video_count</a> </li>";
+            echo "<li> <a class='video-nav-list' id = 'video-list-0' href='javascript:;'>0..$video_count</a> </li>";
         }
 
         while ($current < $max_items && $count < 5) {
@@ -35,15 +35,15 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
             if ($current == $video_min) {
                 if ($current == $next) {
-                    echo "<li><a class='video-nav-list' id='video-list-$current' href='#'><b>$current</b></a> </li>";
+                    echo "<li><a class='video-nav-list' id='video-list-$current' href='javascript:;'><b>$current</b></a> </li>";
                 } else {
-                    echo "<li><a class='video-nav-list' id='video-list-$current' href='#'><b>$current..$next</b></a> </li>";
+                    echo "<li><a class='video-nav-list' id='video-list-$current' href='javascript:;'><b>$current..$next</b></a> </li>";
                 }
             } else {
                 if ($current == $next) {
-                    echo "<li><a class='video-nav-list' id='video-list-$current' href='#'>$current</a> </li>";
+                    echo "<li><a class='video-nav-list' id='video-list-$current' href='javascript:;'>$current</a> </li>";
                 } else {
-                    echo "<li><a class='video-nav-list' id='video-list-$current' href='#'>$current..$next</a> </li>";
+                    echo "<li><a class='video-nav-list' id='video-list-$current' href='javascript:;'>$current..$next</a> </li>";
                 }
             }
 
@@ -53,13 +53,13 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
         }
 
         if ($current < $max_items) {
-            echo "<li> <a class='video-nav-list' id = 'video-list-" . ($max_items - $video_count) . "' href='#'>" .($max_items - $video_count) . ".." . ($max_items - 1) . "</a> </li>";
+            echo "<li> <a class='video-nav-list' id = 'video-list-" . ($max_items - $video_count) . "' href='javascript:;'>" .($max_items - $video_count) . ".." . ($max_items - 1) . "</a> </li>";
         }
 
         if ($video_min + $video_count < $max_items) {
             $new_min = $video_min + $video_count;
 
-            echo "<li> <a class='video-nav-list' id='video-list-$new_min' href='#'>Next</a> </li>";
+            echo "<li> <a class='video-nav-list' id='video-list-$new_min' href='javascript:;'>Next</a> </li>";
         }
 
         echo "</ul></div>";
@@ -69,14 +69,26 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
     echo "
                         <div class='span4'>
+
+                            <div class='btn-group pull-right'>
+                                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='sort-by-dropdown'>
+                                Sort by <span class='caret'></span>
+                                </button>
+                                <ul class='dropdown-menu'>
+                                    <li><a href='javascript:;' class='sort-by-dropdown' sort_value='filename' id='sort-by-filename'>Video Name</a></li>
+                                    <li><a href='javascript:;' class='sort-by-dropdown' sort_value='(SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND observations.user_id = $user_id) DESC' id='sort-by-observation'>Recently Viewed</a></li>
+                                </ul>
+                            </div>
+
                             <div class='btn-group pull-right'>
                                 <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='display-videos-button'>
                                 Display $video_count videos <span class='caret'></span>
                                 </button>
-                                <ul class='dropdown-menu bottom-up'>
-                                    <li><a href='#' id='display-5-dropdown'>Display  5 videos</a></li>
-                                    <li><a href='#' id='display-10-dropdown'>Display 10 videos</a></li>
-                                    <li><a href='#' id='display-20-dropdown'>Display 20 videos</a></li>
+                                <ul class='dropdown-menu'>
+                                    <li><a href='javascript:;' id='display-1-dropdown'>Display  1 videos</a></li>
+                                    <li><a href='javascript:;' id='display-5-dropdown'>Display  5 videos</a></li>
+                                    <li><a href='javascript:;' id='display-10-dropdown'>Display 10 videos</a></li>
+                                    <li><a href='javascript:;' id='display-20-dropdown'>Display 20 videos</a></li>
                                 </ul>
                             </div>
 
@@ -86,7 +98,6 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
                     </div>
                 </div>
-            </div>
         </div>
     ";
 

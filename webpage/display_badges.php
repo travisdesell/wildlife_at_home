@@ -1,74 +1,111 @@
 <?php
 
+$bossa_badge_info = array(
+    array( 'credit' => 48 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Emerald.png', 'name' => 'A quad emerald', 'value' => '48 weeks' ),
+    array( 'credit' => 45 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Jade.png', 'name' => 'A quad jade', 'value' => '45 weeks' ),
+    array( 'credit' => 42 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Saph.png', 'name' => 'A quad sapphire', 'value' => '42 weeks' ),
+    array( 'credit' => 39 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Turq.png', 'name' => 'A quad turquoise', 'value' => '39 weeks' ),
+    array( 'credit' => 36 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Amethyst.png', 'name' => 'A quad amethyst', 'value' => '36 weeks' ),
+    array( 'credit' => 33 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Gold.png', 'name' => 'A quad gold', 'value' => '33 weeks' ),
+    array( 'credit' => 30 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Silber.png', 'name' => 'A quad silver', 'value' => '30 weeks' ),
+    array( 'credit' => 27 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Bronze.png', 'name' => 'A quad bronze', 'value' => '27 weeks' ),
+
+    array( 'credit' => 24 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Emerald.png', 'name' => 'A triple emerald', 'value' => '24 weeks' ),
+    array( 'credit' => 22 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Jade.png', 'name' => 'A triple jade', 'value' => '22 weeks' ),
+    array( 'credit' => 20 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Saph.png', 'name' => 'A triple sapphire', 'value' => '20 weeks' ),
+    array( 'credit' => 18 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Turq.png', 'name' => 'A triple turquoise', 'value' => '18 weeks' ),
+    array( 'credit' => 16 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Amethyst.png', 'name' => 'A triple amethyst', 'value' => '16 weeks' ),
+    array( 'credit' => 14 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Gold.png', 'name' => 'A triple gold', 'value' => '14 weeks' ),
+    array( 'credit' => 12 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Silber.png', 'name' => 'A triple silver', 'value' => '12 weeks' ),
+    array( 'credit' => 10 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Bronze.png', 'name' => 'A triple bronze', 'value' => '10 weeks' ),
+
+    array( 'credit' =>  8 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Emerald.png', 'name' => 'A double emerald', 'value' => '8 weeks' ),
+    array( 'credit' =>  7 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Jade.png', 'name' => 'A double jade', 'value' => '7 weeks' ),
+    array( 'credit' =>  6 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Saph.png', 'name' => 'A double sapphire', 'value' => '6 weeks' ),
+    array( 'credit' =>  5 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Turq.png', 'name' => 'A double turquoise', 'value' => '5 weeks' ),
+    array( 'credit' =>  4 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Amethyst.png', 'name' => 'A double amethyst', 'value' => '4 weeks' ),
+    array( 'credit' =>  3 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Gold.png', 'name' => 'A double gold', 'value' => '3 weeks' ),
+    array( 'credit' =>  2 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Silber.png', 'name' => 'A double silver', 'value' => '2 weeks' ),
+    array( 'credit' =>      7 * 24 * 60 * 60, 'img_src' => 'Feder2Bronze.png', 'name' => 'A double bronze', 'value' => '1 week' ),
+
+    array( 'credit' =>      6 * 24 * 60 * 60, 'img_src' => 'FederEmerald.png', 'name' => 'An emerald', 'value' => '6 days' ),
+    array( 'credit' =>      5 * 24 * 60 * 60, 'img_src' => 'FederJade.png', 'name' => 'A jade', 'value' => '5 days' ),
+    array( 'credit' =>      4 * 24 * 60 * 60, 'img_src' => 'FederSaph.png', 'name' => 'A sapphire', 'value' => '4 days' ),
+    array( 'credit' =>      3 * 24 * 60 * 60, 'img_src' => 'FederTurq.png', 'name' => 'A turquoise', 'value' => '3 days' ),
+    array( 'credit' =>      2 * 24 * 60 * 60, 'img_src' => 'FederAmethyst.png', 'name' => 'An amethyst', 'value' => '2 days' ),
+    array( 'credit' =>          24 * 60 * 60, 'img_src' => 'FederGold.png', 'name' => 'A gold', 'value' => '1 day' ),
+    array( 'credit' =>          12 * 60 * 60, 'img_src' => 'FederSilber.png', 'name' => 'A silver', 'value' => '12 hours' ),
+    array( 'credit' =>           2 * 60 * 60, 'img_src' => 'FederBronze.png', 'name' => 'A bronze', 'value' => '2 hours' )
+);
+
+for ($i = 0; $i < count($bossa_badge_info); $i++) {
+    $bossa_badge_info[$i]['value'] .= " (" . number_format($bossa_badge_info[$i]['credit']) . " seconds)";
+}
+
+$credit_badge_info = array(
+    array( 'credit' => 500000000, 'img_src' => 'credit_500000000_DoubleJadeEm.png', 'name' => 'A double jade-emerald', 'value' => '500 million' ),
+    array( 'credit' => 200000000, 'img_src' => 'credit_200000000_DoubleSaphTurq.png', 'name' => 'A double sapphire-turquoise', 'value' => '200 million' ),
+    array( 'credit' => 100000000, 'img_src' => 'credit_100000000_DoubleAmethRuby.png', 'name' => 'A double amethyst-ruby', 'value' => '100 million' ),
+    array( 'credit' =>  50000000, 'img_src' => 'credit_50000000_DoubleGold.png', 'name' => 'A double gold', 'value' => '50 million' ),
+    array( 'credit' =>  20000000, 'img_src' => 'credit_20000000_DoubleSilber.png', 'name' => 'A double silver', 'value' => '20 million' ),
+    array( 'credit' =>  10000000, 'img_src' => 'credit_10000000_DoubleBronze.png', 'name' => 'A double bronze', 'value' => '10 million' ),
+    array( 'credit' =>   5000000, 'img_src' => 'credit_5000000_JadeEm.png', 'name' => 'A jade-emerald', 'value' => '5 million' ),
+    array( 'credit' =>   2000000, 'img_src' => 'credit_2000000_Saphturq.png', 'name' => 'A sapphire-turquoise', 'value' => '2 million' ),
+    array( 'credit' =>   1000000, 'img_src' => 'credit_1000000_AmethRuby.png', 'name' => 'An amethyst-ruby', 'value' => '1 million' ),
+    array( 'credit' =>    500000, 'img_src' => 'credit_500000_Gold.png', 'name' => 'A gold', 'value' => '500 thousand' ),
+    array( 'credit' =>    100000, 'img_src' => 'credit_100000_Silber.png', 'name' => 'A silver', 'value' => '100 thousand' ),
+    array( 'credit' =>     10000, 'img_src' => 'credit_10000_Bronze.png', 'name' => 'A bronze ', 'value' => '10 thousand' )
+);
+
+function get_bossa_badge_str($user) {
+    global $bossa_badge_info;
+
+    for ($i = 0; $i < count($bossa_badge_info); $i++) {
+        if ($user->bossa_total_credit > $bossa_badge_info[$i]['credit']) {
+            return $bossa_badge_info[$i]['img_src'];
+            break;
+        }
+    }
+
+    return "";
+}
+
+function get_credit_badge_str($user) {
+    global $credit_badge_info;
+
+    for ($i = 0; $i < count($credit_badge_info); $i++) {
+        if ($user->total_credit > $credit_badge_info[$i]['credit']) {
+            return $credit_badge_info[$i]['img_src'];
+            break;
+        }
+    }
+
+    return "";
+}
+
 function get_credit_badge($user) {
+    global $credit_badge_info;
     $badges = "";
 
-    if        ($user->total_credit > 500000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_500000000_DoubleJadeEm.png' title='A double jade-emerald badge for earning 500M credit.'></img>";
-    } else if ($user->total_credit > 200000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_200000000_DoubleSaphTurq.png' title='A double sapphire-turquoise badge for earning 200M credit.'></img>";
-    } else if ($user->total_credit > 100000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_100000000_DoubleAmethRuby.png' title='A double amethyest-ruby badge for earning 100M credit.'></img>";
-    } else if ($user->total_credit > 50000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_50000000_DoubleGold.png' title='A double gold badge for earning 50M credit.'></img>";
-    } else if ($user->total_credit > 20000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_20000000_DoubleSilver.png' title='A double silver badge for earning 20M credit.'></img>";
-    } else if ($user->total_credit > 10000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_10000000_DoubleBronze.png' title='A double bronze badge for earning 10M credit.'></img>";
-    } else if ($user->total_credit > 5000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_5000000_JadeEm.png' title='A jade-emerald badge for earning 2M credit.'></img>";
-    } else if ($user->total_credit > 2000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_2000000_Saphturq.png' title='A sapphire-turquoise badge for earning 2M credit.'></img>";
-    } else if ($user->total_credit > 1000000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_1000000_AmethRuby.png' title='An amethyst-ruby badge for earning 1M credit.'></img>";
-    } else if ($user->total_credit > 500000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_500000_Gold.png' title='A gold badge for earning 500k credit.'></img>";
-    } else if ($user->total_credit > 100000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_100000_Silber.png' title='A silver badge for earning 100k credit.'></img>";
-    } else if ($user->total_credit > 10000) {
-        $badges .= "<img style='vertical-align:middle; height:28px;' src='./wildlife_badges/credit_10000_Bronze.png' title='A bronze badge for earning 10k credit.'></img>";
+    for ($i = 0; $i < count($credit_badge_info); $i++) {
+        if ($user->total_credit > $credit_badge_info[$i]['credit']) {
+            $badges .= "<img style='height:28px;' src='wildlife_badges/" . $credit_badge_info[$i]['img_src'] . "' title='" . $credit_badge_info[$i]['name'] . " badge for earning " . $credit_badge_info[$i]['value'] . " credit.'></img>";
+            break;
+        }
     }
 
     return $badges;
 }
 
 function get_bossa_badge($user) {
+    global $bossa_badge_info;
     $badges = "";
 
-    if        ($user->bossa_total_credit > 10000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_10000000_Feder3TripleBronze.png' title='A triple bronze badge for earning 10M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  9000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_9000000_Feder2DoubleEmerald.png' title='A double emerald badge for earning 9M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  8000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_8000000_Feder2DoubleJade.png' title='A double jade badge for earning 8M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  7000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_7000000_Feder2DoubleSaph.png' title='A double sapphire badge for earning 7M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  6000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_6000000_Feder2DoubleTurq.png' title='A double turquoise badge for earning 6M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  5000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_5000000_Feder2DoubleAmethyst.png' title='A double amethyst badge for earning 5M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  4000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_4000000_Feder2DoubleGold.png' title='A double gold badge for earning 4M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  3000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_3000000_Feder2DoubleSilber.png' title='A double silver badge for earning 3M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  2500000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_2500000_Feder2DoubleBronze.png' title='A double bronze badge for earning 2.5M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  2000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_2000000_FederEmerald.png' title='An emerald badge for earning 2M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  1500000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_1500000_FederJade.png' title='A jade badge for earning 1.5M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >  1000000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_1000000_FederSaph.png' title='A sapphire badge for earning 1M validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >   500000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_500000_FederTurq.png' title='A turquoise badge for earning 500k validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >   250000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_250000_FederAmethyst.png' title='An amethyst badge for earning 250k validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >   100000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_100000_FederGold.png' title='A gold badge for earning 100k validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >    50000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_50000_FederSilber.png' title='A silver badge for earning 50k validated seconds of watched video.'></img>";
-    } else if ($user->bossa_total_credit >    10000) {
-        $badges .= "<img style='height:40px;' src='./wildlife_badges/bossa_10000_FederBronze.png' title='A bronze badge for earning 10k validated seconds of watched video.'></img>";
+    for ($i = 0; $i < count($bossa_badge_info); $i++) {
+        if ($user->bossa_total_credit > $bossa_badge_info[$i]['credit']) {
+            $badges .= "<img style='height:40px;' src='wildlife_badges/" . $bossa_badge_info[$i]['img_src'] . "' title='" . $bossa_badge_info[$i]['name'] . " badge for watching " . $bossa_badge_info[$i]['value'] . " of validated video.'></img>";
+            break;
+        }
     }
 
     return $badges;
@@ -88,6 +125,58 @@ function get_badges($user) {
     }
 
     return $badges;
+}
+
+function print_badge_table() {
+    global $bossa_badge_info, $credit_badge_info;
+
+    echo "<div class='well well-small' style='padding-top:10px; padding-bottom:10px;'>";
+    echo "<div class='container'>";
+    echo "<div class='span12' style='margin-left:0px'>";
+
+    echo "<h3>Watched Video Badges <small>&nbsp;These badges are earned by <a href='./video_selector.php'>watching video</a>.</small></h3>";
+    echo "<table class='table table-bordered table-striped'>";
+    echo "<thead>";
+    echo "<th>Badge</th> <th>Description</th>";
+    echo "</thead>";
+
+    echo "<tbody>";
+    for ($i = 0; $i < count($bossa_badge_info); $i++) {
+        echo "<tr>";
+        echo "<td style='text-align:center;'><img style='height:40px;' src='wildlife_badges/" . $bossa_badge_info[$i]['img_src'] . "' title='" . $bossa_badge_info[$i]['name'] . " badge for watching " . $bossa_badge_info[$i]['value'] . " of validated video.'></img></td>";
+        echo "<td style='vertical-align:middle;'>" . $bossa_badge_info[$i]['name'] . " badge for watching " . $bossa_badge_info[$i]['value'] . " of validated video.</td>";
+        echo "</tr>";
+    }
+    echo "</tbody>";
+    echo "</table>";
+
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
+
+    echo "<div class='well well-small' style='padding-top:10px; padding-bottom:10px;'>";
+    echo "<div class='container'>";
+    echo "<div class='span12' style='margin-left:0px'>";
+
+    echo "<h3>BOINC Credit Badges <small>&nbsp;These badges are earned by <a href='./boinc_instructions.php'>calculating workunits with BOINC</a>.</small></h3>";
+    echo "<table class='table table-bordered table-striped'>";
+    echo "<thead>";
+    echo "<th>Badge</th> <th>Description</th>";
+    echo "</thead>";
+
+    echo "<tbody>";
+    for ($i = 0; $i < count($credit_badge_info); $i++) {
+        echo "<tr>";
+        echo "<td style='text-align:center;'><img style='height:28px;' src='wildlife_badges/" . $credit_badge_info[$i]['img_src'] . "' title='" . $credit_badge_info[$i]['name'] . " badge for earning " . $credit_badge_info[$i]['value'] . " credit.'></img></td>";
+        echo "<td style='vertical-align:middle;'>" . $credit_badge_info[$i]['name'] . " badge for earning " . $credit_badge_info[$i]['value'] . " credit.</td>";
+        echo "</tr>";
+    }
+    echo "</tbody>";
+    echo "</table>";
+
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
 }
 
 ?>
