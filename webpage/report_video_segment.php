@@ -33,6 +33,25 @@ if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_e
 $query = "UPDATE video_segment_2 SET report_status = IF(report_status = 'UNREPORTED', 'REPORTED', report_status) WHERE id = $video_segment_id";
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-error_log("query: $query");
+
+
+$query = "SELECT species_id FROM video_segment_2 WHERE id = $video_segment_id";
+error_log($query);
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die();
+}
+$row = mysql_fetch_assoc($result);
+$species_id = $row['species_id'];
+
+
+$query = "UPDATE species SET waiting_review = waiting_review + 1 WHERE id = $species_id";
+error_log($query);
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die();
+}
 
 ?>

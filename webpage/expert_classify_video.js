@@ -12,6 +12,7 @@ $(document).ready(function () {
     var video_observations = {};
     var year = '';
     var video_status = '';
+    var video_release = '';
 
     $('.status-dropdown').click(function() {
         var new_status = $(this).attr("video_status");
@@ -26,6 +27,24 @@ $(document).ready(function () {
                 $('#status-button').html("Watched <span class='caret'></span>");
             } else if (video_status === 'FINISHED') {
                 $('#status-button').html("Finished <span class='caret'></span>");
+            }
+
+            load_animal_ids();
+            load_videos();
+        }
+    });
+
+    $('.release-dropdown').click(function() {
+        var new_release = $(this).attr("release_to_public");
+
+        if (new_release !== video_release) {
+            video_release = new_release;
+            if (video_release === '') {
+                $('#release-button').html("Release <span class='caret'></span>");
+            } else if (video_release === 'false') {
+                $('#release-button').html("Private <span class='caret'></span>");
+            } else if (video_release === 'true') {
+                $('#release-button').html("Public <span class='caret'></span>");
             }
 
             load_animal_ids();
@@ -102,7 +121,9 @@ $(document).ready(function () {
 
         var submission_data = {
                                 species_id : species_id,
-                                location_id : location_id
+                                location_id : location_id,
+                                video_status : video_status,
+                                year : year
                               };
 
         $.ajax({
@@ -149,7 +170,8 @@ $(document).ready(function () {
                                 year : year,
                                 video_min : video_min,
                                 video_count : video_count,
-                                video_status : video_status
+                                video_status : video_status,
+                                video_release : video_release
                               };
 
         $.ajax({
@@ -161,6 +183,42 @@ $(document).ready(function () {
 //                console.log("the response was:\n" + response);
                 $("#video-list-placeholder").html(response);
                 enable_accordion();
+
+                $(".private-video-button").button();
+                $(".private-video-button").click(function() {
+                    var is_private = $(this).attr('private');
+                    var video_id = $(this).attr('video_id');
+                    var div_id = "#" + $(this).attr('id');
+
+                    $(div_id).addClass('disabled');
+//                    console.log("is private? '" + is_private + "', video_id: '" + video_id + "'");
+//                    console.log("div id: '" + div_id + "'");
+
+                    $.ajax({
+                        type: 'POST',
+                        url: './toggle_private_video.php',
+                        data : { is_private : is_private, video_id : video_id },
+                        dataType : 'JSON',
+                        success : function(response) {
+//                            console.log("response: " + JSON.stringify(response));
+
+                            if (response['is_private'] === 'true') {
+                                $(div_id).attr('private', 'false');
+                                $(div_id).html('public');
+                                $(div_id).removeClass('btn-warning');
+                                $(div_id).addClass('btn-success');
+                            } else {
+                                $(div_id).attr('private', 'true');
+                                $(div_id).html('private');
+                                $(div_id).addClass('btn-warning');
+                                $(div_id).removeClass('btn-success');
+                            }
+                            $(div_id).removeClass('disabled');
+                        },
+                        async: true
+                    });
+                    
+                });
 
                 $(".tag-video-button").button();
                 $(".tag-video-button").click(function() {
@@ -216,7 +274,7 @@ $(document).ready(function () {
 
     function enable_accordion() {
         $('.accordion-toggle').click(function(ev) {
-//            console.log("clicked an accordion toggle with href: " + $(this).attr('href'));
+            console.log("clicked an accordion toggle with href: " + $(this).attr('href'));
 
             if ($( $(this).attr('href') + "_inner" ).html().indexOf('uninitialized') != -1) {
                 var target = $(this).attr('href') + "_inner";
@@ -224,8 +282,11 @@ $(document).ready(function () {
 
                 var submission_data = {
                                         video_id : $( $(this).attr('href') ).attr("video_id"),
-                                        video_file : $( $(this).attr('href') ).attr("video_file")
+                                        video_file : $( $(this).attr('href') ).attr("video_file"),
+                                        video_converted : $( $(this).attr('href') ).attr('video_converted')
                                       };
+
+                console.log("target is: '" + target + "'");
 
                 $.ajax({
                     type: 'POST',
@@ -240,12 +301,20 @@ $(document).ready(function () {
                             var video_id = $(this).attr("video_id");
 //                            console.log("setting text for #wildlife-video-" + video_id);
 
-                            var time = Math.floor( $("#wildlife-video-" + video_id).get(0).currentTime );
+                            var video_start_time = $("#collapse_" + video_id).attr("start_time");
+                            var time = $("#wildlife-video-" + video_id).get(0).currentTime * 1000;
 
-                            var hours = parseInt( time / 3600 ) % 24;
-                            var minutes = parseInt( time / 60 ) % 60;
-                            var seconds = time % 60;
+                            //convert the mysql datetime to a javascript Date object
+                            var t = video_start_time.split(/[- :]/);
+                            var video_date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
+                            console.log("video_date: " + video_date);
+                            console.log("time: " + time);
 
+                            var current_time = new Date(video_date.getTime() + time);
+
+                            var hours = current_time.getHours();
+                            var minutes = current_time.getMinutes();
+                            var seconds = current_time.getSeconds();
                             var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
 
 //                            console.log( "Time: " + result);
@@ -257,12 +326,19 @@ $(document).ready(function () {
                             var video_id = $(this).attr("video_id");
 //                            console.log("setting text for #wildlife-video-" + video_id);
 
-                            var time = Math.floor( $("#wildlife-video-" + video_id).get(0).currentTime );
+                            var video_start_time = $("#collapse_" + video_id).attr("start_time");
+                            var time = $("#wildlife-video-" + video_id).get(0).currentTime * 1000;
 
-                            var hours = parseInt( time / 3600 ) % 24;
-                            var minutes = parseInt( time / 60 ) % 60;
-                            var seconds = time % 60;
+                            //convert the mysql datetime to a javascript Date object
+                            var t = video_start_time.split(/[- :]/);
+                            var video_date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
+//                            console.log("video_date: " + video_date);
 
+                            var current_time = new Date(video_date.getTime() + time);
+
+                            var hours = current_time.getHours();
+                            var minutes = current_time.getMinutes();
+                            var seconds = current_time.getSeconds();
                             var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
 
 //                            console.log( "Time: " + result);
@@ -317,8 +393,23 @@ $(document).ready(function () {
                             var video = $('#wildlife-video-' + video_id).get(0);
                             var rate = video.playbackRate;
 
-                            rate -= 2.0;
-                            if (rate < -9.0) rate = -9.0;
+                            if (rate === -16.0)         rate = -16.0;
+                            else if (rate === -12.0)    rate = -16.0; 
+                            else if (rate === -10.0)    rate = -12.0;
+                            else if (rate === -8.0)     rate = -10.0;
+                            else if (rate === -6.0)     rate = -8.0;
+                            else if (rate === -4.0)     rate = -6.0;
+                            else if (rate === -2.0)     rate = -4.0;
+                            else if (rate === -1.0)     rate = -2.0;
+                            else if (rate === 1.0)      rate = -1.0;
+                            else if (rate === 2.0)      rate = 1.0; 
+                            else if (rate === 4.0)      rate = 2.0;
+                            else if (rate === 6.0)      rate = 4.0;
+                            else if (rate === 8.0)      rate = 6.0;
+                            else if (rate === 10.0)     rate = 8.0;
+                            else if (rate === 12.0)     rate = 10.0;
+                            else if (rate === 16.0)     rate = 12.0;
+                            else rate = -1.0;
 
                             video.playbackRate = rate;
 
@@ -332,8 +423,23 @@ $(document).ready(function () {
                             var video = $('#wildlife-video-' + video_id).get(0);
                             var rate = video.playbackRate;
 
-                            rate += 2.0;
-                            if (rate > 9.0) rate = 9.0;
+                            if (rate === -16.0)         rate = -12.0;
+                            else if (rate === -12.0)    rate = -10.0; 
+                            else if (rate === -10.0)    rate = -8.0;
+                            else if (rate === -8.0)     rate = -6.0;
+                            else if (rate === -6.0)     rate = -4.0;
+                            else if (rate === -4.0)     rate = -2.0;
+                            else if (rate === -2.0)     rate = -1.0;
+                            else if (rate === -1.0)     rate = 1.0;
+                            else if (rate === 1.0)      rate = 2.0;
+                            else if (rate === 2.0)      rate = 4.0; 
+                            else if (rate === 4.0)      rate = 6.0;
+                            else if (rate === 6.0)      rate = 8.0;
+                            else if (rate === 8.0)      rate = 10.0;
+                            else if (rate === 10.0)     rate = 12.0;
+                            else if (rate === 12.0)     rate = 16.0;
+                            else if (rate === 16.0)     rate = 16.0;
+                            else rate = 1.0;
 
                             video.playbackRate = rate;
 
@@ -350,8 +456,8 @@ $(document).ready(function () {
                                                     video_id : video_id,
                                                     user_id : user_id,
                                                     event_type : event_ids[video_id],
-                                                    start_time : event_start_times[video_id],
-                                                    end_time : event_end_times[video_id],
+                                                    start_time : $("#event-start-time-" + video_id).val(),
+                                                    end_time : $("#event-end-time-" + video_id).val(),
                                                     comments : $("#comments-" + video_id).val()
                                                   };
 
@@ -364,31 +470,12 @@ $(document).ready(function () {
                                     //console.log("the response was:\n" + response);
 
                                     var observation_id = response['observation_id'];
+                                    $("#observations-table-div-" + video_id).html( response['html'] );
 
-                                    if ($("#observations-table-div-" + video_id).html() == '') {
-                                        var text = "<table class='table table-striped table-bordered table-condensed observations-table' video_id='" + video_id + "' id='observations-table-" + video_id + "'>";
-                                        text += "<thead><th>User</th><th>Event</th><th>Start Time</th><th>End Time</th></th><th>Comments</th></thead>";
-                                        text += "<tbody>";
-                                        text += "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_start_times[video_id] + "</td> <td>" + event_end_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
-                                        text += "</tbody>";
-                                        text += "</table>";
-
-                                        $("#observations-table-div-" + video_id).html( text );
-
-                                        video_observations[video_id] = 1;
-                                        if ( ! $("#tag-video-button-" + video_id).hasClass("btn-success") ) {
-                                            $("#tag-video-button-" + video_id).addClass("btn-primary");
-                                        }
-                                    } else {
-                                        var text = "<tr observation_id='" + observation_id + "' id='observation-row-" + observation_id + "'> <td>" + user_name + "</td> <td>" + event_ids[video_id] + "</td> <td>" + event_start_times[video_id] + "</td> <td>" + event_end_times[video_id] + "</td> <td>" + $("#comments-" + video_id).val() + "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" + observation_id + "' observation_id='" + observation_id + "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>";
-
-                                        $("#observations-table-div-" + video_id + " tr:last").after( text );
-
-                                        video_observations[video_id] = 2;
-                                        if ( ! $("#tag-video-button-" + video_id).hasClass("btn-success") ) {
-                                            $("#tag-video-button-" + video_id).addClass("btn-primary");
-                                        }
-                                    }
+                                    var recorded_event_button_html = response['observation_count'];
+                                    if (recorded_event_button_html === 1) recorded_event_button_html += " recorded event";
+                                    else recorded_event_button_html += " recorded events";
+                                    $("#recorded-event-button-" + video_id).html( recorded_event_button_html );
 
                                     enable_remove_observation_buttons();
                                 },
@@ -408,18 +495,33 @@ $(document).ready(function () {
                 });
             }
 
-            $( $(this).attr('href') ).collapse('toggle');
-    //            console.log("toggle: " + $( $(this).attr('href') ).toggled);
+            if ($( $(this).attr('href') ).hasClass('in')) {
+                $( $(this).attr('href') ).removeClass('in');
+            } else {
+                $( $(this).attr('href') ).addClass('in');
+            }
+
+            //$( (this).attr('href') ).collapse('toggle');
+            console.log("toggle: " + $( $(this).attr('href') ).hasClass('in'));
 
             var video_id = $( $(this).attr('href') ).attr("video_id");
 
             /**
              *  For some reason I need this for snow leopard's safari
              */
-            if ($("#wildlife-video-" + video_id).is(":hidden")) {
-                $("#wildlife-video-" + video_id).show();
-            } else {
+//            if ( $("#wildlife-video-span-" + video_id).is(":hidden") ) {
+            if ( !$( $(this).attr('href') ).hasClass('in') ) {
+                console.log("hiding: wildlife-video-span-" + video_id);
+
+                $("#wildlife-video-span-" + video_id).hide();
                 $("#wildlife-video-" + video_id).hide();
+//                $("#wildlife-video-buttons-" + video_id).hide();
+            } else {
+                console.log("showing: wildlife-video-span-" + video_id);
+
+                $("#wildlife-video-span-" + video_id).show();
+                $("#wildlife-video-" + video_id).show();
+//                $("#wildlife-video-buttons-" + video_id).show();
             }
 
             ev.preventDefault();
@@ -443,20 +545,15 @@ $(document).ready(function () {
                 dataType : 'json',
                 success : function(response) {
                     var observation_count = response['observation_count'];
+                    var video_id = $("#observation-row-" + observation_id).parent().parent().attr('video_id');
+                    $("#observations-table-div-" + video_id).html( response['html'] );
 
-                    $("#observation-row-" + observation_id).hide();
+                    var recorded_event_button_html = response['observation_count'];
+                    if (recorded_event_button_html === 1) recorded_event_button_html += " recorded event";
+                    else recorded_event_button_html += " recorded events";
+                    $("#recorded-event-button-" + video_id).html( recorded_event_button_html );
 
-                    if (observation_count === '0') {
-//                        console.log("hiding parent: " + $("#observation-row-" +observation_id).parent().parent().parent().html());
-                        var video_id = $("#observation-row-" + observation_id).parent().parent().attr('video_id');
-
-                        $("#observation-row-" + observation_id).parent().parent().parent().html("");
-
-                        /**
-                         * Need to update the tag button too
-                         */
-                        if ($("#tag-video-button-" + video_id).hasClass("btn-primary")) $("#tag-video-button-" + video_id).removeClass("btn-primary");
-                    }
+                    enable_remove_observation_buttons();
                 },
                 error : function(jqXHR, textStatus, errorThrown) {
                     alert(errorThrown);
@@ -492,6 +589,21 @@ $(document).ready(function () {
                     video_min = value;
                     video_min = video_min - (video_min % video_count);
                     load_videos();
+                }
+            }
+        });
+
+        $("#go-to-textbox").keyup(function (e) {
+            if (e.keyCode == 13) {
+                var value = $('#go-to-textbox').val();
+
+                if (Math.floor(value) == value && $.isNumeric(value)) {
+    //                console.log("value is an integer!: " + value);
+                    if (video_min != value) {
+                        video_min = value;
+                        video_min = video_min - (video_min % video_count);
+                        load_videos();
+                    }
                 }
             }
         });

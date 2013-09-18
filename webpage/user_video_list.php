@@ -7,11 +7,16 @@ require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+
+$user = get_logged_in_user();
+$user_id = $user->id;
+$user_name = $user->name;
 
 echo "
 <!DOCTYPE html>
@@ -87,13 +92,8 @@ echo "
 .dropdown-menu.bottom-up:before { border-bottom: 0px solid transparent !important; border-top: 7px solid rgba(0, 0, 0, 0.2); top: auto !important; bottom: -7px; }
 .dropdown-menu.bottom-up:after  { border-bottom: 0px solid transparent !important; border-top: 6px solid white;              top: auto !important; bottom: -6px; }
     </style>
-";
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-$user_name = $user->name;
-
-echo "<script type='text/javascript'>
+<script type='text/javascript'>
     var user_id = $user_id; 
     var user_name = '$user_name'; 
 </script>";
@@ -116,24 +116,49 @@ $active_items = array(
 
 print_navbar($active_items);
 
+error_log("connecting to boinc db");
+
 $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
 mysql_select_db("wildlife", $boinc_db);
 
-$result = mysql_query("SELECT bossa_total_credit, valid_observations, invalid_observations FROM user WHERE id=$user_id", $boinc_db);
+error_log("getting from boinc db");
+
+$query = "SELECT bossa_total_credit, valid_observations, invalid_observations FROM user WHERE id=$user_id";
+$result = mysql_query($query, $boinc_db);
+
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
+
 $row = mysql_fetch_assoc($result);
 
 $bossa_total_credit = $row['bossa_total_credit'];
 $valid_observations = $row['valid_observations'];
 $invalid_observations = $row['invalid_observations'];
 
+error_log("connecting to wildlife db");
+
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$result = mysql_query("SELECT count(*) FROM observations WHERE user_id=$user_id", $wildlife_db);
+error_log("connected to wildlife_db");
+error_log("userid: $user_id");
+
+$query = "SELECT count(*) FROM observations WHERE user_id=$user_id";
+$result = mysql_query($query, $wildlife_db);
+
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
+error_log("query: SELECT count(*) FROM observations WHERE user_id=$user_id");
+
 $row = mysql_fetch_assoc($result);
 
 $total_observations = $row['count(*)'];
 
+error_log("making filters!");
 
 function append_trinary_filter(&$filter_list, $id_name, $text_name) {
     $filter_list['filter_type'] [] = array(
@@ -213,6 +238,7 @@ $filter_list['filter_type'][] = array(
 $filter_list['filter_type'][] = array('divider' => true);
 
 $filter_list['filter_type'][] = array(
+            'drop_up' => 'bottom-up',
             'dropdown_id' => 'location-dropdown',
             'filter_name' => 'location_id',
             'default_text' => 'Location - Any',
@@ -226,6 +252,7 @@ $filter_list['filter_type'][] = array(
         );
 
 $filter_list['filter_type'][] = array(
+            'drop_up' => 'bottom-up',
             'dropdown_id' => 'species-dropdown',
             'filter_name' => 'species_id',
             'default_text' => 'Species - Any',
@@ -237,22 +264,27 @@ $filter_list['filter_type'][] = array(
             )
         );
 
-
 $filter_list_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/filter_list_template.html");
 $mustache_engine = new Mustache_Engine;
 
 echo "
     <div class='row-fluid'>
-        <div class='span2'>
-            <div class='well well-large span2' style='padding-top: 10px; padding-bottom: 10px; margin-top: 3px; margin-bottom: 5px; position:fixed;'>";
+        <div class='span2' style='z-index:1001;'>
+            <div class='well well-large span2' style='padding-top: 10px; padding-bottom: 10px; margin-top: 3px; margin-bottom: 5px; position:fixed; z-index:1001;'>";
 
 echo $mustache_engine->render($filter_list_template, $filter_list);
 
-echo "      </div>
-        </div>";
+if (is_special_user($user_id, $boinc_db)) {
+    echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
+    echo "<button type='button' class='btn btn-small btn-default btn-block' id='show-all-videos-button' data-toggle='button' style='padding-left:5px;'>Show All Videos</button>";
+}
+echo "      </div>";
+echo "  </div>";
 
 echo "  <div class='span10' style='margin-left:5px;'>
             <div class='row-fluid'>";
+
+echo "<div id='videos-nav-placeholder'></div>";
 
 echo "
 <div class='well well-small' style='padding-top: 5px; padding-bottom: 0px; margin-top:3px; margin-bottom: 10px'>
@@ -265,7 +297,6 @@ echo "
 
 
 echo "<div id='videos-placeholder'></div>";
-echo "<div id='videos-nav-placeholder'></div>";
 
 echo "  </div>
       </div>";

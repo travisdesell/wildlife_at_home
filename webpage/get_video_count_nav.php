@@ -13,12 +13,32 @@ $video_count = mysql_real_escape_string($_POST['video_count']);
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-
 $filters = array();
 if (array_key_exists('filters', $_POST)) {
     $filters = $_POST['filters'];
+}
+
+if (array_key_exists('instructional', $filters) && $filters['instructional'] == 'true') {
+    $user = get_logged_in_user(false);
+    $user_id = $user->id;
+} else if ($_POST['all_users'] == 'true') {
+    $user = get_logged_in_user();
+    $user_id = $user->id;
+
+    ini_set("mysql.connect_timeout", 300);
+    ini_set("default_socket_timeout", 300);
+
+    $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+    mysql_select_db("wildlife", $boinc_db);
+
+    if (!is_special_user($user_id, $boinc_db)) {
+        //don't let non-project scientists display all videos
+        error_log("NOT SPECIAL USER!");
+        die();
+    }
+} else {
+    $user = get_logged_in_user();
+    $user_id = $user->id;
 }
 
 create_filter($filters, $filter, $reported_filter);
@@ -37,27 +57,32 @@ if (empty($filters)) {
     mysql_select_db("wildlife_video", $wildlife_db);
 
     $query = "";
-    if ($_POST['all_users'] == 'true') {
-        if (strlen($filter) > 0) {
-            $filter = substr($filter, 4);
-            $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE $filter AND observations.status = 'EXPERT' AND observations.video_segment_id = vs2.id)";
-        } else {
-            $reported_filter = substr($reported_filter, 0, -4);
-            $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter";
-        }
+    if (strlen($reported_filter) > 0) $reported_filter = " AND " . $reported_filter;
+    if (strlen($filter) > 0) $filter = " AND " . $filter;
+
+    if (array_key_exists('instructional', $filters) && $filters['instructional'] == 'true') {
+        $query = "SELECT count(vs2.id) FROM video_segment_2 vs2 RIGHT JOIN observations o ON (vs2.crowd_obs_count > 0 $reported_filter $filter AND o.status = 'EXPERT' AND o.video_segment_id = vs2.id)";
+
+    } else if ($_POST['all_users'] == 'true') {
+        $query = "SELECT count(vs2.id) FROM video_segment_2 vs2 RIGHT JOIN observations o ON (vs2.crowd_obs_count > 0 $reported_filter $filter AND o.video_segment_id = vs2.id)";
+        error_log ("query: $query");
+
     } else {
-        $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id)";
+       $query = "SELECT count(vs2.id) FROM video_segment_2 vs2 RIGHT JOIN observations o ON (vs2.crowd_obs_count > 0 $reported_filter $filter AND o.user_id = $user_id AND o.video_segment_id = vs2.id)";
     }
 
     //echo "<!-- $query -->\n";
 
 
     $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    if (!$result) {
+        error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+        die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    }
 
     $row = mysql_fetch_assoc($result);
 
-    $max_items = $row['count(id)'];
+    $max_items = $row['count(vs2.id)'];
 }
 
 generate_count_nav($max_items, $video_min, $video_count, $display_nav_numbers);

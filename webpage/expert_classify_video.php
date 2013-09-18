@@ -7,6 +7,7 @@ require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
 
 $user = get_logged_in_user();
 $user_id = $user->id;
@@ -127,7 +128,7 @@ $row = mysql_fetch_assoc($result);
 
 $special_user = $row['special_user'];
 
-if (strlen($special_user) > 0 && $special_user{6} == 1) {
+if (is_special_user($user_id, $boinc_db)) {
     echo "
         <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 5px; margin-bottom: 5px'> 
             <div class='row-fluid'>
@@ -143,9 +144,11 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
     $row = mysql_fetch_assoc($result);
     $video_count = $row['count(*)'];
 
+    /*
     $result = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE ogv_generated = true", $wildlife_db);
     $row = mysql_fetch_assoc($result);
     $ogv_generated_count = $row['count(*)'];
+     */
 
     $result = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE processing_status = 'WATERMARKED'", $wildlife_db);
     $row = mysql_fetch_assoc($result);
@@ -159,22 +162,24 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
     $row = mysql_fetch_assoc($result);
     $finished_video_count = $row['count(*)'];
 
-    echo "<div class='span3'>";
+    echo "<div class='span4'>";
     echo "<p> " . $finished_video_count . " of $video_count videos with completed expert observation.</p>";
     echo "<div class='progress'> <div class='bar bar-success' style='width:" .floor(100.0 * $finished_video_count / $video_count) . "%;'> </div> </div>";
     echo "</div>";
 
+    /*
     echo "<div class='span3'>";
     echo "<p> " . $ogv_generated_count . " of " . ($watermarked_video_count + $split_video_count) . " watermarked videos have ogv generated for firefox.</p>";
     echo "<div class='progress'> <div class='bar bar-success' style='width:" .floor(100.0 * $ogv_generated_count / ($watermarked_video_count + $split_video_count)) . "%;'> </div> </div>";
     echo "</div>";
+     */
 
-    echo "<div class='span3'>";
+    echo "<div class='span4'>";
     echo "<p> " . ($watermarked_video_count + $split_video_count) . " of $video_count videos availble for expert observation.</p>";
     echo "<div class='progress'> <div class='bar bar-warning' style='width:" .floor(100.0 * ($watermarked_video_count + $split_video_count) / $video_count) . "%;'> </div> </div>";
     echo "</div>";
 
-    echo "<div class='span3'>";
+    echo "<div class='span4'>";
     echo "<p> $split_video_count of $video_count videos availble for volunteer observation.</p>";
     echo "<div class='progress'> <div class='bar bar-info' style='width:" .floor(100.0 * $split_video_count / $video_count) . "%;'> </div> </div>";
     echo "</div>";
@@ -248,6 +253,18 @@ if (strlen($special_user) > 0 && $special_user{6} == 1) {
                     <li><a href='javascript:;' class='status-dropdown' video_status='FINISHED' id='finished-dropdown'><button class='btn btn-mini btn-success pull-right'>&#x2713;</button> Finished</a></li>
                 </ul>
             </div>
+
+            <div class='btn-group pull-right'>
+                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='release-button'>
+                    Released <span class='caret'></span>
+                </button>
+                <ul class='dropdown-menu'>
+                    <li><a href='javascript:;' class='release-dropdown' release_to_public='' id='any-release-dropdown'>Any</a></li>
+                    <li><a href='javascript:;' class='release-dropdown' release_to_public='false' id='private-release-dropdown'>Private</a></li>
+                    <li><a href='javascript:;' class='release-dropdown' release_to_public='true' id='public-release-dropdown'>Public</a></li>
+                </ul>
+            </div>
+
 
         ";
 

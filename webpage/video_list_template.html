@@ -13,15 +13,20 @@
                 </div>  <!-- row-fluid -->
 
                 <div class='row-fluid'>
-                    {{#unreported}}
-                    <button class='btn btn-danger span6 pull-left report-observations-button' style='margin-top:0px;' id='report-observations-{{video_segment_2_id}}' video_segment_id='{{video_segment_2_id}}'>Report Observations</button>
-                    {{/unreported}}
-                    {{#reported}}
-                    <button class='btn btn-warning disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Pending Review</button>
-                    {{/reported}}
-                    {{#reviewed}}
-                    <button class='btn btn-success disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Reviewed</button>
-                    {{/reviewed}}
+                    {{#has_canonical}}
+                        {{#unreported}}
+                        <button class='btn btn-danger span6 pull-left report-observations-button' style='margin-top:0px;' id='report-observations-{{video_segment_2_id}}' video_segment_id='{{video_segment_2_id}}'>Report Observations</button>
+                        {{/unreported}}
+                        {{#reported}}
+                        <button class='btn btn-warning disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Pending Review</button>
+                        {{/reported}}
+                        {{#reviewed}}
+                        <button class='btn btn-success disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Reviewed</button>
+                        {{/reviewed}}
+                    {{/has_canonical}}
+                    {{^has_canonical}}
+                        <button class='btn disabled span6 pull-left report-observations-button' style='margin-top:0px;'>Awaiting Canonical Result</button>
+                    {{/has_canonical}}
 
                     <button class='btn btn-primary span6 pull-right discuss-video-button' style='margin-top:0px;' id='discuss-video-button-{{video_segment_2_id}}' value='discuss video'>Discuss Video</button>
                     <form id='discuss-video-form-{{video_segment_2_id}}' action='forum_post.php?id=8' method='post'>

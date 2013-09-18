@@ -2,6 +2,8 @@
 
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/get_expert_observation_table.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
 
 $video_id = mysql_real_escape_string($_POST['video_id']);
 $user_id = mysql_real_escape_string($_POST['user_id']);
@@ -11,6 +13,11 @@ $end_time = mysql_real_escape_string($_POST['end_time']);
 $comments = mysql_real_escape_string($_POST['comments']);
 
 error_log("post: " . json_encode($_POST));
+
+if (!is_special_user()) {
+    error_log("non project scientists cannot submit expert observations.");
+    die();
+}
 
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
@@ -29,5 +36,7 @@ $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $response['observation_id'] = $observation_id;
+$response['html'] = get_expert_observation_table($video_id, $response['observation_count']);
+
 echo json_encode($response);
 ?>

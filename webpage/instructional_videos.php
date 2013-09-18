@@ -13,6 +13,12 @@ Mustache_Autoloader::register();
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
+$user = get_logged_in_user(false);
+if ($user != null) {
+    $user_id = $user->id;
+    $user_name = $user->name;
+}
+
 echo "
 <!DOCTYPE html>
 <html>
@@ -89,17 +95,15 @@ echo "
 .bottom-up {top: auto; bottom: 100%; }
 .dropdown-menu.bottom-up:before { border-bottom: 0px solid transparent !important; border-top: 7px solid rgba(0, 0, 0, 0.2); top: auto !important; bottom: -7px; }
 .dropdown-menu.bottom-up:after  { border-bottom: 0px solid transparent !important; border-top: 6px solid white;              top: auto !important; bottom: -6px; }
-    </style>
-";
+</style>";
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-$user_name = $user->name;
 
-echo "<script type='text/javascript'>
-    var user_id = $user_id; 
-    var user_name = '$user_name'; 
-</script>";
+if ($user != null) {
+    echo "<script type='text/javascript'>
+        var user_id = $user_id; 
+        var user_name = '$user_name'; 
+    </script>";
+}
 
 
 
@@ -122,6 +126,7 @@ print_navbar($active_items);
 $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
 mysql_select_db("wildlife", $boinc_db);
 
+/*
 $result = mysql_query("SELECT bossa_total_credit, valid_observations, invalid_observations FROM user WHERE id=$user_id", $boinc_db);
 $row = mysql_fetch_assoc($result);
 
@@ -136,7 +141,7 @@ $result = mysql_query("SELECT count(*) FROM observations WHERE user_id=$user_id"
 $row = mysql_fetch_assoc($result);
 
 $total_observations = $row['count(*)'];
-
+ */
 
 function append_trinary_filter(&$filter_list, $id_name, $text_name) {
     $filter_list['filter_type'] [] = array(
@@ -177,6 +182,7 @@ $filter_list['filter_type'][] = array(
 $filter_list['filter_type'][] = array('divider' => true);
 
 $filter_list['filter_type'][] = array(
+            'drop_up' => 'bottom-up',
             'dropdown_id' => 'location-dropdown',
             'filter_name' => 'location_id',
             'default_text' => 'Location - Any',
@@ -190,6 +196,7 @@ $filter_list['filter_type'][] = array(
         );
 
 $filter_list['filter_type'][] = array(
+            'drop_up' => 'bottom-up',
             'dropdown_id' => 'species-dropdown',
             'filter_name' => 'species_id',
             'default_text' => 'Species - Any',
@@ -218,18 +225,8 @@ echo "      </div>
 echo "  <div class='span10' style='margin-left:5px;'>
             <div class='row-fluid'>";
 
-echo "
-<div class='well well-small' style='padding-top: 5px; padding-bottom: 0px; margin-top:3px; margin-bottom: 10px'>
-    <div class='row-fluid'>
-        <div class='span12'>
-                <p>You have $bossa_total_credit credit from $total_observations observations. $valid_observations have been marked valid and $invalid_observations marked invalid (" . round((100 * $valid_observations / ($valid_observations + $invalid_observations)), 2) . "% accuracy). " . ($total_observations - ($valid_observations + $invalid_observations)) . " observations are awaiting validation. You have averaged " . round(($bossa_total_credit / $valid_observations), 2) . " credit per valid observation.</p>
-        </div>
-    </div>
-</div>";
-
-
-echo "<div id='videos-placeholder'></div>";
 echo "<div id='videos-nav-placeholder'></div>";
+echo "<div id='videos-placeholder'></div>";
 
 echo "  </div>
       </div>";

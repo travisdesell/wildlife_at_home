@@ -12,11 +12,21 @@ $video_count = mysql_real_escape_string($_POST['video_count']);
 $species_id = mysql_real_escape_string($_POST['species_id']);
 $location_id = mysql_real_escape_string($_POST['location_id']);
 $animal_id = mysql_real_escape_string($_POST['animal_id']);
+$year = mysql_real_escape_string($_POST['year']);
+$video_status = mysql_real_escape_string($_POST['video_status']);
+$video_release = mysql_real_escape_string($_POST['video_release']);
 
-$filter = "";
+error_log("video release: '" . $video_release . "'");
+
+$filter = '';
 if ($species_id > 0) $filter .= " AND species_id = $species_id";
 if ($location_id > 0) $filter .= " AND location_id = $location_id";
 if ($animal_id !== '-1' && $animal_id !== '0') $filter .= " AND animal_id = '$animal_id'";
+if ($year !== '') $filter .= " AND DATE_FORMAT(start_time, '%Y') = $year";
+if ($video_status !== '') $filter .= " AND expert_finished = '$video_status'";
+if ($video_release !== '') $filter .= " AND release_to_public = $video_release";
+
+if (strlen($filter) > 4) $filter = substr($filter, 4);
 
 $display_nav_numbers = true;
 
@@ -27,9 +37,14 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 
-$query = "SELECT count(id) FROM video_2 vs2 WHERE processing_status != 'UNWATERMARKED' $filter";
+$query = '';
+if ($filter == '') {
+    $query = "SELECT count(id) FROM video_2";
+} else {
+    $query = "SELECT count(id) FROM video_2 vs2 WHERE $filter";
+}
 
-//echo "<!-- $query -->\n";
+error_log("$query");
 
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");

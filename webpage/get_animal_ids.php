@@ -7,11 +7,15 @@ require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
 $species_id = mysql_real_escape_string($_POST['species_id']);
 $location_id = mysql_real_escape_string($_POST['location_id']);
+$year = mysql_real_escape_string($_POST['year']);
+$video_status = mysql_real_escape_string($_POST['video_status']);
 
 $filter = '';
 
 if ($species_id > 0) $filter .= " AND species_id = $species_id";
 if ($location_id > 0) $filter .= " AND location_id = $location_id";
+if ($year !== '') $filter .= " AND DATE_FORMAT(start_time, '%Y') = $year";
+if ($video_status !== '') $filter .= " AND expert_finished = '$video_status'";
 
 if (strlen($filter) > 5) $filter = "WHERE " . substr($filter, 5);
 
@@ -22,7 +26,7 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 
-$query = "SELECT DISTINCT animal_id FROM video_2 $filter";
+$query = "SELECT DISTINCT animal_id FROM video_2 $filter ORDER BY animal_id";
 
 //echo "<!-- $query -->\n";
 

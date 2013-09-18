@@ -2,80 +2,54 @@
 
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/get_expert_observation_table.php');
 
 require_once('/projects/wildlife/html/inc/util.inc');
 
 
 $video_id = mysql_real_escape_string($_POST['video_id']);
 $video_file = mysql_real_escape_string($_POST['video_file']);
+$video_converted = mysql_real_escape_string($_POST['video_converted']);
 
 //echo "<p>Got this for video: $video_id, and file: $video_file</p>";
 
-echo "
-    <div class='row-fluid'>
-        <div class='span6'>
-            <div class='row-fluid'>
-                <video style='width:100%;' id='wildlife-video-$video_id' controls='controls' preload='auto'>
-                    <source src=\"http://wildlife.und.edu/$video_file\" type=\"video/mp4\">
-                    <source src=\"http://wildlife.und.edu/$video_file.ogv\" type=\"video/ogg\">
-                    This video requires a browser that supports HTML5 video.
-                </video>
-            </div>
-
-            <div class='row-fluid'>
-                <button class='btn btn-primary span5 pull-left fast-backward-button' style='margin-top:0px;' video_id='$video_id'>fast backward</button>
-
-                <div class='span2'>
-                    <input style='width:100%; padding:3px; margin:1px;' type='text' id='speed-textbox-$video_id' value='speed: 1' readonly='readonly'></input>
+if ($video_converted == 'true') {
+    echo "
+        <div class='row-fluid'>
+            <div class='span6' id='wildlife-video-span-$video_id'>
+                <div class='row-fluid'>
+                    <video style='width:100%;' id='wildlife-video-$video_id' controls='controls' preload='auto'>
+                        <source src=\"http://wildlife.und.edu/$video_file\" type=\"video/mp4\">
+                        <source src=\"http://wildlife.und.edu/$video_file.ogv\" type=\"video/ogg\">
+                        This video requires a browser that supports HTML5 video.
+                    </video>
                 </div>
 
-                <button class='btn btn-primary span5 pull-right fast-forward-button' style='margin-top:0px;' video_id='$video_id'>fast forward</button>
-            </div>
+                <div class='row-fluid' id='wildlife-video-buttons-$video_id'>
+                    <button class='btn btn-primary span5 pull-left fast-backward-button' style='margin-top:0px;' video_id='$video_id'>fast backward</button>
 
-        </div>"; 
+                    <div class='span2'>
+                        <input style='width:100%; padding:3px; margin:1px;' type='text' id='speed-textbox-$video_id' value='speed: 1' readonly='readonly'></input>
+                    </div>
+
+                    <button class='btn btn-primary span5 pull-right fast-forward-button' style='margin-top:0px;' video_id='$video_id'>fast forward</button>
+                </div>
+
+            </div>"; 
+} else {
+    echo "
+        <div class='row-fluid'>
+            <div class='span6' id='wildlife-video-span-$video_id'>
+                <p>This video has not yet been converted to a format where it can be streamed on the expert video classification webpage.</p>
+            </div>"; 
+}
 
 echo "  <div class='span6'>
             <div class='row-fluid'>";
 
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
-$query = "SELECT * FROM expert_observations WHERE video_id = $video_id";
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-
-
-$printed_header = false;
-
-while ($row = mysql_fetch_assoc($result)) {
-    if (!$printed_header) {
-        echo "<div class='observations-table-div' id='observations-table-div-$video_id'>";
-        echo "<table class='table table-striped table-bordered table-condensed observations-table' video_id='$video_id' id='observations-table-$video_id'>
-                <thead>
-                    <th>User</th>
-                    <th>Event</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Comments</th>
-                </thead><tbody>";
-        $printed_header = true;
-    }
-
-    echo "<tr observation_id='" . $row['id'] . "' id='observation-row-" . $row['id'] . "'> ";
-
-    echo "<td> " . get_user_from_id($row['user_id'])->name . " </td>";
-   
-    echo " <td>" . $row['event_type'] . "</td> <td>" . $row['start_time'] . "</td> <td>" . $row['end_time'] . "</td> <td>" . $row['comments'] . "</td> <td style='padding-top:0px; padding-bottom:0px; width:25px;'> <button class='btn btn-small btn-danger pull-right remove-observation-button' id='remove-observation-button-" . $row['id'] . "' observation_id='" . $row['id'] . "' style='margin-top:3px; margin-bottom:0px; padding-top:0px; padding-bottom:0px;'> - </button> </td> </tr>"; 
-}
-
-if ($printed_header) {
-    echo "</tbody></table></div>";
-} else {
-    echo "<div class='observations-table-div' id='observations-table-div-$video_id'></div>";
-}
+echo "<div class='observations-table-div' id='observations-table-div-$video_id'>";
+echo get_expert_observation_table($video_id, $observation_count);
+echo "</div>";
 
 echo "      </div>
 
