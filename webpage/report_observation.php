@@ -158,6 +158,10 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
     error_log(" dying? ");
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
     error_log(" UPDATED VIDEO SEGMENT 2 WITH: $query");
+
+    $query = "UPDATE species SET waiting_review = waiting_review - 1 WHERE id = $species_id";
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 }
 
 $result = array( 'post_observation' => $post_observation, 'db_observations' => $db_observations );

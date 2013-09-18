@@ -74,7 +74,7 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
                                 <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='sort-by-dropdown'>
                                 Sort by <span class='caret'></span>
                                 </button>
-                                <ul class='dropdown-menu bottom-up'>
+                                <ul class='dropdown-menu'>
                                     <li><a href='javascript:;' class='sort-by-dropdown' sort_value='filename' id='sort-by-filename'>Video Name</a></li>
                                     <li><a href='javascript:;' class='sort-by-dropdown' sort_value='(SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND observations.user_id = $user_id) DESC' id='sort-by-observation'>Recently Viewed</a></li>
                                 </ul>
@@ -84,7 +84,8 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
                                 <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='display-videos-button'>
                                 Display $video_count videos <span class='caret'></span>
                                 </button>
-                                <ul class='dropdown-menu bottom-up'>
+                                <ul class='dropdown-menu'>
+                                    <li><a href='javascript:;' id='display-1-dropdown'>Display  1 videos</a></li>
                                     <li><a href='javascript:;' id='display-5-dropdown'>Display  5 videos</a></li>
                                     <li><a href='javascript:;' id='display-10-dropdown'>Display 10 videos</a></li>
                                     <li><a href='javascript:;' id='display-20-dropdown'>Display 20 videos</a></li>

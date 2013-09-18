@@ -120,9 +120,9 @@ echo "
             <div class='span6'>
                 <h3>Welcome to Wildlife@Home</h3>
                 <p>
-                Wildlife@Home is a joint effort between the <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>
+                Wildlife@Home is <i>citizen science project</i>, developed in a joint effort by <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>
                 
-                <p>We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse, and better understand the behaviors of least terns and piping plovers to aid in their conservation, as well as provide some interesting video for everyone to watch and discuss. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action.
+                <p>We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse, and better understand the behaviors of least terns and piping plovers to aid in their conservation, as well as provide some interesting video for everyone to watch and discuss. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action, or talk to us on the <a href='./forum_index.php'>message boards</a>.
                 </p>
 
                 <div class='row-fluid'>
@@ -300,7 +300,7 @@ echo"
                         <div class='page-header'><h2>Contact Information</h2></div>
                         <p>Please email any questions or suggestions to <a href='mailto:tdesell@cs.und.edu'>Travis Desell</a>, or feel free to post a message in our <a href='forum_index.php'>forums</a>.
                         <p>
-                        Wildlife@Home is currently run by:
+                        The Wildlife@Home team includes:
                         <ul>
                         <li>
                         <a href='http://people.cs.und.edu/~tdesell/'>Travis Desell</a>, Assistant Professor of Computer Science, University of North Dakota
@@ -308,6 +308,10 @@ echo"
 
                         <li>
                         <a href='http://arts-sciences.und.edu/biology/faculty/susan-felege.cfm'>Susan Ellis-Felege</a>, Assistant Professor of Biology, University of North Dakota 
+                        </li>
+
+                        <li>
+                        Alicia Andes, Graduate Research Assistant in Biology, University of North Dakota
                         </li>
 
                         <li>
@@ -398,7 +402,7 @@ echo"
                                 <a href=\"http://gf.nd.gov\"><img src=\"images/ndgf_logo.png\"></a>
                             </div>
                             <div class='span10'>
-                                ND Game Fish has provided financial support for field logistics to collect sharp-tailed grouse videos.
+                                North Dakota Game and Fish has provided financial support for field logistics to collect sharp-tailed grouse videos.
                             </div>
                         </div>
                         <br>

@@ -34,7 +34,6 @@ $(document).ready(function () {
 
     $('#fast_forward_button').button();
     $('#fast_backward_button').button();
-    $('#too_dark_button').button();
     $('#video_issue_button').button();
     $('#speed_textbox').val("speed: " + $('#wildlife_video').get(0).playbackRate);
 

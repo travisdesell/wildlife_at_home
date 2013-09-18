@@ -8,7 +8,7 @@ $bossa_badge_info = array(
     array( 'credit' => 36 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Amethyst.png', 'name' => 'A quad amethyst', 'value' => '36 weeks' ),
     array( 'credit' => 33 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Gold.png', 'name' => 'A quad gold', 'value' => '33 weeks' ),
     array( 'credit' => 30 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Silber.png', 'name' => 'A quad silver', 'value' => '30 weeks' ),
-    array( 'credit' => 27 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Bronze.png', 'name' => 'A quad bronze', 'value' => '27 week' ),
+    array( 'credit' => 27 * 7 * 24 * 60 * 60, 'img_src' => 'Feder4Bronze.png', 'name' => 'A quad bronze', 'value' => '27 weeks' ),
 
     array( 'credit' => 24 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Emerald.png', 'name' => 'A triple emerald', 'value' => '24 weeks' ),
     array( 'credit' => 22 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Jade.png', 'name' => 'A triple jade', 'value' => '22 weeks' ),
@@ -17,7 +17,7 @@ $bossa_badge_info = array(
     array( 'credit' => 16 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Amethyst.png', 'name' => 'A triple amethyst', 'value' => '16 weeks' ),
     array( 'credit' => 14 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Gold.png', 'name' => 'A triple gold', 'value' => '14 weeks' ),
     array( 'credit' => 12 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Silber.png', 'name' => 'A triple silver', 'value' => '12 weeks' ),
-    array( 'credit' => 10 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Bronze.png', 'name' => 'A triple bronze', 'value' => '10 week' ),
+    array( 'credit' => 10 * 7 * 24 * 60 * 60, 'img_src' => 'Feder3Bronze.png', 'name' => 'A triple bronze', 'value' => '10 weeks' ),
 
     array( 'credit' =>  8 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Emerald.png', 'name' => 'A double emerald', 'value' => '8 weeks' ),
     array( 'credit' =>  7 * 7 * 24 * 60 * 60, 'img_src' => 'Feder2Jade.png', 'name' => 'A double jade', 'value' => '7 weeks' ),

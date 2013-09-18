@@ -7,10 +7,22 @@
     <div class='accordion-group'>
         <div class='accordion-heading'>
             <button class='btn btn-small {{check_button_type}} pull-right tag-video-button' id='tag-video-button-{{id}}' video_id='{{id}}' style='margin-top:5px; margin-right:5px;'>&#x2713;</button>
+
+            {{#private}}
+            <button class='btn btn-small btn-warning pull-right private-video-button' id='private-video-button-{{id}}' video_id='{{id}}' private='true' style='margin-top:5px; margin-right:5px;'>private</button>
+            {{/private}}
+            {{^private}}
+            <button class='btn btn-small btn-success pull-right private-video-button' id='private-video-button-{{id}}' video_id='{{id}}' private='false' style='margin-top:5px; margin-right:5px;'>public</button>
+            {{/private}}
+
+            {{#not_ready}}
+            <button class='btn btn-small btn-danger disabled pull-right' style='margin-top:5px; margin-right:5px;'>conversion pending</button>
+            {{/not_ready}}
+            <button class='btn btn-small disabled pull-right' id ='recorded-event-button-{{id}}' style='margin-top:5px; margin-right:5px;'>{{{expert_obs_count}}}</button>
             <a class='accordion-toggle' data-parent='#video-accordion' href='#collapse_{{id}}'>{{cleaned_filename}}</a>
         </div>
 
-        <div id ='collapse_{{id}}' video_id='{{id}}' video_file='{{watermarked_filename}}' class='accordion-body collapse'>
+        <div id ='collapse_{{id}}' video_converted='{{#not_ready}}false{{/not_ready}}{{^not_ready}}true{{/not_ready}}' video_id='{{id}}' video_file='{{watermarked_filename}}' start_time='{{start_time}}' class='accordion-body collapse'>
             <div class='accordion-inner' id='collapse_{{id}}_inner'>
                 uninitialized
             </div>

@@ -8,10 +8,10 @@ require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
-
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
@@ -109,21 +109,25 @@ $user = get_logged_in_user();
 $user_id = $user->id;
 $user_name = $user->name;
 
+$active_items = array(
+                    'home' => '',
+                    'watch_video' => '',
+                    'message_boards' => '',
+                    'preferences' => '',
+                    'about_wildlife' => '',
+                    'project_management' => 'active',
+                    'community' => ''
+                );
+
+print_navbar($active_items);
+
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
 
 $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
 mysql_select_db("wildlife", $boinc_db);
 
-$query = "SELECT special_user FROM forum_preferences WHERE userid = $user_id";
-$result = mysql_query($query, $boinc_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
-
-$row = mysql_fetch_assoc($result);
-
-$special_user = $row['special_user'];
-
-if (! (strlen($special_user) > 0 && $special_user{6} == 1) ) {
+if (!is_special_user($user_id, $boinc_db)) {
     echo "
         <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 3px; margin-bottom: 5px'> 
             <div class='row-fluid'>
@@ -140,6 +144,15 @@ if (! (strlen($special_user) > 0 && $special_user{6} == 1) ) {
     die();
 }
 
+$species_id = $_GET['species_id'];
+
+if ($species_id != '1' && $species_id != '2' && $species_id != '3') {
+    $species_filter = "";
+} else {
+    $species_filter = " AND species_id = $species_id";
+}
+
+//echo "<p>species filter: '$species_filter', species_id: '$species_id'</p>";
 
 /*
  * This is a little convoluted, but it will quickly select a random video_segment which has
@@ -156,7 +169,7 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$query = "SELECT id, filename, duration_s, video_id, species_id, location_id FROM video_segment_2 vs2 WHERE report_status = 'REPORTED' ORDER BY RAND() limit 1";
+$query = "SELECT id, filename, duration_s, video_id, species_id, location_id FROM video_segment_2 vs2 WHERE report_status = 'REPORTED' $species_filter ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -167,7 +180,32 @@ $row = mysql_fetch_assoc($result);
 $found = true;
 if (!$row) {
    $found = false;
-    error_log("did not find a watched video segment 2 on second try");
+
+    echo "
+        <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 3px; margin-bottom: 5px'> 
+            <div class='row-fluid'>
+                <div class='container'>
+                    <div class='span12'>";
+
+   if ($species_id == '1') {
+       echo "<p>There are no unreviewed reported videos for the Sharptailed Grouse.</p>";
+   } else if ($species_id == '2') {
+       echo "<p>There are no unreviewed reported videos for the Interior Least Tern.</p>";
+   } else if ($species_id == '2') {
+       echo "<p>There are no unreviewed reported videos for the Piping Plover.</p>";
+   } else if ($species_id == '2') {
+       echo "<p>There are no unreviewed reported videos.</p>";
+   }
+
+    echo "           </div>
+                </div>
+            </div>
+        </div>";
+
+    print_footer();
+    echo "</body></html>";
+
+   die();
 }
 
 $segment_filename = $row['filename'];
@@ -200,18 +238,6 @@ echo "
 </head>
 <body>
 ";
-
-$active_items = array(
-                    'home' => '',
-                    'watch_video' => '',
-                    'message_boards' => '',
-                    'preferences' => '',
-                    'about_wildlife' => '',
-                    'project_management' => 'active',
-                    'community' => ''
-                );
-
-print_navbar($active_items);
 
 //
 //echo "file: $segment_filename\n";
@@ -370,7 +396,31 @@ $reporter_id = $row['reporter_id'];
 $report_comments = $row['report_comments'];
 
 echo "
-    <div class='well well-small' style='padding-top:5px; padding-bottom:0px;'>
+<div class='well well-small' style='padding-top:10px; padding-bottom:10px;'>
+<div class='row' style='margin-left:0px;'>
+
+<div class='accordion' id='parent-video-accordion'>
+    <div class='accordion-group'>
+        <div class='accordion-heading'>
+            <a class='accordion-toggle' data-toggle='collapse' data-parent='#parent-video-accordion' href='#parent_video_collapse'>
+                Show Parent Video
+            </a>
+        </div>
+
+        <div id='parent_video_collapse' class='accordion-body collapse'>
+            <div class='accordion-inner'>
+                Anim pariatur cliche...
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+    ";
+
+echo "
+    <div class='well well-large' style='padding-top:5px; padding-bottom:0px;'>
         <p>This video was reported by $reporter_name with the following description:</p> 
         <div class='row-fluid'>
         <textarea readonly style='width:97%;' rows=2 class='report-comments' id='report-comments-$video_segment_id' video_segment_id=$video_segment_id> $report_comments </textarea>

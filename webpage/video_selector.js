@@ -34,23 +34,5 @@ $(document).ready(function () {
                            "<p>" + (piping_plover_total / 3600).toFixed(1) + " hours total</p>";
 
     $('#piping_plover_progress').popover({ placement : 'bottom', html : true,  content : piping_plover_content, title : 'Progress'});
-
-
-
-    var belden_content_2013 = "<p>" + (grouse_belden_validated_2013 / 3600).toFixed(1) + " hours watched</p>" +
-                           "<p>" + (grouse_belden_processed_2013 / 3600).toFixed(1) + " hours available</p>" +
-                           "<p>" + (grouse_belden_total_2013 / 3600).toFixed(1) + " hours total</p>";
-
-    $('#grouse_belden_progress_2013').popover({ placement : 'bottom', html : true,  content : belden_content_2013, title : 'Progress'});
-
-
-    var blaisdell_content_2013 = "<p>" + (grouse_blaisdell_validated_2013 / 3600).toFixed(1) + " hours watched</p>" +
-                           "<p>" + (grouse_blaisdell_processed_2013 / 3600).toFixed(1) + " hours available</p>" +
-                           "<p>" + (grouse_blaisdell_total_2013 / 3600).toFixed(1) + " hours total</p>";
-
-    $('#grouse_blaisdell_progress_2013').popover({ placement : 'bottom', html : true,  content : blaisdell_content_2013, title : 'Progress'});
-
-
-
 });
 

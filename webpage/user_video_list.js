@@ -11,6 +11,11 @@ $(document).ready(function () {
         sort_by = 'recently viewed';
     }
 
+    $('#show-all-videos-button').click(function() {
+        all_users = !all_users;
+        reload_videos();
+    });
+
     $('.filter-dropdown').click(function() {
         var filter_name = $(this).attr("filter_name");
         var filter_value = $(this).attr("filter_value");
@@ -94,7 +99,7 @@ $(document).ready(function () {
                     var video_segment_id = $(this).attr("video_segment_id");
                     console.log("video segment 2 id is: " + video_segment_id);
 
-                    var text = "<p>Please enter a description of why you are reporting this video:</p>" +
+                    var text = "<p>Please enter a description of why you are reporting this video. Credit issues are not a valid reason for a report, please post in our forums in those cases.</p>" +
                                "<textarea style='width:97%;' rows=5 class='report-comments' id='report-comments-" + video_segment_id + "' video_segment_id=" + video_segment_id + "></textarea>" +
                                "<div class='btn btn-primary disabled pull-right report-final' style='margin-right:4px;' video_segment_id=" + video_segment_id + " id='report-final-" + video_segment_id + "'>Submit Report</div>";
                     $("#report-placeholder-" + video_segment_id).html(text);
@@ -193,6 +198,16 @@ $(document).ready(function () {
                     }
                 }
             }
+        });
+
+        $('#display-1-dropdown').click(function(ev) {
+            if (video_count != 1) {
+                video_count = 1;
+                reload_videos(false);
+            }
+
+            ev.preventDefault();
+            ev.stopPropagation();
         });
 
         $('#display-5-dropdown').click(function(ev) {
