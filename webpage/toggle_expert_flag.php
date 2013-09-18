@@ -2,8 +2,14 @@
 
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
 
 $video_id = mysql_real_escape_string($_POST['video_id']);
+
+if (!is_special_user()) {
+    error_log("non project scientists cannot toggle the expert flag.");
+    die();
+}
 
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);

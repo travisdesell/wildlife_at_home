@@ -34,5 +34,5 @@ $(document).ready(function () {
                            "<p>" + (piping_plover_total / 3600).toFixed(1) + " hours total</p>";
 
     $('#piping_plover_progress').popover({ placement : 'bottom', html : true,  content : piping_plover_content, title : 'Progress'});
-
 });
+

@@ -95,6 +95,7 @@ echo "var piping_plover_total = $piping_plover_total_s;\n";
 echo "var piping_plover_processed = $piping_plover_processed_s;\n";
 echo "var piping_plover_validated = $piping_plover_validated_s;\n";
 
+
 echo "</script>
 
         <script src='video_selector.js'></script>
@@ -156,7 +157,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
                                     'site_name' => 'Belden, ND',
-                                    'year' => '2012',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'grouse_belden_progress',
                                     'site_description' => 'Cameras were placed at grouse nests in areas of intense gas and oil development.',
                                     'site_id' => '1',
@@ -167,7 +168,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($grouse_blaisdell_available > 0),
                                     'site_name' => 'Blaisdell, ND',
-                                    'year' => '2012',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'grouse_blaisdell_progress',
                                     'site_description' => 'Cameras were placed at grouse nests in areas of low intensity of gas and oil development.',
                                     'site_id' => '2',
@@ -198,7 +199,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($least_tern_available > 0),
                                     'site_name' => 'Missouri River, ND',
-                                    'year' => '2012',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'least_tern_progress',
                                     'site_description' => 'Cameras were placed at least tern nests along the Missouri River in western North Dakota.',
                                     'site_id' => '4',
@@ -218,7 +219,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($piping_plover_available > 0),
                                     'site_name' => 'Missouri River, ND',
-                                    'year' => '2012',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'piping_plover_progress',
                                     'site_description' => 'Cameras were placed at piping plover nests along the Missouri River in western North Dakota.',
                                     'site_id' => '4',

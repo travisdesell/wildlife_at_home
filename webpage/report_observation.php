@@ -1,6 +1,7 @@
 <?php
 
 require_once('/home/tdesell/wildlife_at_home/webpage/award_credit.inc');
+require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/projects/wildlife/html/inc/util.inc');
@@ -20,8 +21,7 @@ function get_observation_data($data, $from_db = false) {
     $res->interesting = $data['interesting'];
     $res->user_id = $data['user_id'];
     $res->video_segment_id = $data['video_segment_id'];
-    $res->too_dark = $data['too_dark'];
-    $res->corrupt = $data['corrupt'];
+    $res->video_issue = $data['video_issue'];
 
     if (!$from_db) {
         $res->status = 'UNVALIDATED';
@@ -79,31 +79,90 @@ while ($row = mysql_fetch_assoc($result)) {
  *  insert the observation into the database
  */
 
-$query = "REPLACE INTO observations SET" .
-    " comments = '$post_observation->comments'," .
-    " bird_leave = $post_observation->bird_leave, " .
-    " bird_return = $post_observation->bird_return, " .
-    " bird_presence = $post_observation->bird_presence, " .
-    " bird_absence = $post_observation->bird_absence, " .
-    " predator_presence = $post_observation->predator_presence, " .
-    " nest_defense = $post_observation->nest_defense, " .
-    " nest_success = $post_observation->nest_success, " .
-    " chick_presence = $post_observation->chick_presence, " .
-    " interesting = $post_observation->interesting, " .
-    " user_id = $post_observation->user_id, " .
-    " too_dark = $post_observation->too_dark, " .
-    " corrupt = $post_observation->corrupt, " .
-    " status = '$post_observation->status', " .
-    " species_id = $species_id, " .
-    " location_id = $location_id, " .
-    " video_segment_id = $post_observation->video_segment_id";
+if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported'] == 'true') {
+    $query = "REPLACE INTO observations SET" .
+        " comments = '$post_observation->comments'," .
+        " bird_leave = $post_observation->bird_leave, " .
+        " bird_return = $post_observation->bird_return, " .
+        " bird_presence = $post_observation->bird_presence, " .
+        " bird_absence = $post_observation->bird_absence, " .
+        " predator_presence = $post_observation->predator_presence, " .
+        " nest_defense = $post_observation->nest_defense, " .
+        " nest_success = $post_observation->nest_success, " .
+        " chick_presence = $post_observation->chick_presence, " .
+        " interesting = $post_observation->interesting, " .
+        " user_id = $post_observation->user_id, " .
+        " video_issue = $post_observation->video_issue, " .
+        " status = 'EXPERT', " .
+        " species_id = $species_id, " .
+        " location_id = $location_id, " .
+        " video_segment_id = $post_observation->video_segment_id," .
+        " insert_time = NOW()";
 
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    error_log($query);
+} else {
+    $query = "REPLACE INTO observations SET" .
+        " comments = '$post_observation->comments'," .
+        " bird_leave = $post_observation->bird_leave, " .
+        " bird_return = $post_observation->bird_return, " .
+        " bird_presence = $post_observation->bird_presence, " .
+        " bird_absence = $post_observation->bird_absence, " .
+        " predator_presence = $post_observation->predator_presence, " .
+        " nest_defense = $post_observation->nest_defense, " .
+        " nest_success = $post_observation->nest_success, " .
+        " chick_presence = $post_observation->chick_presence, " .
+        " interesting = $post_observation->interesting, " .
+        " user_id = $post_observation->user_id, " .
+        " video_issue = $post_observation->video_issue, " .
+        " status = '$post_observation->status', " .
+        " species_id = $species_id, " .
+        " location_id = $location_id, " .
+        " video_segment_id = $post_observation->video_segment_id," .
+        " insert_time = NOW()";
+
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
 
 $query = "UPDATE video_segment_2 SET crowd_obs_count = crowd_obs_count + 1, crowd_status = IF(crowd_status = 'UNWATCHED', 'WATCHED', crowd_status) WHERE id = " . $post_observation->video_segment_id;
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+
+error_log("_POST[reviewing_reported] = " . $_POST['reviewing_reported'] . ", user_id: " . $post_observation->user_id);
+
+if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported'] == 'true') {
+    $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+    mysql_select_db("wildlife", $boinc_db);
+
+    $user_id = $post_observation->user_id;
+    $query = "SELECT name FROM user WHERE id = $user_id";
+    $result = attempt_query_with_ping($query, $boinc_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
+    $row = mysql_fetch_assoc($result);
+    $user_name = $row['name'];
+
+    error_log("in reviewing reported: id: $user_id, name: $user_name");
+
+    $query = "UPDATE reported_video SET reviewer_id = $user_id, reviewer_name = '$user_name', review_comments = '$post_observation->comments', instructional = $post_observation->interesting, valid_report = " . $_POST['valid_report'] . " WHERE video_segment_id = $post_observation->video_segment_id";
+    error_log("UPDATING REPORTED  VIDEO WITH: $query");
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    error_log(" dying? ");
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    error_log("UPDATED REPORTED  VIDEO WITH: $query");
+
+    $query = "UPDATE video_segment_2 SET report_status = 'REVIEWED', validate_for_review = true, instructional = $post_observation->interesting WHERE id = $post_observation->video_segment_id";
+    error_log(" UPDATING VIDEO SEGMENT 2 WITH: $query");
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    error_log(" dying? ");
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    error_log(" UPDATED VIDEO SEGMENT 2 WITH: $query");
+
+    $query = "UPDATE species SET waiting_review = waiting_review - 1 WHERE id = $species_id";
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
 
 $result = array( 'post_observation' => $post_observation, 'db_observations' => $db_observations );
 

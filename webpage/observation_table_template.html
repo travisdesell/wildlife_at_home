@@ -1,0 +1,48 @@
+<div class='row-fluid' style='margin-top:10px'> 
+    <div class='span12'>
+        <table class='table table-striped table-bordered table-condensed'>
+            <thead>
+                <th>User</th>
+                <th>Status</th>
+                <th>Interesting</th>
+                <th>Bird Leave</th>
+                <th>Bird Return</th>
+                <th>Bird Presence</th>
+                <th>Bird Absence</th>
+                <th>Predator Presence</th>
+                <th>Nest Defense</th>
+                <th>Nest Success</th>
+                <th>Chick Presence</th>
+                <th>Video Issue</th>
+                <th>Awarded Credit</th>
+            </thead>
+
+            {{#observations}}
+            <tr>
+                <td>{{user_id}}</td>
+                <td>{{status}}</td>
+
+                <td style='text-align:center'>{{{interesting}}}</td>
+                <td style='text-align:center'>{{{bird_leave}}}</td>
+                <td style='text-align:center'>{{{bird_return}}}</td>
+                <td style='text-align:center'>{{{bird_presence}}}</td>
+                <td style='text-align:center'>{{{bird_absence}}}</td>
+                <td style='text-align:center'>{{{predator_presence}}}</td>
+                <td style='text-align:center'>{{{nest_defense}}}</td>
+                <td style='text-align:center'>{{{nest_success}}}</td>
+                <td style='text-align:center'>{{{chick_presence}}}</td>
+                <td style='text-align:center'>{{{video_issue}}}</td>
+                <td style='text-align:center'>{{{awarded_credit}}}</td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td colspan='12'>{{comments}}</td>
+            </tr>
+            {{/observations}}
+
+        </table>
+    </div>
+</div>
+
+

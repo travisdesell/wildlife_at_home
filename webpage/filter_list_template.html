@@ -1,0 +1,20 @@
+{{#filter_type}}
+    {{#divider}}
+        <hr style='margin-top:5px; margin-bottom:5px;'>
+    {{/divider}}
+    {{^divider}}
+        <div class='row-fluid'>
+            <div class='btn-group span12'>
+                <button type='button' class='btn btn-small btn-default dropdown-toggle btn-block' data-toggle='dropdown' id='{{dropdown_id}}' style='text-align:left; padding-left:5px;'>
+                    {{default_text}} <span class='caret'></span>
+                </button>
+                <ul class='dropdown-menu {{drop_up}}'>
+                    {{#filter_option}}
+                    <li><a href='javascript:;' class='filter-dropdown' filter_name='{{filter_name}}' filter_value='{{filter_value}}' dropdown_text='{{dropdown_text}}' dropdown_id='{{dropdown_id}}'>{{dropdown_text}}</a></li>
+                    {{/filter_option}}
+                </ul>
+            </div>
+        </div>
+    {{/divider}}
+
+{{/filter_type}}

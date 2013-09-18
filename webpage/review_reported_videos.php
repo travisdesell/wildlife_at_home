@@ -5,29 +5,28 @@ require_once('../inc/util.inc');
 require_once('/home/tdesell/wildlife_at_home/webpage/display_badges.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
+
+require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+Mustache_Autoloader::register();
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
-
-$species_id = mysql_real_escape_string($_GET['species']);
-$location_id = mysql_real_escape_string($_GET['site']);
-
-$user = get_logged_in_user();
-$user_id = $user->id;
 
 echo "
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset='utf-8'>
-    <title>Wildlife@Home: Watching Video</title>
+    <title>Wildlife@Home: Reviewing Reported Video</title>
 
     <!-- For bootstrap -->
     $bootstrap_scripts
 
     <script type='text/javascript'>
-        var reviewing_reported = false;
+        var reviewing_reported = true;
     </script>
     <script type='text/javascript' src='watch.js'></script>
 
@@ -106,6 +105,55 @@ echo "
     </style>
 ";
 
+$user = get_logged_in_user();
+$user_id = $user->id;
+$user_name = $user->name;
+
+$active_items = array(
+                    'home' => '',
+                    'watch_video' => '',
+                    'message_boards' => '',
+                    'preferences' => '',
+                    'about_wildlife' => '',
+                    'project_management' => 'active',
+                    'community' => ''
+                );
+
+print_navbar($active_items);
+
+ini_set("mysql.connect_timeout", 300);
+ini_set("default_socket_timeout", 300);
+
+$boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+mysql_select_db("wildlife", $boinc_db);
+
+if (!is_special_user($user_id, $boinc_db)) {
+    echo "
+        <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 3px; margin-bottom: 5px'> 
+            <div class='row-fluid'>
+                <div class='container'>
+                    <div class='span12'>
+                        <p> Sorry, this page is only accessible for project scientists.</p>
+                    </div>
+                </div>
+            </div>
+        </div>";
+
+    print_footer();
+    echo "</body></html>";
+    die();
+}
+
+$species_id = $_GET['species_id'];
+
+if ($species_id != '1' && $species_id != '2' && $species_id != '3') {
+    $species_filter = "";
+} else {
+    $species_filter = " AND species_id = $species_id";
+}
+
+//echo "<p>species filter: '$species_filter', species_id: '$species_id'</p>";
+
 /*
  * This is a little convoluted, but it will quickly select a random video_segment which has
  * been processed.
@@ -121,9 +169,7 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-//$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
-
-$query = "SELECT id, filename, duration_s, video_id FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.release_to_public = true AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
+$query = "SELECT id, filename, duration_s, video_id, species_id, location_id FROM video_segment_2 vs2 WHERE report_status = 'REPORTED' $species_filter ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -133,26 +179,40 @@ $row = mysql_fetch_assoc($result);
 
 $found = true;
 if (!$row) {
-//    error_log("did not find a watched video segment 2");
+   $found = false;
 
-    $found = true;
+    echo "
+        <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 3px; margin-bottom: 5px'> 
+            <div class='row-fluid'>
+                <div class='container'>
+                    <div class='span12'>";
 
-    $query = "SELECT id, filename, duration_s, video_id from video_segment_2 vs2 WHERE vs2.crowd_status = 'UNWATCHED' AND vs2.release_to_public = true AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
-//    echo "<!-- $query -->\n";
+   if ($species_id == '1') {
+       echo "<p>There are no unreviewed reported videos for the Sharptailed Grouse.</p>";
+   } else if ($species_id == '2') {
+       echo "<p>There are no unreviewed reported videos for the Interior Least Tern.</p>";
+   } else if ($species_id == '2') {
+       echo "<p>There are no unreviewed reported videos for the Piping Plover.</p>";
+   } else if ($species_id == '2') {
+       echo "<p>There are no unreviewed reported videos.</p>";
+   }
 
-    $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    echo "           </div>
+                </div>
+            </div>
+        </div>";
 
-    $row = mysql_fetch_assoc($result);
+    print_footer();
+    echo "</body></html>";
 
-    if (!$row) {
-        $found = false;
-//        error_log("did not find a watched video segment 2 on second try");
-    }
+   die();
 }
 
 $segment_filename = $row['filename'];
 $duration_s = $row['duration_s'];
+$species_id = $row['species_id'];
+$location_id = $row['location_id'];
+$video_segment_id = $row['id'];
 
 $start_time = time();
 
@@ -179,18 +239,6 @@ echo "
 <body>
 ";
 
-$active_items = array(
-                    'home' => '',
-                    'watch_video' => 'active',
-                    'message_boards' => '',
-                    'preferences' => '',
-                    'about_wildlife' => '',
-                    'project_management' => '',
-                    'community' => ''
-                );
-
-print_navbar($active_items);
-
 //
 //echo "file: $segment_filename\n";
 //echo "species_id: $species_id\n";
@@ -214,11 +262,18 @@ $row = mysql_fetch_assoc($result);
 if (!$row) $species_name = 'unknown species';
 else $species_name = $row['name'];
 
+$query = "SELECT count(*) FROM video_segment_2 WHERE report_status = 'REPORTED'";
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$row = mysql_fetch_assoc($result);
+
+$awaiting_review = $row['count(*)'];
+
 
 echo"
     <div class='well well-small' style='margin-top:0px;'>
         <div class='tab'>$animal_id - " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</div>
-        <div class='tab-right'>" . number_format($user->bossa_total_credit) . "s watched - " . round(100 * ($user->valid_observations / ($user->valid_observations + $user->invalid_observations)), 2) . "% accuracy</div>
+        <div class='tab-right'>$awaiting_review videos are awaiting review</div>
 
         <div class='row-fluid'>
             <div class='container'>
@@ -279,7 +334,7 @@ print_selection_row("Predator at the nest.", "predator_presence");
 print_selection_row("Nest defense.", "nest_defense");
 print_selection_row("Nest success (eggs hatching).", "nest_success");
 print_selection_row("Chicks present at the nest.", "chick_presence");
-print_selection_row("Was the video interesting or educational?", "interesting");
+print_selection_row("Display this on our instructional training page?", "interesting");
 
 
 $discuss_video_content = "I would like to discuss this video:\n" . "[" . "video" . "]" . $segment_filename . "[/video" . "]";
@@ -290,7 +345,7 @@ echo "
                     <div class='row-fluid'>
                         <div class='span12'>
                             <p style='padding-top:8px;'>
-                            Any other comments (predator identifications, etc)?
+                            Enter a descriptive explanation of the correct markings:
                             </p>
                         </div>
                     </div>
@@ -300,9 +355,9 @@ echo "
                     </div>
 
                     <div class='row-fluid pull-down'>
-                        <a class='btn pull-left' style='margin-top:0px;' id='video_issue_button' value='video_issue' 'data-toggle='modal'>video problem</a>
-                        <div class='span1'> <span class='badge badge-info pull-left' style='margin-top:8px' id='video_issue_help'>?</span> </div>
                         <a class='btn btn-primary pull-right disabled' style='margin-top:0px;' id='submit_button' value='submit' 'data-toggle='modal'>submit</a>
+
+                        <a class='btn btn-success pull-right span3' style='margin-top:0px; margin-right:5px;' id='valid-report-button'>valid report</a>
                     </div>
 
                     <div id = 'submit-modal' class='modal hide fade' tabindex='-1' role='dialog' aria-labelledby='submit-modal-label'>
@@ -319,7 +374,6 @@ echo "
                             </form>
 
                             <button class= 'btn pull-left' data-dismiss='modal' aria-hidden='true' id='discuss-video-button'>Discuss This Video</button>
-                            <button class ='btn pull-left' data-dismiss='modal' aria-hidden='true' id='another-site-button'>Select Another Site</button>
                             <button class ='btn btn-primary pull-right' data-dismiss='modal' aria-hidden='true' id='another-video-button'>Next Video</button>
                         </div>
                     </div>
@@ -327,8 +381,104 @@ echo "
                 </div> <!-- span6 -->
             </div>  <!-- container -->
         </div> <!-- row-fluid -->
-    </div>  <!-- well -->
+    </div>  <!-- well -->";
+
+/**
+ *  Display the comments for why the video was incorreclty marked.
+ */
+$query = "SELECT report_comments, reporter_id, reporter_name FROM reported_video WHERE video_segment_id = $video_segment_id";
+$result = mysql_query($query, $wildlife_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$row = mysql_fetch_assoc($result);
+
+$reporter_name = $row['reporter_name'];
+$reporter_id = $row['reporter_id'];
+$report_comments = $row['report_comments'];
+
+echo "
+<div class='well well-small' style='padding-top:10px; padding-bottom:10px;'>
+<div class='row' style='margin-left:0px;'>
+
+<div class='accordion' id='parent-video-accordion'>
+    <div class='accordion-group'>
+        <div class='accordion-heading'>
+            <a class='accordion-toggle' data-toggle='collapse' data-parent='#parent-video-accordion' href='#parent_video_collapse'>
+                Show Parent Video
+            </a>
+        </div>
+
+        <div id='parent_video_collapse' class='accordion-body collapse'>
+            <div class='accordion-inner'>
+                Anim pariatur cliche...
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
     ";
+
+echo "
+    <div class='well well-large' style='padding-top:5px; padding-bottom:0px;'>
+        <p>This video was reported by $reporter_name with the following description:</p> 
+        <div class='row-fluid'>
+        <textarea readonly style='width:97%;' rows=2 class='report-comments' id='report-comments-$video_segment_id' video_segment_id=$video_segment_id> $report_comments </textarea>
+        </div>
+    </div>
+    ";
+
+/**
+ *  Display all the user observations in a table.
+ */
+$query = "SELECT * FROM observations WHERE video_segment_id = $video_segment_id";
+$result = mysql_query($query, $wildlife_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+
+function set_marks(&$value, $bool = false) {
+    if ($value == 1) {
+        $value = '&#x2713;';
+    } else if ($value == 0) {
+        if ($bool) {
+            $value = 'x';
+        } else {
+            $value = '?';
+        }
+    } else if ($value == -1) {
+        $value = 'x';
+    }
+}
+
+$observations['observations'] = array();
+
+while ($observation_row = mysql_fetch_assoc($result)) {
+    set_marks($observation_row['interesting']);
+    set_marks($observation_row['bird_leave']);
+    set_marks($observation_row['bird_return']);
+    set_marks($observation_row['bird_presence']);
+    set_marks($observation_row['bird_absence']);
+    set_marks($observation_row['predator_presence']);
+    set_marks($observation_row['nest_defense']);
+    set_marks($observation_row['nest_success']);
+    set_marks($observation_row['chick_presence']);
+    set_marks($observation_row['video_issue'], true);
+
+    $observation_row['user_id'] = get_user_from_id($observation_row['user_id'])->name;
+    $observations['observations'][] = $observation_row;
+}
+
+$observation_table_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/observation_table_template.html");
+$mustache_engine = new Mustache_Engine;
+
+
+echo "
+    <div class='well well-small' style='padding-top:10px; padding-bottom:0px;'>";
+echo $mustache_engine->render($observation_table_template, $observations);
+echo "
+    </div>
+    ";
+
+
 
 print_footer();
 
@@ -336,5 +486,6 @@ echo "
 </body>
 </html>
 ";
+
 
 ?>
