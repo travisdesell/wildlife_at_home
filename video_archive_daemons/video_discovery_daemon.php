@@ -78,7 +78,8 @@ function get_video_duration($filename) {
     $pattern = "/Duration:\s+([0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9]?)/";
     $exists = preg_match($pattern, $info, $matches);
     if(!$exists) {
-        die("No duration found.\n");
+        echo("No duration found.\n");
+        throw new Exception('Duration not found by ffmpeg, corrupt video?');
     }
 
     $timetotalarray = multi_explode("/[:\.]/", $matches[1]);
@@ -130,7 +131,8 @@ function insert_video($archive_filename, $watermarked_filename, $project_id, $lo
                 ", machine_obs_count = '$machine_obs_count'" .
                 ", streaming_segments = '$streaming_segments'" .
                 ", processing_status = '$processing_status'" .
-                ", duration_s = '$duration_s'";
+                ", duration_s = '$duration_s'" .
+                ", release_to_public = false";
 
     $result = mysql_query($query);
     if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
@@ -154,8 +156,10 @@ function insert_video($archive_filename, $watermarked_filename, $project_id, $lo
                     ", expert_obs_count = 0" .
                     ", machine_obs_count = 0" .
                     ", interesting_count = 0" .
+                    ", required_views = 2" .
                     ", processing_status = 'UNWATERMARKED'" .
-                    ", crowd_status = 'UNWATCHED'";
+                    ", crowd_status = 'UNWATCHED'" .
+                    ", release_to_public = false";
 
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
@@ -190,7 +194,7 @@ foreach($directory_iterator as $filename => $path_object) {
 
         //name format is : base/species/type_year/site/animal 
         //id/mm_dd_yy_???/CH00_yyyymmdd_hhmmssMN.avi
-        $start = strlen("/video/wildlife/archive/");
+        $start = strlen("/share/wildlife/archive/");
 
         $project = parse_next_dir($filename, "/", $start);
         if ($project == "lekking") continue;
@@ -227,8 +231,8 @@ foreach($directory_iterator as $filename => $path_object) {
             }
         }
 
-        $date = parse_next_dir($filename, "/", $start);
-        $file = substr($filename, $start);
+        $date = basename($filename);
+        $file = basename($filename);
 
         $year = substr($file, 5, 4);
         $month = substr($file, 9, 2);
@@ -238,10 +242,29 @@ foreach($directory_iterator as $filename => $path_object) {
         $minute = substr($file, 16, 2);
         $second = substr($file, 18, 2);
 
-        $duration_s = get_video_duration($filename);
+        if ($year == '0000' || !is_numeric($year)) {
+            echo "filename is: '$filename'\n";
+            echo "year is: '$year'\n";
+            echo "improperly formatted year! file is: '$file'\n";
+//            die("improperly formatted year! file is: '$file'\n");
+            $year = '0000';
+            $month = '00';
+            $day = '00';
+            $hour = '00';
+            $minute = '00';
+            $second = '00';
+        }
+
+        try {
+            $duration_s = get_video_duration($filename);
+        } catch (Exception $e) {
+            echo "Problems parsing duration.\n";
+            continue;
+        }
+
         $streaming_segments = ceil($duration_s / 180);  //number of 3 minute segments to be generated
 
-        $watermarked_filename = "/video/wildlife/watermarked/" . substr($filename, strlen("/video/wildlife/archive/"));
+        $watermarked_filename = "/share/wildlife/watermarked/" . substr($filename, strlen("/share/wildlife/archive/"));
         $watermarked_filename = str_replace(".avi", ".mp4", $watermarked_filename);
 
         $crowd_obs_count = 0;
@@ -269,30 +292,17 @@ foreach($directory_iterator as $filename => $path_object) {
             die("Unknown project encountered: '$project'");
         }
 
-        if ($directory_year == 2012) {
-            if ($site == "Belden") {
-                $site_id = 1;
-            } else if ($site == "Blaisdell") {
-                $site_id = 2;
-            } else if ($site == "Lostwood") {
-                $site_id = 3;
-            } else if ($site == "Missouri River") {
-                $site_id = 4;
-            } else {
-                echo "filename: $filename \n";
-                die("Unknown location encountered: '$site' for year '$directory_year'\n");
-            }
-        } else if ($directory_year = 2013) {
-            if ($site == "Belden") {
-                $site_id = 5;
-            } else if ($site == "Blaisdell") {
-                $site_id = 6;
-            } else {
-                echo "filename: $filename \n";
-                die("Unknown location encountered: '$site' for year '$directory_year'\n");
-            }
+        if ($site == "Belden") {
+            $site_id = 1;
+        } else if ($site == "Blaisdell") {
+            $site_id = 2;
+        } else if ($site == "Lostwood") {
+            $site_id = 3;
+        } else if ($site == "Missouri River") {
+            $site_id = 4;
         } else {
-                die("Unknown year encountered: '$directory_year'");
+            echo "filename: $filename \n";
+            die("Unknown location encountered: '$site' for year '$directory_year'\n");
         }
 
         echo $filename . "\n";
