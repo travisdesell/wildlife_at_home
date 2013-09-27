@@ -114,7 +114,7 @@ function get_bossa_badge($user) {
 function get_badges($user) {
     $badges = "";
 
-    if ($user->bossa_total_credit > 10000) {
+    if ($user->bossa_total_credit > 2 * 60 * 60) {
         $badges .= "&nbsp;&nbsp;";
         $badges .= get_bossa_badge($user);
     }

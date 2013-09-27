@@ -1,6 +1,12 @@
 {{#video_list}}
 <div class='well well-small'>
     <div class='tab'>{{animal_id}} - {{video_name}}</div>
+    {{#hidden}}
+    <button class='btn btn-right btn-primary toggle-observation-visibility-button' id='toggle-observation-visibility-{{video_segment_2_id}}' observation_id='{{observation_id}}'>show</button>
+    {{/hidden}}
+    {{^hidden}}
+    <button class='btn btn-right toggle-observation-visibility-button' id='toggle-observation-visibility-{{video_segment_2_id}}' observation_id='{{observation_id}}'>hide</button>
+    {{/hidden}}
 
         <div class='row-fluid'>
             <div class='container span6'>
@@ -21,11 +27,23 @@
                         <button class='btn btn-warning disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Pending Review</button>
                         {{/reported}}
                         {{#reviewed}}
-                        <button class='btn btn-success disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Reviewed</button>
+                            {{#special_user}}
+                            <a href='./review_reported_videos.php?video_segment_id={{video_segment_2_id}}' class='btn btn-success span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>
+                                Modify Review
+                            </a>
+                            {{/special_user}}
+                            {{^special_user}}
+                            <button class='btn btn-success disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Reviewed</button>
+                            {{/special_user}}
                         {{/reviewed}}
                     {{/has_canonical}}
                     {{^has_canonical}}
+                        {{#reported}}
+                        <button class='btn btn-warning disabled span6 pull-left' style='margin-top:0px;' video_segment_id='{{video_segment_2_id}}'>Pending Review</button>
+                        {{/reported}}
+                        {{^reported}}
                         <button class='btn disabled span6 pull-left report-observations-button' style='margin-top:0px;'>Awaiting Canonical Result</button>
+                        {{/reported}}
                     {{/has_canonical}}
 
                     <button class='btn btn-primary span6 pull-right discuss-video-button' style='margin-top:0px;' id='discuss-video-button-{{video_segment_2_id}}' value='discuss video'>Discuss Video</button>
@@ -60,7 +78,8 @@
                 <table class='table table-striped table-bordered table-condensed'>
                     <thead>
                         <th>User</th>
-                        <th>Status</th>
+                        <th>Accuracy Rating</th>
+                        <th>Awarded Credit</th>
                         <th>Interesting</th>
                         <th>Bird Leave</th>
                         <th>Bird Return</th>
@@ -71,14 +90,15 @@
                         <th>Nest Success</th>
                         <th>Chick Presence</th>
                         <th>Video Issue</th>
-                        <th>Awarded Credit</th>
                     </thead>
 
                     {{#observations}}
                     <tr>
                         <td>{{user_id}}</td>
-                        <td>{{status}}</td>
+                        <!-- <td>{{status}}</td> -->
 
+                        <td style='text-align:center'>{{{accuracy_rating}}}</td>
+                        <td style='text-align:center'>{{{awarded_credit}}}</td>
                         <td style='text-align:center'>{{{interesting}}}</td>
                         <td style='text-align:center'>{{{bird_leave}}}</td>
                         <td style='text-align:center'>{{{bird_return}}}</td>
@@ -89,7 +109,6 @@
                         <td style='text-align:center'>{{{nest_success}}}</td>
                         <td style='text-align:center'>{{{chick_presence}}}</td>
                         <td style='text-align:center'>{{{video_issue}}}</td>
-                        <td style='text-align:center'>{{{awarded_credit}}}</td>
                     </tr>
 
                     <tr>
