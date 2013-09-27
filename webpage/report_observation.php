@@ -126,16 +126,25 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 }
 
-$query = "UPDATE video_segment_2 SET crowd_obs_count = crowd_obs_count + 1, crowd_status = IF(crowd_status = 'UNWATCHED', 'WATCHED', crowd_status) WHERE id = " . $post_observation->video_segment_id;
+$query = "UPDATE video_segment_2 SET crowd_obs_count = crowd_obs_count + 1, crowd_status = 'WATCHED' WHERE id = " . $post_observation->video_segment_id;
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 error_log("_POST[reviewing_reported] = " . $_POST['reviewing_reported'] . ", user_id: " . $post_observation->user_id);
 
-if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported'] == 'true') {
-    $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
-    mysql_select_db("wildlife", $boinc_db);
+$boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+mysql_select_db("wildlife", $boinc_db);
 
+$query = "UPDATE user SET total_observations = total_observations + 1 WHERE id = " . $post_observation->user_id;
+$result = attempt_query_with_ping($query, $boinc_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
+
+$query = "UPDATE team SET total_observations = total_observations + 1 WHERE id = (SELECT teamid FROM user WHERE user.id = " . $post_observation->user_id .")";
+$result = attempt_query_with_ping($query, $boinc_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
+
+
+if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported'] == 'true') {
     $user_id = $post_observation->user_id;
     $query = "SELECT name FROM user WHERE id = $user_id";
     $result = attempt_query_with_ping($query, $boinc_db);

@@ -355,31 +355,42 @@ $(document).ready(function () {
 //                            console.log("target = #event-button-" + video_id);
 //                            console.log("event_ids = " + JSON.stringify(event_ids));
 
+                            function toTitleCase(str) {
+                                return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+                            }
+
+                            $('#event-button-' + video_id).html(toTitleCase(event_ids[video_id]) + ' <span class="caret"></span>');
+
+                            /*
                             if (event_id === '0') {
                                 $('#event-button-' + video_id).html('Unspecified <span class="caret"></span>');
-                                event_ids[video_id] = 'UNSPECIFIED';
+                                event_ids[video_id] = 'unspecified';
                             } else if (event_id === '1') {
                                 $('#event-button-' + video_id).html('Bird Presence <span class="caret"></span>');
-                                event_ids[video_id] = 'BIRD_PRESENCE';
+                                event_ids[video_id] = 'bird present';
                             } else if (event_id === '2') {
                                 $('#event-button-' + video_id).html('Bird Absence <span class="caret"></span>');
-                                event_ids[video_id] = 'BIRD_ABSENCE';
+                                event_ids[video_id] = 'bird absent';
                             } else if (event_id === '3') {
                                 $('#event-button-' + video_id).html('Predator <span class="caret"></span>');
-                                event_ids[video_id] = 'PREDATOR';
+                                event_ids[video_id] = 'territorial - predator';
                             } else if (event_id === '4') {
                                 $('#event-button-' + video_id).html('Other Animal <span class="caret"></span>');
-                                event_ids[video_id] = 'OTHER_ANIMAL';
+                                event_ids[video_id] = 'territorial - other animal';
                             } else if (event_id === '5') {
                                 $('#event-button-' + video_id).html('Nest Defense <span class="caret"></span>');
-                                event_ids[video_id] = 'NEST_DEFENSE';
+                                event_ids[video_id] = 'territorial - nest defense';
                             } else if (event_id === '6') {
                                 $('#event-button-' + video_id).html('Nest Success <span class="caret"></span>');
-                                event_ids[video_id] = 'NEST_SUCCESS';
+                                event_ids[video_id] = 'nest success';
                             } else if (event_id === '7') {
                                 $('#event-button-' + video_id).html('Chick Presence <span class="caret"></span>');
-                                event_ids[video_id] = 'CHICK_PRESENCE';
+                                event_ids[video_id] = 'chick presence';
+                            } else if (event_id === '8') {
+                                $('#event-button-' + video_id).html('Volunteer Training<span class="caret"></span>');
+                                event_ids[video_id] = 'volunteer training';
                             }
+                            */
 
                             ev.preventDefault();
 //                            ev.stopPropagation();
