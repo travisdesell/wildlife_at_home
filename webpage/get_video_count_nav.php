@@ -68,7 +68,9 @@ if (empty($filters)) {
         error_log ("query: $query");
 
     } else {
-       $query = "SELECT count(vs2.id) FROM video_segment_2 vs2 RIGHT JOIN observations o ON (vs2.crowd_obs_count > 0 $reported_filter $filter AND o.user_id = $user_id AND o.video_segment_id = vs2.id)";
+        if ($_POST['show_hidden'] == 'false') $filter .= " AND o.hidden = false";
+
+        $query = "SELECT count(vs2.id) FROM video_segment_2 vs2 RIGHT JOIN observations o ON (vs2.crowd_obs_count > 0 $reported_filter $filter AND o.user_id = $user_id AND o.video_segment_id = vs2.id)";
     }
 
     //echo "<!-- $query -->\n";
