@@ -126,7 +126,7 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 }
 
-$query = "UPDATE video_segment_2 SET crowd_obs_count = crowd_obs_count + 1, crowd_status = IF(crowd_status = 'UNWATCHED', 'WATCHED', crowd_status) WHERE id = " . $post_observation->video_segment_id;
+$query = "UPDATE video_segment_2 SET crowd_obs_count = crowd_obs_count + 1, crowd_status = 'WATCHED' WHERE id = " . $post_observation->video_segment_id;
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
