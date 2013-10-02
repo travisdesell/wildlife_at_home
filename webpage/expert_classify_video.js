@@ -451,6 +451,8 @@ $(document).ready(function () {
 
                         $('.submit-observation-button').click(function() {
                             var video_id = $(this).attr("video_id");
+                            $(this).addClass("disabled");
+                            var div_id = "#submit-observation-button-" + video_id;
 
                             var submission_data = {
                                                     video_id : video_id,
@@ -468,6 +470,7 @@ $(document).ready(function () {
                                 dataType : 'json',
                                 success : function(response) {
                                     //console.log("the response was:\n" + response);
+                                    $(div_id).removeClass("disabled");
 
                                     var observation_id = response['observation_id'];
                                     $("#observations-table-div-" + video_id).html( response['html'] );
