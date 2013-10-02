@@ -152,16 +152,13 @@ if ($species_id != '1' && $species_id != '2' && $species_id != '3') {
     $species_filter = " AND species_id = $species_id";
 }
 
-//echo "<p>species filter: '$species_filter', species_id: '$species_id'</p>";
+$video_segment_id = -1;
+if (array_key_exists('video_segment_id', $_GET)) {
+    $species_filter = "";
+    $video_segment_id = $_GET['video_segment_id'];
+}
 
-/*
- * This is a little convoluted, but it will quickly select a random video_segment which has
- * been processed.
- *
- * select one that has been processed, not validated, and has no observation by the user already.
- *
- * first select one that has observations by OTHER users, then select one with no observations.
- */
+//echo "<p>species filter: '$species_filter', species_id: '$species_id'</p>";
 
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
@@ -169,7 +166,14 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$query = "SELECT id, filename, duration_s, video_id, species_id, location_id FROM video_segment_2 vs2 WHERE report_status = 'REPORTED' $species_filter ORDER BY RAND() limit 1";
+$query ="";
+
+if ($video_segment_id >= 0) {
+    $query = "SELECT id, filename, duration_s, video_id, species_id, location_id FROM video_segment_2 vs2 WHERE id = $video_segment_id";
+} else {
+    $query = "SELECT id, filename, duration_s, video_id, species_id, location_id FROM video_segment_2 vs2 WHERE report_status = 'REPORTED' $species_filter ORDER BY RAND() limit 1";
+}
+
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -208,6 +212,7 @@ if (!$row) {
    die();
 }
 
+$video_id = $row['video_id'];
 $segment_filename = $row['filename'];
 $duration_s = $row['duration_s'];
 $species_id = $row['species_id'];
@@ -402,14 +407,12 @@ echo "
 <div class='accordion' id='parent-video-accordion'>
     <div class='accordion-group'>
         <div class='accordion-heading'>
-            <a class='accordion-toggle' data-toggle='collapse' data-parent='#parent-video-accordion' href='#parent_video_collapse'>
-                Show Parent Video
-            </a>
+            <a class='accordion-toggle' data-toggle='collapse' data-parent='#parent-video-accordion' href='#parent_video_collapse' video_id='$video_id'>Show Parent Video</a>
         </div>
 
         <div id='parent_video_collapse' class='accordion-body collapse'>
-            <div class='accordion-inner'>
-                Anim pariatur cliche...
+            <div class='accordion-inner' id='parent_video_collapse_inner'>
+                uninitialized
             </div>
         </div>
     </div>

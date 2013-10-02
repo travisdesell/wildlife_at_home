@@ -473,78 +473,94 @@ $(document).ready(function () {
     $('#video_issue_button').click(function() {
         console.log("video_issue!");
 
-        if (!$('#video_issue_button').hasClass("disabled")) {
-            $('#video_issue_button').addClass("disabled");
+        var state = $(this).html();
+        console.log("state: " + state);
 
-            var body_text = "You flagged the video as video_issue.";
+        if (state === "video problem") {
+            $(this).html("video problem - are you sure?");
+            $(this).addClass("btn-warning");
+        } else {
+            if (!$('#video_issue_button').hasClass("disabled")) {
+                $('#video_issue_button').addClass("disabled");
 
-            var comments_html = $('#comments').val();
-            if (!interesting_selected) interesting = -1;
-            var submission_data = {
-                reviewing_reported : reviewing_reported,
-                user_id : user_id,
-                video_segment_id : video_segment_id,
-                comments : comments_html,
-                bird_leave : 0,
-                bird_return : 0,
-                bird_presence : 0,
-                bird_absence : 0,
-                predator_presence : 0,
-                nest_defense : 0,
-                nest_success : 0,
-                chick_presence: 0,
-                interesting : -1,
-                start_time : start_time,
-                species_id : species_id,
-                location_id : location_id,
-                duration_s : duration_s,
-                video_issue : 1
-            };
-            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
+                var body_text = "You flagged the video as video_issue.";
 
-            var modal_body = '#submit-modal';
+                var comments_html = $('#comments').val();
+                if (!interesting_selected) interesting = -1;
+                var submission_data = {
+                    reviewing_reported : reviewing_reported,
+                    user_id : user_id,
+                    video_segment_id : video_segment_id,
+                    comments : comments_html,
+                    bird_leave : 0,
+                    bird_return : 0,
+                    bird_presence : 0,
+                    bird_absence : 0,
+                    predator_presence : 0,
+                    nest_defense : 0,
+                    nest_success : 0,
+                    chick_presence: 0,
+                    interesting : -1,
+                    start_time : start_time,
+                    species_id : species_id,
+                    location_id : location_id,
+                    duration_s : duration_s,
+                    video_issue : 1
+                };
+                if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
-            console.log("flagging video as video_issue, generating modal: '" + modal_body + "'");
-            generate_modal(modal_body, submission_data);
-            console.log("flagging video as video_issue, generated modal: '" + modal_body + "'");
+                var modal_body = '#submit-modal';
 
-            $('#video_issue_button').removeClass("disabled");
+                console.log("flagging video as video_issue, generating modal: '" + modal_body + "'");
+                generate_modal(modal_body, submission_data);
+                console.log("flagging video as video_issue, generated modal: '" + modal_body + "'");
+
+                $('#video_issue_button').removeClass("disabled");
+            }
         }
     });
 
     $('#submit_button').click(function() {
         if (!$('#submit_button').hasClass("disabled")) {
-            $('#submit_button').addClass("disabled");
-            var comments_html = $('#comments').val();
+            var state = $(this).html();
+            console.log("state: " + state);
 
-            var submission_data = {
-                reviewing_reported : reviewing_reported,
-                user_id : user_id,
-                video_segment_id : video_segment_id,
-                comments : comments_html,
-                bird_leave : bird_leave,
-                bird_return : bird_return,
-                bird_presence : bird_presence,
-                bird_absence : bird_absence,
-                predator_presence : predator_presence,
-                nest_defense : nest_defense,
-                nest_success : nest_success,
-                chick_presence: chick_presence,
-                interesting : interesting,
-                start_time : start_time,
-                species_id : species_id,
-                location_id : location_id,
-                duration_s : duration_s,
-                video_issue : 0
-            };
-            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
+            if (state === "submit") {
+                $(this).html("submit - are you sure?");
+                $(this).addClass("btn-warning");
+            } else {
+                $('#submit_button').addClass("disabled");
+                var comments_html = $('#comments').val();
 
-//            alert( JSON.stringify(submission_data) );
+                var submission_data = {
+                    reviewing_reported : reviewing_reported,
+                    user_id : user_id,
+                    video_segment_id : video_segment_id,
+                    comments : comments_html,
+                    bird_leave : bird_leave,
+                    bird_return : bird_return,
+                    bird_presence : bird_presence,
+                    bird_absence : bird_absence,
+                    predator_presence : predator_presence,
+                    nest_defense : nest_defense,
+                    nest_success : nest_success,
+                    chick_presence: chick_presence,
+                    interesting : interesting,
+                    start_time : start_time,
+                    species_id : species_id,
+                    location_id : location_id,
+                    duration_s : duration_s,
+                    video_issue : 0
+                };
+                if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
-            var modal_body = '#submit-modal';
+    //            alert( JSON.stringify(submission_data) );
 
-            console.log("submitting observations, generating modal: '" + modal_body + "'");
-            generate_modal(modal_body, submission_data);
+                var modal_body = '#submit-modal';
+
+                console.log("submitting observations, generating modal: '" + modal_body + "'");
+                generate_modal(modal_body, submission_data);
+            }
         }
     });
 
@@ -557,6 +573,143 @@ $(document).ready(function () {
             window.location.reload();
         }
     });
+
+    /*
+     *  Used in review reported videos
+     */
+    $('.accordion-toggle').click(function(ev) {
+        console.log("clicked an accordion toggle with href: " + $(this).attr('href'));
+        if ($(this).html() === "Show Parent Video") {
+            $(this).html("Hide Parent Video - " + $(this).attr("video_id"));
+        } else {
+            $(this).html("Show Parent Video - " + $(this).attr("video_id"));
+        }
+
+        if ($( $(this).attr('href') + "_inner" ).html().indexOf('uninitialized') != -1) {
+            var target = $(this).attr('href') + "_inner";
+            console.log("target is: '" + target + "'");
+
+            $( target ).html("<p>Loading...</p>");
+
+            var submission_data = {
+                                    video_id : $(this).attr('video_id')
+                                  };
+
+            $.ajax({
+                type: 'POST',
+                url: './get_full_video.php',
+                data : submission_data,
+                dataType : 'text',
+                success : function(response) {
+                    console.log("the response was:\n" + response);
+                    $(target).html(response);
+
+                    $('.fast-forward-button').button();
+                    $('.fast-backward-button').button();
+
+                    $('.fast-backward-button').click(function() {
+                        var video_id = $(this).attr('video_id');
+                        var video = $('#wildlife-video-' + video_id).get(0);
+                        var rate = video.playbackRate;
+
+                        if (rate === -16.0)         rate = -16.0;
+                        else if (rate === -12.0)    rate = -16.0; 
+                        else if (rate === -10.0)    rate = -12.0;
+                        else if (rate === -8.0)     rate = -10.0;
+                        else if (rate === -6.0)     rate = -8.0;
+                        else if (rate === -4.0)     rate = -6.0;
+                        else if (rate === -2.0)     rate = -4.0;
+                        else if (rate === -1.0)     rate = -2.0;
+                        else if (rate === 1.0)      rate = -1.0;
+                        else if (rate === 2.0)      rate = 1.0; 
+                        else if (rate === 4.0)      rate = 2.0;
+                        else if (rate === 6.0)      rate = 4.0;
+                        else if (rate === 8.0)      rate = 6.0;
+                        else if (rate === 10.0)     rate = 8.0;
+                        else if (rate === 12.0)     rate = 10.0;
+                        else if (rate === 16.0)     rate = 12.0;
+                        else rate = -1.0;
+
+                        video.playbackRate = rate;
+
+                        //console.log("clicking fast backward!, playback rate: " + video.playbackRate);
+
+                        $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
+                    });
+
+                    $('.fast-forward-button').click(function() {
+                        var video_id = $(this).attr('video_id');
+                        var video = $('#wildlife-video-' + video_id).get(0);
+                        var rate = video.playbackRate;
+
+                        if (rate === -16.0)         rate = -12.0;
+                        else if (rate === -12.0)    rate = -10.0; 
+                        else if (rate === -10.0)    rate = -8.0;
+                        else if (rate === -8.0)     rate = -6.0;
+                        else if (rate === -6.0)     rate = -4.0;
+                        else if (rate === -4.0)     rate = -2.0;
+                        else if (rate === -2.0)     rate = -1.0;
+                        else if (rate === -1.0)     rate = 1.0;
+                        else if (rate === 1.0)      rate = 2.0;
+                        else if (rate === 2.0)      rate = 4.0; 
+                        else if (rate === 4.0)      rate = 6.0;
+                        else if (rate === 6.0)      rate = 8.0;
+                        else if (rate === 8.0)      rate = 10.0;
+                        else if (rate === 10.0)     rate = 12.0;
+                        else if (rate === 12.0)     rate = 16.0;
+                        else if (rate === 16.0)     rate = 16.0;
+                        else rate = 1.0;
+
+                        video.playbackRate = rate;
+
+                        //console.log("clicking fast forward!, playback rate: " + video.playbackRate);
+
+                        $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
+                    });
+                },
+                error : function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                },
+                async: true
+            });
+        }
+
+        if ($( $(this).attr('href') ).hasClass('in')) {
+            $( $(this).attr('href') ).removeClass('in');
+        } else {
+            $( $(this).attr('href') ).addClass('in');
+        }
+
+        //$( (this).attr('href') ).collapse('toggle');
+        console.log("toggle: " + $( $(this).attr('href') ).hasClass('in'));
+
+        var video_id = $(this).attr("video_id");
+
+        /**
+         *  For some reason I need this for snow leopard's safari
+         */
+//            if ( $("#wildlife-video-span-" + video_id).is(":hidden") ) {
+        if ( !$( $(this).attr('href') ).hasClass('in') ) {
+            console.log("hiding: wildlife-video-span-" + video_id);
+
+            $("#wildlife-video-span-" + video_id).hide();
+            $("#wildlife-video-" + video_id).hide();
+//                $("#wildlife-video-buttons-" + video_id).hide();
+        } else {
+            console.log("showing: wildlife-video-span-" + video_id);
+
+            $("#wildlife-video-span-" + video_id).show();
+            $("#wildlife-video-" + video_id).show();
+//                $("#wildlife-video-buttons-" + video_id).show();
+        }
+
+        ev.preventDefault();
+        ev.stopPropagation();
+
+    });
+
+
 });
 
 

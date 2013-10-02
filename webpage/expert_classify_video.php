@@ -90,6 +90,28 @@ echo "
 .bottom-up {top: auto; bottom: 100%; }
 .dropdown-menu.bottom-up:before { border-bottom: 0px solid transparent !important; border-top: 7px solid rgba(0, 0, 0, 0.2); top: auto !important; bottom: -7px; }
 .dropdown-menu.bottom-up:after  { border-bottom: 0px solid transparent !important; border-top: 6px solid white;              top: auto !important; bottom: -6px; }
+
+.navbar .dropdown-menu [class*='span'] {
+    padding-top: 10px;
+}
+.navbar .dropdown-menu > li.column-menu ul {
+    display: inline-block;
+    list-style: none outside none;
+    list-style-type: none outside none;
+    margin: 0 0 16px;
+    width: 100%;
+}
+.navbar .dropdown-menu > li.column-menu li {
+    display: inline;
+    list-style-type: none outside none;
+    float: left;
+    width: 100%;
+}
+.navbar .dropdown-menu > li.column-menu.firstcolumn {
+    margin-left: 0;
+    padding-left: 0;
+}
+
     </style>
 ";
 
