@@ -94,7 +94,7 @@ if ($species_id == 1) {
                     </ul>";
 
 } else if ($species_id == 2) {
-    echo "          <ul class='dropdown-menu' id='event-dropdown-$video_id'>
+    echo "          <ul class='dropdown-menu' id='event-dropdown-$video_id' style='width:350px;'>
                         <li class='column-menu span6 firstcolumn'>
                             <ul style='list-style-type: none; margin-left:10px;'>
                                 <li class='nav-header'>Miscellaneous</li>
@@ -141,7 +141,7 @@ if ($species_id == 1) {
                     </ul>";
 
 } else if ($species_id == 3) {
-    echo "          <ul class='dropdown-menu' id='event-dropdown-$video_id'>
+    echo "          <ul class='dropdown-menu' id='event-dropdown-$video_id' style='width:350px;'>
                         <li class='column-menu span6 firstcolumn'>
                             <ul style='list-style-type: none; margin-left:10px;'>
                                 <li class='nav-header'>Miscellaneous</li>

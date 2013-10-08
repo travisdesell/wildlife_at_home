@@ -462,6 +462,8 @@ $(document).ready(function () {
 
                         $('.submit-observation-button').click(function() {
                             var video_id = $(this).attr("video_id");
+                            var div_id = "#submit-observation-button-" + video_id;
+                            $(this).addClass("disabled");
 
                             var submission_data = {
                                                     video_id : video_id,
@@ -479,6 +481,7 @@ $(document).ready(function () {
                                 dataType : 'json',
                                 success : function(response) {
                                     //console.log("the response was:\n" + response);
+                                    $(div_id).removeClass("disabled");
 
                                     var observation_id = response['observation_id'];
                                     $("#observations-table-div-" + video_id).html( response['html'] );
@@ -544,7 +547,9 @@ $(document).ready(function () {
         $('.remove-observation-button').button();
         $('.remove-observation-button').click(function() {
             var observation_id = $(this).attr('observation_id');
+            var div_id = "#remove-observation-button-" + observation_id;
             console.log("observation id: " + observation_id);
+            $(this).addClass("disabled");
 
             var submission_data = {
                                     observation_id : observation_id
@@ -555,6 +560,8 @@ $(document).ready(function () {
                 data : submission_data,
                 dataType : 'json',
                 success : function(response) {
+                    $(div_id).removeClass("disabled");
+
                     var observation_count = response['observation_count'];
                     var video_id = $("#observation-row-" + observation_id).parent().parent().attr('video_id');
                     $("#observations-table-div-" + video_id).html( response['html'] );
