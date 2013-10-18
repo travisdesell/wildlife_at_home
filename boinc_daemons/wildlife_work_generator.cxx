@@ -139,7 +139,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
     if (0 == strcmp(app_name, "wildlife_surf")) {
         fpops_est *= 40; //SURF seems to run approximately 40 times slower
         delay_bound *= 10;  //this should give a 10 day delay for the surf application
-    } else if (0 == strcmp(app_name, "wildlife_collect")) {
+    } else if (0 == strcmp(app_name, "wildlife_surf_collect")) {
         fpops_est *= 40; // TODO: adjust this estimate. Leaving the same as surf for now.
         delay_bound *= 10;  //this should give a 10 day delay for the surf application
     }
@@ -183,7 +183,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         n_files = 2;
 
         sprintf(command_line, " video.mp4 input.feats");
-    } else if (0 == strcmp(app_name, "wildlife_collect")) {
+    } else if (0 == strcmp(app_name, "wildlife_surf_collect")) {
         conig_filename = "input.config";
         ofstream config_file(config_filename);
 
@@ -215,7 +215,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
             string event_type = expert_row[0];
             string start_time = expert_row[1];
             string end_time = expert_row[2];
-            config_file << event_type << start_time << end_time << endl;
+            config_file << event_type << "," <<  start_time << "," <<  end_time << endl;
         }
 
         mysql_free_result(expert_result);
@@ -285,7 +285,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
             << "        <file_number>1</file_number>" << endl
             << "        <open_name>video.mp4</open_name>" << endl
             << "    </file_ref>" << endl;
-    } else if (0 == strcmp(app_name, "wildlife_collect")) {
+    } else if (0 == strcmp(app_name, "wildlife_surf_collect")) {
         input_template_stream
             << "<file_info>" << endl
             << "    <number>0</number>" << endl
