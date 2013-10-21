@@ -42,7 +42,7 @@ bool read_checkpoint();
 void write_descriptors(string, Mat);
 void write_events(string, vector<Event>);
 Mat read_descriptors(string);
-int skip_frames(CvCapture*, int);
+int skip_frames(VideoCapture, int);
 void printUsage();
 double standardDeviation(vector<DMatch>, double);
 int timeToSeconds(string);
@@ -93,10 +93,15 @@ int main(int argc, char **argv) {
 #endif
 
 	events = readConfigFile(configFileName, &vidTime);
-	cout << events.size() << endl;
-	cout << event_types.size() << endl;
+	cout << "Events: " << events.size() << endl;
+	cout << "Event Types: " << event_types.size() << endl;
 
-	CvCapture *capture = cvCaptureFromFile(vidFileName.c_str());
+	VideoCapture capture(vidFileName.c_str());
+    if(!capture.isOpened()) {
+        cerr << "Failed to open " << vidFileName << endl;
+        cout << "Failed to open " << vidFileName << endl;
+        return false;
+    }
 
 #ifdef _BOINC_APP_
     boinc_init();
@@ -105,7 +110,6 @@ int main(int argc, char **argv) {
     checkpoint_filename = "checkpoint.txt";
 
     if(read_checkpoint()) {
-        cout << "This shouldn't print!" << endl;
         if(checkpointConfigFileName.compare(configFileName)!=0 || checkpointVidFileName.compare(vidFileName)!=0) {
             cerr << "Checkpointed video or feature filename was not the same as given video or feature filename... Restarting" << endl;
         } else {
@@ -117,8 +121,8 @@ int main(int argc, char **argv) {
 
     skip_frames(capture, checkpointFramePos);
 
-    framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
-    total = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_COUNT);
+    framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+    total = capture.get(CV_CAP_PROP_FRAME_COUNT);
 
     cerr << "Config File Name: " << configFileName << endl;
     cerr << "Vid File Name: " << vidFileName << endl;
@@ -129,16 +133,17 @@ int main(int argc, char **argv) {
 
 	// Loop through all video frames.
 	while(framePos/total < 1.0) {
-		cout << "Percent complete: " << framePos/total*100 << endl;
+		//cout << "Percent complete: " << framePos/total*100 << endl;
 #ifdef _BONC_APP_
         boinc_fraction_done(framePos/total);
 #endif
-		Mat img(cvQueryFrame(capture), true);
-		framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
+		Mat img;
+        capture >> img;
+		framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
 
 		// Increment video time every 10 frames.
 		if(framePos % 10 == 0) vidTime++;
-		cout << "Video time: " << vidTime << endl;
+		//cout << "Video time: " << vidTime << endl;
 
     	Mat frame = img;
 
@@ -176,10 +181,10 @@ int main(int argc, char **argv) {
 
 					double avg_dist = total_dist/matches.size();
 					double stdDev = standardDeviation(matches, avg_dist);
-					cout << "Max dist: " << max_dist << endl;
-					cout << "Avg dist: " << avg_dist << endl;
-					cout << "Min dist: " << min_dist << endl;
-					cout << "Avg + 3.5*stdDev: " << avg_dist + 3.5*stdDev << endl;
+					//cout << "Max dist: " << max_dist << endl;
+					//cout << "Avg dist: " << avg_dist << endl;
+					//cout << "Min dist: " << min_dist << endl;
+					//cout << "Avg + 3.5*stdDev: " << avg_dist + 3.5*stdDev << endl;
 
 					vector<DMatch> new_matches;
 
@@ -190,20 +195,21 @@ int main(int argc, char **argv) {
 					}
 
 					Mat new_descriptors;
-					cout << it->type->name << " descriptors found: " << descriptors_frame.rows << endl;
+					//cout << it->type->name << " descriptors found: " << descriptors_frame.rows << endl;
 					for(int i=0; i<new_matches.size(); i++) {
 						new_descriptors.push_back(descriptors_frame.row(new_matches[i].queryIdx));
 					}
 
-					cout << it->type->name << " descriptors added: " << new_descriptors.rows << endl;
+					//cout << it->type->name << " descriptors added: " << new_descriptors.rows << endl;
 					if (new_descriptors.rows > 0) {
 						it->type->descriptors.push_back(new_descriptors);
 					}
-					cout << it->type->name << " descriptors: " << it->type->descriptors.size() << endl;
+					//cout << it->type->name << " descriptors: " << it->type->descriptors.size() << endl;
                 }
             }
         }
-        cout << "Active Events: " << activeEvents << "/" << events.size() << endl;
+        if(activeEvents == 0)
+            cerr << "[ERROR] There are no active events! (Problem with expert classification.)" << endl;
 
 #ifdef GUI
         // Code to draw the points.
@@ -221,7 +227,7 @@ int main(int argc, char **argv) {
 #ifdef GUI
     cvDestroyWindow("SURF");
 #endif
-    cvReleaseCapture(&capture);
+    capture.release();
 
 #ifdef CHART
     // create google chart
@@ -260,7 +266,7 @@ int main(int argc, char **argv) {
 #ifdef _BOINC_APP_
     boinc_finish(0);
 #endif
-    cout << "Finished!" << endl;
+    cerr << "Finished!" << endl;
     return 0;
 }
 
@@ -457,10 +463,12 @@ int timeToSeconds(string time) {
 }
 
 /** @function skip_frames **/
-int skip_frames(CvCapture *capture, int n) {
+int skip_frames(VideoCapture capture, int n) {
+    Mat frame;
     for (int i=0; i<n; i++) {
+        capture >> frame;
         // Check if at end of video.
-        if (cvQueryFrame(capture) == NULL) {
+        if (frame.empty()) {
             return i+1;
         }
     }
