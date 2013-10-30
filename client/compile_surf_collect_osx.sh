@@ -13,8 +13,8 @@
     -I../../opencv/modules/flann/include \
     -I../../opencv/modules/nonfree/include \
     -I../../opencv/modules/calib3d/include \
-	wildlife_surf.cpp \
-    -o wildlife_surf \
+	wildlife_surf_collect.cpp \
+    -o wildlife_surf_collect \
     ../../ffmpeg/libavformat/libavformat.a \
 	../../ffmpeg/libavcodec/libavcodec.a \
     ../../ffmpeg/libswscale/libswscale.a \
@@ -48,6 +48,6 @@
     -L/Users/kgoehner/repos/boinc/mac_build/build/Development \
     -lboinc_api \
     -lboinc \
-    -liconv \
     -lbz2 \
+    -liconv \
     -framework Cocoa -framework VideoDecodeAcceleration -framework QTKit -framework QuartzCore -framework AppKit -lstdc++
