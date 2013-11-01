@@ -51,6 +51,7 @@ using std::ifstream;
 using std::stringstream;
 using std::string;
 using std::endl;
+using namespace cv;
 
 struct EventType {
     string name;
@@ -58,13 +59,36 @@ struct EventType {
 };
 
 int init_result(RESULT& result, void*& data) {
-    FILE* f;
     OUTPUT_FILE_INFO fi;
     int retval;
 
     try {
         string events_str = parse_xml<string>(result.stderr_out, "event_names");
+        stringstream ss(events_str);
+        vector<string> event_names;
+        vector<EventType*> event_types;
 
+        string temp;
+        while(std::getline(ss, temp, '\n')) {
+            event_names.push_back(temp);
+        }
+
+        retval = get_output_file_path(result, fi.path);
+        if (retval) {
+            exit(0);
+            return retval;
+        } 
+
+        FileStorage fs(fi.path.c_str(), FileStorage::READ);
+        for (unsigned int i=0; i<event_names.size(); i++) {
+            EventType *temp = new EventType;
+            temp->name = event_names[i];
+            fs[event_names[i]] >> temp->descriptors;
+            event_types.push_back(temp);
+        }
+
+        fs.release();
+        data = (void*)&event_types;
     } catch (string error_message) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
@@ -75,114 +99,58 @@ int init_result(RESULT& result, void*& data) {
         return ERR_XML_PARSE;
     }
 
-    stringstream ss(events_str);
-    vector<string> event_names;
-    vector<EventType*> event_types;
-
-    string temp;
-    while(std::getline(ss, temp, '\n')) {
-        event_names.push_back(temp);
-    }
-
-    retval = get_output_file_path(result, fi.path);
-    if (retval) return retval;
-
-    FileStorage fs(fi.path.c_str(), FileStorage::READ);
-    for (int i=0; i<event_names.size(); i++) {
-        EventType *temp = new EventType;
-        temp->name = event_names[i];
-        fs[event_names[i]] >> temp->descriptors;
-        event_types.push_back(temp);
-    }
-
-    fs.release();
-
-    DATA* dp = new DATA;
-    dp->count = 0;
-    // Create pointer for each descriptor.
-
-    data = (void*)dp;
     exit(0);
     return 0;
 }
 
 int compare_results(
-    RESULT & r1, void* data1,
-    RESULT const& r2, void* data2,
+    RESULT & r1, void *data1,
+    RESULT const& r2, void *data2,
     bool& match
 ) {
-    char *probabilities1 = (char*)data1;
-    char *probabilities2 = (char*)data2;
+    double threshold = 0.000000001;
+    vector<EventType*> *desc1 = (vector<EventType*>*)data1;
+    vector<EventType*> *desc2 = (vector<EventType*>*)data2;
 
-    vector<double> p1;
-    istringstream iss1(probabilities1);
-    copy(istream_iterator<double>(iss1), istream_iterator<double>(), back_inserter<vector<double> >(p1));
-    
-    vector<double> p2;
-    istringstream iss2(probabilities2);
-    copy(istream_iterator<double>(iss2), istream_iterator<double>(), back_inserter<vector<double> >(p2));
-
-    if (p1.size() != p2.size()) {
+    if(desc1->size() != desc2->size()) {
         match = false;
-        log_messages.printf(MSG_CRITICAL, "ERROR, number of probabilities is different. %d vs %d\n", (int)p1.size(), (int)p2.size());
-
-        /*
-        log_messages.printf(MSG_CRITICAL, "p1 string: '%s'\n", probabilities1);
-        log_messages.printf(MSG_CRITICAL, "p2 string: '%s'\n", probabilities2);
-
-        log_messages.printf(MSG_CRITICAL, "probabilities1:\n");
-        for (uint32_t i = 0; i < p1.size(); i++) {
-            log_messages.printf(MSG_CRITICAL, "\t%lf\n", p1[i]);
-        }
-
-        log_messages.printf(MSG_CRITICAL, "probabilities2:\n");
-        for (uint32_t i = 0; i < p2.size(); i++) {
-            log_messages.printf(MSG_CRITICAL, "\t%lf\n", p2[i]);
-        }
-        */
-
-        match = false;
-
+        log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)desc1->size(), (int)desc2->size());
+        exit(0);
         return 0;
     }
-
-    double threshold = 0.026;
-
-    for (uint32_t i = 0; i < p1.size(); i++) {
-        if (fabs(p1[i] - p2[i]) > threshold) {
+    
+    for (unsigned int i=0; i<desc1->size(); i++) {
+        if (desc1->at(i)->name != desc2->at(i)->name) {
             match = false;
-
-            /*
-            log_messages.printf(MSG_CRITICAL, "probabilities1:\n");
-            for (uint32_t j = 0; j < p1.size(); j++) {
-                log_messages.printf(MSG_CRITICAL, "\t%lf\n", p1[j]);
-            }
-
-            log_messages.printf(MSG_CRITICAL, "probabilities2:\n");
-            for (uint32_t j = 0; j < p2.size(); j++) {
-                log_messages.printf(MSG_CRITICAL, "\t%lf\n", p2[j]);
-            }
-            */
-
-            log_messages.printf(MSG_CRITICAL, "ERROR, difference in probabilities (%lf) exceeded threshold (%lf):\n", fabs(p1[i]-p2[i]), threshold);
-            log_messages.printf(MSG_CRITICAL, "probabilities1[%d]: %lf\n", i, p1[i]);
-            log_messages.printf(MSG_CRITICAL, "probabilities2[%d]: %lf\n", i, p2[i]);
-            exit(1);
-
+            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", desc1->at(i)->name.c_str(), desc2->at(i)->name.c_str());
+            exit(0);
             return 0;
+        }
+
+        Mat temp = desc1->at(i)->descriptors - desc2->at(i)->descriptors;
+        for (int x=0; x<temp.rows; x++) {
+            for (int y=0; y<temp.cols; y++) {
+                if (temp.at<double>(x,y) > threshold) {
+                    match = false;
+                    log_messages.printf(MSG_CRITICAL, "ERROR, descriptors are not the same. Different of %f\n", (float)temp.at<double>(x,y));
+                    exit(0);
+                    return 0;
+                }
+            }
         }
     }
 
     match = true;
-
+    exit(0);
     return 0;
 }
 
 int cleanup_result(RESULT const& /*result*/, void* data) {
-    char* result = (char*)data;
+    vector<EventType*> *result = (vector<EventType*>*)data;
 
-    delete result;
-
+    for (unsigned int i=0; i<result->size(); i++) {
+        delete result->at(i);
+    }
     return 0;
 }
 
