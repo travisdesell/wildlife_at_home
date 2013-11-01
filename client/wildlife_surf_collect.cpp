@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
     cerr << "Frame Count: " << total << endl;
 
 	// Loop through all video frames.
-	while(framePos/total < 1.0) {
+	while(framePos/total < 0.1) {
 		//cout << "Percent complete: " << framePos/total*100 << endl;
 #ifdef _BOINC_APP_
         boinc_fraction_done(framePos/total);
@@ -235,46 +235,18 @@ int main(int argc, char **argv) {
 #endif
     }
 
+    cerr << "<event_names>" << endl;
+    for (int i=0; i<event_types.size(); i++) {
+        cerr << event_types[i]->name << endl;
+    }
+    cerr << "</event_names>" << endl;
     write_events(descFileName, event_types);
 
 #ifdef GUI
     cvDestroyWindow("SURF");
 #endif
+
     capture.release();
-
-#ifdef CHART
-    // create google chart
-    unsigned int total_descriptors = descriptors_good.rows;
-    unsigned int first_frame_descriptors = feature_counts[0];
-    ostringstream oss;
-    vector<unsigned int>::iterator it = feature_counts.begin();
-    while(it != feature_counts.end()) {
-    	oss << 100*((float)*it-first_frame_descriptors)/(total_descriptors-first_frame_descriptors) << ",";
-    	it++;
-    }
-
-    cout << "http://chart.googleapis.com/chart?"
-    << "cht=lc"
-    << "&"
-    << "chxt=x,y"
-    << "&"
-    << "chs=700x400"
-    << "&"
-    << "chdl=Feature Count"
-    << "&"
-    << "chls=1"
-    << "&"
-    << "chtt=Features+Over+Time"
-    << "&"
-    << "chxr=1,"
-    << first_frame_descriptors
-    << ","
-    << total_descriptors
-    << "&"
-    << "chd=t:"
-    << oss.str()
-    << endl;
-#endif
 
 #ifdef _BOINC_APP_
     boinc_finish(0);
