@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
     cerr << "Frame Count: " << total << endl;
 
 	// Loop through all video frames.
-	while(framePos/total < 0.1) {
+	while(framePos/total < 1.0) {
 		//cout << "Percent complete: " << framePos/total*100 << endl;
 #ifdef _BOINC_APP_
         boinc_fraction_done(framePos/total);
