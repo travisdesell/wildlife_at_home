@@ -184,29 +184,37 @@ int make_job(int video_id, int species_id, int location_id, string video_address
 
         sprintf(command_line, " video.mp4 input.feats");
     } else if (0 == strcmp(app_name, "wildlife_surf_collect")) {
-        conig_filename = "input.config";
-        ofstream config_file(config_filename);
+        video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
+        infiles[1] = video_filename.c_str();
+
+        config_filename = video_filename + ".config";
+        ofstream config_file(config_filename.c_str());
 
         ostringstream video_start_query;
         video_start_query << "SELECT start_time"
-            << "FROM video_2"
-            << "WHERE id = "
-            << "LIMIT 1";
-        mysql_query_check(wildlife_db_conn, expert_event_query.str());
+            << " FROM video_2"
+            << " WHERE id = "
+            << video_id
+            << " LIMIT 1";
+        mysql_query_check(wildlife_db_conn, video_start_query.str());
         MYSQL_RES *start_result = mysql_store_result(wildlife_db_conn);
 
         MYSQL_ROW video_row;
+        string video_start_time = "";
         while ((video_row = mysql_fetch_row(start_result)) != NULL) {
-            string event_type = video_row[0];
-            config_file << video_start_time<< endl;
+            video_start_time = video_row[0];
+            video_start_time = video_start_time.substr(video_start_time.find(' ')+1);
+            config_file << video_start_time << endl;
         }
+        cout << "Video Start Time: " << video_start_time << endl;
 
         mysql_free_result(start_result);
 
         ostringstream expert_event_query;
         expert_event_query << "SELECT event_type, start_time, end_time"
-            << "FROM expert_observations"
-            << "WHERE video_id = ";
+            << " FROM expert_observations"
+            << " WHERE video_id = "
+            << video_id;
         mysql_query_check(wildlife_db_conn, expert_event_query.str());
         MYSQL_RES *expert_result = mysql_store_result(wildlife_db_conn);
 
@@ -215,6 +223,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
             string event_type = expert_row[0];
             string start_time = expert_row[1];
             string end_time = expert_row[2];
+            cout << "Event: " << event_type << " " << start_time << " " << end_time << endl;
             config_file << event_type << "," <<  start_time << "," <<  end_time << endl;
         }
 
@@ -222,12 +231,9 @@ int make_job(int video_id, int species_id, int location_id, string video_address
 
         config_file.close();
         copy_file_to_download_dir(config_filename);
-        remove(config_filename); // delete the config file from the local directory.
-        config_filename = features_file.substr(config_file.find_last_of('/') + 1);
+        remove(config_filename.c_str()); // delete the config file from the local directory.
+        config_filename = config_filename.substr(config_filename.find_last_of('/') + 1);
         infiles[0] = config_filename.c_str();
-
-        video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
-        infiles[1] = video_filename.c_str();
 
         cout << "\tinfile[0]: " << infiles[0] << endl;
         cout << "\tinfile[1]: " << infiles[1] << endl;
@@ -427,7 +433,7 @@ void main_loop(const vector<string> &arguments) {
      *  their video id (for tracking), duration in seconds (for calculating credits), and the video file's
      *  address on wildlife.und.edu
      */
-    ostringstream unclassified_video_query finished_expert_query;
+    ostringstream unclassified_video_query, finished_expert_query;
     finished_expert_query << "SELECT DISTINCT v.id, watermarked_vilename, duration_s, species_id, location_id, size, md5_hash"
         << " FROM video_2 AS v"
         << " JOIN expert_observations AS o ON v.id = o.video_id"
@@ -471,7 +477,7 @@ void main_loop(const vector<string> &arguments) {
 
     if (0 == strcmp(app_name, "wildlife_surf")) {
         mysql_query_check(wildlife_db_conn, finished_expert_query.str());
-    } else  {
+    } else if (0 == strcmp(app_name, "wildlife_surf_collect"))  {
         mysql_query_check(wildlife_db_conn, unclassified_video_query.str());
     }
     MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
@@ -480,6 +486,7 @@ void main_loop(const vector<string> &arguments) {
     while ((video_row = mysql_fetch_row(video_result)) != NULL) {
         int video_id = atoi(video_row[0]);
         string video_address = video_row[1];
+        video_address += ".mp4";
         double duration_s = atof(video_row[2]);
         int species_id = atoi(video_row[3]);
         int location_id = atoi(video_row[4]);

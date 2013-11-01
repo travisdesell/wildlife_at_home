@@ -1,0 +1,157 @@
+// This file is part of BOINC.
+// http://boinc.berkeley.edu
+// Copyright (C) 2008 University of California
+//
+// BOINC is free software; you can redistribute it and/or modify it
+// under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation,
+// either version 3 of the License, or (at your option) any later version.
+//
+// BOINC is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with BOINC.  If not, see <http://www.gnu.org/licenses/>.
+
+// A sample validator that requires a majority of results to be
+// bitwise identical.
+// This is useful only if either
+// 1) your application does no floating-point math, or
+// 2) you use homogeneous redundancy
+
+#include "config.h"
+#include "util.h"
+#include "sched_util.h"
+#include "sched_msgs.h"
+#include "validate_util.h"
+#include "md5_file.h"
+#include "error_numbers.h"
+#include "stdint.h"
+
+#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <algorithm>
+#include <iterator>
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+
+#include "undvc_common/parse_xml.hxx"
+#include "undvc_common/file_io.hxx"
+
+using std::string;
+using std::vector;
+using std::ifstream;
+
+using std::stringstream;
+using std::string;
+using std::endl;
+using namespace cv;
+
+struct EventType {
+    string name;
+    Mat descriptors;
+};
+
+int init_result(RESULT& result, void*& data) {
+    OUTPUT_FILE_INFO fi;
+    int retval;
+
+    try {
+        string events_str = parse_xml<string>(result.stderr_out, "event_names");
+        stringstream ss(events_str);
+        vector<string> event_names;
+        vector<EventType*> event_types;
+
+        string temp;
+        while(std::getline(ss, temp, '\n')) {
+            event_names.push_back(temp);
+        }
+
+        retval = get_output_file_path(result, fi.path);
+        if (retval) {
+            exit(0);
+            return retval;
+        } 
+
+        FileStorage fs(fi.path.c_str(), FileStorage::READ);
+        for (unsigned int i=0; i<event_names.size(); i++) {
+            EventType *temp = new EventType;
+            temp->name = event_names[i];
+            fs[event_names[i]] >> temp->descriptors;
+            event_types.push_back(temp);
+        }
+
+        fs.release();
+        data = (void*)&event_types;
+    } catch (string error_message) {
+        log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
+        log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
+        result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
+        result.validate_state = VALIDATE_STATE_INVALID;
+
+        exit(1);
+        return ERR_XML_PARSE;
+    }
+
+    exit(0);
+    return 0;
+}
+
+int compare_results(
+    RESULT & r1, void *data1,
+    RESULT const& r2, void *data2,
+    bool& match
+) {
+    double threshold = 0.000000001;
+    vector<EventType*> *desc1 = (vector<EventType*>*)data1;
+    vector<EventType*> *desc2 = (vector<EventType*>*)data2;
+
+    if(desc1->size() != desc2->size()) {
+        match = false;
+        log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)desc1->size(), (int)desc2->size());
+        exit(0);
+        return 0;
+    }
+    
+    for (unsigned int i=0; i<desc1->size(); i++) {
+        if (desc1->at(i)->name != desc2->at(i)->name) {
+            match = false;
+            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", desc1->at(i)->name.c_str(), desc2->at(i)->name.c_str());
+            exit(0);
+            return 0;
+        }
+
+        Mat temp = desc1->at(i)->descriptors - desc2->at(i)->descriptors;
+        for (int x=0; x<temp.rows; x++) {
+            for (int y=0; y<temp.cols; y++) {
+                if (temp.at<double>(x,y) > threshold) {
+                    match = false;
+                    log_messages.printf(MSG_CRITICAL, "ERROR, descriptors are not the same. Different of %f\n", (float)temp.at<double>(x,y));
+                    exit(0);
+                    return 0;
+                }
+            }
+        }
+    }
+
+    match = true;
+    exit(0);
+    return 0;
+}
+
+int cleanup_result(RESULT const& /*result*/, void* data) {
+    vector<EventType*> *result = (vector<EventType*>*)data;
+
+    for (unsigned int i=0; i<result->size(); i++) {
+        delete result->at(i);
+    }
+    return 0;
+}
+
+const char *BOINC_RCSID_7ab2b7189c = "$Id: sample_bitwise_validator.cpp 21735 2010-06-12 22:08:15Z davea $";
