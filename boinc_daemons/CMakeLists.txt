@@ -1,5 +1,6 @@
 find_package(MySQL REQUIRED)
 find_package(BOINC REQUIRED)
+find_package(OpenCV REQUIRED)
 
 find_path(BOINC_INCLUDE_DIR config.h PATHS /boinc/src/boinc/ /boinc/)
 
@@ -12,6 +13,7 @@ include_directories(
     ${BOINC_INCLUDE_DIR}/lib
     ${BOINC_INCLUDE_DIR}/sched
 	${MYSQL_INCLUDE_DIR}
+    ${OpenCV_INCLUDE_DIR}
 )
 
 add_executable(wildlife_validator
@@ -20,6 +22,13 @@ add_executable(wildlife_validator
     ${BOINC_INCLUDE_DIR}/sched/validate_util2
     wildlife_validation_policy)
 target_link_libraries(wildlife_validator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES})
+
+add_executable(wildlife_surf_collect_validator
+    ${BOINC_INCLUDE_DIR}/sched/validator
+    ${BOINC_INCLUDE_DIR}/sched/validate_util
+    ${BOINC_INCLUDE_DIR}/sched/validate_util2
+    wildlife_surf_collect_validation_policy)
+target_link_libraries(wildlife_surf_collect_validator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(wildlife_assimilator
     ${BOINC_INCLUDE_DIR}/sched/assimilator
