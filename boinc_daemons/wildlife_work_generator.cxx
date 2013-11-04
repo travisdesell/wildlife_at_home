@@ -434,12 +434,12 @@ void main_loop(const vector<string> &arguments) {
      *  address on wildlife.und.edu
      */
     ostringstream unclassified_video_query, finished_expert_query;
-    finished_expert_query << "SELECT DISTINCT v.id, watermarked_vilename, duration_s, species_id, location_id, size, md5_hash"
-        << " FROM video_2 AS v"
-        << " JOIN expert_observations AS o ON v.id = o.video_id"
+    finished_expert_query << "SELECT DISTINCT id, watermarked_vilename, duration_s, species_id, location_id, size, md5_hash"
+        << " FROM video_2"
         << " WHERE processing_staus != 'UNWATERMAKED'"
         << " AND md5_hash IS NOT NULL"
-        << " AND size IS NOT NULL";
+        << " AND size IS NOT NULL"
+        << " AND expert_finished = 'FINISHED'";
     unclassified_video_query << "SELECT id, watermarked_filename, duration_s, species_id, location_id, size, md5_hash"
         << " FROM video_2 WHERE"
         << " processing_status != 'UNWATERMARKED'"
