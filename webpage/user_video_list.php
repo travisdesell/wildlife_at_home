@@ -67,6 +67,14 @@ echo "
            border-radius: 4px 0 4px 0;
         }
 
+        .btn-right {
+           position: absolute;
+           top: -1px;
+           right: -1px;
+           padding: 3px 7px;
+        }
+
+
         .title {
             text-align: center;
            position: absolute;
@@ -123,42 +131,32 @@ mysql_select_db("wildlife", $boinc_db);
 
 error_log("getting from boinc db");
 
-$query = "SELECT bossa_total_credit, valid_observations, invalid_observations FROM user WHERE id=$user_id";
+$query = "SELECT bossa_total_credit, bossa_accuracy, total_observations FROM user WHERE id=$user_id";
 $result = mysql_query($query, $boinc_db);
 
 if (!$result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    error_log("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
+    die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
 }
 
 $row = mysql_fetch_assoc($result);
 
 $bossa_total_credit = $row['bossa_total_credit'];
-$valid_observations = $row['valid_observations'];
-$invalid_observations = $row['invalid_observations'];
-
-error_log("connecting to wildlife db");
+$total_observations = $row['total_observations'];
+$bossa_accuracy = $row['bossa_accuracy'];
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-error_log("connected to wildlife_db");
-error_log("userid: $user_id");
-
-$query = "SELECT count(*) FROM observations WHERE user_id=$user_id";
-$result = mysql_query($query, $wildlife_db);
-
-if (!$result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$unvalidated_query = "SELECT count(*) FROM observations WHERE user_id = $user_id AND status = 'UNVALIDATED'";
+$unvalidated_result = mysql_query($unvalidated_query, $wildlife_db);
+if (!$unvalidated_result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $unvalidated_query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $unvalidated_query\n");
 }
-error_log("query: SELECT count(*) FROM observations WHERE user_id=$user_id");
+$unvalidated_row = mysql_fetch_assoc($unvalidated_result);
+$unvalidated_observations = $unvalidated_row['count(*)'];
 
-$row = mysql_fetch_assoc($result);
-
-$total_observations = $row['count(*)'];
-
-error_log("making filters!");
 
 function append_trinary_filter(&$filter_list, $id_name, $text_name) {
     $filter_list['filter_type'] [] = array(
@@ -274,8 +272,9 @@ echo "
 
 echo $mustache_engine->render($filter_list_template, $filter_list);
 
-if (is_special_user($user_id, $boinc_db)) {
     echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
+    echo "<button type='button' class='btn btn-small btn-default btn-block' id='show-hidden-videos-button' data-toggle='button' style='padding-left:5px;'>Show Hidden Videos</button>";
+if (is_special_user($user_id, $boinc_db)) {
     echo "<button type='button' class='btn btn-small btn-default btn-block' id='show-all-videos-button' data-toggle='button' style='padding-left:5px;'>Show All Videos</button>";
 }
 echo "      </div>";
@@ -290,7 +289,7 @@ echo "
 <div class='well well-small' style='padding-top: 5px; padding-bottom: 0px; margin-top:3px; margin-bottom: 10px'>
     <div class='row-fluid'>
         <div class='span12'>
-                <p>You have $bossa_total_credit credit from $total_observations observations. $valid_observations have been marked valid and $invalid_observations marked invalid (" . round((100 * $valid_observations / ($valid_observations + $invalid_observations)), 2) . "% accuracy). " . ($total_observations - ($valid_observations + $invalid_observations)) . " observations are awaiting validation. You have averaged " . round(($bossa_total_credit / $valid_observations), 2) . " credit per valid observation.</p>
+                <p>You have $bossa_total_credit credit from $total_observations observations, with " . round((100 * $bossa_accuracy / $total_observations), 2) . "% accuracy). $unvalidated_observations observations are awaiting validation. You have averaged " . round(($bossa_total_credit / $total_observations), 2) . " credit per valid observation.</p>
         </div>
     </div>
 </div>";

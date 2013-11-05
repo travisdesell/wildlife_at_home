@@ -34,6 +34,7 @@ for ($i = 0; $i < $number_of_processes; $i++) {
 }
 
 $species_id = 1;
+$location_id = 0;
 
 if ($modulo > -1) {
     /**
@@ -47,8 +48,7 @@ if ($modulo > -1) {
     mysql_connect("localhost", $wildlife_user, $wildlife_pw);
     mysql_select_db($wildlife_db);
 
-    $iteration = 1;
-    $location_iteration = 1;
+    $iteration = 0;
     $videos_not_found = 0;
 
     while(true) {   //Loop until there are no more videos to watermark.
@@ -74,7 +74,7 @@ if ($modulo > -1) {
         }
         $iteration++;
 
-        $query = "SELECT id, archive_filename, watermarked_filename, processing_status, duration_s FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status != 'SPLIT' AND species_id = $species_id AND location_id = $location_iteration LIMIT 1";
+        $query = "SELECT id, archive_filename, watermarked_filename, processing_status, duration_s FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status != 'SPLIT' AND species_id = $species_id AND location_id = $location_id LIMIT 1";
         echo $query . "\n";
 
         $result = mysql_query($query);
@@ -113,15 +113,24 @@ if ($modulo > -1) {
             //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
             //use HTML5 to stream it
             $watermark_file = "/video/wildlife/watermark.png";
-            $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i $archive_filename -ar 44100 -vb 400000 -qmax 5 -vcodec libx264 -level 30 -maxrate 10000000 -bufsize 10000000 -vprofile baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" $watermarked_filename";
+            //This was being used to generate the watermarked files
+//          $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i $archive_filename -ar 44100 -vb 400000 -qmax 5 -vcodec libx264 -level 30 -maxrate 10000000 -bufsize 10000000 -vprofile baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" $watermarked_filename";
+
+//          this is used for generating the streaming segments
+//          $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . " -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
+
+            //This should generate better sized videos
+            $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i $archive_filename -vcodec libx264 -vpre slow -vpre baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" $watermarked_filename.mp4";
+
             echo "\n\n$command\n\n";
             shell_exec($command);
 
             echo "shell exec 1 completed\n\n";
 
-            $command = "/usr/bin/ffmpeg -y -i $watermarked_filename -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 $watermarked_filename.ogv";
+            $command = "/usr/bin/ffmpeg -y -i $watermarked_filename.mp4 -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 $watermarked_filename.ogv";
             echo "\n\n$command\n\n";
             shell_exec($command);
+
 
             echo "shell exec 2 completed\n\n";
 
@@ -132,8 +141,8 @@ if ($modulo > -1) {
              *
              *  We also need to add its md5 hash and the file size so boinc can use these to generate workunits
              */
-            $md5_hash = md5_file($watermarked_filename);
-            $filesize = filesize($watermarked_filename);
+            $md5_hash = md5_file($watermarked_filename . ".mp4");
+            $filesize = filesize($watermarked_filename . ".mp4");
 
             $query = "UPDATE video_2 SET processing_status = 'WATERMARKED', size = $filesize, md5_hash = '$md5_hash', ogv_generated = true WHERE id = " . $row['id'];
             $result = mysql_query($query);
@@ -190,10 +199,10 @@ if ($modulo > -1) {
             //so we don't need to convert it a second time.  Just use the watermarked file.
             $query = "INSERT INTO video_segment_2 SET " .
                             "video_id = $video_id, " .
-                            "filename = '$watermarked_filename', " .
+                            "filename = '" . substr($watermarked_filename, 0, -4) . "', " .
                             "crowd_obs_count = 0, expert_obs_count = 0, machine_obs_count = 0, interesting_count = 0, " .
                             "processing_status = 'DONE', " .
-                            "number = $current_segment, " .
+                            "number = 0, " .
                             "location_id = $location_id, " .
                             "species_id = $species_id, " .
                             "crowd_status = 'UNWATCHED', " .
@@ -252,12 +261,12 @@ if ($modulo > -1) {
                 if ($d_s < 10) $d_s = "0" . $d_s;
 
                 //Run FFMPEG to create the segment from the watermarked video 
-                $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . " -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
+                $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . ".mp4 -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
                 echo "command:\n\n" . $command . "\n\n";
                 shell_exec($command);
 
                 //also generate an ogv file for firefox
-                $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . " -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".ogv";
+                $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . ".ogv -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".ogv";
                 echo "command:\n\n" . $command . "\n\n";
                 shell_exec($command);
 
@@ -295,7 +304,7 @@ if ($modulo > -1) {
         $result = mysql_query($query);
         if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
-        die("DEAD!");
+//        die("DEAD!");
     }
 
 } else {

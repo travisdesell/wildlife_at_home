@@ -4,6 +4,7 @@ $(document).ready(function () {
     var sort_by = 'filename';
 
     var all_users = false;
+    var show_hidden = false;
     if (typeof is_instructional !== 'undefined') {
         all_users = true;
         filters['report_status'] = 'REVIEWED';
@@ -15,6 +16,12 @@ $(document).ready(function () {
         all_users = !all_users;
         reload_videos();
     });
+
+    $('#show-hidden-videos-button').click(function() {
+        show_hidden = !show_hidden;
+        reload_videos();
+    });
+
 
     $('.filter-dropdown').click(function() {
         var filter_name = $(this).attr("filter_name");
@@ -49,6 +56,7 @@ $(document).ready(function () {
 
         var submission_data = {
                                 all_users : all_users,
+                                show_hidden : show_hidden,
                                 video_min : video_min,
                                 video_count : video_count,
                                 filters : filters,
@@ -81,6 +89,34 @@ $(document).ready(function () {
             success : function(response) {
 //                console.log("the response was:\n" + response);
                 $("#videos-placeholder").html(response);
+
+                $('.toggle-observation-visibility-button').button();
+                $('.toggle-observation-visibility-button').click(function() {
+                    var observation_id = $(this).attr("observation_id");
+                    var div_id = "#" + $(this).attr('id');
+//                    console.log("clicked toggle observaiton visibility button, observation_id = " + observation_id);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: './toggle_observation_visibility.php',
+                        data : { observation_id : observation_id },
+                        dataType : 'JSON',
+                        success : function(response) {
+//                            console.log("response: " + JSON.stringify(response));
+
+                            if (response['hidden'] === '1') {
+                                $(div_id).html('show');
+                                $(div_id).removeClass('btn-default');
+                                $(div_id).addClass('btn-primary');
+                            } else {
+                                $(div_id).html('hide');
+                                $(div_id).removeClass('btn-primary');
+                                $(div_id).addClass('btn-default');
+                            }
+                        },
+                        async: true
+                    });
+                });
 
                 /**
                  * Use this to create a forum thread with the video.
