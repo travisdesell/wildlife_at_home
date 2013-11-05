@@ -218,7 +218,7 @@ else $species_name = $row['name'];
 echo"
     <div class='well well-small' style='margin-top:0px;'>
         <div class='tab'>$animal_id - " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</div>
-        <div class='tab-right'>" . number_format($user->bossa_total_credit) . "s watched - " . round(100 * ($user->valid_observations / ($user->valid_observations + $user->invalid_observations)), 2) . "% accuracy</div>
+        <div class='tab-right'>" . number_format($user->bossa_total_credit) . "s watched - " . round(100 * ($user->bossa_accuracy / $user->total_observations), 2) . "% accuracy</div>
 
         <div class='row-fluid'>
             <div class='container'>

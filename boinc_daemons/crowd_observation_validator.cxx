@@ -84,10 +84,12 @@ class Observation {
         const int interesting;
         const string status;
         string new_status;
-        double awarded_credit;
+        const double awarded_credit;
+        double new_awarded_credit;
+        const double accuracy_rating;
+        double new_accuracy_rating;
         const int user_id;
         const int video_segment_id;
-        double match_rating;
 
         int marks[8];
 
@@ -104,13 +106,15 @@ class Observation {
                 int interesting,
                 string status,
                 double awarded_credit,
+                double accuracy_rating,
                 int user_id,
                 int video_segment_id) : id(id), bird_leave(bird_leave), bird_return(bird_return), bird_presence(bird_presence), bird_absence(bird_absence),
         predator_presence(predator_presence), nest_defense(nest_defense), nest_success(nest_success),
         video_issue(video_issue), chick_presence(chick_presence), interesting(interesting),
-        status(status), awarded_credit(awarded_credit) , user_id(user_id), video_segment_id(video_segment_id) {
+        status(status), awarded_credit(awarded_credit), accuracy_rating(accuracy_rating), user_id(user_id), video_segment_id(video_segment_id) {
 
-            match_rating = 0.0;
+            new_accuracy_rating = 0.0;
+            new_awarded_credit = 0.0;
 
             marks[0] = bird_leave;
             marks[1] = bird_return;
@@ -128,92 +132,73 @@ class Observation {
 
             oss 
                 << setw(11) << status << " -> " << setw(11) << new_status
-                << " ("    << setw(4) << awarded_credit  << " c)"
-                << "  BL: "        << setw(2) << bird_leave
-                << ", BR: "       << setw(2) << bird_return
+                << " ("         << setw(4) << awarded_credit  << " -> " << new_awarded_credit << "c)"
+                << " ("         << setw(4) << accuracy_rating << " -> " << new_accuracy_rating << " %)"
+                << "  BL: "     << setw(2) << bird_leave
+                << ", BR: "     << setw(2) << bird_return
                 << ", BP: "     << setw(2) << bird_presence
-                << ", BA: "      << setw(2) << bird_absence
-                << ", PP: " << setw(2) << predator_presence
-                << ", ND: "      << setw(2) << nest_defense
-                << ", NS: "      << setw(2) << nest_success
-                << ", VI: "       << setw(2) << video_issue
-                << ", CP: "    << setw(2) << chick_presence
-                << ", INT: "       << setw(2) << interesting
-                << ", id: "                  << setw(8) << id
-                << ", uid: "           << user_id 
-                << ", vsid: "  << video_segment_id;
+                << ", BA: "     << setw(2) << bird_absence
+                << ", PP: "     << setw(2) << predator_presence
+                << ", ND: "     << setw(2) << nest_defense
+                << ", NS: "     << setw(2) << nest_success
+                << ", VI: "     << setw(2) << video_issue
+                << ", CP: "     << setw(2) << chick_presence
+                << ", INT: "    << setw(2) << interesting
+                << ", id: "     << setw(8) << id
+                << ", uid: "    << user_id 
+                << ", vsid: "   << video_segment_id;
 
             return oss.str();
         }
 
-        double get_credit_compared_to(Observation *canonical, int duration_s) {
-            //We will always be comparing the observation to the canonical one
-            int matches = 0;
-
-            if (canonical->video_issue && video_issue) matches = 6; //award 75% credit for too darks
-            else {
-                if (bird_leave == canonical->bird_leave) matches++;
-                if (bird_return == canonical->bird_return) matches++;
-                if (bird_presence == canonical->bird_presence) matches++;
-                if (bird_absence == canonical->bird_absence) matches++;
-                if (predator_presence == canonical->predator_presence) matches++;
-                if (nest_defense == canonical->nest_defense) matches++;
-                if (nest_success == canonical->nest_success) matches++;
-                if (chick_presence == canonical->chick_presence) matches++;
-            }
-
-            return (matches / 8.0) * duration_s;
-        }
-
-        double get_match_rating(Observation *other) {
-            //return a rating of how well this observation matches the other observation
-            //the observation with the highest match rating will be selected as the canonical observation
-            //this value should range between 0 and 1
-
-            if (video_issue == 1 && other->video_issue == 1) {
-                return 0.75;        //give a slight penalty for observations marked with a video issue
-            } else {
-                double rating = 0;
-                for (int i = 0; i < 8; i++) {
-                    if (marks[i] != 0) {
-                        if (marks[i] == other->marks[i]) {
-                            //neither were unsure and both match -- perfect match
-                            rating += 1.0/8.0;
-                        } else if (other->marks[i] == 0) {
-                            //this wasn't unsure and the other was unsure -- middle quality match
-                            rating += 0.5/8.0;
-                        } else {
-                            //neither were unsure and neither match
-                            rating += 0.0;
-                        }
-                    } else {
-                        if (other->marks[i] == 0) {
-                            //both were unsure -- better than middle match
-                            rating += 0.75/8.0;
-                        } else {
-                            //this was unsure and the other was not unsure  -- low quality match
-                            rating += 0.25/8.0;
-                        }
-                    }
-                }
-                return rating;
-            }
-        }
-
-        bool matches_canonical(Observation *canonical) {
-            if (canonical->video_issue == 1) {
-                log_messages.printf(MSG_CRITICAL, "ERROR: a canonical observation should not be passed to matches canonical\n");
-                exit(0);
-            }
-            if (video_issue != 0) return false; //a canonical observation passed to this will not have video issue marked
-
+        double matches_canonical_marks(int canonical_marks[]) {
+            double match_count = 0;
             for (int i = 0; i < 8; i++) {
-                if (marks[i] != 0 && canonical->marks[i] != 0 && marks[i] != canonical->marks[i]) return false;
+                if (canonical_marks[i] < -1 || canonical_marks[i] > 1) continue;    //for inconclusive marks we can still grant partial
+                                                                                    //credit for the agreed on marks.
+                if (marks[i] == canonical_marks[i]) match_count += 1.0;
+                else if (marks[i] == 0 || canonical_marks[i] == 0) match_count += 0.5;
             }
-
-            return true;
+            return match_count;
         }
+
 };
+
+
+void get_mark_totals(const vector< Observation* > &observations, int total_yes[], int total_no[], int total_unsure[]) {
+    for (int i = 0; i < 8; i++) {
+        total_yes[i] = 0;
+        total_no[i] = 0;
+        total_unsure[i] = 0;
+    }
+
+    for (int i = 0; i < (int)observations.size(); i++) {
+        for (int j = 0; j < 8; j++) {
+            if (observations.at(i)->marks[j] ==  1) total_yes[j]++;
+            if (observations.at(i)->marks[j] ==  0) total_unsure[j]++;
+            if (observations.at(i)->marks[j] == -1) total_no[j]++;
+        }
+    }
+}
+
+bool has_potential_canonical(int expected_marks[]) {
+    //Need to make sure that every mark has a total greater than the other totals
+    for (int i = 0; i < 8; i++) {
+        if (expected_marks[i] == -2) return false;
+    }
+
+    return true;
+}
+
+void get_expected_canonical(int total_yes[], int total_no[], int total_unsure[], int expected_marks[]) {
+    for (int i = 0; i < 8; i++) {
+        expected_marks[i] = -2; //set the mark to -2 if there's no agreed on marking
+
+        if ( total_yes[i] >= 2    && total_yes[i]    > total_no[i]   && total_yes[i]    > total_unsure[i] ) expected_marks[i] = 1;
+        if ( total_no[i] >= 2     && total_no[i]     > total_yes[i]  && total_no[i]     > total_unsure[i] ) expected_marks[i] = -1; 
+        if ( total_unsure[i] >= 2 && total_unsure[i] > total_no[i]   && total_unsure[i] > total_yes[i]    ) expected_marks[i] = 0;
+    }
+}
 
 
 /**
@@ -327,7 +312,8 @@ int main(int argc, char** argv) {
 
         ostringstream unvalidated_video_query;
         //    unvalidated_video_query << "SELECT id FROM video_segment_2 WHERE crowd_obs_count > 0"; // << " AND crowd_status != 'VALIDATED'";
-        unvalidated_video_query << "SELECT id, duration_s, species_id, location_id FROM video_segment_2 WHERE (crowd_obs_count >= required_views AND crowd_status = 'WATCHED') AND validate_for_review != true";
+//        unvalidated_video_query << "SELECT id, duration_s, species_id, location_id FROM video_segment_2 WHERE (crowd_obs_count >= required_views AND crowd_status = 'WATCHED') AND validate_for_review != true";
+        unvalidated_video_query << "SELECT id, duration_s, species_id, location_id FROM video_segment_2 WHERE (crowd_obs_count >= required_views AND crowd_status = 'WATCHED')";
 
         mysql_query_check(wildlife_db_conn, unvalidated_video_query.str());
         MYSQL_RES *video_segment_result = mysql_store_result(wildlife_db_conn);
@@ -343,7 +329,7 @@ int main(int argc, char** argv) {
             int location_id = atoi(video_segment_row[3]);
 
             ostringstream observation_query;
-            observation_query << "SELECT id, bird_leave, bird_return, bird_presence, bird_absence, predator_presence, nest_defense, nest_success, video_issue, chick_presence, interesting, status, awarded_credit, user_id, video_segment_id FROM observations WHERE video_segment_id = " << video_segment_id;
+            observation_query << "SELECT id, bird_leave, bird_return, bird_presence, bird_absence, predator_presence, nest_defense, nest_success, video_issue, chick_presence, interesting, status, awarded_credit, accuracy_rating, user_id, video_segment_id FROM observations WHERE video_segment_id = " << video_segment_id;
 
             mysql_query_check(wildlife_db_conn, observation_query.str());
             MYSQL_RES *observation_result = mysql_store_result(wildlife_db_conn);
@@ -367,12 +353,13 @@ int main(int argc, char** argv) {
                 int interesting         = atoi(observation_row[10]);
                 string status           = observation_row[11];
                 double awarded_credit   = atof(observation_row[12]);
-                int user_id             = atoi(observation_row[13]);
-                int video_segment_id    = atoi(observation_row[14]);
+                double accuracy_rating  = atof(observation_row[13]);
+                int user_id             = atoi(observation_row[14]);
+                int video_segment_id    = atoi(observation_row[15]);
 
                 Observation *observation = new Observation(id, bird_leave, bird_return, bird_presence, bird_absence, predator_presence, 
                         nest_defense, nest_success, video_issue, chick_presence, interesting,
-                        status, awarded_credit, user_id, video_segment_id);
+                        status, awarded_credit, accuracy_rating, user_id, video_segment_id);
 
                 observations.push_back(observation);
             }
@@ -385,95 +372,131 @@ int main(int argc, char** argv) {
             for (uint32_t i = 0; i < observations.size(); i++) {
                 if (0 == observations[i]->status.compare("EXPERT")) {
                     canonical = i;
-                    log_messages.printf(MSG_DEBUG, "FOUND AN EXPERT OBSERVATION!\n");
-                    exit(0);
-                    break;
+//                    log_messages.printf(MSG_DEBUG, "FOUND AN EXPERT OBSERVATION!\n");
+//                    exit(0);
                 }
             }
 
-            if (canonical < 0) {
-                /**
-                 *  Check to see if the majority of observations are flagged with a video error.
-                 */
-                int video_issue_count = 0;
-                int canonical_video_issue = -1;
-                for (uint32_t i = 0; i < observations.size(); i++) {
-                    if (observations[i]->video_issue) {
-                        video_issue_count++;
-                        canonical_video_issue = i;
-                    }
+            int total_yes[8], total_no[8], total_unsure[8], canonical_marks[8];
+
+            if (canonical >= 0) {
+                for (int i = 0; i < 8; i++) {
+                    canonical_marks[i] = observations[canonical]->marks[i];
                 }
+            } else  {
+                //No canonical observation yet, see if
+                //we can create one.
 
-                if (video_issue_count > (observations.size() / 2.0)) {
-                    //The majority of observations had a video issue, so we can accept that as canonical.
-                    canonical = canonical_video_issue;
+                //1. total up the yes/no/unsure for each observation marking
+                get_mark_totals(observations, total_yes, total_no, total_unsure);
 
-                    for (uint32_t i = 0; i < observations.size(); i++) {
-                        if (observations[i]->video_issue) observations[i]->new_status = "VALID";
-                        else observations[i]->new_status = "INVALID";
+                //2. get what marks we would expect the canonical result to have
+                get_expected_canonical(total_yes, total_no, total_unsure, canonical_marks);
 
-                        observations[i]->awarded_credit = observations[i]->get_credit_compared_to(observations[canonical_video_issue], duration_s);
-                    }
-                    observations[canonical_video_issue]->new_status = "CANONICAL";
-
-                    log_messages.printf(MSG_DEBUG, "VIDEO ISSUE canonical: %d\n", canonical_video_issue);
-
-                } else {
-                    //The majority of observations did not have a video issue, so we can determine matches.
-
-                    if (canonical >= 0) {
-                        log_messages.printf(MSG_DEBUG, "EXPERT canonical: %d\n", canonical);
-                    } else {
-                        /**
-                         *  For each observation, see how many other observations it matches.
-                         */
-                        for (uint32_t i = 0; i < observations.size(); i++) {
-                            for (uint32_t j = 0; j < observations.size(); j++) {
-                                if (i == j || observations[i]->video_issue) continue;
-
-                                observations[i]->match_rating += observations[i]->get_match_rating(observations[j]);
-                            }
-                        }
-
-                        double max_match = 0;
-                        for (uint32_t i = 0; i < observations.size(); i++) {
-                            if (observations[i]->match_rating >= 1 && observations[i]->match_rating > max_match) {
-                                canonical = i;
-                                max_match = observations[i]->match_rating;
-                            }
-                        }
-                        log_messages.printf(MSG_DEBUG, "canonical: %d\n", canonical);
-                    }
-
-                    if (canonical >= 0) {
-                        for (uint32_t i = 0; i < observations.size(); i++) {
-                            ostringstream oss;
-
-                            if (canonical == (int)i) {
-                                if (0 == observations[i]->status.compare("EXPERT")) {
-                                    observations[i]->new_status = "EXPERT";
-                                } else {
-                                    observations[i]->new_status = "CANONICAL";
-                                }
-                            } else if (observations[i]->matches_canonical(observations[canonical])) {
-                                observations[i]->new_status = "VALID";
-                            } else {
-                                observations[i]->new_status = "INVALID";
-                            }
-                            if (canonical >= 0) observations[i]->awarded_credit = observations[i]->get_credit_compared_to(observations[canonical], duration_s);
+                //3. check to see if there's a possible canonical result
+                if (has_potential_canonical(canonical_marks)) {
+                    //4. find an observation which matches the expected canonical marks
+                    for (int i = 0; i < (int)observations.size(); i++) {
+                        if (observations[i]->matches_canonical_marks(canonical_marks) == 8.0) {
+                            canonical = i;
+                            break;
                         }
                     }
                 }
+            }
+
+            log_messages.printf(MSG_DEBUG, "number_observations: %d\n", (int)observations.size());
+            ostringstream expected_marks_oss, yes_oss, no_oss, unsure_oss;
+            for (int i = 0; i < 8; i++) {
+                expected_marks_oss << " " << setw(4) << canonical_marks[i];
+                yes_oss << " " << setw(4) << total_yes[i];
+                no_oss << " " << setw(4) << total_no[i];
+                unsure_oss << " " << setw(4) << total_unsure[i];
+            }
+            log_messages.printf(MSG_DEBUG, "total yes      : %s\n", yes_oss.str().c_str());
+            log_messages.printf(MSG_DEBUG, "total no       : %s\n", no_oss.str().c_str());
+            log_messages.printf(MSG_DEBUG, "total unsure   : %s\n", unsure_oss.str().c_str());
+            log_messages.printf(MSG_DEBUG, "canonical marks: %s\n", expected_marks_oss.str().c_str());
+
+            //There was a canoical result, so update the status of each
+            //observation.
+            bool progress_updated = false;
+            for (uint32_t i = 0; i < observations.size(); i++) {
+                ostringstream oss;
+
+                if (0 != observations[i]->status.compare("UNVALIDATED")) progress_updated = true;
             }
 
             for (uint32_t i = 0; i < observations.size(); i++) {
                 ostringstream oss;
-                oss << "RATING: " << setw(8) << observations[i]->match_rating << ", ";
+
+                if (observations.size() >= 5 && canonical < 0) {
+                    observations[i]->new_status = "INCONCLUSIVE";
+
+                } else if (canonical == (int)i) {
+                    if (0 == observations[i]->status.compare("EXPERT")) {
+                        observations[i]->new_status = "EXPERT";
+                    } else {
+                        observations[i]->new_status = "CANONICAL";
+                    }
+                } else if (observations[i]->matches_canonical_marks(canonical_marks) == 8.0) {
+                    observations[i]->new_status = "VALID";
+                } else {
+                    observations[i]->new_status = "INVALID";
+                }
+                if (canonical >= 0 || observations.size() >= 5) {
+                    observations[i]->new_accuracy_rating = (double)observations[i]->matches_canonical_marks(canonical_marks) / 8.0;
+                    observations[i]->new_awarded_credit  = duration_s * ((double)observations[i]->matches_canonical_marks(canonical_marks) / 8.0);
+                }
+            }
+
+            //Print out the observations for debugging
+            for (uint32_t i = 0; i < observations.size(); i++) {
+                ostringstream oss;
+                oss << "RATING: " << setw(8) << observations[i]->matches_canonical_marks(canonical_marks) << ", ";
                 oss << observations.at(i)->to_string();
 
                 log_messages.printf(MSG_DEBUG, "%s\n", oss.str().c_str());
             }
             log_messages.printf(MSG_DEBUG, "\n");
+            log_messages.printf(MSG_DEBUG, "Progress already updated: %d\n", progress_updated);
+
+            /*
+            if (count < 100) {
+                count++;
+                continue;
+            } else {
+                exit(1);
+            }
+            */
+
+            if (observations.size() >= 5 || canonical >= 0) {
+                for (uint32_t i = 0; i < observations.size(); i++) {
+                    ostringstream user_query, observation_query, team_query;
+
+                    double accuracy_difference = observations[i]->new_accuracy_rating - observations[i]->accuracy_rating;
+                    double credit_difference = observations[i]->new_awarded_credit - observations[i]->awarded_credit;
+
+                    //the status or credit of the observation hasn't changed so we can skip it
+                    if (!observations[i]->new_status.compare(observations[i]->status) && accuracy_difference == 0.0 && credit_difference == 0.0) continue;
+
+                    user_query << "UPDATE user SET bossa_accuracy = bossa_accuracy + " << accuracy_difference << ", bossa_total_credit = bossa_total_credit + " << credit_difference << " WHERE id = " << observations[i]->user_id;
+
+                    log_messages.printf(MSG_DEBUG, "%s\n", user_query.str().c_str());
+                    if (!no_db_update) mysql_query_check(boinc_db_conn, user_query.str());
+
+                    team_query << "UPDATE team SET bossa_accuracy = bossa_accuracy + " << accuracy_difference << ", bossa_total_credit = bossa_total_credit + " << credit_difference << " WHERE id = (SELECT teamid FROM user WHERE id =" << observations[i]->user_id << ")";
+
+                    log_messages.printf(MSG_DEBUG, "%s\n", team_query.str().c_str());
+                    if (!no_db_update) mysql_query_check(boinc_db_conn, team_query.str());
+
+
+                    observation_query << "UPDATE observations SET status = '" << observations[i]->new_status << "', awarded_credit = " << observations[i]->new_awarded_credit << ", accuracy_rating = " << observations[i]->new_accuracy_rating << " WHERE id = " << observations[i]->id;
+                    log_messages.printf(MSG_DEBUG, "%s\n", observation_query.str().c_str());
+                    if (!no_db_update) mysql_query_check(wildlife_db_conn, observation_query.str());
+                }
+            }
+
 
             if (canonical < 0) {
                 //No canonical observation has been found yet
@@ -485,41 +508,37 @@ int main(int argc, char** argv) {
 
                 log_messages.printf(MSG_DEBUG, "%s\n", vs2_query.str().c_str());
                 if (!no_db_update) mysql_query_check(wildlife_db_conn, vs2_query.str());
-            } else {
-                //A canonical observation was found
 
-                for (uint32_t i = 0; i < observations.size(); i++) {
-                    if (0 != observations[i]->status.compare(observations[i]->new_status)) {
-                        //the status has changed, update the observation in the database
-                        ostringstream user_query, observation_query;
+                if (observations.size() >= 5) {
+                    //If there's no consensus, automatically flag the video for expert review
+                    ostringstream report_oss;
+                    report_oss << "REPLACE INTO reported_video SET video_segment_id = " << video_segment_id << ", reporter_id = -1, reporter_name='VALIDATOR', report_comments='This video was automatically reported because the user observations were inconclusive.'";
+                    log_messages.printf(MSG_DEBUG, "%s\n", report_oss.str().c_str());
+                    if (!no_db_update) mysql_query_check(wildlife_db_conn, report_oss.str());
 
-                        if (0 == observations[i]->new_status.compare("VALID") || 0 == observations[i]->new_status.compare("CANONICAL")) {
-                            //The status was valid, award credit and increment the users valid observations count
-                            user_query << "UPDATE user SET valid_observations = valid_observations + 1, bossa_total_credit = bossa_total_credit + " << observations[i]->awarded_credit << " WHERE id = " << observations[i]->user_id;
+                    ostringstream status_oss;
+                    status_oss << "UPDATE video_segment_2 SET report_status = IF(report_status = 'UNREPORTED', 'REPORTED', report_status) WHERE id = " << video_segment_id;
+                    log_messages.printf(MSG_DEBUG, "%s\n", status_oss.str().c_str());
+                    if (!no_db_update) mysql_query_check(wildlife_db_conn, status_oss.str());
 
-                            log_messages.printf(MSG_DEBUG, "%s\n", user_query.str().c_str());
-                            if (!no_db_update) mysql_query_check(boinc_db_conn, user_query.str());
-
-                        } else if (0 == observations[i]->new_status.compare("INVALID")) {
-                            //The status was invalid, increment the users invalid observations count
-                            user_query << "UPDATE user SET invalid_observations = invalid_observations + 1, bossa_total_credit = bossa_total_credit + " << observations[i]->awarded_credit << " WHERE id = " << observations[i]->user_id;
-
-                            log_messages.printf(MSG_DEBUG, "%s\n", user_query.str().c_str());
-                            if (!no_db_update) mysql_query_check(boinc_db_conn, user_query.str());
-                        }
-
-                        observation_query << "UPDATE observations SET status = '" << observations[i]->new_status << "', awarded_credit = " << observations[i]->awarded_credit << " WHERE id = " << observations[i]->id;
-                        log_messages.printf(MSG_DEBUG, "%s\n", observation_query.str().c_str());
-                        if (!no_db_update) mysql_query_check(wildlife_db_conn, observation_query.str());
-                    }
+                    ostringstream waiting_oss;
+                    waiting_oss << "UPDATE species SET waiting_review = waiting_review + 1 WHERE id = " << species_id;
+                    log_messages.printf(MSG_DEBUG, "%s\n", waiting_oss.str().c_str());
+                    if (!no_db_update) mysql_query_check(wildlife_db_conn, waiting_oss.str());
                 }
 
+            } else {
                 ostringstream vs2_query;
                 vs2_query << "UPDATE video_segment_2 SET crowd_status = 'VALIDATED' WHERE id = " << video_segment_id;
 
                 log_messages.printf(MSG_DEBUG, "%s\n", vs2_query.str().c_str());
                 if (!no_db_update) mysql_query_check(wildlife_db_conn, vs2_query.str());
+            }
 
+            /**
+             *  Should only update the progress if it hasn't been updated for this video yet.
+             */
+            if (!progress_updated) {
                 ostringstream progress_query;
                 progress_query << "UPDATE progress SET validated_video_s = validated_video_s + " << duration_s << " WHERE progress.species_id = " << species_id << " AND progress.location_id = " << location_id;
 
