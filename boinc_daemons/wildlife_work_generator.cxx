@@ -434,9 +434,9 @@ void main_loop(const vector<string> &arguments) {
      *  address on wildlife.und.edu
      */
     ostringstream unclassified_video_query, finished_expert_query;
-    finished_expert_query << "SELECT DISTINCT id, watermarked_vilename, duration_s, species_id, location_id, size, md5_hash"
+    finished_expert_query << "SELECT DISTINCT id, watermarked_filename, duration_s, species_id, location_id, size, md5_hash"
         << " FROM video_2"
-        << " WHERE processing_staus != 'UNWATERMAKED'"
+        << " WHERE processing_status != 'UNWATERMAKED'"
         << " AND md5_hash IS NOT NULL"
         << " AND size IS NOT NULL"
         << " AND expert_finished = 'FINISHED'";
@@ -476,9 +476,9 @@ void main_loop(const vector<string> &arguments) {
     }
 
     if (0 == strcmp(app_name, "wildlife_surf")) {
-        mysql_query_check(wildlife_db_conn, finished_expert_query.str());
-    } else if (0 == strcmp(app_name, "wildlife_surf_collect"))  {
         mysql_query_check(wildlife_db_conn, unclassified_video_query.str());
+    } else if (0 == strcmp(app_name, "wildlife_surf_collect"))  {
+        mysql_query_check(wildlife_db_conn, finished_expert_query.str());
     }
     MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
 
