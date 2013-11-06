@@ -27,7 +27,7 @@ using namespace std;
 using namespace cv;
 
 struct EventType {
-	string name;
+	string id;
 	Mat descriptors;
 };
 
@@ -208,16 +208,16 @@ int main(int argc, char **argv) {
 					}
 
 					Mat new_descriptors;
-					//cout << it->type->name << " descriptors found: " << descriptors_frame.rows << endl;
+					//cout << it->type->id << " descriptors found: " << descriptors_frame.rows << endl;
 					for(int i=0; i<new_matches.size(); i++) {
 						new_descriptors.push_back(descriptors_frame.row(new_matches[i].queryIdx));
 					}
 
-					//cout << it->type->name << " descriptors added: " << new_descriptors.rows << endl;
+					//cout << it->type->id << " descriptors added: " << new_descriptors.rows << endl;
 					if (new_descriptors.rows > 0) {
 						(*it)->type->descriptors.push_back(new_descriptors);
 					}
-					//cout << it->type->name << " descriptors: " << it->type->descriptors.size() << endl;
+					//cout << it->type->id << " descriptors: " << it->type->descriptors.size() << endl;
                 }
             }
         }
@@ -235,11 +235,11 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    cerr << "<event_names>" << endl;
+    cerr << "<event_ids>" << endl;
     for (int i=0; i<event_types.size(); i++) {
-        cerr << event_types[i]->name << endl;
+        cerr << event_types[i]->id << endl;
     }
-    cerr << "</event_names>" << endl;
+    cerr << "</event_ids>" << endl;
     write_events(descFileName, event_types);
 
 #ifdef GUI
@@ -330,8 +330,8 @@ bool read_checkpoint() {
 void write_events(string filename, vector<EventType*> event_types) {
     FileStorage outfile(filename, FileStorage::WRITE);
 	for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-        cerr << "Write: " << (*it)->name << endl;
-        outfile << (*it)->name << (*it)->descriptors;
+        cerr << "Write: " << (*it)->id << endl;
+        outfile << (*it)->id << (*it)->descriptors;
 	}
 	outfile.release();
 }
@@ -343,8 +343,8 @@ void read_event_desc(string filename, vector<EventType*> event_types) {
     if(infile.isOpened()) {
         cerr << filename << " is open." << endl;
         for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-            cerr << "Read: " << (*it)->name << endl;
-            infile[(*it)->name] >> (*it)->descriptors;
+            cerr << "Read: " << (*it)->id << endl;
+            infile[(*it)->id] >> (*it)->descriptors;
         }
         infile.release();
     } else {
@@ -377,23 +377,23 @@ Mat read_descriptors(string filename, string desc_name) {
 vector<Event*> readConfigFile(string fileName, int *vidStartTime) {
 	vector<Event*> events;
 
-	string line, event_name, start_time, end_time;
+	string line, event_id, start_time, end_time;
 	ifstream infile;
 	infile.open(fileName.c_str());
     getline(infile, line);
 	*vidStartTime = timeToSeconds(line.c_str());
-    while(getline(infile, event_name, ',')) {
+    while(getline(infile, event_id, ',')) {
 		Event *newEvent = new Event();
 		EventType *event_type = NULL;
 		for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-			if((*it)->name.compare(event_name) == 0) {
+			if((*it)->id.compare(event_id) == 0) {
 				event_type = *it;
 				break;
 			}
 		}
 		if(event_type == NULL) {
 			event_type = new EventType();
-			event_type->name = event_name;
+			event_type->id = event_id;
 			event_types.push_back(event_type);
 		}
         getline(infile, start_time, ',');
