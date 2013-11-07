@@ -78,6 +78,7 @@ int main(int argc, char **argv) {
     string resolved_config_path;
     string resolved_vid_path;
     string resolved_desc_path;
+    cerr << "Resolving boinc file paths." << endl;
     int retval = boinc_resolve_filename_s(configFileName.c_str(), resolved_config_path);
     if (retval) {
         cerr << "Error, could not open file: '" << configFileName << "'" << endl;
@@ -104,8 +105,8 @@ int main(int argc, char **argv) {
 #endif
 
 	events = readConfigFile(configFileName, &vidTime);
-	cout << "Events: " << events.size() << endl;
-	cout << "Event Types: " << event_types.size() << endl;
+	cerr << "Events: " << events.size() << endl;
+	cerr << "Event Types: " << event_types.size() << endl;
 
 	VideoCapture capture(vidFileName.c_str());
     if(!capture.isOpened()) {
@@ -291,6 +292,7 @@ void write_checkpoint() {
 
 /** @function read_checkpoint **/
 bool read_checkpoint() {
+    cerr << "Reading checkpoint..." << endl;
 #ifdef _BOINC_APP_
     string resolved_path;
     int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
@@ -323,6 +325,7 @@ bool read_checkpoint() {
     }
 
     read_event_desc(checkpoint_desc_filename, event_types);
+    cerr << "Done reading checkpoint." << endl;
     return true;
 }
 
@@ -377,6 +380,7 @@ Mat read_descriptors(string filename, string desc_name) {
 vector<Event*> readConfigFile(string fileName, int *vidStartTime) {
 	vector<Event*> events;
 
+    cerr << "Reading config file: " << fileName << endl;
 	string line, event_name, start_time, end_time;
 	ifstream infile;
 	infile.open(fileName.c_str());
@@ -386,6 +390,7 @@ vector<Event*> readConfigFile(string fileName, int *vidStartTime) {
 		Event *newEvent = new Event();
 		EventType *event_type = NULL;
 		for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
+            cerr << "Event name: " << (*it)->name << endl;
 			if((*it)->name.compare(event_name) == 0) {
 				event_type = *it;
 				break;
@@ -396,11 +401,16 @@ vector<Event*> readConfigFile(string fileName, int *vidStartTime) {
 			event_type->name = event_name;
 			event_types.push_back(event_type);
 		}
-        getline(infile, start_time, ',');
-        getline(infile, end_time);
-		newEvent->type = event_type;
-		newEvent->start_time = timeToSeconds(start_time);
-		newEvent->end_time = timeToSeconds(end_time);
+        if(!getline(infile, start_time, ',') || !getline(infile, end_time)) {
+            cerr << "Error: Malformed config file!" << endl;
+#ifdef _BOINC_APP_
+            boinc_finish(1);
+#endif
+            exit(1);
+        }
+        newEvent->type = event_type;
+        newEvent->start_time = timeToSeconds(start_time);
+        newEvent->end_time = timeToSeconds(end_time);
 		events.push_back(newEvent);
 	}
 	infile.close();
