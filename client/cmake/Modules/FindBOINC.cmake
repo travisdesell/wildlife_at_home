@@ -26,28 +26,28 @@ FIND_LIBRARY(BOINC_LIBRARY
     PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
-#MESSAGE(STATUS "BOINC library: ${BOINC_LIBRARY}")
+MESSAGE(STATUS "BOINC library: ${BOINC_LIBRARY}")
 
 FIND_LIBRARY(BOINC_CRYPT_LIBRARY
     NAMES boinc_crypt
     PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/Deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
-#MESSAGE(STATUS "BOINC crypt library: ${BOINC_CRYPT_LIBRARY}")
+MESSAGE(STATUS "BOINC crypt library: ${BOINC_CRYPT_LIBRARY}")
 
 FIND_LIBRARY(BOINC_API_LIBRARY
     NAMES boinc_api
     PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/Deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
     PATH_SUFFIXES api
 )
-#MESSAGE(STATUS "BOINC api library: ${BOINC_API_LIBRARY}")
+MESSAGE(STATUS "BOINC api library: ${BOINC_API_LIBRARY}")
 
 FIND_LIBRARY(BOINC_SCHED_LIBRARY
     NAMES sched
     PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/Deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
     PATH_SUFFIXES sched
 )
-#MESSAGE(STATUS "BOINC sched library: ${BOINC_SCHED_LIBRARY}")
+MESSAGE(STATUS "BOINC sched library: ${BOINC_SCHED_LIBRARY}")
 
 IF (BOINC_INCLUDE_DIR AND BOINC_LIBRARY AND BOINC_API_LIBRARY)
     add_definitions( -D_BOINC_APP_ )

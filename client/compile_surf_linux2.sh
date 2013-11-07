@@ -1,0 +1,55 @@
+#/opt/local/bin/g++-mp-4.7 -std=c++11 \
+g++ \
+    -static \
+    -D_BOINC_APP_ \
+	-I../../ffmpeg \
+    -I../../boinc \
+    -I../../boinc/api \
+    -I../../boinc/lib \
+    -I../../opencv/install/include \
+    -I../../opencv/modules/core/include \
+    -I../../opencv/modules/highgui/include \
+    -I../../opencv/modules/features2d/include \
+    -I../../opencv/modules/imgproc/include \
+    -I../../opencv/modules/flann/include \
+    -I../../opencv/modules/nonfree/include \
+    -I../../opencv/modules/calib3d/include \
+	wildlife_surf.cpp \
+    -o wildlife_surf \
+    ../../opencv/install/lib/libopencv_contrib.a \
+    ../../opencv/install/lib/libopencv_legacy.a \
+    ../../opencv/install/lib/libopencv_videostab.a \
+    ../../opencv/install/lib/libopencv_photo.a \
+    ../../opencv/install/lib/libopencv_stitching.a \
+    ../../opencv/install/lib/libopencv_objdetect.a \
+    ../../opencv/install/lib/libopencv_video.a \
+    ../../opencv/install/lib/libopencv_ml.a \
+    ../../opencv/install/lib/libopencv_calib3d.a \
+    ../../opencv/install/lib/libopencv_features2d.a \
+    ../../opencv/install/lib/libopencv_highgui.a \
+    ../../opencv/install/lib/libopencv_flann.a \
+    ../../opencv/install/lib/libopencv_imgproc.a \
+    ../../opencv/install/lib/libopencv_nonfree.a \
+    ../../opencv/install/lib/libopencv_core.a \
+    ../../ffmpeg/libavformat/libavformat.a \
+	../../ffmpeg/libavcodec/libavcodec.a \
+    ../../ffmpeg/libswscale/libswscale.a \
+    ../../ffmpeg/libavutil/libavutil.a \
+    ../../ffmpeg/libavdevice/libavdevice.a \
+    ../../ffmpeg/libavfilter/libavfilter.a \
+    ../../ffmpeg/libpostproc/libpostproc.a \
+    ../../ffmpeg/libswresample/libswresample.a \
+    ../../opencv/build/3rdparty/lib/libzlib.a \
+    ../../opencv/build/3rdparty/lib/libIlmImf.a \
+    ../../opencv/build/3rdparty/lib/liblibjasper.a \
+    ../../opencv/build/3rdparty/lib/liblibjpeg.a \
+    ../../opencv/build/3rdparty/lib/liblibpng.a \
+    ../../opencv/build/3rdparty/lib/liblibtiff.a \
+    /usr/local/lib/libx264.a \
+    -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lpangocairo-1.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0     -lgmodule-2.0 -lgthread-2.0 -lglib-2.0 -lgthread-2.0 -lglib-2.0 -ldl -lm -lpthread -lrt \
+    -pthread \
+    -L../../boinc/api \
+    -L../../boinc/lib \
+    -lboinc_api \
+    -lboinc \
+    -lstdc++
