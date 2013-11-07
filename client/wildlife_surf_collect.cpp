@@ -23,6 +23,8 @@
 #include "mfile.h"
 #endif
 
+#define GUI
+
 using namespace std;
 using namespace cv;
 
@@ -48,30 +50,39 @@ void printUsage();
 double standardDeviation(vector<DMatch>, double);
 int timeToSeconds(string);
 vector<Event*> readConfigFile(string, int*);
+bool readParams(int, char**);
 
 string checkpoint_filename;
 string checkpoint_desc_filename;
-string configFileName;
-string vidFileName;
-string descFileName;
-int framePos;
-int checkpointFramePos = 0;
+string config_file_name;
+string vid_file_name;
+string desc_file_name;
+int frame_pos;
+int checkpoint_frame_pos = 0;
 float total;
-int vidTime;
+int vid_time;
 
-int minHessian = 400;
+int min_hessian = 400;
+double flann_threshold = 3.5;
 vector<EventType*> event_types;
 vector<Event*> events;
 
 int main(int argc, char **argv) {
-	if(argc != 3) {
+	if(argc < 5) {
 		printUsage();
 		return -1;
-	}
+	} else {
+        if (!readParams(argc, argv)) {
+            printUsage();
+            return -1;
+        }
+    }
 
-    configFileName = argv[1];
-    vidFileName = argv[2];
-    descFileName = "results.desc";
+    cerr << "Vid file: " << vid_file_name.c_str() << endl;
+    cerr << "Config file: " << config_file_name.c_str() << endl;
+    cerr << "Min Hessian: " << min_hessian << endl;
+    cerr << "Flann Threshold: " << flann_threshold << " * standard deviation" << endl;
+    desc_file_name = "results.desc";
 
 #ifdef _BOINC_APP_
     cout << "Boinc enabled." << endl;
@@ -79,39 +90,38 @@ int main(int argc, char **argv) {
     string resolved_vid_path;
     string resolved_desc_path;
     cerr << "Resolving boinc file paths." << endl;
-    int retval = boinc_resolve_filename_s(configFileName.c_str(), resolved_config_path);
+    int retval = boinc_resolve_filename_s(config_file_name.c_str(), resolved_config_path);
     if (retval) {
-        cerr << "Error, could not open file: '" << configFileName.c_str() << "'" << endl;
+        cerr << "Error, could not open file: '" << config_file_name.c_str() << "'" << endl;
         cerr << "Resolved to: '" << resolved_config_path.c_str() << "'" << endl;
         return false;
     }
-    configFileName = resolved_config_path;
+    config_file_name = resolved_config_path;
 
-    retval = boinc_resolve_filename_s(vidFileName.c_str(), resolved_vid_path);
+    retval = boinc_resolve_filename_s(vid_file_name.c_str(), resolved_vid_path);
     if (retval) {
-        cerr << "Error, could not open file: '" << vidFileName.c_str() << "'" << endl;
+        cerr << "Error, could not open file: '" << vid_file_name.c_str() << "'" << endl;
         cerr << "Resolved to: '" << resolved_vid_path.c_str() << "'" << endl;
         return false;
     }
-    vidFileName = resolved_vid_path;
+    vid_file_name = resolved_vid_path;
 
-    retval = boinc_resolve_filename_s(descFileName.c_str(), resolved_desc_path);
+    retval = boinc_resolve_filename_s(desc_file_name.c_str(), resolved_desc_path);
     if (retval) {
-        cerr << "Error, could not open file: '" << descFileName.c_str() << "'" << endl;
+        cerr << "Error, could not open file: '" << desc_file_name.c_str() << "'" << endl;
         cerr << "Resolved to: '" << resolved_desc_path.c_str() << "'" << endl;
         return false;
     }
-    descFileName = resolved_desc_path;
+    desc_file_name = resolved_desc_path;
 #endif
 
-	events = readConfigFile(configFileName, &vidTime);
+	events = readConfigFile(config_file_name, &vid_time);
 	cerr << "Events: " << events.size() << endl;
 	cerr << "Event Types: " << event_types.size() << endl;
 
-	VideoCapture capture(vidFileName.c_str());
+	VideoCapture capture(vid_file_name.c_str());
     if(!capture.isOpened()) {
-        cerr << "Failed to open " << vidFileName.c_str() << endl;
-        cout << "Failed to open " << vidFileName.c_str() << endl;
+        cerr << "Failed to open " << vid_file_name.c_str() << endl;
         return false;
     }
 
@@ -123,26 +133,26 @@ int main(int argc, char **argv) {
     checkpoint_desc_filename = "checkpoint.desc";
 
     if(read_checkpoint()) {
-        cerr << "Contuning from checkpoint..." << endl;
+        cerr << "Start from checkpoint..." << endl;
     } else {
         cerr << "Unseccessful checkpoint read." << endl << "Starting from beginning of video." << endl;
     }
 
-    skip_frames(capture, checkpointFramePos);
+    skip_frames(capture, checkpoint_frame_pos);
 
-    framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+    frame_pos = capture.get(CV_CAP_PROP_POS_FRAMES);
     total = capture.get(CV_CAP_PROP_FRAME_COUNT);
 
-    cerr << "Config File Name: " << configFileName.c_str() << endl;
-    cerr << "Vid File Name: " << vidFileName.c_str() << endl;
-    cerr << "Current Frame: " << framePos << endl;
+    cerr << "Config File Name: " << config_file_name.c_str() << endl;
+    cerr << "Vid File Name: " << vid_file_name.c_str() << endl;
+    cerr << "Current Frame: " << frame_pos << endl;
     cerr << "Frame Count: " << total << endl;
 
 	// Loop through all video frames.
-	while(framePos/total < 1.0) {
+	while(frame_pos/total < 1.0) {
 		//cout << "Percent complete: " << framePos/total*100 << endl;
 #ifdef _BOINC_APP_
-        boinc_fraction_done(framePos/total);
+        boinc_fraction_done(frame_pos/total);
 
         int key = waitKey(1);
         if(boinc_time_to_checkpoint() || key == 's') {
@@ -153,15 +163,15 @@ int main(int argc, char **argv) {
 #endif
 		Mat img;
         capture >> img;
-		framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+		frame_pos = capture.get(CV_CAP_PROP_POS_FRAMES);
 
 		// Increment video time every 10 frames.
-		if(framePos % 10 == 0) vidTime++;
+		if(frame_pos % 10 == 0) vid_time++;
 		//cout << "Video time: " << vidTime << endl;
 
     	Mat frame = img;
 
-		SurfFeatureDetector detector(minHessian);
+		SurfFeatureDetector detector(min_hessian);
 		vector<KeyPoint> keypoints_frame;
 		detector.detect(frame, keypoints_frame);
 
@@ -172,7 +182,7 @@ int main(int argc, char **argv) {
 		// Add distinct features to active events.
 		int activeEvents = 0;
 		for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
-			if(vidTime >= (*it)->start_time && vidTime <= (*it)->end_time) {
+			if(vid_time >= (*it)->start_time && vid_time <= (*it)->end_time) {
 				activeEvents++;
 				if ((*it)->type->descriptors.empty()) {
 					(*it)->type->descriptors.push_back(descriptors_frame);
@@ -194,7 +204,7 @@ int main(int argc, char **argv) {
 					}
 
 					double avg_dist = total_dist/matches.size();
-					double stdDev = standardDeviation(matches, avg_dist);
+					double std_dev = standardDeviation(matches, avg_dist);
 					//cout << "Max dist: " << max_dist << endl;
 					//cout << "Avg dist: " << avg_dist << endl;
 					//cout << "Min dist: " << min_dist << endl;
@@ -203,7 +213,7 @@ int main(int argc, char **argv) {
 					vector<DMatch> new_matches;
 
 					for(int i=0; i<matches.size(); i++) {
-						if(matches[i].distance > avg_dist+(3.5*stdDev)) {
+						if(matches[i].distance > avg_dist+(flann_threshold*std_dev)) {
 							new_matches.push_back(matches[i]);
 						}
 					}
@@ -227,7 +237,15 @@ int main(int argc, char **argv) {
 
 #ifdef GUI
         // Code to draw the points.
-        Mat frame_points;
+        Mat frame_points = frame;
+        // Watermark Box
+        cv::Point watermark_top_left(12, 12);
+        cv::Point watermark_bottom_right(90, 55);
+        rectangle(frame_points, watermark_top_left, watermark_bottom_right, Scalar(0, 0, 100));
+        // Time box
+        cv::Point time_top_left(520, 415);
+        cv::Point time_bottom_right(680, 470);
+        rectangle(frame_points, time_top_left, time_bottom_right, Scalar(0, 0, 100));
         drawKeypoints(frame, keypoints_frame, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
         // Display image.
@@ -241,7 +259,7 @@ int main(int argc, char **argv) {
         cerr << event_types[i]->id.c_str() << endl;
     }
     cerr << "</event_ids>" << endl;
-    write_events(descFileName, event_types);
+    write_events(desc_file_name, event_types);
 
 #ifdef GUI
     cvDestroyWindow("SURF");
@@ -281,7 +299,7 @@ void write_checkpoint() {
         return;
     }
 
-    checkpoint_file << "CURRENT_FRAME: " << framePos << endl;
+    checkpoint_file << "CURRENT_FRAME: " << frame_pos << endl;
 
     write_events(checkpoint_desc_filename, event_types);
 
@@ -314,8 +332,8 @@ bool read_checkpoint() {
     if(!checkpoint_file.is_open()) return false;
 
     string s;
-    checkpoint_file >> s >> checkpointFramePos;
-    cerr << s.c_str() << " " << checkpointFramePos << endl;
+    checkpoint_file >> s >> checkpoint_frame_pos;
+    cerr << s.c_str() << " " << checkpoint_frame_pos << endl;
     if(s.compare("CURRENT_FRAME:") != 0 ) {
         cerr << "ERROR: malformed checkpoint! could not read 'CURRENT_FRAME'" << endl;
 #ifdef _BOINC_APP_
@@ -454,7 +472,29 @@ int skip_frames(VideoCapture capture, int n) {
     return n;
 }
 
+/** @function readParams **/
+bool readParams(int argc, char **argv) {
+    for (int i=1; i<argc; i++) {
+        if (i+1 < argc) {
+            if (string(argv[i]) == "--video" || string(argv[i]) == "--v") {
+                vid_file_name = argv[++i];
+            } else if (string(argv[i]) == "--config" || string(argv[i]) == "--c") {
+                config_file_name = argv[++i];
+            } else if (string(argv[i]) == "--hessian" || string(argv[i]) == "--h") {
+                min_hessian = atoi(argv[++i]);
+            } else if (string(argv[i]) == "--threshold" || string(argv[i]) == "--t") {
+                flann_threshold = atoi(argv[++i]);
+            }
+        } else {
+            cout << "Parameter has no matching value." << endl;
+            return false;
+        }
+    }
+    if (vid_file_name.empty() || config_file_name.empty()) return false;
+    else return true;
+}
+
 /** @function printUsage **/
 void printUsage() {
-	cout << "Usage: wildlife_collect <config> <vid>" << endl;
+	cout << "Usage: wildlife_collect --v <video> --c <config> [--h <min hessian>] [--t <feature match threshold>]" << endl;
 }
