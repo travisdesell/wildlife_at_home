@@ -27,7 +27,7 @@ using namespace std;
 using namespace cv;
 
 struct EventType {
-	string name;
+	string id;
 	Mat descriptors;
 };
 
@@ -81,24 +81,24 @@ int main(int argc, char **argv) {
     cerr << "Resolving boinc file paths." << endl;
     int retval = boinc_resolve_filename_s(configFileName.c_str(), resolved_config_path);
     if (retval) {
-        cerr << "Error, could not open file: '" << configFileName << "'" << endl;
-        cerr << "Resolved to: '" << resolved_config_path << "'" << endl;
+        cerr << "Error, could not open file: '" << configFileName.c_str() << "'" << endl;
+        cerr << "Resolved to: '" << resolved_config_path.c_str() << "'" << endl;
         return false;
     }
     configFileName = resolved_config_path;
 
     retval = boinc_resolve_filename_s(vidFileName.c_str(), resolved_vid_path);
     if (retval) {
-        cerr << "Error, could not open file: '" << vidFileName << "'" << endl;
-        cerr << "Resolved to: '" << resolved_vid_path << "'" << endl;
+        cerr << "Error, could not open file: '" << vidFileName.c_str() << "'" << endl;
+        cerr << "Resolved to: '" << resolved_vid_path.c_str() << "'" << endl;
         return false;
     }
     vidFileName = resolved_vid_path;
 
     retval = boinc_resolve_filename_s(descFileName.c_str(), resolved_desc_path);
     if (retval) {
-        cerr << "Error, could not open file: '" << descFileName << "'" << endl;
-        cerr << "Resolved to: '" << resolved_desc_path << "'" << endl;
+        cerr << "Error, could not open file: '" << descFileName.c_str() << "'" << endl;
+        cerr << "Resolved to: '" << resolved_desc_path.c_str() << "'" << endl;
         return false;
     }
     descFileName = resolved_desc_path;
@@ -110,8 +110,8 @@ int main(int argc, char **argv) {
 
 	VideoCapture capture(vidFileName.c_str());
     if(!capture.isOpened()) {
-        cerr << "Failed to open " << vidFileName << endl;
-        cout << "Failed to open " << vidFileName << endl;
+        cerr << "Failed to open " << vidFileName.c_str() << endl;
+        cout << "Failed to open " << vidFileName.c_str() << endl;
         return false;
     }
 
@@ -133,8 +133,8 @@ int main(int argc, char **argv) {
     framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
     total = capture.get(CV_CAP_PROP_FRAME_COUNT);
 
-    cerr << "Config File Name: " << configFileName << endl;
-    cerr << "Vid File Name: " << vidFileName << endl;
+    cerr << "Config File Name: " << configFileName.c_str() << endl;
+    cerr << "Vid File Name: " << vidFileName.c_str() << endl;
     cerr << "Current Frame: " << framePos << endl;
     cerr << "Frame Count: " << total << endl;
 
@@ -209,16 +209,16 @@ int main(int argc, char **argv) {
 					}
 
 					Mat new_descriptors;
-					//cout << it->type->name << " descriptors found: " << descriptors_frame.rows << endl;
+					//cout << it->type->id << " descriptors found: " << descriptors_frame.rows << endl;
 					for(int i=0; i<new_matches.size(); i++) {
 						new_descriptors.push_back(descriptors_frame.row(new_matches[i].queryIdx));
 					}
 
-					//cout << it->type->name << " descriptors added: " << new_descriptors.rows << endl;
+					//cout << it->type->id << " descriptors added: " << new_descriptors.rows << endl;
 					if (new_descriptors.rows > 0) {
 						(*it)->type->descriptors.push_back(new_descriptors);
 					}
-					//cout << it->type->name << " descriptors: " << it->type->descriptors.size() << endl;
+					//cout << it->type->id << " descriptors: " << it->type->descriptors.size() << endl;
                 }
             }
         }
@@ -236,11 +236,11 @@ int main(int argc, char **argv) {
 #endif
     }
 
-    cerr << "<event_names>" << endl;
+    cerr << "<event_ids>" << endl;
     for (int i=0; i<event_types.size(); i++) {
-        cerr << event_types[i]->name << endl;
+        cerr << event_types[i]->id.c_str() << endl;
     }
-    cerr << "</event_names>" << endl;
+    cerr << "</event_ids>" << endl;
     write_events(descFileName, event_types);
 
 #ifdef GUI
@@ -315,7 +315,7 @@ bool read_checkpoint() {
 
     string s;
     checkpoint_file >> s >> checkpointFramePos;
-    cerr << s << " " << checkpointFramePos << endl;
+    cerr << s.c_str() << " " << checkpointFramePos << endl;
     if(s.compare("CURRENT_FRAME:") != 0 ) {
         cerr << "ERROR: malformed checkpoint! could not read 'CURRENT_FRAME'" << endl;
 #ifdef _BOINC_APP_
@@ -333,25 +333,25 @@ bool read_checkpoint() {
 void write_events(string filename, vector<EventType*> event_types) {
     FileStorage outfile(filename, FileStorage::WRITE);
 	for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-        cerr << "Write: " << (*it)->name << endl;
-        outfile << (*it)->name << (*it)->descriptors;
+        cerr << "Write: " << (*it)->id.c_str() << endl;
+        outfile << (*it)->id << (*it)->descriptors;
 	}
 	outfile.release();
 }
 
 /** @function read_events **/
 void read_event_desc(string filename, vector<EventType*> event_types) {
-    cerr << "Opening file: " << filename << endl;
+    cerr << "Opening file: " << filename.c_str() << endl;
     FileStorage infile(filename, FileStorage::READ);
     if(infile.isOpened()) {
-        cerr << filename << " is open." << endl;
+        cerr << filename.c_str() << " is open." << endl;
         for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-            cerr << "Read: " << (*it)->name << endl;
-            infile[(*it)->name] >> (*it)->descriptors;
+            cerr << "Read: " << (*it)->id.c_str() << endl;
+            infile[(*it)->id] >> (*it)->descriptors;
         }
         infile.release();
     } else {
-        cerr << "ERROR: feature file '" << filename << "' does does not exist." << endl;
+        cerr << "ERROR: feature file '" << filename.c_str() << "' does does not exist." << endl;
 #ifdef _BOINC_APP_
         boinc_finish(1);
 #endif
@@ -367,7 +367,7 @@ Mat read_descriptors(string filename, string desc_name) {
         read(infile[desc_name], descriptors);
         infile.release();
     } else {
-        cerr << "ERROR: feature file '" << filename << "' does not exists." << endl;
+        cerr << "ERROR: feature file '" << filename.c_str() << "' does not exists." << endl;
 #ifdef _BOINC_APP_
         boinc_finish(1);
 #endif
@@ -380,25 +380,25 @@ Mat read_descriptors(string filename, string desc_name) {
 vector<Event*> readConfigFile(string fileName, int *vidStartTime) {
 	vector<Event*> events;
 
-    cerr << "Reading config file: " << fileName << endl;
-	string line, event_name, start_time, end_time;
+    cerr << "Reading config file: " << fileName.c_str() << endl;
+	string line, event_id, start_time, end_time;
 	ifstream infile;
 	infile.open(fileName.c_str());
     getline(infile, line);
 	*vidStartTime = timeToSeconds(line.c_str());
-    while(getline(infile, event_name, ',')) {
+    while(getline(infile, event_id, ',')) {
 		Event *newEvent = new Event();
 		EventType *event_type = NULL;
 		for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-            cerr << "Event name: " << (*it)->name << endl;
-			if((*it)->name.compare(event_name) == 0) {
+            cerr << "Event name: " << (*it)->id.c_str() << endl;
+			if((*it)->id.compare(event_id) == 0) {
 				event_type = *it;
 				break;
 			}
 		}
 		if(event_type == NULL) {
 			event_type = new EventType();
-			event_type->name = event_name;
+			event_type->id = event_id;
 			event_types.push_back(event_type);
 		}
         if(!getline(infile, start_time, ',') || !getline(infile, end_time)) {
