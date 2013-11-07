@@ -120,7 +120,7 @@ int compare_results(
     RESULT const& r2, void *data2,
     bool& match
 ) {
-    double threshold = 0.00002;
+    double threshold = 0.00006;
     vector<EventType*> *desc1 = (vector<EventType*>*)data1;
     vector<EventType*> *desc2 = (vector<EventType*>*)data2;
 
