@@ -39,6 +39,8 @@ struct Event {
 	 int end_time;
 };
 
+/****** PROTOTYPES ******/
+
 void write_checkpoint();
 bool read_checkpoint();
 void write_descriptors(string, Mat);
@@ -52,6 +54,8 @@ int timeToSeconds(string);
 vector<Event*> readConfigFile(string, int*);
 bool readParams(int, char**);
 
+/****** END PROTOTYPES ******/
+
 string checkpoint_filename;
 string checkpoint_desc_filename;
 string config_file_name;
@@ -64,6 +68,16 @@ int vid_time;
 
 int min_hessian = 400;
 double flann_threshold = 3.5;
+bool remove_watermark = true;
+bool remove_timestamp = true;
+
+// Watermark Box
+cv::Point watermark_top_left(12, 12);
+cv::Point watermark_bottom_right(90, 55);
+// Time box
+cv::Point time_top_left(520, 415);
+cv::Point time_bottom_right(680, 470);
+
 vector<EventType*> event_types;
 vector<Event*> events;
 
@@ -143,6 +157,14 @@ int main(int argc, char **argv) {
     frame_pos = capture.get(CV_CAP_PROP_POS_FRAMES);
     total = capture.get(CV_CAP_PROP_FRAME_COUNT);
 
+    int frame_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+    int frame_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+    time_top_left.x = frame_width*0.69;
+    time_top_left.y = frame_height*0.81;
+    time_bottom_right.x = frame_width*0.96;
+    time_bottom_right.y = frame_height*0.975;
+
     cerr << "Config File Name: " << config_file_name.c_str() << endl;
     cerr << "Vid File Name: " << vid_file_name.c_str() << endl;
     cerr << "Current Frame: " << frame_pos << endl;
@@ -172,8 +194,23 @@ int main(int argc, char **argv) {
     	Mat frame = img;
 
 		SurfFeatureDetector detector(min_hessian);
-		vector<KeyPoint> keypoints_frame;
+		vector<KeyPoint> keypoints_frame, keypoints;
 		detector.detect(frame, keypoints_frame);
+
+        // Remove keypoints in watermark and timestamp.
+        for (int i=0; i<keypoints_frame.size(); i++) {
+            cv::Point pt = keypoints_frame.at(i).pt;
+            bool watermark = true;
+            bool timestamp = true;
+            if (!remove_watermark || pt.x < watermark_top_left.x || pt.x > watermark_bottom_right.x || pt.y < watermark_top_left.y || pt.y > watermark_bottom_right.y) {
+                watermark = false;
+            }
+            if (!remove_timestamp || pt.x < time_top_left.x || pt.x > time_bottom_right.x || pt.y < time_top_left.y || pt.y > time_bottom_right.y) {
+                timestamp = false;
+            }
+            if (!watermark && !timestamp) keypoints.push_back(keypoints_frame.at(i));
+        }
+        keypoints_frame = keypoints;
 
 		SurfDescriptorExtractor extractor;
 		Mat descriptors_frame;
@@ -205,10 +242,10 @@ int main(int argc, char **argv) {
 
 					double avg_dist = total_dist/matches.size();
 					double std_dev = standardDeviation(matches, avg_dist);
-					//cout << "Max dist: " << max_dist << endl;
-					//cout << "Avg dist: " << avg_dist << endl;
-					//cout << "Min dist: " << min_dist << endl;
-					//cout << "Avg + 3.5*stdDev: " << avg_dist + 3.5*stdDev << endl;
+					cerr << "Max dist: " << max_dist << endl;
+					cerr << "Avg dist: " << avg_dist << endl;
+					cerr << "Min dist: " << min_dist << endl;
+					cerr << "Avg + 3.5*std_ev: " << avg_dist + 3.5*std_dev << endl;
 
 					vector<DMatch> new_matches;
 
@@ -219,16 +256,16 @@ int main(int argc, char **argv) {
 					}
 
 					Mat new_descriptors;
-					//cout << it->type->id << " descriptors found: " << descriptors_frame.rows << endl;
+					cerr << (*it)->type->id.c_str() << " descriptors found: " << descriptors_frame.rows << endl;
 					for(int i=0; i<new_matches.size(); i++) {
 						new_descriptors.push_back(descriptors_frame.row(new_matches[i].queryIdx));
 					}
 
-					//cout << it->type->id << " descriptors added: " << new_descriptors.rows << endl;
+					cerr << (*it)->type->id.c_str() << " descriptors added: " << new_descriptors.rows << endl;
 					if (new_descriptors.rows > 0) {
 						(*it)->type->descriptors.push_back(new_descriptors);
 					}
-					//cout << it->type->id << " descriptors: " << it->type->descriptors.size() << endl;
+					cerr << (*it)->type->id.c_str() << " descriptors: " << (*it)->type->descriptors.size() << endl;
                 }
             }
         }
@@ -238,13 +275,7 @@ int main(int argc, char **argv) {
 #ifdef GUI
         // Code to draw the points.
         Mat frame_points = frame;
-        // Watermark Box
-        cv::Point watermark_top_left(12, 12);
-        cv::Point watermark_bottom_right(90, 55);
         rectangle(frame_points, watermark_top_left, watermark_bottom_right, Scalar(0, 0, 100));
-        // Time box
-        cv::Point time_top_left(520, 415);
-        cv::Point time_bottom_right(680, 470);
         rectangle(frame_points, time_top_left, time_bottom_right, Scalar(0, 0, 100));
         drawKeypoints(frame, keypoints_frame, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
@@ -475,15 +506,19 @@ int skip_frames(VideoCapture capture, int n) {
 /** @function readParams **/
 bool readParams(int argc, char **argv) {
     for (int i=1; i<argc; i++) {
-        if (i+1 < argc) {
+        if (i < argc) {
             if (string(argv[i]) == "--video" || string(argv[i]) == "--v") {
-                vid_file_name = argv[++i];
+                if (i+1 < argc) vid_file_name = argv[++i];
             } else if (string(argv[i]) == "--config" || string(argv[i]) == "--c") {
-                config_file_name = argv[++i];
+                if (i+1 < argc) config_file_name = argv[++i];
             } else if (string(argv[i]) == "--hessian" || string(argv[i]) == "--h") {
-                min_hessian = atoi(argv[++i]);
+                if (i+1 < argc) min_hessian = atoi(argv[++i]);
             } else if (string(argv[i]) == "--threshold" || string(argv[i]) == "--t") {
-                flann_threshold = atoi(argv[++i]);
+                if (i+1 < argc) flann_threshold = atoi(argv[++i]);
+            } else if (string(argv[i]) == "--watermark") {
+                remove_watermark = false;
+            } else if (string(argv[i]) == "--timestamp") {
+                remove_timestamp = false;
             }
         } else {
             cout << "Parameter has no matching value." << endl;
@@ -496,5 +531,5 @@ bool readParams(int argc, char **argv) {
 
 /** @function printUsage **/
 void printUsage() {
-	cout << "Usage: wildlife_collect --v <video> --c <config> [--h <min hessian>] [--t <feature match threshold>]" << endl;
+	cout << "Usage: wildlife_collect --v <video> --c <config> [--h <min hessian>] [--t <feature match threshold>] [--watermark] [--timestamp]" << endl;
 }
