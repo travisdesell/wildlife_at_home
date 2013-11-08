@@ -39,6 +39,13 @@ struct Event {
 	 int end_time;
 };
 
+struct VideoType {
+    int video_width;
+    int video_height;
+    cv::Rect *watermark_rect;
+    cv::Rect *timestamp_rect;
+};
+
 /****** PROTOTYPES ******/
 
 void write_checkpoint();
@@ -52,6 +59,7 @@ void printUsage();
 double standardDeviation(vector<DMatch>, double);
 int timeToSeconds(string);
 vector<Event*> readConfigFile(string, int*);
+void loadVideoTypes();
 bool readParams(int, char**);
 
 /****** END PROTOTYPES ******/
@@ -71,12 +79,10 @@ double flann_threshold = 3.5;
 bool remove_watermark = true;
 bool remove_timestamp = true;
 
-// Watermark Box
-cv::Point watermark_top_left(12, 12);
-cv::Point watermark_bottom_right(90, 55);
-// Time box
-cv::Point time_top_left(520, 415);
-cv::Point time_bottom_right(680, 470);
+// Vector of video types and their corresponding aspect ratios.
+vector<VideoType> video_types;
+cv::Rect *watermark_rect;
+cv::Rect *timestamp_rect;
 
 vector<EventType*> event_types;
 vector<Event*> events;
@@ -91,6 +97,8 @@ int main(int argc, char **argv) {
             return -1;
         }
     }
+
+    loadVideoTypes();
 
     cerr << "Vid file: " << vid_file_name.c_str() << endl;
     cerr << "Config file: " << config_file_name.c_str() << endl;
@@ -160,10 +168,18 @@ int main(int argc, char **argv) {
     int frame_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frame_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-    time_top_left.x = frame_width*0.69;
-    time_top_left.y = frame_height*0.81;
-    time_bottom_right.x = frame_width*0.96;
-    time_bottom_right.y = frame_height*0.975;
+    for (int i=0; i<video_types.size(); i++) {
+        if (video_types.at(i).video_width == frame_width && video_types.at(i).video_height == frame_height) {
+            cerr << "Found matching size." << endl;
+            watermark_rect = video_types.at(i).watermark_rect;
+            timestamp_rect = video_types.at(i).timestamp_rect;
+            break;
+        }
+    }
+    if (watermark_rect == NULL || timestamp_rect == NULL) {
+        cerr << "[ERROR] (Watermark and Timestamp removeal) There is no registered aspect ratio for this video size." << endl;
+        return false;
+    }
 
     cerr << "Config File Name: " << config_file_name.c_str() << endl;
     cerr << "Vid File Name: " << vid_file_name.c_str() << endl;
@@ -176,7 +192,9 @@ int main(int argc, char **argv) {
 #ifdef _BOINC_APP_
         boinc_fraction_done(frame_pos/total);
 
+#ifdef GUI
         int key = waitKey(1);
+#endif
         if(boinc_time_to_checkpoint() || key == 's') {
             cerr << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
             write_checkpoint();
@@ -198,18 +216,22 @@ int main(int argc, char **argv) {
 		detector.detect(frame, keypoints_frame);
 
         // Remove keypoints in watermark and timestamp.
+        cerr << "Remove watermark stuff." << endl;
         for (int i=0; i<keypoints_frame.size(); i++) {
             cv::Point pt = keypoints_frame.at(i).pt;
             bool watermark = true;
             bool timestamp = true;
-            if (!remove_watermark || pt.x < watermark_top_left.x || pt.x > watermark_bottom_right.x || pt.y < watermark_top_left.y || pt.y > watermark_bottom_right.y) {
+            if (!watermark_rect->contains(pt)) watermark = false;
+            if (!timestamp_rect->contains(pt)) timestamp = false;
+            /*if (!remove_watermark || pt.x < watermark_top_left.x || pt.x > watermark_bottom_right.x || pt.y < watermark_top_left.y || pt.y > watermark_bottom_right.y) {
                 watermark = false;
             }
-            if (!remove_timestamp || pt.x < time_top_left.x || pt.x > time_bottom_right.x || pt.y < time_top_left.y || pt.y > time_bottom_right.y) {
+            if (!remove_timestamp || pt.x < timestamp_top_left.x || pt.x > timestamp_bottom_right.x || pt.y < timestamp_top_left.y || pt.y > timestamp_bottom_right.y) {
                 timestamp = false;
-            }
+            }*/
             if (!watermark && !timestamp) keypoints.push_back(keypoints_frame.at(i));
         }
+        cerr << "Done removeing stuff." << endl;
         keypoints_frame = keypoints;
 
 		SurfDescriptorExtractor extractor;
@@ -275,8 +297,8 @@ int main(int argc, char **argv) {
 #ifdef GUI
         // Code to draw the points.
         Mat frame_points = frame;
-        rectangle(frame_points, watermark_top_left, watermark_bottom_right, Scalar(0, 0, 100));
-        rectangle(frame_points, time_top_left, time_bottom_right, Scalar(0, 0, 100));
+        rectangle(frame_points, *watermark_rect, Scalar(0, 0, 100));
+        rectangle(frame_points, *timestamp_rect, Scalar(0, 0, 100));
         drawKeypoints(frame, keypoints_frame, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
         // Display image.
@@ -501,6 +523,31 @@ int skip_frames(VideoCapture capture, int n) {
         }
     }
     return n;
+}
+
+/** @function loadVideoTypes **/
+void loadVideoTypes() {
+    VideoType a;
+    a.video_width = 708;
+    a.video_height = 480;
+    cv::Point watermark_top_left_a(12, 12);
+    cv::Point watermark_bottom_right_a(90, 55);
+    cv::Point timestamp_top_left_a(520, 415);
+    cv::Point timestamp_bottom_right_a(680, 470);
+    a.watermark_rect = new cv::Rect(watermark_top_left_a, watermark_bottom_right_a);
+    a.timestamp_rect = new cv::Rect(timestamp_top_left_a, timestamp_bottom_right_a);
+    video_types.push_back(a);
+
+    VideoType b;
+    b.video_width = 352;
+    b.video_height = 240;
+    cv::Point watermark_top_left_b(12, 12);
+    cv::Point watermark_bottom_right_b(90, 55);
+    cv::Point timestamp_top_left_b(240, 190);
+    cv::Point timestamp_bottom_right_b(335, 230);
+    b.watermark_rect = new cv::Rect(watermark_top_left_b, watermark_bottom_right_b);
+    b.timestamp_rect = new cv::Rect(timestamp_top_left_b, timestamp_bottom_right_b);
+    video_types.push_back(b);
 }
 
 /** @function readParams **/
