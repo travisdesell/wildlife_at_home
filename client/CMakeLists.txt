@@ -11,5 +11,5 @@ add_executable(wildlife_surf_collect wildlife_surf_collect)
 find_package(OpenCV REQUIRED)
 find_package(BOINC REQUIRED)
 
-include_directories(${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
+include_directories("${PROJECT_SOURCE_DIR}/../include/"${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
 target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
