@@ -44,6 +44,8 @@
 #include "undvc_common/parse_xml.hxx"
 #include "undvc_common/file_io.hxx"
 
+#include "wildlife_surf.hpp"
+
 using std::string;
 using std::vector;
 using std::ifstream;
@@ -52,11 +54,6 @@ using std::stringstream;
 using std::string;
 using std::endl;
 using namespace cv;
-
-struct EventType {
-    string name;
-    Mat descriptors;
-};
 
 int init_result(RESULT& result, void*& data) {
     OUTPUT_FILE_INFO fi;
@@ -80,12 +77,12 @@ int init_result(RESULT& result, void*& data) {
             log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy: Failed to get output file path: %d %s\n", result.id, result.name);
             exit(0);
             return retval;
-        } 
+        }
 
         FileStorage fs(fi.path.c_str(), FileStorage::READ);
         for (unsigned int i=0; i<event_names.size(); i++) {
             EventType *temp = new EventType;
-            temp->name = event_names[i];
+            temp->id = event_names[i];
             fs[event_names[i]] >> temp->descriptors;
             event_types->push_back(temp);
         }
@@ -102,6 +99,7 @@ int init_result(RESULT& result, void*& data) {
         return ERR_XML_PARSE;
     }
 
+    // Check for any null pointer errors
     vector<EventType*> *desc = (vector<EventType*>*)data;
     for (unsigned int i=0; i<desc->size(); i++) {
         if (desc->at(i) == NULL) {
@@ -130,11 +128,11 @@ int compare_results(
         exit(0);
         return 0;
     }
-    
+
     for (unsigned int i=0; i<desc1->size(); i++) {
-        if (desc1->at(i)->name != desc2->at(i)->name) {
+        if (desc1->at(i)->id != desc2->at(i)->id) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", desc1->at(i)->name.c_str(), desc2->at(i)->name.c_str());
+            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", desc1->at(i)->id.c_str(), desc2->at(i)->id.c_str());
             exit(0);
             return 0;
         }

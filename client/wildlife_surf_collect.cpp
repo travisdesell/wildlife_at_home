@@ -23,15 +23,12 @@
 #include "mfile.h"
 #endif
 
+#include "wildlife_surf.hpp"
+
 #define GUI
 
 using namespace std;
 using namespace cv;
-
-struct EventType {
-	string id;
-	Mat descriptors;
-};
 
 struct Event {
 	 EventType *type;

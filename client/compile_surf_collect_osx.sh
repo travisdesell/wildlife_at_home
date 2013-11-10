@@ -1,6 +1,7 @@
 #/opt/local/bin/g++-mp-4.7 -std=c++11 \
 /usr/bin/llvm-g++-4.2 \
     -D_BOINC_APP_ \
+    -I../include \
 	-I../../ffmpeg \
     -I../../boinc \
     -I../../boinc/api \
