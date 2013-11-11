@@ -239,7 +239,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         cout << "\tinfile[1]: " << infiles[1] << endl;
         n_files = 2;
 
-        sprintf(command_line, " input.config video.mp4");
+        sprintf(command_line, " --c input.config --v video.mp4");
     } else {
         video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
         infiles[0] = video_filename.c_str();
