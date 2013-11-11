@@ -36,14 +36,19 @@
 #include "mysql.h"
 #include "boinc_db.h"
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+
 #include "undvc_common/file_io.hxx"
 #include "undvc_common/parse_xml.hxx"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 
 #include "wildlife_surf.hpp"
 
 using namespace std;
+using namespace cv;
 
 #define mysql_query_check(conn, query) __mysql_check (conn, query, __FILE__, __LINE__)
 
@@ -108,13 +113,13 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
 
         if (row == NULL) {
             log_messages.printf(MSG_CRITICAL, "Could not get row from workunit with query '%s'. Error: %d -- '%s'\n", xml_doc.c_str(), mysql_errno(boinc_db.mysql), mysql_error(boinc_db.mysql));
-            exit(1);
+            return 1;
         }
 
         xml_doc = row[0];
     } else {
         log_messages.printf(MSG_CRITICAL, "Could execute query '%s'. Error: %d -- '%s'\n", xml_doc.c_str(), mysql_errno(boinc_db.mysql), mysql_error(boinc_db.mysql));
-        exit(1);
+        return 1;
     }
     mysql_free_result(my_result);
 
@@ -128,14 +133,14 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     } catch (string error_message) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy assimilate_handler([RESULT#%d %s]) failed with error: %s\n", canonical_result.id, canonical_result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n'%s'\n", xml_doc.c_str());
-        exit(1);
-
+        return 1;
         return 0;
     }
 
+    OUTPUT_FILE_INFO fi;
     vector<EventType*> event_types;
     try {
-        string events_str = parse_xml<string>(result.stderr_out, "event_names");
+        string events_str = parse_xml<string>(canonical_result.stderr_out, "event_names");
         stringstream ss(events_str);
         vector<string> event_names;
 
@@ -146,30 +151,30 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
             event_names.push_back(temp);
         }
 
-        int retval = get_output_file_path(result, fi.path);
+        int retval = get_output_file_path(canonical_result, fi.path);
         if (retval) {
-            log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy: Failed to get output file path: %d %s\n", result.id, result.name);
-            exit(0);
+            log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy: Failed to get output file path: %d %s\n", canonical_result.id, canonical_result.name);
+            return 1;
             return retval;
         }
 
         FileStorage fs(fi.path.c_str(), FileStorage::READ);
         for (unsigned int i=0; i<event_names.size(); i++) {
             EventType *temp = new EventType;
-            temp->name = event_names[i];
+            temp->id = event_names[i];
             fs[event_names[i]] >> temp->descriptors;
             event_types.push_back(temp);
         }
 
         fs.release();
     } catch (string error_message) {
-        log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
-        log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
-        result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
-        result.validate_state = VALIDATE_STATE_INVALID;
+        log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", canonical_result.id, canonical_result.name, error_message.c_str());
+        log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", canonical_result.stderr_out);
+        canonical_result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
+        canonical_result.validate_state = VALIDATE_STATE_INVALID;
 
-        log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
-        return ERR_XML_PARSE;
+        log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", canonical_result.name);
+        return 1; //Nothing ot assimilate.
     }
 
     // Here we should have a list of event types.
@@ -186,7 +191,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
 
     if (first_pos == string::npos || second_pos == string::npos) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy assimilate_handler failed with 'malformed result name error', result name: %s\n", result_name.c_str());
-        exit(1);
+        return 1;
     }
 
     string video_id = result_name.substr( first_pos, (second_pos - first_pos) );
@@ -205,21 +210,32 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     cout << " got video result" << endl;
 
     MYSQL_ROW full_video_row = mysql_fetch_row(video_result);
-    int species_id = atoi(full_video_row[0]);
-    int location_id = atoi(full_video_row[1]);
+    string species_id(full_video_row[0]);
+    string location_id(full_video_row[1]);
 
     mysql_free_result(video_result);
 
     // Here we need to create/insert files for each event type into a stored
     // directory structure.
     for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-        string filename = "/projects/wildlife/feature_files/" + tag_str + "/" + species_id + "/" + location_id + "/" + video_id + "/" + (*it)->id.c_str() + ".desc";
-        FileStorage outfile(filename, FileStorage::WRITE)
+        string pathname = "/projects/wildlife/feature_files/" + tag_str + "/" + species_id + "/" + location_id + "/" + video_id + "/";
+        string filename = (*it)->id + ".desc";
+
+        boost::filesystem::path path(pathname);
+        boost::system::error_code returnedError;
+        boost::filesystem::create_directories(path, returnedError);
+
+        if(returnedError) {
+            log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy failed with 'cannot create directories error', result name: %s\n", result_name.c_str());
+            return 1;
+        }
+
+        string full_filename = pathname + filename;
+        cerr << "Writing to: " <<  full_filename << endl;
+        FileStorage outfile(full_filename, FileStorage::WRITE);
         cerr << "Write: " << (*it)->id.c_str() << endl;
         outfile << (*it)->id << (*it)->descriptors;
         outfile.release();
     }
-
-    exit(0);
     return 0;
 }

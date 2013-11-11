@@ -35,7 +35,7 @@ unset(Boost_INCLUDE_DIR CACHE)
 unset(Boost_LIBRARY_DIRS CACHE)
 
 #This may need to be updated or Linux/Windows
-set(CMAKE_LIBRARY_PATH ~/boost_1_53_0/stage/lib ${CMAKE_LIBRARY_PATH} /Users/deselt/Dropbox/software/opencv/lib /opt/local/lib)
+set(CMAKE_LIBRARY_PATH /home/tdesell/boost_1_53_0/stage/lib ${CMAKE_LIBRARY_PATH} /Users/deselt/Dropbox/software/opencv/lib /opt/local/lib)
 
 #this adds the undvc_common FindX.cmake modules to look for BOINC and OpenCV
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/cmake/Modules/")
@@ -48,8 +48,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/c
 #set(BOOST_COMPILER "-vc100")
 #set(Boost_COMPILER "-vc100")
 #set(Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0")
-find_package(Boost REQUIRED filesystem system)
-include_directories (${Boost_INCLUDE_DIR})
+#set(Boost_USE_MULTITHREADED  OFF)
+#find_package(Boost REQUIRED filesystem system)
+#include_directories (${Boost_INCLUDE_DIR})
 
 include_directories (${PROJECT_SOURCE_DIR})
 
