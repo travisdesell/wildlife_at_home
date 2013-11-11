@@ -25,8 +25,6 @@
 
 #include "wildlife_surf.hpp"
 
-#define GUI
-
 using namespace std;
 using namespace cv;
 
@@ -174,7 +172,7 @@ int main(int argc, char **argv) {
         }
     }
     if (watermark_rect == NULL || timestamp_rect == NULL) {
-        cerr << "[ERROR] (Watermark and Timestamp removeal) There is no registered aspect ratio for this video size." << endl;
+        cerr << "[ERROR] (Watermark and Timestamp removeal) There is no registered aspect ratio for this video size (" << frame_width << " X " << frame_height << ")." << endl;
         return false;
     }
 
@@ -192,7 +190,7 @@ int main(int argc, char **argv) {
 #ifdef GUI
         int key = waitKey(1);
 #endif
-        if(boinc_time_to_checkpoint() || key == 's') {
+        if(boinc_time_to_checkpoint()) {
             cerr << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
             write_checkpoint();
             boinc_checkpoint_completed();
@@ -213,7 +211,6 @@ int main(int argc, char **argv) {
 		detector.detect(frame, keypoints_frame);
 
         // Remove keypoints in watermark and timestamp.
-        cerr << "Remove watermark stuff." << endl;
         for (int i=0; i<keypoints_frame.size(); i++) {
             cv::Point pt = keypoints_frame.at(i).pt;
             bool watermark = true;
@@ -228,7 +225,6 @@ int main(int argc, char **argv) {
             }*/
             if (!watermark && !timestamp) keypoints.push_back(keypoints_frame.at(i));
         }
-        cerr << "Done removeing stuff." << endl;
         keypoints_frame = keypoints;
 
 		SurfDescriptorExtractor extractor;
@@ -288,8 +284,10 @@ int main(int argc, char **argv) {
                 }
             }
         }
-        if(activeEvents == 0)
+        if(activeEvents == 0) {
             cerr << "[ERROR] There are no active events! (Problem with expert classification.)" << endl;
+            return false;
+        }
 
 #ifdef GUI
         // Code to draw the points.
@@ -525,7 +523,7 @@ int skip_frames(VideoCapture capture, int n) {
 /** @function loadVideoTypes **/
 void loadVideoTypes() {
     VideoType a;
-    a.video_width = 708;
+    a.video_width = 704;
     a.video_height = 480;
     cv::Point watermark_top_left_a(12, 12);
     cv::Point watermark_bottom_right_a(90, 55);
