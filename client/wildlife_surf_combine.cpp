@@ -1,16 +1,36 @@
 #include <iostream>
 #include <opencv2/nonfree/features2d.hpp>
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace cv;
 
-void printUsage();
 
 int main(int argc, char **argv) {
-	if (argc < 3) {
-		printUsage();
-		return -1;
-	}
+    namespace po = boost::program_options;
+    namespace fs = boost::filesystem;
+
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help", "Show help menu")
+        ("root", "Root feature directory")
+        ("tag", "Tag of features to be combined")
+    ;
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+    
+    if (vm.count("help")) {
+        cout << desc << endl;
+        return 1;
+    }
+
+    string working_directory = vm["root"] + vm["tag"];
+    for (fs::recursive_directory_iterator end, dir(working_directory); dir != end; ++dir) {
+        cout << *dir << endl;
+    }
+    exit(0);
 	
 	string featFileName(argv[1]);
 	

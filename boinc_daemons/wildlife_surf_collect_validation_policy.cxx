@@ -60,7 +60,7 @@ int init_result(RESULT& result, void*& data) {
     int retval;
 
     try {
-        string events_str = parse_xml<string>(result.stderr_out, "event_names");
+        string events_str = parse_xml<string>(result.stderr_out, "event_ids");
         stringstream ss(events_str);
         vector<string> event_names;
         vector<EventType*> *event_types = new vector<EventType*>();
@@ -68,7 +68,7 @@ int init_result(RESULT& result, void*& data) {
         string temp;
         std::getline(ss, temp, '\n');
         while(std::getline(ss, temp, '\n')) {
-            log_messages.printf(MSG_DEBUG, "Event name: %s\n", temp.c_str());
+            log_messages.printf(MSG_DEBUG, "Event id: %s\n", temp.c_str());
             event_names.push_back(temp);
         }
 
@@ -80,6 +80,7 @@ int init_result(RESULT& result, void*& data) {
         }
 
         FileStorage fs(fi.path.c_str(), FileStorage::READ);
+        log_messages.printf(MSG_DEBUG, "Adding events to data structure.\n");
         for (unsigned int i=0; i<event_names.size(); i++) {
             EventType *temp = new EventType;
             temp->id = event_names[i];
@@ -96,10 +97,12 @@ int init_result(RESULT& result, void*& data) {
         result.validate_state = VALIDATE_STATE_INVALID;
 
         log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
+        exit(0);
         return ERR_XML_PARSE;
     }
 
     // Check for any null pointer errors
+    log_messages.printf(MSG_DEBUG, "Checking for null pointer errors.\n");
     vector<EventType*> *desc = (vector<EventType*>*)data;
     for (unsigned int i=0; i<desc->size(); i++) {
         if (desc->at(i) == NULL) {
@@ -109,6 +112,7 @@ int init_result(RESULT& result, void*& data) {
         }
     }
 
+    log_messages.printf(MSG_DEBUG, "Successful.\n");
     //exit(0);
     return 0;
 }
@@ -122,6 +126,7 @@ int compare_results(
     vector<EventType*> *desc1 = (vector<EventType*>*)data1;
     vector<EventType*> *desc2 = (vector<EventType*>*)data2;
 
+    log_messages.printf(MSG_DEBUG, "Check number of events.\n");
     if(desc1->size() != desc2->size()) {
         match = false;
         log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)desc1->size(), (int)desc2->size());
@@ -130,6 +135,7 @@ int compare_results(
     }
 
     for (unsigned int i=0; i<desc1->size(); i++) {
+        log_messages.printf(MSG_DEBUG, "Check event names.\n");
         if (desc1->at(i)->id != desc2->at(i)->id) {
             match = false;
             log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", desc1->at(i)->id.c_str(), desc2->at(i)->id.c_str());
@@ -138,7 +144,16 @@ int compare_results(
         }
 
         int matches = 0;
+
+        log_messages.printf(MSG_DEBUG, "Check number of descriptors.\n");
+        if (desc1->at(i)->descriptors.rows != desc2->at(i)->descriptors.rows) {
+            match = false;
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d\n", (int)desc1->at(i)->descriptors.rows, (int)desc2->at(i)->descriptors.rows);
+            //exit(0);
+            return 1;
+        }
         Mat temp = desc1->at(i)->descriptors - desc2->at(i)->descriptors;
+        log_messages.printf(MSG_DEBUG, "Check descriptors.\n");
         for (int x=0; x<temp.rows; x++) {
             bool sub_match = true;
             for (int y=0; y<temp.cols; y++) {
@@ -151,7 +166,8 @@ int compare_results(
         }
         if (matches < temp.rows) {
             log_messages.printf(MSG_CRITICAL, "%d/%d (%f) of descriptors match for results %d and %d \n", matches, temp.rows, (float)matches/temp.rows*100, r1.id, r2.id);
-            exit(0);
+            //exit(0);
+            return 1;
             return ERR_OPENDIR;
         }
     }
