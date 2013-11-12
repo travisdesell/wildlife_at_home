@@ -173,7 +173,10 @@ int main(int argc, char **argv) {
     }
     if (watermark_rect == NULL || timestamp_rect == NULL) {
         cerr << "[ERROR] (Watermark and Timestamp removeal) There is no registered aspect ratio for this video size (" << frame_width << " X " << frame_height << ")." << endl;
-        return false;
+#ifdef _BOINC_APP_
+        boinc_finish(1);
+#endif
+        exit(1);
     }
 
     cerr << "Config File Name: " << config_file_name.c_str() << endl;
@@ -286,7 +289,10 @@ int main(int argc, char **argv) {
         }
         if(activeEvents == 0) {
             cerr << "[ERROR] There are no active events! (Problem with expert classification.)" << endl;
-            return false;
+#ifdef _BOINC_APP_
+            boinc_finish(1);
+#endif
+            exit(1);
         }
 
 #ifdef GUI

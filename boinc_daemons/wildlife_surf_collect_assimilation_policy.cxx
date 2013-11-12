@@ -140,14 +140,14 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     OUTPUT_FILE_INFO fi;
     vector<EventType*> event_types;
     try {
-        string events_str = parse_xml<string>(canonical_result.stderr_out, "event_names");
+        string events_str = parse_xml<string>(canonical_result.stderr_out, "event_ids");
         stringstream ss(events_str);
         vector<string> event_names;
 
         string temp;
         std::getline(ss, temp, '\n');
         while(std::getline(ss, temp, '\n')) {
-            log_messages.printf(MSG_DEBUG, "Event name: %s\n", temp.c_str());
+            log_messages.printf(MSG_DEBUG, "Event id: %s\n", temp.c_str());
             event_names.push_back(temp);
         }
 
@@ -174,7 +174,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
         canonical_result.validate_state = VALIDATE_STATE_INVALID;
 
         log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", canonical_result.name);
-        return 1; //Nothing ot assimilate.
+        return 0; //Nothing ot assimilate.
     }
 
     // Here we should have a list of event types.
