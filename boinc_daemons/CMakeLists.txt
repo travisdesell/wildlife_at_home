@@ -2,6 +2,8 @@ find_package(MySQL REQUIRED)
 find_package(BOINC REQUIRED)
 find_package(OpenCV REQUIRED)
 
+MESSAGE(STATUS "OpenCV_LIBRARIES: " ${OpenCV_LIBRARIES})
+
 find_path(BOINC_INCLUDE_DIR config.h PATHS /boinc/src/boinc/ /boinc/)
 
 include_directories(
