@@ -12,7 +12,7 @@ using namespace cv;
 EventType* getEventType(string);
 
 string tag_dir;
-string root_dir = "/projects/widlife/feature_files/";
+string root_dir = "/projects/wildlife/feature_files/";
 string output_dir = "combined";
 vector<EventType*> event_types;
 
