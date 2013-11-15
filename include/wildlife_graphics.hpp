@@ -2,6 +2,7 @@
 #define WILDLIFE_GRAPHICS_HEADER
 
 #include <opencv2/core/core.hpp>
+#include <boinc_api.h>
 
 struct UC_SHMEM {
     double update_time;
