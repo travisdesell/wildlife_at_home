@@ -87,11 +87,20 @@ int main(int argc, char **argv) {
 
     for(int x=0; x<differenceMat.rows; x++) {
         float col_total = 0;
+        float col_max = -100;
+        float col_min = 100;
+        Scalar mean;
+        Scalar std_dev;
+        meanStdDev(differenceMat.row(x), mean, std_dev);
         for(int y=0; y<differenceMat.cols; y++) {
-            col_total += differenceMat.at<float>(x,y);
+            float d = differenceMat.at<float>(x,y);
+            col_total += d;
+            if (d > col_max) col_max = d;
+            if (d < col_min) col_min = d;
             //cout << "(" << x << "," << y << ") " << differenceMat.at<float>(x, y) << endl; 
         }
-        cout << "Row " << x << " mean: " << col_total/differenceMat.cols << endl;
+        if (std_dev[0] < 0.2 && mean[0] > 1.0)
+            cout << "Row " << x << " mean: " << mean[0] << " max: " << col_max << " min: " << col_min << " std_dev: " << std_dev[0] << endl;
     }
     /*
     string combined_feats_directory = working_directory + "/" + output_dir + "/";
