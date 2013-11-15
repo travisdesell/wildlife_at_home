@@ -84,6 +84,15 @@ int main(int argc, char **argv) {
 
     Mat differenceMat = getDifferenceMatrix(event_type_a.descriptors, event_type_b.descriptors);
     cout << differenceMat.rows << "x" << differenceMat.cols << endl;
+
+    for(int x=0; x<differenceMat.rows; x++) {
+        float col_total = 0;
+        for(int y=0; y<differenceMat.cols; y++) {
+            col_total += differenceMat.at<float>(x,y);
+            //cout << "(" << x << "," << y << ") " << differenceMat.at<float>(x, y) << endl; 
+        }
+        cout << "Row " << x << " mean: " << col_total/differenceMat.cols << endl;
+    }
     /*
     string combined_feats_directory = working_directory + "/" + output_dir + "/";
     for (int i=0; i<event_types.size(); i++) {
