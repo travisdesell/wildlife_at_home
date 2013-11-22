@@ -11,16 +11,25 @@ ENDIF()
 
 #set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 #set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+IF (APPLEawdawd)
+    MESSAGE(STATUS "Setting FLAGS for APPLE")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.5.8")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5.8")
+ENDIF()
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 #add_executable(wildlife_surf_collect wildlife_surf_collect)
 
-find_package(OpenCV REQUIRED videostab nonfree)
+find_package(OpenCV REQUIRED COMPONENTS videostab nonfree)
 find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
-#find_package(BOINC REQUIRED)
+find_package(BOINC REQUIRED)
 
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
+
+add_executable(wildlife_surf_collect wildlife_surf_collect)
+include_directories("${PROJECT_SOURCE_DIR}/../include/" ${BOINC_INCLUDE_DIR})
+target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
 
 add_executable(wildlife_surf_combine wildlife_surf_combine)
 include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})

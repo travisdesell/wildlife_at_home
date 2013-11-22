@@ -1,4 +1,4 @@
-# - Find BOINC 
+# - Find BOINC
 # Find the native BOINC includes and libraries
 #
 #  BOINC_INCLUDE_DIR        - where to find boinc.h, etc.
@@ -16,35 +16,35 @@ FIND_PATH(BOINC_INCLUDE_DIR boinc_api.h
     /usr/local/include/boinc
     /boinc/src/boinc
     /home/tdesell/boinc
-    /Users/deselt/Software/boinc
+    /Users/kgoehner/repos/boinc/api
     ~/BOINC_SOURCE
 )
 MESSAGE(STATUS "BOINC include directory: ${BOINC_INCLUDE_DIR}")
 
 FIND_LIBRARY(BOINC_LIBRARY
     NAMES boinc
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
 MESSAGE(STATUS "BOINC library: ${BOINC_LIBRARY}")
 
 FIND_LIBRARY(BOINC_CRYPT_LIBRARY
     NAMES boinc_crypt
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/Deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
 MESSAGE(STATUS "BOINC crypt library: ${BOINC_CRYPT_LIBRARY}")
 
 FIND_LIBRARY(BOINC_API_LIBRARY
     NAMES boinc_api
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/Deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
     PATH_SUFFIXES api
 )
 MESSAGE(STATUS "BOINC api library: ${BOINC_API_LIBRARY}")
 
 FIND_LIBRARY(BOINC_SCHED_LIBRARY
     NAMES sched
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/Deselt/Software/boinc/mac_build/build/Deployment/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
     PATH_SUFFIXES sched
 )
 MESSAGE(STATUS "BOINC sched library: ${BOINC_SCHED_LIBRARY}")
@@ -54,8 +54,8 @@ IF (BOINC_INCLUDE_DIR AND BOINC_LIBRARY AND BOINC_API_LIBRARY)
     SET (BOINC_APP_FOUND TRUE)
     SET (BOINC_APP_LIBRARIES ${BOINC_API_LIBRARY} ${BOINC_LIBRARY})
 
-    MESSAGE(STATUS "Found BOINC_APP_LIBRARIES: ${BOINC_APP_LIBRARIES}")
-    MESSAGE(STATUS "BOINC include directory: ${BOINC_INCLUDE_DIR}")
+    MESSAGE(STATUS "BOINC_APP_LIBRARIES: ${BOINC_APP_LIBRARIES}")
+    MESSAGE(STATUS "BOINC_INCLUDE_DIR: ${BOINC_INCLUDE_DIR}")
 ELSE (BOINC_INCLUDE_DIR AND BOINC_LIBRARY AND BOINC_API_LIBRARY)
     SET (BOINC_APP_FOUND FALSE)
     SET (BOINC_APP_LIBRARIES )
@@ -67,7 +67,7 @@ IF (BOINC_INCLUDE_DIR AND BOINC_LIBRARY AND BOINC_API_LIBRARY AND BOINC_SCHED_LI
     SET( BOINC_SERVER_LIBRARIES ${BOINC_SCHED_LIBRARY} ${BOINC_LIBRARY} ${BOINC_API_LIBRARY} ${BOINC_CRYPT_LIBRARY})
 
     MESSAGE(STATUS "Found BOINC_SERVER_LIBRARIES: ${BOINC_SERVER_LIBRARIES}")
-    MESSAGE(STATUS "BOINC include directory: ${BOINC_INCLUDE_DIR}")
+    MESSAGE(STATUS "BOINC_INCLUDE_DIR: ${BOINC_INCLUDE_DIR}")
 ELSE (BOINC_INCLUDE_DIR AND BOINC_LIBRARY AND BOINC_API_LIBRARY AND BOINC_SCHED_LIBRARY AND BOINC_CRYPT_LIBRARY)
     SET(BOINC_FOUND FALSE)
     SET( BOINC_LIBRARIES )
