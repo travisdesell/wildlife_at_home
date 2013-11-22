@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(Wildlife_Client)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+
 IF(OpenCV_DIR)
     MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 ELSE()
@@ -29,12 +31,16 @@ find_package(BOINC REQUIRED)
 
 add_executable(wildlife_surf_collect wildlife_surf_collect)
 include_directories("${PROJECT_SOURCE_DIR}/../include/" ${BOINC_INCLUDE_DIR})
-target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
+
+#add_executable(wildlife_graphics_app wildlife_graphics_app)
+#include_directories (${PROJECT_SOURCE_DIR}/../include/ ${BOINC_INCLUDE_DIR})
+#target_link_libraries(wildlife_graphics_app ${BOINC_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(wildlife_surf_combine wildlife_surf_combine)
-include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/../include/ ${Boost_INCLUDE_DIR})
 target_link_libraries(wildlife_surf_combine ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(wildlife_surf_analyze wildlife_surf_analyze)
-include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/../include/ ${Boost_INCLUDE_DIR})
 target_link_libraries(wildlife_surf_analyze ${Boost_LIBRARIES} ${OpenCV_LIBS})
