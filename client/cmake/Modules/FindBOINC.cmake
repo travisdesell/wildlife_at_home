@@ -16,38 +16,38 @@ FIND_PATH(BOINC_INCLUDE_DIR boinc_api.h
     /usr/local/include/boinc
     /boinc/src/boinc
     /home/tdesell/boinc
-    /Users/kgoehner/repos/boinc/api
+    /Users/kgoehner/repos/boinc/install/include/boinc
     ~/BOINC_SOURCE
 )
-MESSAGE(STATUS "BOINC include directory: ${BOINC_INCLUDE_DIR}")
+MESSAGE(STATUS "BOINC_INCLUDE_DIR: ${BOINC_INCLUDE_DIR}")
 
 FIND_LIBRARY(BOINC_LIBRARY
     NAMES boinc
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
-MESSAGE(STATUS "BOINC library: ${BOINC_LIBRARY}")
+MESSAGE(STATUS "BOINC_LIBRARY: ${BOINC_LIBRARY}")
 
 FIND_LIBRARY(BOINC_CRYPT_LIBRARY
     NAMES boinc_crypt
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
-MESSAGE(STATUS "BOINC crypt library: ${BOINC_CRYPT_LIBRARY}")
+MESSAGE(STATUS "BOINC_CRYPT_LIBRARY: ${BOINC_CRYPT_LIBRARY}")
 
 FIND_LIBRARY(BOINC_API_LIBRARY
     NAMES boinc_api
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
     PATH_SUFFIXES api
 )
-MESSAGE(STATUS "BOINC api library: ${BOINC_API_LIBRARY}")
+MESSAGE(STATUS "BOINC_API_LIBRARY: ${BOINC_API_LIBRARY}")
 
 FIND_LIBRARY(BOINC_SCHED_LIBRARY
     NAMES sched
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/lib/ ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
     PATH_SUFFIXES sched
 )
-MESSAGE(STATUS "BOINC sched library: ${BOINC_SCHED_LIBRARY}")
+MESSAGE(STATUS "BOINC_SCHED_LIBRARY: ${BOINC_SCHED_LIBRARY}")
 
 IF (BOINC_INCLUDE_DIR AND BOINC_LIBRARY AND BOINC_API_LIBRARY)
     add_definitions( -D_BOINC_APP_ )
