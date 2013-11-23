@@ -6,20 +6,27 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/
 IF(OpenCV_DIR)
     MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 ELSE()
-    #set(OpenCV_DIR /home/kgoehner/opencv/install/share/OpenCV/)
-    set(OpenCV_DIR ~/repos/opencv/install/share/OpenCV/)
+    IF(APPLE)
+        set(OpenCV_DIR ~/repos/opencv/install/share/OpenCV/)
+    ELSE()
+        set(OpenCV_DIR /home/kgoehner/opencv/install/share/OpenCV/)
+    ENDIF()
     MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 ENDIF()
 
-#set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-#set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
-IF (APPLEawdawd)
+IF (LINK_STATIC_LIBS)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+    set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
+ENDIF()
+
+IF (APPLE)
     MESSAGE(STATUS "Setting FLAGS for APPLE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.5.8")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5.8")
 ENDIF()
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
+
+# Executables
 #add_executable(wildlife_surf_collect wildlife_surf_collect)
 
 find_package(OpenCV REQUIRED COMPONENTS videostab nonfree)
