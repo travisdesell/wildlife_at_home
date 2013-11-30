@@ -9,6 +9,7 @@ function attempt_query_with_ping($sql, &$db) {
         }
     }
 
-    return mysql_query($sql, $db);
+    $result = mysql_query($sql, $db);
+    return $result;
 }
 ?>

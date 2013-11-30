@@ -1,11 +1,10 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/generate_count_nav.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/get_video_segment_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
@@ -19,26 +18,20 @@ if (array_key_exists('filters', $_POST)) {
 }
 
 if (array_key_exists('instructional', $filters) && $filters['instructional'] == 'true') {
-    $user = get_logged_in_user(false);
-    $user_id = $user->id;
+    $user = get_user(false);
+    $user_id = $user['id'];
 } else if ($_POST['all_users'] == 'true') {
-    $user = get_logged_in_user();
-    $user_id = $user->id;
+    $user = get_user();
+    $user_id = $user['id'];
 
-    ini_set("mysql.connect_timeout", 300);
-    ini_set("default_socket_timeout", 300);
-
-    $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
-    mysql_select_db("wildlife", $boinc_db);
-
-    if (!is_special_user($user_id, $boinc_db)) {
+    if (!is_special_user__fixme($user, true)) {
         //don't let non-project scientists display all videos
         error_log("NOT SPECIAL USER!");
         die();
     }
 } else {
-    $user = get_logged_in_user();
-    $user_id = $user->id;
+    $user = get_user();
+    $user_id = $user['id'];
 }
 
 create_filter($filters, $filter, $reported_filter);

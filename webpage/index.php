@@ -323,6 +323,10 @@ echo"
                         </li>
 
                         <li>
+                        Kyle Goehner, Graduate Research Assistant in Computer Science, University of North Dakota
+                        </li>
+
+                        <li>
                         Julia Johnson, Undergraduate Research Assistant in Biology, University of North Dakota
                         </li>
                         <li>

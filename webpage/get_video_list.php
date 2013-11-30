@@ -1,11 +1,10 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/get_video_segment_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
@@ -36,13 +35,13 @@ $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
 mysql_select_db("wildlife", $boinc_db);
 
 if (array_key_exists('instructional', $filters) && $filters['instructional'] == 'true') {
-    $user = get_logged_in_user(false);
-    $user_id = $user->id;
+    $user = get_user(false);
+    $user_id = $user['id'];
 } else if ($_POST['all_users'] == 'true') {
-    $user = get_logged_in_user();
-    $user_id = $user->id;
+    $user = get_user();
+    $user_id = $user['id'];
 
-    if (!is_special_user($user_id, $boinc_db)) {
+    if (!is_special_user__fixme($user, true)) {
         echo "<div class='well well-large' style='padding-top:15px; padding-bottom:5px'>";
         echo "<div class='row-fluid>";
         echo "<div class='span12' style='margin-left:0px;'>";
@@ -54,8 +53,8 @@ if (array_key_exists('instructional', $filters) && $filters['instructional'] == 
     }
 
 } else {
-    $user = get_logged_in_user();
-    $user_id = $user->id;
+    $user = get_user();
+    $user_id = $user['id'];
 }
 
 create_filter($filters, $filter, $reported_filter);
@@ -211,7 +210,8 @@ while ($row = mysql_fetch_assoc($result)) {
         set_marks($observation_row['chick_presence']);
         set_marks($observation_row['video_issue'], true);
 
-        $observation_row['user_id'] = get_user_from_id($observation_row['user_id'])->name;
+        $other_user = get_user_from_id__fixme($observation_row['user_id']);
+        $observation_row['user_id'] = $other_user['name'];
         $video_and_observations['observations'][] = $observation_row;
     }
 
@@ -219,7 +219,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
 }
 
-if (is_special_user($user_id, $boinc_db)) {
+if (is_special_user__fixme($user_id, false)) {
     $video_list['special_user'] = true;
 }
 

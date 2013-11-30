@@ -1,22 +1,21 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
-$user = get_logged_in_user(false);
+$user = get_user(false);
 if ($user != null) {
-    $user_id = $user->id;
-    $user_name = $user->name;
+    $user_id = $user['id'];
+    $user_name = $user['name'];
 }
 
 echo "
