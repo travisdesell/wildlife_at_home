@@ -338,4 +338,11 @@ foreach($directory_iterator as $filename => $path_object) {
 }
 
 echo $count . " videos in '" . $dir . "'\n";
+
+echo "updating total video progress\n";
+
+$query = "UPDATE progress AS p SET total_video_s = (SELECT SUM(duration_S) FROM video_2 AS v2 WHERE v2.species_id = p.species_id AND v2.location_id = p.location_id)";
+$results = mysql_query($query);
+if (!$results) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+
 ?>

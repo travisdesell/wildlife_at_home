@@ -1,7 +1,5 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 

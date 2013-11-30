@@ -1,17 +1,15 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-$user_name = $user->name;
+$user = get_user();
+$user_id = $user['id'];
+$user_name = $user['name'];
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
@@ -150,7 +148,20 @@ $row = mysql_fetch_assoc($result);
 
 $special_user = $row['special_user'];
 
-if (is_special_user($user_id, $boinc_db)) {
+/*
+$result2 = mysql_query("SELECT project_prefs FROM user WHERE id =$user_id", $boinc_db);
+$row2 = mysql_fetch_assoc($result2);
+
+$prefs = simplexml_load_string($row2['project_prefs']);
+print_r($prefs);
+
+$min_video_time = $prefs->minimum_video_time;
+$max_video_time = $prefs->maximum_video_time;
+
+echo "MIN VIDEO TIME IS: $min_video_time AND MAX VIDEO TIME IS: $max_video_time";}{{{
+ */
+
+if (is_special_user__fixme($user, true)) {
     echo "
         <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 5px; margin-bottom: 5px'> 
             <div class='row-fluid'>

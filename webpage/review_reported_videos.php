@@ -8,7 +8,7 @@ require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
@@ -105,9 +105,9 @@ echo "
     </style>
 ";
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-$user_name = $user->name;
+$user = get_user();
+$user_id = $user['id'];
+$user_name = $user['name'];
 
 $active_items = array(
                     'home' => '',
@@ -127,7 +127,7 @@ ini_set("default_socket_timeout", 300);
 $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
 mysql_select_db("wildlife", $boinc_db);
 
-if (!is_special_user($user_id, $boinc_db)) {
+if (!is_special_user__fixme($user)) {
     echo "
         <div class='well well-large' style='padding-top: 10px; padding-bottom: 0px; margin-top: 3px; margin-bottom: 5px'> 
             <div class='row-fluid'>

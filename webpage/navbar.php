@@ -1,31 +1,32 @@
 <?php
 
-require_once('../inc/util.inc');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 function print_navbar($active_items) {
     global $boinc_passwd, $boinc_user, $wildlife_passwd, $wildlife_user;
 
     $project_scientist = false;
-    $user = get_logged_in_user(false);
+    $user = get_user(false);
     $user_name = "";
     if ($user != null) {
-        $user_id = $user->id;
-        $user_name = $user->name;
+        $user_id = $user['id'];
+        $user_name = $user['name'];
 
         ini_set("mysql.connect_timeout", 300);
         ini_set("default_socket_timeout", 300);
 
         $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
         mysql_select_db("wildlife", $boinc_db);
-        if (is_special_user($user_id, $boinc_db)) $project_scientist = true;
+        if (is_special_user__fixme($user, false)) $project_scientist = true;
 
     } else {
         $user_name = "Your Account";
     }
+
+    if (!array_key_exists('project_management', $active_items)) $active_items['project_management'] = '';
 
 
     echo "
@@ -181,7 +182,7 @@ echo "                      <li class='dropdown " . $active_items['preferences']
                                 <li><a href='apps.php'>Applications</a></li>";
 
 if ($user != null) {
-    $url_tokens = url_tokens($user->authenticator);
+    $url_tokens = url_tokens__fixme($user['authenticator']);
     echo "                      <li class='divider'></li>
                                 <li><a href='logout.php?$url_tokens'>Log Out</a></li>";
 }

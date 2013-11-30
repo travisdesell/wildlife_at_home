@@ -1,22 +1,20 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
-$user = get_logged_in_user();
-$user_id = $user->id;
-$user_name = $user->name;
+$user = get_user();
+$user_id = $user['id'];
+$user_name = $user['name'];
 
 echo "
 <!DOCTYPE html>
@@ -274,7 +272,7 @@ echo $mustache_engine->render($filter_list_template, $filter_list);
 
     echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
     echo "<button type='button' class='btn btn-small btn-default btn-block' id='show-hidden-videos-button' data-toggle='button' style='padding-left:5px;'>Show Hidden Videos</button>";
-if (is_special_user($user_id, $boinc_db)) {
+if (is_special_user__fixme($user, true)) {
     echo "<button type='button' class='btn btn-small btn-default btn-block' id='show-all-videos-button' data-toggle='button' style='padding-left:5px;'>Show All Videos</button>";
 }
 echo "      </div>";

@@ -121,9 +121,27 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
+$prefs = simplexml_load_string($user->project_prefs);
+//print_r($prefs);
+
+$min_video_time = 0;
+if (array_key_exists('minimum_video_time', $prefs)) {
+//    error_log("minimum video_time exists!");
+    $min_video_time = $prefs->minimum_video_time * 60;
+}
+
+$max_video_time = 60 * 60;
+if (array_key_exists('maximum_video_time', $prefs)) {
+//    error_log("minimum video_time exists!");
+    $max_video_time = $prefs->maximum_video_time * 60;
+}
+
+//error_log("MIN VIDEO TIME IS: $min_video_time AND MAX VIDEO TIME IS: $max_video_time");
+
+
 //$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
 
-$query = "SELECT id, filename, duration_s, video_id FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.release_to_public = true AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
+$query = "SELECT id, filename, duration_s, video_id FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.release_to_public = true AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND duration_s >= $min_video_time AND duration_s <= $max_video_time AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -137,7 +155,7 @@ if (!$row) {
 
     $found = true;
 
-    $query = "SELECT id, filename, duration_s, video_id from video_segment_2 vs2 WHERE vs2.crowd_status = 'UNWATCHED' AND vs2.release_to_public = true AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
+    $query = "SELECT id, filename, duration_s, video_id from video_segment_2 vs2 WHERE vs2.crowd_status = 'UNWATCHED' AND vs2.release_to_public = true AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND duration_s >= $min_video_time AND duration_s <= $max_video_time AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
 //    echo "<!-- $query -->\n";
 
     $result = attempt_query_with_ping($query, $wildlife_db);
