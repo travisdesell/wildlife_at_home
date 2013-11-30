@@ -1,20 +1,19 @@
 <?php
 
-require_once('../inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/display_badges.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 $bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
 $species_id = mysql_real_escape_string($_GET['species']);
 $location_id = mysql_real_escape_string($_GET['site']);
 
-$user = get_logged_in_user();
-$user_id = $user->id;
+$user = get_user();
+$user_id = $user['id'];
 
 echo "
 <!DOCTYPE html>
@@ -121,7 +120,7 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$prefs = simplexml_load_string($user->project_prefs);
+$prefs = simplexml_load_string($user['project_prefs']);
 //print_r($prefs);
 
 $min_video_time = 0;
@@ -236,7 +235,7 @@ else $species_name = $row['name'];
 echo"
     <div class='well well-small' style='margin-top:0px;'>
         <div class='tab'>$animal_id - " . trim(substr($segment_filename, strrpos($segment_filename, '/') + 1)) . "</div>
-        <div class='tab-right'>" . number_format($user->bossa_total_credit) . "s watched - " . round(100 * ($user->bossa_accuracy / $user->total_observations), 2) . "% accuracy</div>
+        <div class='tab-right'>" . number_format($user['bossa_total_credit']) . "s watched - " . round(100 * ($user['bossa_accuracy'] / $user['total_observations']), 2) . "% accuracy</div>
 
         <div class='row-fluid'>
             <div class='container'>
