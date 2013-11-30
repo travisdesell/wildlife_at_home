@@ -1,6 +1,7 @@
 #/opt/local/bin/g++-mp-4.7 -std=c++11 \
-/usr/bin/llvm-g++ \
+/usr/bin/llvm-g++-4.2 \
     -D_BOINC_APP_ \
+    -I../include \
 	-I../../ffmpeg \
     -I../../boinc \
     -I../../boinc/api \
@@ -13,8 +14,8 @@
     -I../../opencv/modules/flann/include \
     -I../../opencv/modules/nonfree/include \
     -I../../opencv/modules/calib3d/include \
-	wildlife_surf.cpp \
-    -o wildlife_surf \
+	wildlife_surf_collect.cpp \
+    -o wildlife_surf_collect \
     ../../ffmpeg/libavformat/libavformat.a \
 	../../ffmpeg/libavcodec/libavcodec.a \
     ../../ffmpeg/libswscale/libswscale.a \
@@ -48,6 +49,7 @@
     -L/Users/kgoehner/repos/boinc/mac_build/build/Development \
     -lboinc_api \
     -lboinc \
-    -liconv \
     -lbz2 \
+    -liconv \
+    -mmacosx-version-min=10.5.8 \
     -framework Cocoa -framework VideoDecodeAcceleration -framework QTKit -framework QuartzCore -framework AppKit -lstdc++

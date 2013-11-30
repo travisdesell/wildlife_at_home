@@ -462,8 +462,9 @@ $(document).ready(function () {
 
                         $('.submit-observation-button').click(function() {
                             var video_id = $(this).attr("video_id");
-                            var div_id = "#submit-observation-button-" + video_id;
+
                             $(this).addClass("disabled");
+                            var div_id = "#submit-observation-button-" + video_id;
 
                             var submission_data = {
                                                     video_id : video_id,
