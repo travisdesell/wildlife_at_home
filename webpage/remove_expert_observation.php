@@ -3,13 +3,14 @@
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/get_expert_observation_table.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 $observation_id = mysql_real_escape_string($_POST['observation_id']);
+$species_id = mysql_real_escape_string($_POST['species_id']);
 
 error_log("post: " . json_encode($_POST));
 
-if (!is_special_user(null, null)) {
+if (!is_special_user__fixme()) {
     error_log("non project scientists cannot remove expert observations.");
     die();
 }
@@ -53,7 +54,7 @@ if (!$result) {
 }
 $row = mysql_fetch_assoc($result);
 
-$response['html'] = get_expert_observation_table($video_id, $response['observation_count'], $response['observation_count']);
+$response['html'] = get_expert_observation_table($video_id, $response['observation_count'], $response['observation_count'], $species_id, 0);
 
 echo json_encode($response);
 ?>

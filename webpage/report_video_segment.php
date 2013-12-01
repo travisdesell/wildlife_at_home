@@ -1,14 +1,12 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/award_credit.inc');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/projects/wildlife/html/inc/util.inc');
-require_once('/projects/wildlife/html/inc/bossa_impl.inc');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
-$user = get_logged_in_user();
-$reporter_id = $user->id;
-$reporter_name = mysql_real_escape_string($user->name);
+$user = get_user();
+$reporter_id = $user['id'];
+$reporter_name = mysql_real_escape_string($user['name']);
 
 $report_comments = mysql_real_escape_string($_POST['report_comments']);
 $video_segment_id = mysql_real_escape_string($_POST['video_segment_id']);

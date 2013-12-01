@@ -1,11 +1,9 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/award_credit.inc');
 require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/projects/wildlife/html/inc/util.inc');
-require_once('/projects/wildlife/html/inc/bossa_impl.inc');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 function get_observation_data($data, $from_db = false) {
 
@@ -69,8 +67,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $observation = get_observation_data($row, true);
     if ($observation->status == 'CANONICAL') $canonical_observation = $observation;
 
-    $user = get_user_from_id($observation->user_id);
-    $observation->user_name = $user->name;
+    $user = get_user_from_id__fixme($observation->user_id);
+    $observation->user_name = $user['name'];
 
     $db_observations[] = $observation;
 }

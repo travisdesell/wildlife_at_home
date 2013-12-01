@@ -320,6 +320,8 @@ int main(int argc, char** argv) {
 
         int count = 0;
 
+        bool progress_updated = false;
+
         MYSQL_ROW video_segment_row;
         while ((video_segment_row = mysql_fetch_row(video_segment_result)) != NULL) {
 
@@ -369,9 +371,11 @@ int main(int argc, char** argv) {
              *  If there is, that is the canonical result.
              */
             int canonical = -1;
+            bool has_expert = false;
             for (uint32_t i = 0; i < observations.size(); i++) {
                 if (0 == observations[i]->status.compare("EXPERT")) {
                     canonical = i;
+                    has_expert = true;
 //                    log_messages.printf(MSG_DEBUG, "FOUND AN EXPERT OBSERVATION!\n");
 //                    exit(0);
                 }
@@ -412,15 +416,17 @@ int main(int argc, char** argv) {
                 yes_oss << " " << setw(4) << total_yes[i];
                 no_oss << " " << setw(4) << total_no[i];
                 unsure_oss << " " << setw(4) << total_unsure[i];
+
+                if (canonical_marks[i] < -1 && !has_expert) canonical = -1; 
             }
             log_messages.printf(MSG_DEBUG, "total yes      : %s\n", yes_oss.str().c_str());
             log_messages.printf(MSG_DEBUG, "total no       : %s\n", no_oss.str().c_str());
             log_messages.printf(MSG_DEBUG, "total unsure   : %s\n", unsure_oss.str().c_str());
             log_messages.printf(MSG_DEBUG, "canonical marks: %s\n", expected_marks_oss.str().c_str());
+            log_messages.printf(MSG_DEBUG, "canonical      : %d\n", canonical);
 
             //There was a canoical result, so update the status of each
             //observation.
-            bool progress_updated = false;
             for (uint32_t i = 0; i < observations.size(); i++) {
                 ostringstream oss;
 
@@ -430,7 +436,10 @@ int main(int argc, char** argv) {
             for (uint32_t i = 0; i < observations.size(); i++) {
                 ostringstream oss;
 
-                if (observations.size() >= 5 && canonical < 0) {
+                if (canonical < 0) {
+                    observations[i]->new_status = "INCONCLUSIVE";
+
+                } else if (observations.size() >= 5 && canonical < 0) {
                     observations[i]->new_status = "INCONCLUSIVE";
 
                 } else if (canonical == (int)i) {
@@ -444,6 +453,7 @@ int main(int argc, char** argv) {
                 } else {
                     observations[i]->new_status = "INVALID";
                 }
+
                 if (canonical >= 0 || observations.size() >= 5) {
                     observations[i]->new_accuracy_rating = (double)observations[i]->matches_canonical_marks(canonical_marks) / 8.0;
                     observations[i]->new_awarded_credit  = duration_s * ((double)observations[i]->matches_canonical_marks(canonical_marks) / 8.0);
@@ -536,8 +546,9 @@ int main(int argc, char** argv) {
             }
 
             /**
+             *  UPDATE: Now updating progress at the end of the loop, along with available video
+             *
              *  Should only update the progress if it hasn't been updated for this video yet.
-             */
             if (!progress_updated) {
                 ostringstream progress_query;
                 progress_query << "UPDATE progress SET validated_video_s = validated_video_s + " << duration_s << " WHERE progress.species_id = " << species_id << " AND progress.location_id = " << location_id;
@@ -545,6 +556,7 @@ int main(int argc, char** argv) {
                 log_messages.printf(MSG_DEBUG, "%s\n", progress_query.str().c_str());
                 if (!no_db_update) mysql_query_check(wildlife_db_conn, progress_query.str());
             }
+             */
 
             for (uint32_t i = 0; i < observations.size(); i++) {
                 delete observations[i];
@@ -553,8 +565,30 @@ int main(int argc, char** argv) {
             count++;
         }
 
+        /**
+         *  Update the progess table with new amounts of validated video
+         */
+        if (progress_updated) {
+            log_messages.printf(MSG_DEBUG, "Updating progress...\n");
+            ostringstream validated_progress_query;
+            validated_progress_query << "UPDATE progress AS p SET validated_video_s = (SELECT SUM(duration_s) FROM video_segment_2 AS vs2 WHERE vs2.species_id = p.species_id AND vs2.location_id = p.location_id AND vs2.crowd_status = 'VALIDATED');";
+
+            log_messages.printf(MSG_DEBUG, "%s\n", validated_progress_query.str().c_str());
+            if (!no_db_update) mysql_query_check(wildlife_db_conn, validated_progress_query.str());
+        }
+
+        /**
+         *  Update the progress table with new available video times.
+         */
+        log_messages.printf(MSG_DEBUG, "Updating progress...\n");
+        ostringstream available_progress_query;
+        available_progress_query << "UPDATE progress AS p SET available_video_s = (SELECT SUM(duration_s) FROM video_segment_2 AS vs2 WHERE vs2.species_id = p.species_id AND vs2.location_id = p.location_id AND vs2.processing_status = 'DONE' AND vs2.release_to_public = true);";
+
+        log_messages.printf(MSG_DEBUG, "%s\n", available_progress_query.str().c_str());
+        if (!no_db_update) mysql_query_check(wildlife_db_conn, available_progress_query.str());
+
         log_messages.printf(MSG_DEBUG, "Sleeping...\n"); 
-        sleep(30);
+        sleep(300);
     }
 }
 
