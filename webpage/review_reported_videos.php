@@ -1,7 +1,5 @@
 <?php
 
-require_once('../inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/display_badges.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
@@ -31,14 +29,14 @@ echo "
     <script type='text/javascript' src='watch.js'></script>
 
     <style>
-    body {
-        padding-top: 60px;
-    }
-    @media (max-width: 979px) {
         body {
-            padding-top: 0px;
+            padding-top: 60px;
         }
-    }
+        @media (max-width: 979px) {
+            body {
+                padding-top: 0px;
+            }
+        }
 
         .well {
            position: relative;
