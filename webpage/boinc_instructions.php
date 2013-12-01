@@ -1,7 +1,5 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
-
 require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');

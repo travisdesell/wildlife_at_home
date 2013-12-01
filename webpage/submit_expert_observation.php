@@ -3,7 +3,7 @@
 require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/get_expert_observation_table.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/special_user.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
 $video_id = mysql_real_escape_string($_POST['video_id']);
 $user_id = mysql_real_escape_string($_POST['user_id']);
@@ -14,7 +14,7 @@ $comments = mysql_real_escape_string($_POST['comments']);
 
 error_log("post: " . json_encode($_POST));
 
-if (!is_special_user()) {
+if (!is_special_user__fixme()) {
     error_log("non project scientists cannot submit expert observations.");
     die();
 }
