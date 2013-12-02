@@ -1,0 +1,18 @@
+<td id='tag-div-#observation_id#' colspan=3 style='vertical-align:middle; padding:0px;'>
+    {{#has_tags}}
+    <div class='btn-group pull-left'>
+        <button type='button' class='btn btn-small btn-info dropdown-toggle' data-toggle='dropdown' tag_id='{{event_id}}' id='tag-button-#observation_id#' style='margin:0px 4px 0px 0px; padding:2px 4px; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>tag</button>
+
+        <ul class='dropdown-menu' id='tag-dropdown-#observation_id#'>
+            {{#possible_tags}}
+            <li><a href='javascript:;' class='tag-dropdown' observation_id='#observation_id#' tag_id='{{tag_id}}' tag_text='{{tag_name}}' video_id='{{video_id}}' id='tag-{{tag_id}}-dropdown-#observation_id#'>{{tag_name}}</a></li>
+            {{/possible_tags}}
+
+        </ul>
+    </div>  <!-- button group -->
+
+    {{#tags}}
+    <span style='margin:3px; height:16px;' class='badge tag-element' tag_text='{{tag_text}}' observation_id=#observation_id#>{{tag_text}}</span>
+    {{/tags}}
+    {{/has_tags}}
+</td>
