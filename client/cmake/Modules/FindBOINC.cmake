@@ -16,35 +16,35 @@ FIND_PATH(BOINC_INCLUDE_DIR boinc_api.h
     /usr/local/include/boinc
     /boinc/src/boinc
     /home/tdesell/boinc
-    /Users/kgoehner/repos/boinc/install/include/boinc
+    /Users/kgoehner/repos/boinc_build/boinc/api
     ~/BOINC_SOURCE
 )
 MESSAGE(STATUS "BOINC_INCLUDE_DIR: ${BOINC_INCLUDE_DIR}")
 
 FIND_LIBRARY(BOINC_LIBRARY
     NAMES boinc
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
 MESSAGE(STATUS "BOINC_LIBRARY: ${BOINC_LIBRARY}")
 
 FIND_LIBRARY(BOINC_CRYPT_LIBRARY
     NAMES boinc_crypt
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
 MESSAGE(STATUS "BOINC_CRYPT_LIBRARY: ${BOINC_CRYPT_LIBRARY}")
 
 FIND_LIBRARY(BOINC_API_LIBRARY
     NAMES boinc_api
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment ~/BOINC_SOURCE/
     PATH_SUFFIXES api
 )
 MESSAGE(STATUS "BOINC_API_LIBRARY: ${BOINC_API_LIBRARY}")
 
 FIND_LIBRARY(BOINC_SCHED_LIBRARY
     NAMES sched
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc/install/lib ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment ~/BOINC_SOURCE/
     PATH_SUFFIXES sched
 )
 MESSAGE(STATUS "BOINC_SCHED_LIBRARY: ${BOINC_SCHED_LIBRARY}")
