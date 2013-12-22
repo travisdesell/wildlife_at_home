@@ -110,7 +110,70 @@ void initialize_database() {
     }
 }
 
+int time_to_seconds(string time) {
+    vector<string> temp;
+    istringstream iss(time);
+    while(getline(iss, time, ':')) {
+        temp.push_back(time);
+    }
+    int seconds = 0;
+    seconds += atoi(temp[0].c_str())*3600;
+    seconds += atoi(temp[1].c_str())*60;
+    seconds += atoi(temp[2].c_str());
+    return seconds;
+}
 
+bool config_is_good(string fileName, int duration_s) {
+    vector<EventType*> event_types;
+    vector<Event*> events;
+
+    int video_start_time;
+    string line, event_id, start_time, end_time;
+    ifstream infile;
+    infile.open(fileName.c_str());
+    getline(infile, line);
+    video_start_time = time_to_seconds(line.c_str());
+    while(getline(infile, event_id, ',')) {
+        Event *newEvent = new Event();
+        EventType *event_type = NULL;
+        for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
+            if((*it)->id.compare(event_id) == 0) {
+                event_type = *id;
+                break;
+            }
+        }
+        if(event_type = NULL) {
+            event_type = new EventType();
+            event_type->id = event_id;
+            event_types.push_back(event_type);
+        }
+        if(!getline(infile, start_time, ',') || !getline(infile, end_time)) {
+            cout << "Error: Malformed config file!" << endl;
+            return false;
+        }
+        newEvent->type = event_type;
+        newEvent->start_time = time_to_seconds(start_time);
+        newEvent->end_time = time_to_seoncds(end_time);
+        events.push_back(newEvent);
+    }
+    infile.close();
+
+    for(int i=0; i<=duration_s; i++) {
+        int time = video_start_time + i;
+        bool has_event = false;
+        for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
+            if((*it)->start_time >= time && (*id)->end_time <= time) {
+                has_event = true;
+                break;
+            }
+        }
+        if(!has_event) {
+            cout << "Error: invalid events for video!" << endl;
+            return false;
+        }
+    }
+    return true;
+}
 
 // create one new job
 int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, string md5_hash, string features_file, string tag) {
@@ -616,67 +679,4 @@ int main(int argc, char** argv) {
     main_loop(vector<string>(argv, argv + argc));
 }
 
-bool config_is_good(string fileName, int duration_s) {
-    vector<EventType*> event_types;
-    vector<Event*> events;
-
-    int video_start_time;
-    string line, event_id, start_time, end_time;
-    ifstream infile;
-    infile.open(fileName.c_str());
-    getline(infile, line);
-    video_start_time = time_to_seconds(line.c_str());
-    while(getline(infile, event_id, ',')) {
-        Event *newEvent = new Event();
-        EventType *event_type = NULL;
-        for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-            if((*it)->id.compare(event_id) == 0) {
-                event_type = *id;
-                break;
-            }
-        }
-        if(event_type = NULL) {
-            event_type = new EventType();
-            event_type->id = event_id;
-            event_types.push_back(event_type);
-        }
-        if(!getline(infile, start_time, ',') || !getline(infile, end_time)) {
-            cout << "Error: Malformed config file!" << endl;
-            return false;
-        }
-        newEvent->type = event_type;
-        newEvent->start_time = time_to_seconds(start_time);
-        newEvent->end_time = time_to_seoncds(end_time);
-        events.push_back(newEvent);
-    }
-    infile.close();
-
-    for(int i=0; i<=duration_s; i++) {
-        int time = video_start_time + i;
-        bool has_event = false;
-        for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
-            if((*it)->start_time >= time && (*id)->end_time <= time) {
-                has_event = true;
-                break;
-            }
-        }
-        if(!has_event) {
-            cout << "Error: invalid events for video!" << endl;
-            return false;
-        }
-    }
-    return true;
-}
-
-int time_to_seconds(string time) {
-    vector<string> temp;
-    istringstream iss(time);
-    while(getline(iss, time, ':')) {
-        temp.push_back(time);
-    }
-    int seconds = 0;
-    seconds += atoi(temp[0].c_str())*3600;
-    seconds += atoi(temp[1].c_str())*60;
-    seconds += atoi(temp[2].c_str());
-    return seconds;
 }
