@@ -54,6 +54,8 @@
 #include "undvc_common/arguments.hxx"
 #include "undvc_common/file_io.hxx"
 
+#include "wildlife_surf.hpp"
+
 #define CUSHION 2000
     // maintain at least this many unsent results
 #define REPLICATION_FACTOR  1
@@ -66,6 +68,12 @@ int start_time;
 int seqno;
 
 using namespace std;
+
+struct Event {
+    EventType *type;
+    int start_time;
+    int end_time;
+};
 
 /**
  *  This wrapper makes for much more informative error messages when doing MYSQL queries
@@ -138,11 +146,11 @@ bool config_is_good(string fileName, int duration_s) {
         EventType *event_type = NULL;
         for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
             if((*it)->id.compare(event_id) == 0) {
-                event_type = *id;
+                event_type = *it;
                 break;
             }
         }
-        if(event_type = NULL) {
+        if(event_type == NULL) {
             event_type = new EventType();
             event_type->id = event_id;
             event_types.push_back(event_type);
@@ -153,22 +161,27 @@ bool config_is_good(string fileName, int duration_s) {
         }
         newEvent->type = event_type;
         newEvent->start_time = time_to_seconds(start_time);
-        newEvent->end_time = time_to_seoncds(end_time);
+        newEvent->end_time = time_to_seconds(end_time);
         events.push_back(newEvent);
     }
     infile.close();
 
-    for(int i=0; i<=duration_s; i++) {
+    for(int i=0; i<duration_s; i++) {
         int time = video_start_time + i;
         bool has_event = false;
         for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
-            if((*it)->start_time >= time && (*id)->end_time <= time) {
+            if((*it)->start_time <= time && (*it)->end_time >= time) {
                 has_event = true;
                 break;
             }
         }
         if(!has_event) {
-            cout << "Error: invalid events for video!" << endl;
+            int hours = time / 3600;
+            time = time % 3600;
+            int minutes = time / 60;
+            time = time % 60;
+            int seconds = time;
+            cout << "Invalid at time: " << hours << " : " << minutes << " : " << seconds << endl;
             return false;
         }
     }
@@ -299,7 +312,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         } else {
             remove(config_filename.c_str());
             cout << "Error: Corrupt config file!" << endl;
-            return 0;
+            return -1;
         }
         config_filename = config_filename.substr(config_filename.find_last_of('/') + 1);
         infiles[0] = config_filename.c_str();
@@ -436,6 +449,7 @@ void main_loop(const vector<string> &arguments) {
     int unsent_results;
     int retval;
     long total_generated = 0;
+    long total_errors = 0;
 
     int species_id = 0;
     int location_id = 0;
@@ -562,9 +576,14 @@ void main_loop(const vector<string> &arguments) {
         int filesize = atoi(video_row[5]);
         string md5_hash = video_row[6];
 
-        make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash, features_file, tag);
-        total_generated++;
+        int job_id = make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash, features_file, tag); 
+        if (job_id == -1) {
+            total_errors++;
+        } else {
+            total_generated++;
+        }
         cout << "generated " << total_generated << " workunits. " << endl << endl;
+        cout << "generated " << total_errors << " errored workunits. " << endl << endl;
     }
 
     mysql_free_result(video_result);
@@ -677,6 +696,4 @@ int main(int argc, char** argv) {
     log_messages.printf(MSG_NORMAL, "Starting\n");
 
     main_loop(vector<string>(argv, argv + argc));
-}
-
 }
