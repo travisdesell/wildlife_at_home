@@ -1,5 +1,5 @@
-#ifndef WILDLIFE_SURF_HEADER
-#define WILDLIFE_SURF_HEADER
+#ifndef WILDLIFE_SURF_H
+#define WILDLIFE_SURF_H
 
 #include <string>
 #include <opencv2/core/core.hpp>

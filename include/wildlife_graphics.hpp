@@ -1,5 +1,5 @@
-#ifndef WILDLIFE_GRAPHICS_HEADER
-#define WILDLIFE_GRAPHICS_HEADER
+#ifndef WILDLIFE_GRAPHICS_H
+#define WILDLIFE_GRAPHICS_H
 
 #include <opencv2/core/core.hpp>
 #include <boinc_api.h>
