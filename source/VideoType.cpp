@@ -1,3 +1,4 @@
+#include <opencv2/core/core.hpp>
 #include "VideoType.hpp"
 
 void VideoType::VideoType(int width, int height) {
@@ -47,7 +48,7 @@ void loadType() {
         cv::Point timestampBottomRight(680, 470);
         setWatermarkRect(watermarkTopLeft, watermarkBottomRight);
         setTimestampRect(timestampTopLeft, timestampBottomRight);
-    } else if (width == 352 && height == 240) {
+    } else if(width == 352 && height == 240) {
         cv::Point watermarkTopLeft(12, 12);
         cv::Point watermarkBottomRight(90, 55);
         cv::Point timestampTopLeft(240, 190);
