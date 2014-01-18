@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
     string resolved_desc_path;
     cerr << "Resolving boinc file paths." << endl;
     int retval = boinc_resolve_filename_s(config_file_name.c_str(), resolved_config_path);
-    if (retval) {
+    if(retval) {
         cerr << "Error, could not open file: '" << config_file_name.c_str() << "'" << endl;
         cerr << "Resolved to: '" << resolved_config_path.c_str() << "'" << endl;
         return false;
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
     config_file_name = resolved_config_path;
 
     retval = boinc_resolve_filename_s(vid_file_name.c_str(), resolved_vid_path);
-    if (retval) {
+    if(retval) {
         cerr << "Error, could not open file: '" << vid_file_name.c_str() << "'" << endl;
         cerr << "Resolved to: '" << resolved_vid_path.c_str() << "'" << endl;
         return false;
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
     vid_file_name = resolved_vid_path;
 
     retval = boinc_resolve_filename_s(desc_file_name.c_str(), resolved_desc_path);
-    if (retval) {
+    if(retval) {
         cerr << "Error, could not open file: '" << desc_file_name.c_str() << "'" << endl;
         cerr << "Resolved to: '" << resolved_desc_path.c_str() << "'" << endl;
         return false;
@@ -163,15 +163,15 @@ int main(int argc, char **argv) {
     int frame_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frame_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-    for (int i=0; i<video_types.size(); i++) {
-        if (video_types.at(i).video_width == frame_width && video_types.at(i).video_height == frame_height) {
+    for(int i=0; i<video_types.size(); i++) {
+        if(video_types.at(i).video_width == frame_width && video_types.at(i).video_height == frame_height) {
             cerr << "Found matching size." << endl;
             watermark_rect = video_types.at(i).watermark_rect;
             timestamp_rect = video_types.at(i).timestamp_rect;
             break;
         }
     }
-    if (watermark_rect == NULL || timestamp_rect == NULL) {
+    if(watermark_rect == NULL || timestamp_rect == NULL) {
         cerr << "[ERROR] (Watermark and Timestamp removeal) There is no registered aspect ratio for this video size (" << frame_width << " X " << frame_height << ")." << endl;
 #ifdef _BOINC_APP_
         boinc_finish(1);
@@ -214,19 +214,19 @@ int main(int argc, char **argv) {
 		detector.detect(frame, keypoints_frame);
 
         // Remove keypoints in watermark and timestamp.
-        for (int i=0; i<keypoints_frame.size(); i++) {
+        for(int i=0; i<keypoints_frame.size(); i++) {
             cv::Point pt = keypoints_frame.at(i).pt;
             bool watermark = true;
             bool timestamp = true;
-            if (!watermark_rect->contains(pt)) watermark = false;
-            if (!timestamp_rect->contains(pt)) timestamp = false;
+            if(!watermark_rect->contains(pt)) watermark = false;
+            if(!timestamp_rect->contains(pt)) timestamp = false;
             /*if (!remove_watermark || pt.x < watermark_top_left.x || pt.x > watermark_bottom_right.x || pt.y < watermark_top_left.y || pt.y > watermark_bottom_right.y) {
                 watermark = false;
             }
             if (!remove_timestamp || pt.x < timestamp_top_left.x || pt.x > timestamp_bottom_right.x || pt.y < timestamp_top_left.y || pt.y > timestamp_bottom_right.y) {
                 timestamp = false;
             }*/
-            if (!watermark && !timestamp) keypoints.push_back(keypoints_frame.at(i));
+            if(!watermark && !timestamp) keypoints.push_back(keypoints_frame.at(i));
         }
         keypoints_frame = keypoints;
 
@@ -239,7 +239,7 @@ int main(int argc, char **argv) {
 		for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
 			if(vid_time >= (*it)->start_time && vid_time <= (*it)->end_time) {
 				activeEvents++;
-				if ((*it)->type->descriptors.empty()) {
+				if((*it)->type->descriptors.empty()) {
 					(*it)->type->descriptors.push_back(descriptors_frame);
 				} else {
 					// Find Matches
@@ -263,7 +263,7 @@ int main(int argc, char **argv) {
 					cerr << "Max dist: " << max_dist << endl;
 					cerr << "Avg dist: " << avg_dist << endl;
 					cerr << "Min dist: " << min_dist << endl;
-					cerr << "Avg + 3.5*std_ev: " << avg_dist + 3.5*std_dev << endl;
+					cerr << "Avg + " << flannThreshold << "*std_ev: " << avg_dist + flannThreshold * std_dev << endl;
 
 					vector<DMatch> new_matches;
 
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 					}
 
 					cerr << (*it)->type->id.c_str() << " descriptors added: " << new_descriptors.rows << endl;
-					if (new_descriptors.rows > 0) {
+					if(new_descriptors.rows > 0) {
 						(*it)->type->descriptors.push_back(new_descriptors);
 					}
 					cerr << (*it)->type->id.c_str() << " descriptors: " << (*it)->type->descriptors.size() << endl;
@@ -309,7 +309,7 @@ int main(int argc, char **argv) {
     }
 
     cerr << "<event_ids>" << endl;
-    for (int i=0; i<event_types.size(); i++) {
+    for(int i=0; i<event_types.size(); i++) {
         cerr << event_types[i]->id.c_str() << endl;
     }
     cerr << "</event_ids>" << endl;

@@ -1,6 +1,8 @@
 #ifndef VIDEO_TYPE_H
 #define VIDEO_TYPE_H
 
+#include <opencv2/core/core.hpp>
+
 class VideoType {
 	 int width;
 	 int height;
