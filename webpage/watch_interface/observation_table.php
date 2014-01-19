@@ -1,11 +1,15 @@
 <?php
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname(dirname($cwd));
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/user.php');
 
 function set_time_text($time_s) {
     if ($time_s == -1) return -1;
@@ -157,24 +161,27 @@ function get_observations($row_only, $video_id, $user_id, $observation_id, $spec
 }
 
 function get_timed_observation_table($video_id, $user_id, &$observation_count, $species_id, $expert_only) {
+    global $cwd;
     $observations = get_observations(false, $video_id, $user_id, null, $species_id, $expert_only);
     $observation_count = count($observations['observations']);
 
-    $observation_table_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/observation_table_template.html");
+    $observation_table_template = file_get_contents($cwd . "/templates/observation_table_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($observation_table_template, $observations);
 }
 
 function get_timed_observation_row($observation_id, $species_id, $expert_only) {
+    global $cwd;
     $observations = get_observations(true, null, null, $observation_id, $species_id, $expert_only);
     $observations['row_only'] = true;
 
-    $observation_table_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/observation_table_template.html");
+    $observation_table_template = file_get_contents($cwd . "/templates/observation_table_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($observation_table_template, $observations);
 }
 
 function get_watch_video_interface($species_id, $video_id, $video_file, $animal_id, $user, $start_time) {
+    global $cwd;
     $watch_info['video_id'] = $video_id;
     $watch_info['video_file'] = $video_file;
     $watch_info['start_time'] = $start_time;
@@ -187,7 +194,7 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
     $watch_info['missed_events'] = $user['missed_events'];
 
 
-    $watch_interface_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/watch_template.html");
+    $watch_interface_template = file_get_contents($cwd . "/templates/watch_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($watch_interface_template, $watch_info);
 }
