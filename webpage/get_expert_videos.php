@@ -1,13 +1,17 @@
 <?php
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once($cwd . '/navbar.php');
+require_once($cwd . '/footer.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/boinc_db.php');
+require_once($cwd . '/my_query.php');
 
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
@@ -93,7 +97,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($found) {
-    $video_list_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/expert_list_template.html");
+    $video_list_template = file_get_contents($cwd . "/expert_list_template.html");
     $mustache_engine = new Mustache_Engine;
     echo $mustache_engine->render($video_list_template, $video_list);
 

@@ -1,13 +1,18 @@
 <?php
-require_once("/home/tdesell/wildlife_at_home/webpage/navbar.php");
-require_once("/home/tdesell/wildlife_at_home/webpage/footer.php");
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require_once($cwd . "/navbar.php");
+require_once($cwd . "/footer.php");
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 
 echo "
@@ -98,7 +103,7 @@ $videos = array(
                 'page_end' => "<p>As you watch the videos, we will be interested at what time the event starts.  Please make note of the time from the time stamp in the video when you first notice the activity beginning. If it is already in progress (e.g., skunk sitting at the nest eating eggs), please make note of this in the comments section.  Any other interesting observation or details you wish to include, please include these in the comment section.</p><p>We appreciate your assistance in classifying nesting behaviors and predator interactions at the nest of sharp-tailed grouse!</p><p align=right> - The Wildlife@Home Team</p>"
             );
 
-$training_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/training_template.html");
+$training_template = file_get_contents($cwd . "/training_template.html");
 
 $m = new Mustache_Engine;
 echo $m->render($training_template, $videos);

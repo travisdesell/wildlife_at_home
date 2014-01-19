@@ -1,13 +1,18 @@
 <?php
-require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require_once($cwd . '/navbar.php');
+require_once($cwd . '/footer.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 echo "
 <!DOCTYPE html>
@@ -229,7 +234,7 @@ $thumbnails = array('thumbnail_list' => array(
                     )
                 );
 
-$projects_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/projects_template.html");
+$projects_template = file_get_contents($cwd . "/projects_template.html");
 
 $m = new Mustache_Engine;
 echo $m->render($projects_template, $thumbnails);

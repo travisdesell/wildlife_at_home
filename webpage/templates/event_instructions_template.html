@@ -1,0 +1,46 @@
+<div id='instructions-modal' class='modal hide fade large' tabindex='-1' role='dialog' aria-labelledby='instructions-modal-label'>
+
+    <div class='modal-header'>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Event Descriptions and Instructions</h4>
+    </div>
+
+    <div class='modal-body'>
+        <p>Watch the videos and report observations using the 'Event' dropdown. Each event should have a start time and an end time.  If you click on the 'Start Time' or 'End Time' text areas, they will automatically fill themselves in with the current time of the video.
+        </p>
+        <hr>
+
+        <p>Please consult the following table for information about each event and how they should be classified:</p>
+
+        <table class='table table-striped table-bordered table-condensed'>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Event</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {{#event_list}}
+                <tr>
+                    {{#new_category}}
+                    <td rowspan='{{event_count}}' style='vertical-align:middle'><b>{{category}}</b></td>
+                    {{/new_category}}
+
+                    <td>{{name}}</td>
+                    <td>{{instructions}}</td>
+
+                </tr>
+                {{/event_list}}
+            </tbody>
+        </table>
+    </div> <!-- modal body-->
+
+    <!--
+    <div class='modal-footer'>
+        <button type="button" class="btn btn-small btn-default pull-right" data-dismiss="modal">Close</button>
+    </div>
+    -->
+
+</div>  <!-- instructions-modal -->

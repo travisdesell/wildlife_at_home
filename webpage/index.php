@@ -16,6 +16,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with BOINC.  If not, see <http://www.gnu.org/licenses/>.
 
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
 require_once("../inc/db.inc");
 require_once("../inc/util.inc");
 require_once("../inc/news.inc");
@@ -26,8 +30,8 @@ require_once("../inc/translation.inc");
 require_once("../inc/text_transform.inc");
 require_once("../project/project.inc");
 
-require_once("/home/tdesell/wildlife_at_home/webpage/navbar.php");
-require_once("/home/tdesell/wildlife_at_home/webpage/footer.php");
+require_once($cwd . "/navbar.php");
+require_once($cwd . "/footer.php");
 
 $caching = false;
 
@@ -43,7 +47,7 @@ header("Content-type: text/html; charset=utf-8");
 
 echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 echo "<html>
     <head>
@@ -233,6 +237,65 @@ echo "
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>After the peak of hatch, we follow hens with broods via radio signals.  Once the chicks are about a month old, we will relocate the brood and catch them in big net during the night.  Chicks are then fitted with their own necklace-style radio transmitters so we monitor their survival and reproduction over the next year.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class='item'>
+                      <img src='images/lightning.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>This image found in the collected video shows a lightning crash behind a piping plover incubating a nest on the Missouri River in North Dakota.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='images/plover_chick.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>This image found in the collected video shows a piping plover chick walking across the video screen with an adult brooding the remaining chicks on the nest in the background.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='images/plover_in_flight.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>The leg bands used by wildlife biologists for bird identification are clearly visible on the flying adult piping plover.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='images/tern_chick.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>A tern chick yawns in front of the camera while the adult tern incubates the remaining egg on the nest. This image was found in the collected video.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='images/tern_nest_exchange.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>Interior least terns exhibit biparental investment in their nests. This image found in the collected video shows a nest exchange event between two flying tern parents.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='images/tern_feeding_tern.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>An adult tern feeds a fish to a tern incubating a nest. This image was found in collected video.</p>
                         </div>
                       </div>
                     </div>

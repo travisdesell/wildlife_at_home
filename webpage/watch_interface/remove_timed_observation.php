@@ -38,7 +38,7 @@ $row = mysql_fetch_assoc($result);
 $video_id = $row['video_id'];
 
 $query = "DELETE FROM timed_observations WHERE id = $observation_id";
-error_log("query: " . $query);
+//error_log("query: " . $query);
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");

@@ -1,10 +1,15 @@
 <?php
-require_once("/home/tdesell/wildlife_at_home/webpage/navbar.php");
-require_once("/home/tdesell/wildlife_at_home/webpage/footer.php");
+
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require_once($cwd . "/navbar.php");
+require_once($cwd . "/footer.php");
 
 echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 
 echo "
