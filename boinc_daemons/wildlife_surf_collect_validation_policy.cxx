@@ -97,7 +97,7 @@ int init_result(RESULT& result, void*& data) {
         result.validate_state = VALIDATE_STATE_INVALID;
 
         log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
-        exit(0);
+        //exit(0);
         return ERR_XML_PARSE;
     }
 
@@ -146,10 +146,12 @@ int compare_results(
         int matches = 0;
 
         log_messages.printf(MSG_DEBUG, "Check number of descriptors.\n");
-        if (desc1->at(i)->descriptors.rows != desc2->at(i)->descriptors.rows) {
+        double buffer = (double)desc1->at(i)->descriptors.rows / desc2->at(i)->descriptors.rows;
+        cout << buffer-1 << endl;
+        if (fabs(buffer-1) >= 0.01) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d\n", (int)desc1->at(i)->descriptors.rows, (int)desc2->at(i)->descriptors.rows);
-            //exit(0);
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d (%f)\n", (int)desc1->at(i)->descriptors.rows, (int)desc2->at(i)->descriptors.rows, abs(buffer-1));
+            exit(0);
             return 1;
         }
         Mat temp = desc1->at(i)->descriptors - desc2->at(i)->descriptors;
@@ -166,7 +168,7 @@ int compare_results(
         }
         if (matches < temp.rows) {
             log_messages.printf(MSG_CRITICAL, "%d/%d (%f) of descriptors match for results %d and %d \n", matches, temp.rows, (float)matches/temp.rows*100, r1.id, r2.id);
-            //exit(0);
+            exit(0);
             return 1;
             return ERR_OPENDIR;
         }
