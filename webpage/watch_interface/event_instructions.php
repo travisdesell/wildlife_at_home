@@ -1,16 +1,20 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname(dirname($cwd));
 
-//require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+
+//require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 //Mustache_Autoloader::register();
 
 //$species_id = mysql_real_escape_string($_POST['species_id']);
 //$expert_only = mysql_real_escape_string($_POST['expert_only']);
 
 function get_event_instructions_html($species_id, $expert_only) {
-    global $wildlife_user, $wildlife_passwd, $wildlife_db;
+    global $wildlife_user, $wildlife_passwd, $wildlife_db, $cwd;
 
     if ($species_id > 3)  {
         echo "<p>Species unknown for video. No instructions available.</p>";
@@ -77,7 +81,7 @@ function get_event_instructions_html($species_id, $expert_only) {
     $event_list['event_list'][$prev_category_key]['event_count'] = $event_count;
     $event_list['event_list'][$prev_category_key]['new_category'] = true;
 
-    $instructions_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/event_instructions_template.html");
+    $instructions_template = file_get_contents($cwd . "/templates/event_instructions_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($instructions_template, $event_list);
 }

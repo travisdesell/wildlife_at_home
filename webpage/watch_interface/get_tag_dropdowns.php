@@ -1,14 +1,18 @@
 <?php
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname(dirname($cwd));
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/user.php');
 
 function get_tag_dropdowns() {
-    global $wildlife_user, $wildlife_passwd, $wildlife_db;
+    global $wildlife_user, $wildlife_passwd, $wildlife_db, $cwd;
 
     if ($wildlife_db == null) {
         ini_set("mysql.connect_timeout", 300);
@@ -46,7 +50,7 @@ function get_tag_dropdowns() {
 
             $row['possible_tags'] = $tags;
 
-            $watch_interface_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/tag_row_template.html");
+            $watch_interface_template = file_get_contents($cwd . "/tag_row_template.html");
             $mustache_engine = new Mustache_Engine;
             $tag_dropdowns[$row['id']] = $mustache_engine->render($watch_interface_template, $row);
 
