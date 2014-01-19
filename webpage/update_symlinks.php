@@ -11,8 +11,14 @@ echo "cwd:    $cwd\n";
 echo "target: $target\n";
 
 foreach (glob("*.php") as $filename) {
+    if ($filename == "boinc_db.php" || $filename == "wildlife_db.php") {
+        echo "Not copying '$filename' because it contains the database passwords and is not needed.\n";
+        continue;
+    }
+
     $command = "ln -s $cwd/$filename $target/$filename";
     echo "$command\n";
+    shell_exec("rm $target/$filename");
     shell_exec($command);
 }
 
@@ -20,7 +26,12 @@ foreach (glob("*.js") as $filename) {
     //echo $filename . "\n";
     $command = "ln -s $cwd/$filename $target/$filename";
     echo "$command\n";
+    shell_exec("rm $target/$filename");
     shell_exec($command);
 }
 
+$command = "ln -s $cwd/watch_interface $target/watch_interface";
+echo "$command\n";
+shell_exec("rm $cwd/watch_interface");
+shell_exec($command);
 ?>

@@ -1,10 +1,10 @@
 $(document).ready(function () {
 
     var path = document.location.pathname;
-    var dir = path.substr(path.indexOf('/', 1), path.lastIndexOf('/')+1);
+    var dev_dir = path.substr(path.indexOf('/', 1) + 1, path.lastIndexOf('/') - path.indexOf('/', 1));
 
-    console.log("dir: " + dir);
-    console.log("path: " + path);
+    console.log("path:    '" + path + "'");
+    console.log("dev_dir: '" + dev_dir + "'");
 
     var location_id = -1;
     var species_id = -1;
