@@ -1,6 +1,10 @@
 
 $(document).ready(function () {
 
+        var path = document.location.pathname;
+        var dev_dir = path.substr(path.indexOf('/', 1) + 1, path.lastIndexOf('/') - path.indexOf('/', 1));
+
+
     if (reviewing_reported) {
         $('#valid-report-button').click(function() {
             if ($(this).hasClass('active')) {
