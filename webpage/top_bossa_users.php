@@ -20,8 +20,6 @@ $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
 $cwd = dirname($cwd);
 
-require_once($cwd . "/display_badges.php");
-
 /*
  * THIS IS REALLY BAD!
  * But the BOINC include suck and use relative paths
@@ -32,6 +30,8 @@ require_once("/projects/wildlife/html/inc/cache.inc");
 require_once("/projects/wildlife/html/inc/util.inc");
 require_once("/projects/wildlife/html/inc/user.inc");
 require_once("/projects/wildlife/html/inc/boinc_db.inc");
+
+require_once($cwd . "/display_badges.php");
 
 check_get_args(array("sort_by", "offset"));
 

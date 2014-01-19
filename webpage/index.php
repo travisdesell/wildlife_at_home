@@ -20,9 +20,6 @@ $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
 $cwd = dirname($cwd);
 
-require_once($cwd . "/navbar.php");
-require_once($cwd . "/footer.php");
-
 /*
  * THIS IS REALLY BAD!
  * But the BOINC include suck and use relative paths
@@ -38,8 +35,11 @@ require_once("/projects/wildlife/html/inc/sanitize_html.inc");
 require_once("/projects/wildlife/html/inc/translation.inc");
 require_once("/projects/wildlife/html/inc/text_transform.inc");
 
-set_include_path("/projects/wildlife/html/project");
+//set_include_path("/projects/wildlife/html/project");
 require_once("/projects/wildlife/html/project/project.inc");
+
+require_once($cwd . "/navbar.php");
+require_once($cwd . "/footer.php");
 
 $caching = false;
 
