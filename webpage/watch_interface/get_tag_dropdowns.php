@@ -7,7 +7,7 @@ require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
 
-function get_tag_dropdowns($observation_id) {
+function get_tag_dropdowns() {
     global $wildlife_user, $wildlife_passwd, $wildlife_db;
 
     if ($wildlife_db == null) {
@@ -57,6 +57,6 @@ function get_tag_dropdowns($observation_id) {
     return $tag_dropdowns;
 }
 
-echo json_encode( get_tag_dropdowns($observation_id) );
+echo json_encode( get_tag_dropdowns() );
 
 ?>

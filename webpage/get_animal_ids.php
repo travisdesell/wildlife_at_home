@@ -1,7 +1,11 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
 
 $species_id = mysql_real_escape_string($_POST['species_id']);
 $location_id = mysql_real_escape_string($_POST['location_id']);

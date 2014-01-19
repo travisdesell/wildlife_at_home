@@ -1,13 +1,18 @@
 <?php
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/boinc_db.php');
+require_once($cwd . '/my_query.php');
 
 function get_expert_observation_table($video_id, &$observation_count) {
-    global $wildlife_user, $wildlife_passwd, $boinc_user, $boinc_passwd;
+    global $wildlife_user, $wildlife_passwd, $boinc_user, $boinc_passwd, $cwd;
 
     ini_set("mysql.connect_timeout", 300);
     ini_set("default_socket_timeout", 300);
@@ -30,7 +35,7 @@ function get_expert_observation_table($video_id, &$observation_count) {
         $observations['has_observations'] = true;
 
         $query = "SELECT name FROM user WHERE id = " . $row['user_id'];
-        $user_result = attempt_query_with_ping($query, $boinc_db);
+        $user_result = mysql_query($query, $boinc_db);
         $user_row = mysql_fetch_assoc($user_result);
 
         $row['user_name'] = $user_row['name'];
@@ -39,13 +44,13 @@ function get_expert_observation_table($video_id, &$observation_count) {
     }
     $observation_count = count($observations['observations']);
 
-    $observation_table_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/expert_observation_table_template.html");
+    $observation_table_template = file_get_contents($cwd . "/expert_observation_table_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($observation_table_template, $observations);
 }
 
 function get_timed_observation_table($video_segment_id, $user_id, &$observation_count) {
-    global $wildlife_user, $wildlife_passwd, $boinc_user, $boinc_passwd;
+    global $wildlife_user, $wildlife_passwd, $boinc_user, $boinc_passwd, $cwd;
 
     ini_set("mysql.connect_timeout", 300);
     ini_set("default_socket_timeout", 300);
@@ -82,13 +87,15 @@ function get_timed_observation_table($video_segment_id, $user_id, &$observation_
     }
     $observation_count = count($observations['observations']);
 
-    $observation_table_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/expert_observation_table_template.html");
+    $observation_table_template = file_get_contents($cwd . "/expert_observation_table_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($observation_table_template, $observations);
 }
 
 
 function get_watch_video_interface($wildlife_db, $species_id, $video_id, $video_segment_id, $video_file, $start_time, $expert_only) {
+    global $cwd;
+
     if ($video_segment_id >= 0) {
         $watch_info['video_id'] = $video_segment_id;
     } else {
@@ -151,7 +158,7 @@ function get_watch_video_interface($wildlife_db, $species_id, $video_id, $video_
     $watch_info['event_list'][$prev_category_key]['new_category'] = true;
 
 
-    $watch_interface_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/watch_template.html");
+    $watch_interface_template = file_get_contents($cwd . "/templates/watch_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($watch_interface_template, $watch_info);
 }

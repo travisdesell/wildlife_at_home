@@ -9,8 +9,6 @@ $user = get_user();
 $user_id = $user['id'];
 $is_special_user = is_special_user__fixme($user, true);
 
-error_log("is special user: '" . $is_special_user . "', user id: " . $user_id);
-
 $video_id = mysql_real_escape_string($_POST['video_id']);
 $event_id  = mysql_real_escape_string($_POST['event_id']);
 $start_time = mysql_real_escape_string($_POST['start_time']);
@@ -38,7 +36,7 @@ if (!$user_result) {
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$query = "INSERT INTO timed_observations SET user_id = $user_id, start_time = '$start_time', end_time = '$end_time', event_id ='$event_id', comments = '$comments', video_id = '$video_id', species_id = $species_id, location_id = $location_id, expert = $is_special_user";
+$query = "INSERT INTO timed_observations SET user_id = $user_id, start_time = '$start_time', end_time = '$end_time', start_time_s = '-1', end_time_s = '-1', event_id ='$event_id', comments = '$comments', video_id = '$video_id', species_id = $species_id, location_id = $location_id, expert = $is_special_user";
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");

@@ -1,5 +1,16 @@
 <div class='tab'>{{trimmed_filename}}</div>
-<div class='tab-right'>{{bossa_total_credit}} seconds watched : <span class='total_events'>{{total_events}}</span> events marked ({{valid_events}} valid, {{invalid_events}} invalid, {{missed_events}} missed)</div>
+<div class='tab-bottom-left'>{{bossa_total_credit}} seconds watched : <span class='total_events'>{{total_events}}</span> events marked ({{valid_events}} valid, {{invalid_events}} invalid, {{missed_events}} missed)</div>
+<div class='tab-right'>
+    <button class='btn btn-small btn-info pull-right' id='help-button' style='margin:0px; padding: 2px 4px;' data-toggle='modal'>
+        <i class='icon-white icon-question-sign'></i> Instructions
+    </button>
+</div>
+<div class='tab-bottom-right'>
+    <button class='btn btn-small btn-success pull-right next-video-button' id='next-video-button-{{video_id}}' video_id='{{video_id}}'>
+        Next Video
+    </button>
+</div>
+
 
 <div class='span12'>
     <div class='row-fluid'>
@@ -29,15 +40,8 @@
 
         <div class='span6'>
             <div class='row-fluid'>
-                <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}'></div>
+                <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
                 <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
-
-                <button class='btn btn-small btn-primary pull-right' id='help-button' style='margin:0px 0px 0px 5px; padding: 2px 4px;'>
-                    <i class='icon-white icon-question-sign'></i>
-                </button>
-
-                <button class='btn btn-small btn-success pull-right next-video-button' id='next-video-button-{{video_id}}' video_id='{{video_id}}'>Next Video</button>
-
             </div>
         </div>  <!-- span 6 -->
     </div> <!--row fluid-->
