@@ -50,7 +50,7 @@ function get_tag_dropdowns() {
 
             $row['possible_tags'] = $tags;
 
-            $watch_interface_template = file_get_contents($cwd . "/tag_row_template.html");
+            $watch_interface_template = file_get_contents($cwd . "/templates/tag_row_template.html");
             $mustache_engine = new Mustache_Engine;
             $tag_dropdowns[$row['id']] = $mustache_engine->render($watch_interface_template, $row);
 
