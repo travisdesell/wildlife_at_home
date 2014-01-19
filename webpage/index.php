@@ -20,15 +20,15 @@ $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
 $cwd = dirname($cwd);
 
-require_once("../inc/db.inc");
-require_once("../inc/util.inc");
-require_once("../inc/news.inc");
-require_once("../inc/cache.inc");
-require_once("../inc/uotd.inc");
-require_once("../inc/sanitize_html.inc");
-require_once("../inc/translation.inc");
-require_once("../inc/text_transform.inc");
-require_once("../project/project.inc");
+require_once("/projects/wildlife/html/inc/db.inc");
+require_once("/projects/wildlife/html/inc/util.inc");
+require_once("/projects/wildlife/html/inc/news.inc");
+require_once("/projects/wildlife/html/inc/cache.inc");
+require_once("/projects/wildlife/html/inc/uotd.inc");
+require_once("/projects/wildlife/html/inc/sanitize_html.inc");
+require_once("/projects/wildlife/html/inc/translation.inc");
+require_once("/projects/wildlife/html/inc/text_transform.inc");
+require_once("/projects/wildlife/html/project/project.inc");
 
 require_once($cwd . "/navbar.php");
 require_once($cwd . "/footer.php");
