@@ -32,6 +32,6 @@ foreach (glob("*.js") as $filename) {
 
 $command = "ln -s $cwd/watch_interface $target/watch_interface";
 echo "$command\n";
-shell_exec("rm $cwd/watch_interface");
+shell_exec("rm $target/watch_interface");
 shell_exec($command);
 ?>
