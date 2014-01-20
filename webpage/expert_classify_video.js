@@ -1,5 +1,11 @@
 $(document).ready(function () {
 
+    var path = document.location.pathname;
+    var dev_dir = path.substr(path.indexOf('/', 1) + 1, path.lastIndexOf('/') - path.indexOf('/', 1));
+
+    console.log("path:    '" + path + "'");
+    console.log("dev_dir: '" + dev_dir + "'");
+
     var location_id = -1;
     var species_id = -1;
     var animal_id = -1;

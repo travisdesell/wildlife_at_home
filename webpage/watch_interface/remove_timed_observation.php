@@ -1,9 +1,13 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/watch_interface/observation_table.php');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname(dirname($cwd));
+
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/user.php');
+require_once($cwd . '/watch_interface/observation_table.php');
 
 $user = get_user();
 $user_id = $user['id'];
@@ -38,7 +42,7 @@ $row = mysql_fetch_assoc($result);
 $video_id = $row['video_id'];
 
 $query = "DELETE FROM timed_observations WHERE id = $observation_id";
-error_log("query: " . $query);
+//error_log("query: " . $query);
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");

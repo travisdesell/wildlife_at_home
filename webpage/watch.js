@@ -377,7 +377,7 @@ $(document).ready(function () {
     var another_site_clicked = false;
     $('#another-site-button').click(function() {
             another_site_clicked = true;
-            window.location.href = "http://volunteer.cs.und.edu/wildlife/video_selector.php";
+            window.location.href = "http://volunteer.cs.und.edu/wildlife/" + dev_dir + "video_selector.php";
     });
 
     $('#another-video-button').click(function() {
