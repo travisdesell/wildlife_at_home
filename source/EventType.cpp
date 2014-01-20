@@ -1,36 +1,38 @@
 #include <string>
+#include <vector>
+
 #include <opencv2/core/core.hpp>
 
 #include "EventType.hpp"
 
 // Accessors
 
-void EventType::EventType(std::string id) {
+EventType::EventType(std::string id) {
     this->id = id;
 }
 
 void EventType::setId(std::string id) {
-    this->id = id;
+   this->id = id;
 }
 
 void EventType::setDescriptors(cv::Mat descriptors) {
     this->descriptors = descriptors;
 }
 
-void EventType::setKeypoints(cv::Mat keypoints) {
-    this->keypoints = ketpoints;
+void EventType::setKeypoints(vector<cv::KeyPoint> keypoints) {
+    this->keypoints = keypoints;
 }
 
 std::string EventType::getId() {
-    return id;
+    return this->id;
 }
 
 cv::Mat EventType::getDescriptors() {
-    return descriptors;
+    return this->descriptors;
 }
 
-cv::Mat EventType::getKeypoints() {
-    return keypoints;
+vector<cv::KeyPoint> EventType::getKeypoints() {
+    return this->keypoints;
 }
 
 // Functions
@@ -39,6 +41,8 @@ void EventType::addDescriptors(cv::Mat descriptors) {
     this->descriptors.push_back(descriptors);
 }
 
-void EventType::addKeypoints(cv::Mat keypoints) {
-    this->keypoints.push_back(keypoints);
+void EventType::addKeypoints(vector<cv::KeyPoint> keypoints) {
+    for(int i=0; i<keypoints.size(); i++) {
+        this->keypoints.push_back(keypoints.at(i));
+    }
 }

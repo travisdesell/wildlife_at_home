@@ -1,24 +1,29 @@
-#ifndef WILDLIFE_SURF_H
-#define WILDLIFE_SURF_H
+#ifndef EVENT_TYPE_HEADER
+#define EVENT_TYPE_HEADER
 
 #include <string>
+#include <vector>
+
 #include <opencv2/core/core.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+
+using namespace std;
 
 class EventType {
     std::string id;
     cv::Mat descriptors;
-    cv::Mat keypoints;
+    vector<cv::KeyPoint> keypoints;
     public:
-    void EventType(std::string);
+    EventType(std::string);
     void setId(std::string);
     void setDescriptors(cv::Mat);
-    void setKeypoints(cv::Mat);
+    void setKeypoints(vector<cv::KeyPoint> keypoints);
     std::string getId();
     cv::Mat getDescriptors();
-    cv::Mat getKeypoints();
+    vector<cv::KeyPoint> getKeypoints();
 
     void addDescriptors(cv::Mat descriptors);
-    void addKeypoints(cv::Mat keypoints);
+    void addKeypoints(vector<cv::KeyPoint> keypoints);
 };
 
 #endif
