@@ -1,0 +1,24 @@
+<ul class='dropdown-menu' id='event-dropdown-{{video_id}}' style='width:350px;'>
+    <li class='column-menu span6 firstcolumn'>
+        <ul style='list-style-type: none; margin-left:10px; margin-right:0px;'>
+            {{#event_list}}
+
+            {{#new_column}}
+        </ul>
+    </li>
+
+    <li class='column-menu span6'>
+        <ul style='list-style-type: none; margin-right:10px; margin-left:0px;'>
+            {{/new_column}}
+
+            {{#new_category}}
+                <li class='nav-header'>{{category}}</li>
+            {{/new_category}}
+
+            <li><a href='javascript:;' class='event-dropdown' event_id='{{database_enum}}' video_id='{{video_id}}' id='{{database_enum}}-dropdown'>{{name}}</a></li>
+
+            {{/event_list}}
+        </ul>
+    </li>
+
+</ul>

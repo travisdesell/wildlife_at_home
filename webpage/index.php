@@ -16,18 +16,30 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with BOINC.  If not, see <http://www.gnu.org/licenses/>.
 
-require_once("../inc/db.inc");
-require_once("../inc/util.inc");
-require_once("../inc/news.inc");
-require_once("../inc/cache.inc");
-require_once("../inc/uotd.inc");
-require_once("../inc/sanitize_html.inc");
-require_once("../inc/translation.inc");
-require_once("../inc/text_transform.inc");
-require_once("../project/project.inc");
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
 
-require_once("/home/tdesell/wildlife_at_home/webpage/navbar.php");
-require_once("/home/tdesell/wildlife_at_home/webpage/footer.php");
+/*
+ * THIS IS REALLY BAD!
+ * But the BOINC include suck and use relative paths
+ */
+chdir("/projects/wildlife/html/user/"); 
+
+require_once("/projects/wildlife/html/inc/db.inc");
+require_once("/projects/wildlife/html/inc/util.inc");
+require_once("/projects/wildlife/html/inc/news.inc");
+require_once("/projects/wildlife/html/inc/cache.inc");
+require_once("/projects/wildlife/html/inc/uotd.inc");
+require_once("/projects/wildlife/html/inc/sanitize_html.inc");
+require_once("/projects/wildlife/html/inc/translation.inc");
+require_once("/projects/wildlife/html/inc/text_transform.inc");
+
+//set_include_path("/projects/wildlife/html/project");
+require_once("/projects/wildlife/html/project/project.inc");
+
+require_once($cwd . "/navbar.php");
+require_once($cwd . "/footer.php");
 
 $caching = false;
 
@@ -43,7 +55,7 @@ header("Content-type: text/html; charset=utf-8");
 
 echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 echo "<html>
     <head>
@@ -137,7 +149,7 @@ echo "
                 <div id='myCarousel' class='carousel slide'>
                   <div class='carousel-inner'>
                     <div class='item'>
-                      <img src='images/HenCapture2.JPG' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/HenCapture2.JPG' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>Each spring we capture hens on the lek or dancing grounds where males display for females.  We fit hens with a necklace-style radio transmitter that emits a unique radio frequency which we can use to relocate the bird and find her nest.</p>
@@ -146,7 +158,7 @@ echo "
                     </div>
 
                     <div class='item'>
-                      <img src='images/RadioTracking1.JPG' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/RadioTracking1.JPG' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>We track grouse using radio telemetry receivers and various types of antennas such as this handheld antenna and receiver.  Photo courtesy of Chris Felege.</p>
@@ -155,7 +167,7 @@ echo "
                     </div>
 
                     <div class='item'>
-                      <img src='images/Truck.JPG' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/Truck.JPG' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>We track grouse using radio telemetry receivers and various type so antennas such as this truck mounted antenna.  Photo courtesy of Anna Mattson.</p>
@@ -164,7 +176,7 @@ echo "
                     </div>
 
                     <div class='item'>
-                      <img src='images/camera_system_1.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/camera_system_1.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>Once we find a nest, we install a miniature surveillance camera near the nest.</p>
@@ -173,7 +185,7 @@ echo "
                     </div>
 
                     <div class='item'>
-                      <img src='images/camera_system_2.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/camera_system_2.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>Nest cameras are powered by cable, from about 75 feet away with a 12 volt battery and a waterproof box housing a DVR that will record to SD cards.</p>
@@ -183,7 +195,7 @@ echo "
 
 
                     <div class='item'>
-                      <img src='images/grouse_nest.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/grouse_nest.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>A sharp-tailed grouse nest.</p>
@@ -192,7 +204,7 @@ echo "
                     </div>
 
                     <div class='item'>
-                      <img src='images/hen_on_nest.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/hen_on_nest.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>Hens will incubate a nest for about 23 days unless a predator finds and destroys the nest.  This is a snapshot from our nest cameras of hen incubating her nest.</p>
@@ -201,7 +213,7 @@ echo "
                     </div>
 
                     <div class='item'>
-                      <img src='images/hatch.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/hatch.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>Sharp-tailed grouse chicks hatching.</p>
@@ -211,16 +223,16 @@ echo "
 
 
                     <div class='item'>
-                      <img src='images/hawk2_resized.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/hawk2_resized.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
-                          <p>Various predators such as this Swainson’s Hawk will attack the hen while she is sitting on the nest.  This images is from one of our nest cameras.</p>
+                          <p>Various predators such as this Swainson’s Hawk will attack the hen while she is sitting on the nest.  This http://volunteer.cs.und.edu/wildlife/images is from one of our nest cameras.</p>
                         </div>
                       </div>
                     </div>
 
                     <div class='item'>
-                      <img src='images/badger1.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/badger1.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>Ground predators, such as this American Badger, will destroy the nest.</p>
@@ -229,10 +241,69 @@ echo "
                     </div>
 
                     <div class='item'>
-                      <img src='images/chick_capture.png' alt=''>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/chick_capture.png' alt=''>
                       <div class='container'>
                         <div class='carousel-caption'>
                           <p>After the peak of hatch, we follow hens with broods via radio signals.  Once the chicks are about a month old, we will relocate the brood and catch them in big net during the night.  Chicks are then fitted with their own necklace-style radio transmitters so we monitor their survival and reproduction over the next year.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class='item'>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/lightning.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>This image found in the collected video shows a lightning crash behind a piping plover incubating a nest on the Missouri River in North Dakota.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/plover_chick.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>This image found in the collected video shows a piping plover chick walking across the video screen with an adult brooding the remaining chicks on the nest in the background.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/plover_in_flight.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>The leg bands used by wildlife biologists for bird identification are clearly visible on the flying adult piping plover.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/tern_chick.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>A tern chick yawns in front of the camera while the adult tern incubates the remaining egg on the nest. This image was found in the collected video.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/tern_nest_exchange.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>Interior least terns exhibit biparental investment in their nests. This image found in the collected video shows a nest exchange event between two flying tern parents.</p>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class='item'>
+                      <img src='http://volunteer.cs.und.edu/wildlife/images/tern_feeding_tern.png' alt=''>
+                      <div class='container'>
+                        <div class='carousel-caption'>
+                          <p>An adult tern feeds a fish to a tern incubating a nest. This image was found in collected video.</p>
                         </div>
                       </div>
                     </div>
@@ -377,7 +448,7 @@ echo"
                         <div class='row-fluid'>
                             <div class='span2'>
                                 <p align=center>
-                                <a href='http://www.nsf.gov/'><img class ='floating' border='0' src='images/nsf1.png' width ='83' height='83' alt='Funded through a grant from the National Science Foundation (NSF).' /></a>
+                                <a href='http://www.nsf.gov/'><img class ='floating' border='0' src='http://volunteer.cs.und.edu/wildlife/images/nsf1.png' width ='83' height='83' alt='Funded through a grant from the National Science Foundation (NSF).' /></a>
                                 </p>
                             </div>
                             <div class='span10'>
@@ -390,7 +461,7 @@ echo"
                         <div class='row-fluid'>
                             <div class='span2'>
                                 <p align=center>
-                                <a href='http://und.edu'><img src='images/und_logo.png'></a>
+                                <a href='http://und.edu'><img src='http://volunteer.cs.und.edu/wildlife/images/und_logo.png'></a>
                                 </p>
                             </div>
                             <div class='span10'>
@@ -403,7 +474,7 @@ echo"
 
                         <div class='row-fluid'>
                             <div class='span2'>
-                                <a href=\"http://gf.nd.gov\"><img src=\"images/ndgf_logo.png\"></a>
+                                <a href=\"http://gf.nd.gov\"><img src=\"http://volunteer.cs.und.edu/wildlife/images/ndgf_logo.png\"></a>
                             </div>
                             <div class='span10'>
                                 North Dakota Game and Fish has provided financial support for field logistics to collect sharp-tailed grouse videos.
@@ -413,7 +484,7 @@ echo"
 
                         <div class='row-fluid'>
                             <div class='span2'>
-                                <a href=\"http://www.npwrc.usgs.gov\"><img src=\"images/usgs_logo.png\"></a>
+                                <a href=\"http://www.npwrc.usgs.gov\"><img src=\"http://volunteer.cs.und.edu/wildlife/images/usgs_logo.png\"></a>
                             </div>
                             <div class='span10'>
                                 USGS has provided financial support for camera equipment, video storage, and field assistance to collect data for the piping plover and interior least tern.
@@ -423,7 +494,7 @@ echo"
 
                         <div class='row-fluid'>
                             <div class='span2'>
-                                <a href=\"http://boinc.berkeley.edu/\" style='display:block; margin-left:auto; margin-right:auto;'><img src=\"img/pb_boinc.gif\" alt=\"Powered by BOINC\"></a>
+                                <a href=\"http://boinc.berkeley.edu/\" style='display:block; margin-left:auto; margin-right:auto;'><img src=\"http://volunteer.cs.und.edu/wildlife/img/pb_boinc.gif\" alt=\"Powered by BOINC\"></a>
                             </div>
                             <div class='span10'>
                                 <p>

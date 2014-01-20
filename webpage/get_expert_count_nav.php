@@ -1,8 +1,12 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/generate_count_nav.php');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/generate_count_nav.php');
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);

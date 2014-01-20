@@ -1,12 +1,16 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/get_video_segment_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+require_once($cwd . '/boinc_db.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/get_video_segment_query.php');
+require_once($cwd . '/user.php');
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
@@ -219,13 +223,13 @@ while ($row = mysql_fetch_assoc($result)) {
 
 }
 
-if (is_special_user__fixme($user_id, false)) {
+if (is_special_user__fixme($user, false)) {
     $video_list['special_user'] = true;
 }
 
 
 if ($found) {
-    $video_list_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/video_list_template.html");
+    $video_list_template = file_get_contents($cwd . "/video_list_template.html");
     $mustache_engine = new Mustache_Engine;
     echo $mustache_engine->render($video_list_template, $video_list);
 

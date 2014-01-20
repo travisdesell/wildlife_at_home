@@ -1,17 +1,21 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/display_badges.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+require_once($cwd . '/display_badges.php');
+require_once($cwd . '/navbar.php');
+require_once($cwd . '/footer.php');
+require_once($cwd . '/boinc_db.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/user.php');
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 echo "
 <!DOCTYPE html>
@@ -468,7 +472,7 @@ while ($observation_row = mysql_fetch_assoc($result)) {
     $observations['observations'][] = $observation_row;
 }
 
-$observation_table_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/observation_table_template.html");
+$observation_table_template = file_get_contents($cwd . "/observation_table_template.html");
 $mustache_engine = new Mustache_Engine;
 
 
