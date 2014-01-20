@@ -30,9 +30,17 @@ find_package(BOINC REQUIRED)
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
 
-add_executable(wildlife_surf_collect wildlife_surf_collect)
+add_executable(wildlife_surf_collect
+    wildlife_surf_collect
+    ../source/Event
+    ../source/EventType
+    ../source/VideoType)
 include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
 target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
+
+#add_executable(wildlife_surf_collect wildlife_surf_collect2)
+#include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
+#target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
 
 #add_executable(wildlife_graphics_app wildlife_graphics_app)
 #include_directories (${PROJECT_SOURCE_DIR}/../include/ ${BOINC_INCLUDE_DIR})
