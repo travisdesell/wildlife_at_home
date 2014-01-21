@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -31,17 +32,18 @@ using namespace cv;
 
 void printUsage();
 bool readParams(int argc, char** argv);
-int skipFrames(VideoCapture capture, int numFrames);
-string getBoincFilename(string filename);
+string getBoincFilename(string filename) throw(runtime_error);
 int timeToSeconds(string time);
 double standardDeviation(vector<DMatch> arr, double mean);
-bool readConfig(string filename, vector<EventType*> eventTypes, vector<Event*> events, int *vidTime);
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime);
 void writeMatrix(FileStorage outfile, string id, Mat matrix);
 Mat readMatrix(FileStorage infile, string id);
 void writeEventsToFile(string filename, vector<EventType*> eventTypes);
-void readEventsFromFile(string filename, vector<EventType*> &eventTypes);
-bool readCheckpoint(int *checkpointFramePos, vector<EventType*> eventTypes);
-void writeCheckpoint(int framePos, vector<EventType*> eventTypes);
+vector<KeyPoint> readKeypoints(FileStorage infile, string id);
+void writeKeypoints(FileStorage outfile, string id, vector<KeyPoint> keypoints);
+void readEventsFromFile(string filename, vector<EventType*> *eventTypes);
+bool readCheckpoint(int *checkpointFramePos, vector<EventType*> *eventTypes);
+void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error);
 
 /****** END PROTOTYPES ******/
 
@@ -53,10 +55,8 @@ static string vidFilename, configFilename, descFilename, featFilename;
 
 int main(int argc, char **argv) {
     // Local Variables
-    string configFilename;
-    string vidFilename;
-    string descFilename = "descriptors.dat";
-    string featFilename = "features.dat";
+    descFilename = "descriptors.dat";
+    featFilename = "features.dat";
 
     if(!readParams(argc, argv)) {
         printUsage();
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
     int vidTime;
     vector<EventType*> eventTypes;
     vector<Event*> events;
-    if(!readConfig(configFilename, eventTypes, events, &vidTime)) {
+    if(!readConfig(configFilename, &eventTypes, &events, &vidTime)) {
         return false; //Error occurred.
     }
     cerr << "Events: " << events.size() << endl;
@@ -96,13 +96,13 @@ int main(int argc, char **argv) {
 #endif
 
     int checkpointFramePos;
-    if(readCheckpoint(&checkpointFramePos, eventTypes)) {
+    if(readCheckpoint(&checkpointFramePos, &eventTypes)) {
         cerr << "Start from checkpoint..." << endl;
     } else {
         cerr << "Unsuccessful checkpoint read." << endl << "Starting from beginning of video." << endl;
     }
 
-    skipFrames(capture, checkpointFramePos);
+    capture.set(CV_CAP_PROP_POS_FRAMES, checkpointFramePos);
 
     int framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
     int total = capture.get(CV_CAP_PROP_FRAME_COUNT);
@@ -133,7 +133,10 @@ int main(int argc, char **argv) {
 
         // TODO This should be in a setting file to allow for differnet frame
         // rates.
-        if(framePos % 10 == 0) vidTime++; //Increment video time every 10 frames.
+        if(framePos % 10 == 0) {
+            vidTime++; //Increment video time every 10 frames.
+            writeCheckpoint(framePos, eventTypes);
+        }
 
         SurfFeatureDetector detector(minHessian);
         vector<KeyPoint> frameKeypoints;
@@ -189,7 +192,7 @@ int main(int argc, char **argv) {
                     }
 
                     Mat newDescriptors;
-                    Mat newKeypoints;
+                    vector<KeyPoint>  newKeypoints;
                     cerr << (*it)->getTypeId().c_str() << " descriptors found: " << frameDescriptors.rows << endl;
                     for(int i=0; i<newMatches.size(); i++) {
                         newDescriptors.push_back(frameDescriptors.row(newMatches[i].queryIdx));
@@ -205,7 +208,7 @@ int main(int argc, char **argv) {
             }
         }
         if(activeEvents == 0) {
-            cerr << "[ERROR] There are no active events! (Problem with expert classification.)" << endl;
+            cerr << "[ERROR] There are no active events! (Problem with expert classification at frame " << framePos << ")" << endl;
 #ifdef _BOINC_APP_
             boinc_finish(1);
 #endif
@@ -243,95 +246,70 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-// TODO Check if desc can also be read from checkpoint file.
-void writeCheckpoint(int framePos, vector<EventType*> eventTypes) {
+// TODO Check if desc can also be written to checkpoint file.
+void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error) {
 #ifdef _BOINC_APP_
     string checkpointFilename = getBoincFilename("checkpoint.dat");
-    string checkpointDescFilename = getBoincFilename("checkpoint.desc");
 #endif
-    ofstream checkpointFile(checkpointFilename.c_str());
-    if(!checkpointFile.is_open()) {
-        cerr << "ERROR: Checkpoint file did not open." << endl;
-        return;
+    writeEventsToFile(checkpointFilename, eventTypes);
+    FileStorage outfile(checkpointFilename, FileStorage::APPEND);
+    if(!outfile.isOpened()) {
+        throw runtime_error("Checkpoint file did not open");
     }
 
-    checkpointFile << "CURRENT_FRAME: " << framePos << endl;
-    checkpointFile.close();
-
-    writeEventsToFile(checkpointDescFilename, eventTypes);
+    outfile << "CURRENT_FRAME" << framePos;
+    outfile.release();
 }
 
-// TODO Check if desc can also be read from checkpoint file.
-bool readCheckpoint(int *checkpointFramePos, vector<EventType*> eventTypes) {
+bool readCheckpoint(int *checkpointFramePos, vector<EventType*> *eventTypes) {
     cerr << "Reading checkpoint..." << endl;
 #ifdef _BOINC_APP_
     string checkpointFilename = getBoincFilename("checkpoint.dat");
-    string checkpointDescFilename = getBoincFilename("checkpoint.desc");
 #endif
-    ifstream checkpointFile(checkpointFilename.c_str());
-    if(!checkpointFile.is_open()) return false;
+    FileStorage infile(checkpointFilename, FileStorage::READ);
+    if(!infile.isOpened()) return false;
+    infile["CURRENT_FRAME"] >> *checkpointFramePos;
+    cerr << "CURRENT_FRAME:" << " " << *checkpointFramePos << endl;
+    infile.release();
 
-    string s;
-    checkpointFile >> s >> *checkpointFramePos;
-    cerr << s.c_str() << " " << checkpointFramePos << endl;
-    if(s.compare("CURRENT_FRAME:") != 0) {
-        cerr << "ERROR: malformed checkpoint file! Could not read 'CURRENT_FRAME'" << endl;
-#ifdef _BOINC_APP_
-        boinc_finish(1);
-#endif
-        exit(1);
-    }
-
-    readEventsFromFile(checkpointDescFilename, eventTypes);
+    readEventsFromFile(checkpointFilename, eventTypes);
     cerr << "Done reading checkpoint." << endl;
     return true;
 }
 
-// TODO Add a way to read keypoints out as well as descriptors.
-void readEventsFromFile(string filename, vector<EventType*> &eventTypes) {
+void readEventsFromFile(string filename, vector<EventType*> *eventTypes) {
     FileStorage infile(filename, FileStorage::READ);
-    for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
-        (*it)->addDescriptors(readMatrix(infile, (*it)->getId()));
+    try {
+        for(vector<EventType*>::iterator it = eventTypes->begin(); it != eventTypes->end(); ++it) {
+            (*it)->read(infile);
+        }
+    } catch(const exception &ex) {
+        cerr << "readEventsFromFile: " << ex.what() << endl;
+#ifdef _BOINC_APP_
+        boinc_finish(1);
+#endif
+        exit(1);
     }
     infile.release();
 }
 
-// TODO Add a way to write keypoints out as well as descriptors.
 void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     FileStorage outfile(filename, FileStorage::WRITE);
-    for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
-        writeMatrix(outfile, (*it)->getId(), (*it)->getDescriptors());
+    try {
+        for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
+            (*it)->write(outfile);
+        }
+    } catch(const exception ex) {
+        cerr << "writeEventsToFile: " << ex.what() << endl;
+#ifdef _BOINC_APP_
+        boinc_finish(1);
+#endif
+        exit(1);
     }
     outfile.release();
 }
 
-Mat readMatrix(FileStorage infile, string id) {
-    Mat matrix;
-    if(infile.isOpened()) {
-        read(infile[id], matrix);
-    } else {
-        cerr << "ERROR: File is not open." << endl;
-#ifdef _BOINC_APP_
-        boinc_finish(1);
-#endif
-        exit(1);
-    }
-    return matrix;
-}
-
-void writeMatrix(FileStorage outfile, string id, Mat matrix) {
-    if(outfile.isOpened()) {
-        outfile << id << matrix;
-    } else {
-        cerr << "ERROR: File is not open." << endl;
-#ifdef _BOINC_APP_
-        boinc_finish(1);
-#endif
-        exit(1);
-    }
-}
-
-bool readConfig(string filename, vector<EventType*> eventTypes, vector<Event*> events, int *vidTime) {
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime) {
     cerr << "Reading config file: " << filename.c_str() << endl;
     string line, eventId, startTime, endTime;
     ifstream infile;
@@ -341,7 +319,7 @@ bool readConfig(string filename, vector<EventType*> eventTypes, vector<Event*> e
     while(getline(infile, eventId, ',')) {
         Event *newEvent = new Event();
         EventType *eventType = NULL;
-        for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
+        for(vector<EventType*>::iterator it = eventTypes->begin(); it != eventTypes->end(); ++it) {
             cerr << "Event name: '" <<  (*it)->getId().c_str() << endl;
             if((*it)->getId().compare(eventId) == 0) {
                 eventType = *it;
@@ -350,16 +328,16 @@ bool readConfig(string filename, vector<EventType*> eventTypes, vector<Event*> e
         }
         if(eventType == NULL) {
             eventType = new EventType(eventId);
-            eventTypes.push_back(eventType);
+            eventTypes->push_back(eventType);
         }
-        if(!getline(infile, startTime, ',') || getline(infile, endTime)) {
+        if(!getline(infile, startTime, ',') || !getline(infile, endTime)) {
             cerr << "Error: Malformed config file!" << endl;
             return false;
         }
         newEvent->setType(eventType);
         newEvent->setStartTime(timeToSeconds(startTime));
         newEvent->setEndTime(timeToSeconds(endTime));
-        events.push_back(newEvent);
+        events->push_back(newEvent);
     }
     infile.close();
     return true;
@@ -376,7 +354,7 @@ double standardDeviation(vector<DMatch> arr, double mean) {
 
 int timeToSeconds(string time) {
     vector<string> temp;
-    istringstream iss;
+    istringstream iss(time);
     while(getline(iss, time, ':')) {
         temp.push_back(time);
     }
@@ -387,27 +365,13 @@ int timeToSeconds(string time) {
     return seconds;
 }
 
-// TODO Throw error..
-string getBoincFilename(string filename) {
+string getBoincFilename(string filename) throw(runtime_error) {
     string resolvedPath;
     if(boinc_resolve_filename_s(filename.c_str(), resolvedPath)) {
-        cerr << "Error, could not open file: '" << filename.c_str() << "'" << endl;
-        cerr << "Resolved to: '" << filename.c_str() << "'" << endl;
-        return NULL; //Throw error here.
+        cerr << "Could not resolve filename '" << filename.c_str() << "'" << endl;
+        throw runtime_error("Boinc could not resolve filename");
     }
     return resolvedPath;
-}
-
-//TODO Check for a faster way to skip frames.
-int skipFrames(VideoCapture capture, int n) {
-    Mat frame;
-    for(int i=0; i<n; i++) {
-        capture >> frame;
-        if(frame.empty()) { // Check for end of file.
-            return i+1;
-        }
-    }
-    return n;
 }
 
 bool readParams(int argc, char** argv) {

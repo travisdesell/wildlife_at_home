@@ -1,6 +1,7 @@
 #ifndef EVENT_TYPE_HEADER
 #define EVENT_TYPE_HEADER
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -24,6 +25,8 @@ class EventType {
 
     void addDescriptors(cv::Mat descriptors);
     void addKeypoints(vector<cv::KeyPoint> keypoints);
+    void read(cv::FileStorage infile) throw(runtime_error);
+    void write(cv::FileStorage outfile) throw(runtime_error);
 };
 
 #endif
