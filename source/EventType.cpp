@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -44,5 +45,27 @@ void EventType::addDescriptors(cv::Mat descriptors) {
 void EventType::addKeypoints(vector<cv::KeyPoint> keypoints) {
     for(int i=0; i<keypoints.size(); i++) {
         this->keypoints.push_back(keypoints.at(i));
+    }
+}
+
+void EventType::read(cv::FileStorage infile) throw(runtime_error) {
+    cv::Mat descriptors;
+    vector<cv::KeyPoint> keypoints;
+    if(infile.isOpened()) {
+        cv::read(infile[getId() + "_desc"], descriptors); // infile[getId()] >> descriptors;
+        cv::read(infile[getId() + "_pts"], keypoints); // infile[getId()] >> keypoints;
+        addDescriptors(descriptors);
+        addKeypoints(keypoints);
+    } else {
+        throw runtime_error("File is not open for reading");
+    }
+}
+
+void EventType::write(cv::FileStorage outfile) throw(runtime_error) {
+    if(outfile.isOpened()) {
+        outfile << (getId() + "_desc") << getDescriptors();
+        outfile << (getId() + "_pts") << getKeypoints();
+    } else {
+        throw runtime_error("File is not open for writing");
     }
 }

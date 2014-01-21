@@ -61,7 +61,7 @@ vector<cv::KeyPoint> VideoType::getCleanKeypoints(vector<cv::KeyPoint> keypoints
     return cleanPoints;
 }
 
-// This needs to be fixed to load in from a config file.
+// TODO This needs to be fixed to load in from a config file.
 void VideoType::loadType() {
     if(width == 704 && height ==480) {
         cv::Point watermarkTopLeft(12, 12);
