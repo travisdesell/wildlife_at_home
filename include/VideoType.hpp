@@ -10,25 +10,28 @@ using namespace std;
 class VideoType {
 	 int width;
 	 int height;
+     cv::Mat mask;
      cv::Rect watermarkRect;
      cv::Rect timestampRect;
 
-     void setWatermarkRect(cv::Point, cv::Point);
-     void setTimestampRect(cv::Point, cv::Point);
+     // Cache Vars
+     bool updateMask;
 
     public:
      VideoType(int width, int height);
 
-     void setWidth(int);
-     void setHeight(int);
      int getWidth();
      int getHeight();
      cv::Rect getWatermarkRect();
      cv::Rect getTimestampRect();
 
-     vector<cv::KeyPoint> getCleanKeypoints(vector<cv::KeyPoint> keypoints);
+     cv::Mat getMask();
+     void drawZones(cv::Mat &frame, const cv::Scalar &color);
 
     private:
+     void setWatermarkRect(cv::Point, cv::Point);
+     void setTimestampRect(cv::Point, cv::Point);
+     void fillRectOnMat(cv::Mat &mat, cv::Rect rect);
      void loadType();
 };
 

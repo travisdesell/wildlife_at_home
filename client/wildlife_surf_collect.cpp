@@ -1,3 +1,5 @@
+#define GUI
+
 #include <stdexcept>
 #include <vector>
 #include <iostream>
@@ -110,6 +112,8 @@ int main(int argc, char **argv) {
     int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
+    VideoType vidType(frameWidth, frameHeight);
+
     cerr << "Config Filename: '" << configFilename.c_str() << "'" << endl;
     cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
     cerr << "Current Frame: '" << framePos << "'" << endl;
@@ -140,12 +144,8 @@ int main(int argc, char **argv) {
 
         SurfFeatureDetector detector(minHessian);
         vector<KeyPoint> frameKeypoints;
-        detector.detect(frame, frameKeypoints);
-
-        // Remove keypoints from selected areas of video. (Watermark and
-        // Timestamp)
-        VideoType type(frameWidth, frameHeight);
-        frameKeypoints = type.getCleanKeypoints(frameKeypoints);
+        Mat mask = vidType.getMask();
+        detector.detect(frame, frameKeypoints, mask);
 
         SurfDescriptorExtractor extractor;
         Mat frameDescriptors;
@@ -187,6 +187,15 @@ int main(int argc, char **argv) {
                     vector<DMatch> newMatches;
                     for(int i=0; i<matches.size(); i++) {
                         if(matches[i].distance > avgDist + (flannThreshold * stdDev)) {
+                            cerr << "Stored Descriptors: " << (*it)->getDescriptors().size() << endl;
+                            cerr << "Stored Keypoints: " << (*it)->getKeypoints().size() << endl;
+                            cerr << "Descriptors: " << frameDescriptors.size() << endl;
+                            cerr << "Keypoints: " << frameKeypoints.size() << endl;
+                            cerr << "Query Idx: " << matches[i].queryIdx << endl;
+                            cerr << "Train Idx: " << matches[i].trainIdx << endl;
+                            cv::Point a = frameKeypoints.at(matches[i].queryIdx).pt;
+                            cv::Point b = (*it)->getKeypoints().at(matches[i].trainIdx).pt;
+                            cerr << "Euclidian dist: " << sqrt(double((a.x-b.x) * (a.x-b.x)) + double((a.y-b.y) * (a.y-b.y))) << endl;
                             newMatches.push_back(matches[i]);
                         }
                     }
@@ -194,10 +203,13 @@ int main(int argc, char **argv) {
                     Mat newDescriptors;
                     vector<KeyPoint>  newKeypoints;
                     cerr << (*it)->getTypeId().c_str() << " descriptors found: " << frameDescriptors.rows << endl;
+                    // TODO Add this loop to the previous one to reduce
+                    // runtime.
                     for(int i=0; i<newMatches.size(); i++) {
                         newDescriptors.push_back(frameDescriptors.row(newMatches[i].queryIdx));
                         newKeypoints.push_back(frameKeypoints.at(newMatches[i].queryIdx));
                     }
+
                     cerr << (*it)->getTypeId().c_str() << " descriptors added: " << newDescriptors.rows << endl;
                     if(newDescriptors.rows > 0) {
                         (*it)->addDescriptors(newDescriptors);
@@ -218,7 +230,7 @@ int main(int argc, char **argv) {
 #ifdef GUI
         // Draw points on frame.
         Mat pointsFrame = frame;
-        // TODO Add code to draw rectangles around removed points.
+        vidType.drawZones(pointsFrame, Scalar(0, 0, 100));
         drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
         // Display image.
