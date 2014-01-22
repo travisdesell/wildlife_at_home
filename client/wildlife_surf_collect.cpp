@@ -1,4 +1,4 @@
-#define GUI
+//#define GUI
 
 #include <stdexcept>
 #include <vector>
@@ -139,7 +139,6 @@ int main(int argc, char **argv) {
         // rates.
         if(framePos % 10 == 0) {
             vidTime++; //Increment video time every 10 frames.
-            writeCheckpoint(framePos, eventTypes);
         }
 
         SurfFeatureDetector detector(minHessian);
@@ -184,37 +183,24 @@ int main(int argc, char **argv) {
                     cerr << "Avg dist: " << avgDist << endl;
                     cerr << "Avg + " << flannThreshold << " * stdDev: " << avgDist + flannThreshold * stdDev << endl;
 
-                    vector<DMatch> newMatches;
+                    Mat newDescriptors;
+                    vector<KeyPoint>  newKeypoints;
                     for(int i=0; i<matches.size(); i++) {
                         if(matches[i].distance > avgDist + (flannThreshold * stdDev)) {
-                            cerr << "Stored Descriptors: " << (*it)->getDescriptors().size() << endl;
-                            cerr << "Stored Keypoints: " << (*it)->getKeypoints().size() << endl;
-                            cerr << "Descriptors: " << frameDescriptors.size() << endl;
-                            cerr << "Keypoints: " << frameKeypoints.size() << endl;
-                            cerr << "Query Idx: " << matches[i].queryIdx << endl;
-                            cerr << "Train Idx: " << matches[i].trainIdx << endl;
                             cv::Point a = frameKeypoints.at(matches[i].queryIdx).pt;
                             cv::Point b = (*it)->getKeypoints().at(matches[i].trainIdx).pt;
                             cerr << "Euclidian dist: " << sqrt(double((a.x-b.x) * (a.x-b.x)) + double((a.y-b.y) * (a.y-b.y))) << endl;
-                            newMatches.push_back(matches[i]);
+                            newDescriptors.push_back(frameDescriptors.row(matches[i].queryIdx));
+                            newKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
                         }
                     }
 
-                    Mat newDescriptors;
-                    vector<KeyPoint>  newKeypoints;
-                    cerr << (*it)->getTypeId().c_str() << " descriptors found: " << frameDescriptors.rows << endl;
-                    // TODO Add this loop to the previous one to reduce
-                    // runtime.
-                    for(int i=0; i<newMatches.size(); i++) {
-                        newDescriptors.push_back(frameDescriptors.row(newMatches[i].queryIdx));
-                        newKeypoints.push_back(frameKeypoints.at(newMatches[i].queryIdx));
-                    }
-
-                    cerr << (*it)->getTypeId().c_str() << " descriptors added: " << newDescriptors.rows << endl;
                     if(newDescriptors.rows > 0) {
                         (*it)->addDescriptors(newDescriptors);
                         (*it)->addKeypoints(newKeypoints);
                     }
+                    cerr << (*it)->getTypeId().c_str() << " descriptors found: " << frameDescriptors.rows << endl;
+                    cerr << (*it)->getTypeId().c_str() << " descriptors added: " << newDescriptors.rows << endl;
                     cerr << (*it)->getTypeId().c_str() << " descriptors: " << (*it)->getDescriptors().size() << endl;
                 }
             }
@@ -258,7 +244,6 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-// TODO Check if desc can also be written to checkpoint file.
 void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error) {
 #ifdef _BOINC_APP_
     string checkpointFilename = getBoincFilename("checkpoint.dat");
