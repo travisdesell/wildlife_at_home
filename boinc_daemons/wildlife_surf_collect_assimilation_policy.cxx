@@ -188,13 +188,17 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
 /*    string result_name = canonical_result.name;     SHOULD BE THIS */
     uint32_t first_pos = result_name.find("_", 0) + 1;
     uint32_t second_pos = result_name.find("_", first_pos);
+    while(!isdigit(result_name[first_pos])) {
+        first_pos = second_pos + 1;
+        second_pos = result_name.find("_", first_pos);
+    }
 
     if (first_pos == string::npos || second_pos == string::npos) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy assimilate_handler failed with 'malformed result name error', result name: %s\n", result_name.c_str());
         return 1;
     }
 
-    string video_id = result_name.substr( first_pos, (second_pos - first_pos) );
+    string video_id = result_name.substr(first_pos, (second_pos - first_pos) );
 
     cout << "parsed video id: '" << video_id << "'" << endl;
 

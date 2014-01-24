@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/nonfree/features2d.hpp>
 
 #include "EventType.hpp"
 
@@ -43,7 +44,7 @@ void EventType::addDescriptors(cv::Mat descriptors) {
 }
 
 void EventType::addKeypoints(vector<cv::KeyPoint> keypoints) {
-    for(int i=0; i<keypoints.size(); i++) {
+    for(unsigned int i=0; i<keypoints.size(); i++) {
         this->keypoints.push_back(keypoints.at(i));
     }
 }
@@ -63,8 +64,8 @@ void EventType::read(cv::FileStorage infile) throw(runtime_error) {
 
 void EventType::write(cv::FileStorage outfile) throw(runtime_error) {
     if(outfile.isOpened()) {
-        outfile << (getId() + "_desc") << getDescriptors();
-        outfile << (getId() + "_pts") << getKeypoints();
+        outfile << getId() + "_desc" << getDescriptors();
+        outfile << getId() + "_pts" << getKeypoints();
     } else {
         throw runtime_error("File is not open for writing");
     }
