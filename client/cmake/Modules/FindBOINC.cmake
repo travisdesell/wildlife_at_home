@@ -23,7 +23,7 @@ FIND_PATH(BOINC_INCLUDE_DIR boinc_api.h
 MESSAGE(STATUS "BOINC_INCLUDE_DIR: ${BOINC_INCLUDE_DIR}")
 
 FIND_LIBRARY(BOINC_LIBRARY
-    NAMES boinc libboinc
+    NAMES boinc libboinc_staticcrt
     PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment /Users/Kyle/Dropbox/Windows/win32_boinc ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
