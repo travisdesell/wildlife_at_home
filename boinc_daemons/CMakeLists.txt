@@ -1,3 +1,33 @@
+cmake_minimum_required (VERSION 2.6)
+project (WILDLIFE_AT_HOME)
+# The version number.
+set (WILDLIFE_AT_HOME_VERSION_MAJOR 1)
+set (WILDLIFE_AT_HOME_VERSION_MINOR 0)
+
+# These will make cmake use clang and clang++ instead of gcc and g++
+#SET (CMAKE_C_COMPILER             "/usr/bin/clang")
+SET (CMAKE_C_FLAGS                "-Wall -g -O2 -std=c99 -Wl,-Bstatic")
+SET (CMAKE_CXX_FLAGS              "-Wall -g -O2")
+
+unset(Boost_INCLUDE_DIR CACHE)
+unset(Boost_LIBRARY_DIRS CACHE)
+
+#This may need to be updated or Linux/Windows
+set(CMAKE_LIBRARY_PATH /home/tdesell/boost_1_53_0/stage/lib ${CMAKE_LIBRARY_PATH} /Users/deselt/Dropbox/software/opencv/lib /opt/local/lib)
+
+#this adds the undvc_common FindX.cmake modules to look for BOINC and OpenCV
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/cmake/Modules/")
+
+include_directories (${PROJECT_SOURCE_DIR})
+
+find_package(BOINC)
+#find_package(OpenCV COMPONENTS highgui imageproc)
+
+add_definitions( -D_BOINC_ )
+
+add_subdirectory(undvc_common)
+
+
 find_package(MySQL REQUIRED)
 find_package(BOINC REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -53,11 +83,12 @@ target_link_libraries(wildlife_assimilator undvc_common ${BOINC_LIBRARIES} ${MYS
 #    wildlife_surf_collect_assimilation_policy)
 #target_link_libraries(wildlife_surf_collect_assimilator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(wildlife_work_generator wildlife_work_generator)
-target_link_libraries(wildlife_work_generator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
-
 add_executable(crowd_observation_validator crowd_observation_validator)
 target_link_libraries(crowd_observation_validator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES})
 
 add_executable(crowd_observation_validator_new crowd_observation_validator_new)
 target_link_libraries(crowd_observation_validator_new undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES})
+
+
+#add_executable(wildlife_work_generator wildlife_work_generator)
+#target_link_libraries(wildlife_work_generator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
