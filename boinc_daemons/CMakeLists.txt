@@ -38,8 +38,8 @@ add_executable(wildlife_surf_collect_validator
     ${BOINC_INCLUDE_DIR}/sched/validator
     ${BOINC_INCLUDE_DIR}/sched/validate_util
     ${BOINC_INCLUDE_DIR}/sched/validate_util2
-    wildlife_surf_collect_validation_policy
-    ${PROJECT_SOURCE_DIR}/source/EventType)
+    ${PROJECT_SOURCE_DIR}/source/EventType
+    wildlife_surf_collect_validation_policy)
 target_link_libraries(wildlife_surf_collect_validator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(wildlife_assimilator
@@ -51,6 +51,7 @@ target_link_libraries(wildlife_assimilator undvc_common ${BOINC_LIBRARIES} ${MYS
 add_executable(wildlife_surf_collect_assimilator
     ${BOINC_INCLUDE_DIR}/sched/assimilator
     ${BOINC_INCLUDE_DIR}/sched/validate_util
+    ${PROJECT_SOURCE_DIR}/source/EventType
     wildlife_surf_collect_assimilation_policy)
 target_link_libraries(wildlife_surf_collect_assimilator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
 

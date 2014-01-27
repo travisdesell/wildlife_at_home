@@ -45,7 +45,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
-#include "wildlife_surf.hpp"
+#include "EventType.hpp"
 
 using namespace std;
 using namespace cv;
@@ -124,7 +124,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     mysql_free_result(my_result);
 
     /*
-     * Now that the workunit xml has been gotten, we can parse it for the appropriate information
+     * Now that the workunit xml has been collected, we can parse it for the appropriate information
      */
     string tag_str;
 
@@ -160,9 +160,10 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
 
         FileStorage fs(fi.path.c_str(), FileStorage::READ);
         for (unsigned int i=0; i<event_names.size(); i++) {
-            EventType *temp = new EventType;
-            temp->id = event_names[i];
-            fs[event_names[i]] >> temp->descriptors;
+            EventType *temp = new EventType(event_names[i]);
+            Mat descriptors;
+            fs[event_names[i]] >> descriptors;
+            temp->addDescriptors(descriptors);
             event_types.push_back(temp);
         }
 
@@ -223,7 +224,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     // directory structure.
     for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
         string pathname = "/projects/wildlife/feature_files/" + tag_str + "/" + species_id + "/" + location_id + "/" + video_id + "/";
-        string filename = (*it)->id + ".desc";
+        string filename = (*it)->getId() + ".desc";
 
         boost::filesystem::path path(pathname);
         boost::system::error_code returnedError;
@@ -237,8 +238,8 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
         string full_filename = pathname + filename;
         cerr << "Writing to: " <<  full_filename << endl;
         FileStorage outfile(full_filename, FileStorage::WRITE);
-        cerr << "Write: " << (*it)->id.c_str() << endl;
-        outfile << (*it)->id << (*it)->descriptors;
+        cerr << "Write: " << (*it)->getId().c_str() << endl;
+        (*it)->write(outfile);
         outfile.release();
     }
     return 0;
