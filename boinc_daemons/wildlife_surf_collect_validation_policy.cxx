@@ -39,9 +39,6 @@
 #include <iterator>
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/nonfree/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
 
 #include "undvc_common/parse_xml.hxx"
 #include "undvc_common/file_io.hxx"
@@ -147,11 +144,9 @@ int compare_results(
         int matches = 0;
 
         log_messages.printf(MSG_DEBUG, "Check number of descriptors.\n");
-        double buffer = (double)type1->getDescriptors().rows / type2->getDescriptors().rows;
-        cout << buffer-1 << endl;
-        if (fabs(buffer-1) >= 0.01) {
+        if (type1->getDescriptors().rows != type2->getDescriptors().rows) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d (%f)\n", (int)type1->getDescriptors().rows, (int)type2->getDescriptors().rows, abs(buffer-1));
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d\n", (int)type1->getDescriptors().rows, (int)type2->getDescriptors().rows);
             exit(0);
             return 1;
         }
