@@ -102,5 +102,12 @@ Compile openCV:
 
     had to add (so it could find x264 -- do this at the end of the .a files but before the other stuff):
         /Users/deselt/Documents/Dropbox/software/x264/libx264.a
+        
+    LATEST BUILD:
 
+    For OSX:
+        cmake -DCMAKE_INSTALL_PREFIX=/your/install/location -DFFMPEG_INCLUDE_DIR=/ffmpeg/include/dir -DWITH_CUDA=OFF -DCMAKE_C_FLAGS=-mmacosx_version_min=10.5.8 -DCMAKE_CXX_FLAGS=-mmacosx_verson-min=10.5.8
+        
+    For Linux:
+        cmake -DCMAKE_INSTALL_PREFIX=/your/install/location -DFFMPEG_INCLUDE_DIR=/ffmpeg/include/dir -DWITH_CUDA=OFF
 
