@@ -17,13 +17,14 @@ FIND_PATH(BOINC_INCLUDE_DIR boinc_api.h
     /boinc/src/boinc
     /home/tdesell/boinc
     /Users/kgoehner/repos/boinc_build/boinc/api
+    /Users/Kyle/Dropbox/Windows/include/boinc
     ~/BOINC_SOURCE
 )
 MESSAGE(STATUS "BOINC_INCLUDE_DIR: ${BOINC_INCLUDE_DIR}")
 
 FIND_LIBRARY(BOINC_LIBRARY
-    NAMES boinc
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment ~/BOINC_SOURCE/
+    NAMES boinc libboinc
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment /Users/Kyle/Dropbox/Windows/win32_boinc ~/BOINC_SOURCE/
     PATH_SUFFIXES lib
 )
 MESSAGE(STATUS "BOINC_LIBRARY: ${BOINC_LIBRARY}")
@@ -36,8 +37,8 @@ FIND_LIBRARY(BOINC_CRYPT_LIBRARY
 MESSAGE(STATUS "BOINC_CRYPT_LIBRARY: ${BOINC_CRYPT_LIBRARY}")
 
 FIND_LIBRARY(BOINC_API_LIBRARY
-    NAMES boinc_api
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment ~/BOINC_SOURCE/
+    NAMES boinc_api libboincapi_staticcrt
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment /Users/Kyle/Dropbox/Windows/win32_boinc ~/BOINC_SOURCE/
     PATH_SUFFIXES api
 )
 MESSAGE(STATUS "BOINC_API_LIBRARY: ${BOINC_API_LIBRARY}")
