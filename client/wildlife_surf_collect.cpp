@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 
     while(framePos/total < 1.0) {
 #ifdef _BOINC_APP_
-        boinc_fraction_done(framePos/total);
+        boinc_fraction_done((double)framePos/total);
 #ifdef GUI
         int key = waitKey(1);
 #endif
