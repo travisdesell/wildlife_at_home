@@ -524,13 +524,6 @@ $(document).ready(function () {
                     'title' : '<p align="left">Clicking this button will remove this event.</p>'
                 });
 
-        $('.next-video-button:not(.has-tooltip)').addClass('has-tooltip').tooltip({ 
-                    'delay' : { show : 500, hide : 100 },
-                    'placement' : 'top',
-                    'html': true,
-                    'title' : '<p align="left">Click this button to finish watching this video and make your events ready for validation.</p>'
-                });
-
         $('.new-observation-button:not(.has-tooltip)').addClass('has-tooltip').tooltip({ 
                     'delay' : { show : 500, hide : 100 },
                     'placement' : 'auto bottom',
@@ -538,33 +531,104 @@ $(document).ready(function () {
                     'title' : '<p align="left">This will add another event for this video. You can enter and modify multiple events at the same time.</p>'
                 });
 
-        $('.next-video-button:not(.bound)').addClass('bound').click(function() {
-            var video_id = $(this).attr("video_id");
-            $(this).addClass("disabled");
+    }
 
-            $('#new-observation-button-' + video_id).addClass('disabled');
-
-            var submission_data = {
-                                    species_id : species_id,
-                                    location_id : location_id,
-                                    video_id : video_id
-                                  };
-
-            $.ajax({
-                type: 'POST',
-                url: './watch_interface/next_video.php',
-                data : submission_data,
-                dataType : 'json',
-                success : function(response) {
-                    window.location.reload();
-                },
-                error : function(jqXHR, textStatus, errorThrown) {
-                    alert(errorThrown);
-                },
-                async: true
+    $('.random-video-button:not(.has-tooltip)').addClass('has-tooltip').tooltip({ 
+                'delay' : { show : 500, hide : 100 },
+                'placement' : 'top',
+                'html': true,
+                'title' : '<p align="left">Click this button to finish watching this video and make your events ready for validation. Your next video will be chosen randomly.</p>'
             });
+
+
+    $('.next-video-button:not(.has-tooltip)').addClass('has-tooltip').tooltip({ 
+                'delay' : { show : 500, hide : 100 },
+                'placement' : 'top',
+                'html': true,
+                'title' : '<p align="left">Click this button to finish watching this video and make your events ready for validation. If possible, your next video will be the one after the current video.</p>'
+            });
+
+
+    function submit_observations(video_id, random) {
+        $('#new-observation-button-' + video_id).addClass('disabled');
+        $('.random-video-button').addClass("disabled");
+        $('.next-video-button').addClass("disabled");
+
+        var submission_data = {
+                                species_id : species_id,
+                                location_id : location_id,
+                                video_id : video_id,
+                                random : random
+                              };
+
+        $.ajax({
+            type: 'POST',
+            url: './watch_interface/next_video.php',
+            data : submission_data,
+            dataType : 'json',
+            success : function(response) {
+                window.location.reload();
+            },
+            error : function(jqXHR, textStatus, errorThrown) {
+                alert(errorThrown);
+            },
+            async: true
         });
     }
 
+    $('.random-video-button:not(.bound)').addClass('bound').click(function() {
+        var video_id = $(this).attr("video_id");
+        submit_observations(video_id, true);
+    });
+
+    $('.next-video-button:not(.bound)').addClass('bound').click(function() {
+        var video_id = $(this).attr("video_id");
+        submit_observations(video_id, false);
+    });
+
+    $('.difficulty-dropdown:not(.bound)').addClass('bound').click(function() {
+        $(this).closest(".btn-group").children(".btn").addClass("disabled");
+
+        var video_id = $(this).closest(".btn-group").attr("video_id");
+        var difficulty = $(this).attr("difficulty");
+        console.log("VIDEO ID IS: " + video_id  + ", difficulty: " + difficulty);
+
+        var target_button = $(this).parent().parent().parent().find(".btn");
+        target_button.html( "Difficulty: " + $(this).text() + "<span class='caret'></span>" );
+        if (difficulty === 'easy') {
+            target_button.addClass("btn-success");
+            target_button.removeClass("btn-warning");
+            target_button.removeClass("btn-danger");
+        } else if (difficulty === 'medium') {
+            target_button.removeClass("btn-success");
+            target_button.addClass("btn-warning");
+            target_button.removeClass("btn-danger");
+        } else if (difficulty === 'hard') {
+            target_button.removeClass("btn-success");
+            target_button.removeClass("btn-warning");
+            target_button.addClass("btn-danger");
+        }
+
+        var submission_data = {
+                                species_id : species_id,
+                                location_id : location_id,
+                                video_id : video_id,
+                                difficulty : difficulty
+                              };
+
+        $.ajax({
+            type: 'POST',
+            url: './watch_interface/update_difficulty.php',
+            data : submission_data,
+            dataType : 'json',
+            success : function(response) {
+                $(this).closest(".btn-group").children(".btn").removeClass("disabled");
+            },
+            error : function(jqXHR, textStatus, errorThrown) {
+                alert(errorThrown);
+            },
+            async: true
+        });
+    });
 });
 

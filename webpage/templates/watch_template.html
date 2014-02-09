@@ -9,6 +9,19 @@
     <button class='btn btn-small btn-success pull-right next-video-button' id='next-video-button-{{video_id}}' video_id='{{video_id}}'>
         Next Video
     </button>
+
+    <button class='btn btn-small btn-primary pull-right random-video-button' id='random-video-button-{{video_id}}' video_id='{{video_id}}' style='margin-right:10px;'>
+        Random Video
+    </button>
+
+    <div class='btn-group' video_id='{{video_id}}' style='margin-right:10px;'>
+        <button type='button' class='btn btn-small btn-success dropdown-toggle' id='difficulty-dropdown-button-{{video_id}}' data-toggle='dropdown' difficulty='easy'>Difficulty: Easy <span class='caret'></span></button>
+        <ul class='dropdown-menu'>
+            <li><a href='javascript:;' class='difficulty-dropdown' difficulty='easy'>Easy</a></li>
+            <li><a href='javascript:;' class='difficulty-dropdown' difficulty='medium'>Medium</a></li>
+            <li><a href='javascript:;' class='difficulty-dropdown' difficulty='hard'>Hard</a></li>
+        </ul>
+    </div>  <!-- button group -->
 </div>
 
 
