@@ -39,12 +39,21 @@ if (!$watched_videos_result) {
 }
 
 //Also need to increment view count on the video
-$video_query = "UPDATE video_2 SET watch_count = watch_count + 1 WHERE id = $video_id";
+$video_query = "UPDATE video_2 SET watch_count = watch_count + 1, crowd_status = 'WATCHED' WHERE id = $video_id";
 $video_result = attempt_query_with_ping($video_query, $wildlife_db);
 if (!$video_result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
     die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
 }
+
+//Need to set events to completed
+$video_query = "UPDATE timed_observations SET completed = true WHERE video_id = $video_id AND user_id = $user_id";
+$video_result = attempt_query_with_ping($video_query, $wildlife_db);
+if (!$video_result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
+}
+
 
 
 $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);

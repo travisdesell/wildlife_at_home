@@ -8,8 +8,11 @@ IF(OpenCV_DIR)
 ELSE()
     IF(APPLE)
         set(OpenCV_DIR ~/Dropbox/osx/opencv/share/OpenCV)
+        #set(OpenCV_DIR /usr/local/Cellar/opencv/2.4.7.1/share/OpenCV)
+    ELSEIF(WIN_32)
+        set(OpenCV_DIR ~/Dropbox/Windows/opencv/build)
     ELSE()
-        set(OpenCV_DIR /home/kgoehner/opencv/install/share/OpenCV)
+        set(OpenCV_DIR ~/opencv/share/OpenCV)
     ENDIF()
     MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 ENDIF()
@@ -22,17 +25,29 @@ ENDIF()
 
 # Executables
 #add_executable(wildlife_surf_collect wildlife_surf_collect)
+add_executable(wildlife_surf_collect
+    wildlife_surf_collect
+    ../source/Event
+    ../source/EventType
+    ../source/VideoType)
 
 find_package(OpenCV REQUIRED COMPONENTS videostab nonfree)
+#find_package(OpenCV REQUIRED)
 #find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 find_package(BOINC REQUIRED)
 
-#include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
-#target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
+MESSAGE(STATUS "OpenCV Include Dirs: ${OpenCV_INCLUDE_DIRS}")
+MESSAGE(STATUS "OpenCV Libs: ${OpenCV_LIBS}")
 
-add_executable(wildlife_surf_collect wildlife_surf_collect)
-include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
-target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
+#include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
+#target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+
+include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
+target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+
+#add_executable(wildlife_surf_collect wildlife_surf_collect2)
+#include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
+#target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
 
 #add_executable(wildlife_graphics_app wildlife_graphics_app)
 #include_directories (${PROJECT_SOURCE_DIR}/../include/ ${BOINC_INCLUDE_DIR})
