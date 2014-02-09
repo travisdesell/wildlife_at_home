@@ -56,7 +56,7 @@ function get_video_progress($species_id, $location_id, &$available, &$validated)
     $row = mysql_fetch_assoc($results);
     $total = $row['count(*)'];
 
-    $results = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE location_id = $location_id AND species_id = $species_id AND processing_status != 'UNWATERMARKED'", $wildlife_db);
+    $results = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE location_id = $location_id AND species_id = $species_id AND processing_status != 'UNWATERMARKED' AND release_to_public = true", $wildlife_db);
     if (!$results) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
     $row = mysql_fetch_assoc($results);
     $available = $row['count(*)'];
