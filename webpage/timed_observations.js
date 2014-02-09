@@ -587,13 +587,12 @@ $(document).ready(function () {
     });
 
     $('.difficulty-dropdown:not(.bound)').addClass('bound').click(function() {
-        $(this).closest(".btn-group").children(".btn").addClass("disabled");
-
         var video_id = $(this).closest(".btn-group").attr("video_id");
         var difficulty = $(this).attr("difficulty");
         console.log("VIDEO ID IS: " + video_id  + ", difficulty: " + difficulty);
 
-        var target_button = $(this).parent().parent().parent().find(".btn");
+        var target_button = $(this).closest(".btn-group").find(".btn");
+        target_button.addClass("disabled");
         target_button.html( "Difficulty: " + $(this).text() + "<span class='caret'></span>" );
         if (difficulty === 'easy') {
             target_button.addClass("btn-success");
@@ -622,7 +621,7 @@ $(document).ready(function () {
             data : submission_data,
             dataType : 'json',
             success : function(response) {
-                $(this).closest(".btn-group").children(".btn").removeClass("disabled");
+                target_button.removeClass("disabled");
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
