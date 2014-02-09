@@ -54,19 +54,19 @@ function print_navbar($active_items) {
                             <li class='dropdown " . $active_items['watch_video'] . "'>
                               <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Watch Video<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
-                                <li><a href='http://volunteer.cs.und.edu/wildlife/video_selector.php'>Site and Species Descriptions</a></li>
-                                <li><a href='http://volunteer.cs.und.edu/wildlife/instructional_videos.php'>Instructional Videos</a></li>
+                                <li><a href='video_selector.php'>Site and Species Descriptions</a></li>
+                                <li><a href='instructional_videos.php'>Instructional Videos</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Sharp-Tailed Grouse</a></li>
-                                <li><a href='watch.php?site=1&species=1'>Belden, ND</a></li>
-                                <li><a href='watch.php?site=2&species=1'>Blaisdell, ND</a></li>
-                                <li><a href='watch.php?site=3&species=1'>Lostwood Wildlife Refuge, ND</a></li>
+                                <li><a href='watch.php?location=1&species=1'>Belden, ND</a></li>
+                                <li><a href='watch.php?location=2&species=1'>Blaisdell, ND</a></li>
+                                <li><a href='watch.php?location=3&species=1'>Lostwood Wildlife Refuge, ND</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Interior Least Tern</a></li>
-                                <li><a href='watch.php?site=4&species=2'>Missouri River, ND</a></li>
+                                <li><a href='watch.php?location=4&species=2'>Missouri River, ND</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Piping Plover</a></li>
-                                <li><a href='watch.php?site=4&species=3'>Missouri River, ND</a></li>
+                                <li><a href='watch.php?location=4&species=3'>Missouri River, ND</a></li>
                               </ul>
                             </li>
 

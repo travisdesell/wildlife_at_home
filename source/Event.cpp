@@ -1,10 +1,10 @@
-#include "Event.h"
-#include "EventType.h"
+#include "Event.hpp"
+#include "EventType.hpp"
 
-void Event::Event() {
+Event::Event() {
 }
 
-void Event::Event(EventType *type, int startTime, int endTime) {
+Event::Event(EventType *type, int startTime, int endTime) {
     this->type = type;
     this->startTime = startTime;
     this->endTime = endTime;
@@ -24,7 +24,7 @@ void Event::setEndTime(int seconds) {
     this->endTime = seconds;
 }
 
-EventType* getType() {
+EventType* Event::getType() {
     return this->type;
 }
 
@@ -42,14 +42,18 @@ void Event::addDescriptors(cv::Mat descriptors) {
     this->type->addDescriptors(descriptors);
 }
 
-void Event::addKeypoints(cv::Mat keypoints) {
+void Event::addKeypoints(vector<cv::KeyPoint> keypoints) {
     this->type->addKeypoints(keypoints);
 }
 
-int Event::getDescriptors() {
+cv::Mat Event::getDescriptors() {
     return this->type->getDescriptors();
 }
 
-int Event::getKeypoints() {
+vector<cv::KeyPoint> Event::getKeypoints() {
     return this->type->getKeypoints();
+}
+
+string Event::getTypeId() {
+    return this->type->getId();
 }

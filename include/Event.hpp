@@ -1,15 +1,18 @@
-#ifndef EVENT_H
-#define EVENT_H
+#ifndef EVENT_HEADER
+#define EVENT_HEADER
 
+#include <vector>
 #include "EventType.hpp"
+
+using namespace std;
 
 class Event {
 	 EventType *type;
 	 int startTime;
 	 int endTime;
     public:
-     void Event();
-     void Event(EventType*, int, int);
+     Event();
+     Event(EventType*, int, int);
      void setType(EventType*);
      void setStartTime(int);
      void setEndTime(int);
@@ -18,10 +21,10 @@ class Event {
      int getEndTime();
 
      void addDescriptors(cv::Mat descriptors);
-     void addKeypoints(cv::Mat keypoints);
+     void addKeypoints(vector<cv::KeyPoint> keypoints);
      cv::Mat getDescriptors();
-     cv::Mat getKeypoints();
-     std::string getTypeId();
+     vector<cv::KeyPoint> getKeypoints();
+     string getTypeId();
 };
 
 #endif

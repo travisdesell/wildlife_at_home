@@ -38,21 +38,15 @@
 #include <algorithm>
 #include <iterator>
 
-#include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 
 #include "undvc_common/parse_xml.hxx"
 #include "undvc_common/file_io.hxx"
 
-#include "wildlife_surf.hpp"
+#include "Event.hpp"
+#include "EventType.hpp"
 
-using std::string;
-using std::vector;
-using std::ifstream;
-
-using std::stringstream;
-using std::string;
-using std::endl;
+using namespace std;
 using namespace cv;
 
 int init_result(RESULT& result, void*& data) {
@@ -60,16 +54,16 @@ int init_result(RESULT& result, void*& data) {
     int retval;
 
     try {
-        string events_str = parse_xml<string>(result.stderr_out, "event_ids");
-        stringstream ss(events_str);
-        vector<string> event_names;
-        vector<EventType*> *event_types = new vector<EventType*>();
+        string eventString = parse_xml<string>(result.stderr_out, "event_ids");
+        stringstream ss(eventString);
+        vector<string> eventIds;
+        vector<EventType*> *eventTypes = new vector<EventType*>();
 
         string temp;
-        std::getline(ss, temp, '\n');
-        while(std::getline(ss, temp, '\n')) {
+        getline(ss, temp, '\n');
+        while(getline(ss, temp, '\n')) {
             log_messages.printf(MSG_DEBUG, "Event id: %s\n", temp.c_str());
-            event_names.push_back(temp);
+            eventIds.push_back(temp);
         }
 
         retval = get_output_file_path(result, fi.path);
@@ -81,16 +75,14 @@ int init_result(RESULT& result, void*& data) {
 
         FileStorage fs(fi.path.c_str(), FileStorage::READ);
         log_messages.printf(MSG_DEBUG, "Adding events to data structure.\n");
-        for (unsigned int i=0; i<event_names.size(); i++) {
-            EventType *temp = new EventType;
-            temp->id = event_names[i];
-            fs[event_names[i]] >> temp->descriptors;
-            event_types->push_back(temp);
+        for (unsigned int i=0; i<eventIds.size(); i++) {
+            EventType *temp = new EventType(eventIds[i]);
+            temp->read(fs);
+            eventTypes->push_back(temp);
         }
-
         fs.release();
-        data = (void*)event_types;
-    } catch (string error_message) {
+        data = (void*)eventTypes;
+    } catch(string error_message) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
         result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
@@ -99,6 +91,10 @@ int init_result(RESULT& result, void*& data) {
         log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
         //exit(0);
         return ERR_XML_PARSE;
+    } catch(const exception &ex) {
+        log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error %s\n", result.id, result.name, ex.what());
+        exit(0);
+        return 1;
     }
 
     // Check for any null pointer errors
@@ -136,9 +132,11 @@ int compare_results(
 
     for (unsigned int i=0; i<desc1->size(); i++) {
         log_messages.printf(MSG_DEBUG, "Check event names.\n");
-        if (desc1->at(i)->id != desc2->at(i)->id) {
+        EventType *type1 = desc1->at(i);
+        EventType *type2 = desc2->at(i);
+        if (type1->getId() != type2->getId()) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", desc1->at(i)->id.c_str(), desc2->at(i)->id.c_str());
+            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", type1->getId().c_str(), type2->getId().c_str());
             exit(0);
             return 0;
         }
@@ -146,15 +144,13 @@ int compare_results(
         int matches = 0;
 
         log_messages.printf(MSG_DEBUG, "Check number of descriptors.\n");
-        double buffer = (double)desc1->at(i)->descriptors.rows / desc2->at(i)->descriptors.rows;
-        cout << buffer-1 << endl;
-        if (fabs(buffer-1) >= 0.01) {
+        if (type1->getDescriptors().rows != type2->getDescriptors().rows) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d (%f)\n", (int)desc1->at(i)->descriptors.rows, (int)desc2->at(i)->descriptors.rows, abs(buffer-1));
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d\n", (int)type1->getDescriptors().rows, (int)type2->getDescriptors().rows);
             exit(0);
             return 1;
         }
-        Mat temp = desc1->at(i)->descriptors - desc2->at(i)->descriptors;
+        Mat temp = type1->getDescriptors() - type2->getDescriptors();
         log_messages.printf(MSG_DEBUG, "Check descriptors.\n");
         for (int x=0; x<temp.rows; x++) {
             bool sub_match = true;
