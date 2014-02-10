@@ -53,12 +53,11 @@ static int  minHessian = 400;
 static double flannThreshold = 3.5;
 static bool removeWatermark = true;
 static bool removeTimestamp = true;
-static string vidFilename, configFilename, descFilename, featFilename;
+static string vidFilename, configFilename, descFilename;
 
 int main(int argc, char **argv) {
     // Local Variables
     descFilename = "descriptors.dat";
-    featFilename = "features.dat";
 
     if(!readParams(argc, argv)) {
         printUsage();
@@ -380,8 +379,6 @@ bool readParams(int argc, char** argv) {
                 if(i+1 < argc) configFilename = argv[++i];
             } else if(string(argv[i]) == "--desc" || string(argv[i]) == "-d") {
                 if(i+1 < argc) descFilename = argv[++i];
-            } else if(string(argv[i]) == "--feat" || string(argv[i]) == "-f") {
-                if(i+1 < argc) featFilename = argv[++i];
             } else if(string(argv[i]) == "--hessian" || string(argv[i]) == "-h") {
                 if(i+1 < argc) minHessian = atoi(argv[++i]);
             } else if(string(argv[i]) == "--threshold" || string(argv[i]) == "-t") {
