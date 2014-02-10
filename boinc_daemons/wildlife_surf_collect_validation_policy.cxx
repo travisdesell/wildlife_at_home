@@ -69,10 +69,10 @@ int init_result(RESULT& result, void*& data) {
         retval = get_output_file_path(result, fi.path);
         if (retval) {
             log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy: Failed to get output file path: %d %s\n", result.id, result.name);
-            exit(0);
             return retval;
         }
 
+        cout << "Result file path: '" << fi.path << "'" << endl;
         FileStorage fs(fi.path.c_str(), FileStorage::READ);
         log_messages.printf(MSG_DEBUG, "Adding events to data structure.\n");
         for (unsigned int i=0; i<eventIds.size(); i++) {
@@ -89,11 +89,11 @@ int init_result(RESULT& result, void*& data) {
         result.validate_state = VALIDATE_STATE_INVALID;
 
         log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
-        //exit(0);
+        exit(0);
         return ERR_XML_PARSE;
     } catch(const exception &ex) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error %s\n", result.id, result.name, ex.what());
-        exit(0);
+        //exit(0);
         return 1;
     }
 
@@ -118,53 +118,78 @@ int compare_results(
     RESULT const& r2, void *data2,
     bool& match
 ) {
-    double threshold = 0.00006;
-    vector<EventType*> *desc1 = (vector<EventType*>*)data1;
-    vector<EventType*> *desc2 = (vector<EventType*>*)data2;
+    float threshold = 0.00006;
+    //float threshold = 0.02;
+    vector<EventType*> *events1 = (vector<EventType*>*)data1;
+    vector<EventType*> *events2 = (vector<EventType*>*)data2;
 
     log_messages.printf(MSG_DEBUG, "Check number of events.\n");
-    if(desc1->size() != desc2->size()) {
+    if(events1->size() != events2->size()) {
         match = false;
-        log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)desc1->size(), (int)desc2->size());
+        log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)events1->size(), (int)events2->size());
         exit(0);
         return 0;
     }
 
-    for (unsigned int i=0; i<desc1->size(); i++) {
+    for (unsigned int i=0; i<events1->size(); i++) {
         log_messages.printf(MSG_DEBUG, "Check event names.\n");
-        EventType *type1 = desc1->at(i);
-        EventType *type2 = desc2->at(i);
+        EventType *type1 = events1->at(i);
+        EventType *type2 = events2->at(i);
         if (type1->getId() != type2->getId()) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", type1->getId().c_str(), type2->getId().c_str());
+            log_messages.printf(MSG_CRITICAL, "ERROR, event ids do not match. %s vs %s\n", type1->getId().c_str(), type2->getId().c_str());
             exit(0);
             return 0;
         }
 
         int matches = 0;
 
-        log_messages.printf(MSG_DEBUG, "Check number of descriptors.\n");
-        if (type1->getDescriptors().rows != type2->getDescriptors().rows) {
+        log_messages.printf(MSG_DEBUG, "Check number of descriptors for '%s'.\n", type1->getId().c_str());
+        Mat desc1 = type1->getDescriptors();
+        Mat desc2 = type2->getDescriptors();
+        log_messages.printf(MSG_DEBUG, "Descriptors for '%s' (%d, %d).\n", type1->getId().c_str(), (int)desc1.rows, (int)desc2.rows);
+        if (desc1.rows != desc2.rows) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d\n", (int)type1->getDescriptors().rows, (int)type2->getDescriptors().rows);
-            exit(0);
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d\n", (int)desc1.rows, (int)desc2.rows);
+            //exit(0);
+            sleep(10);
             return 1;
         }
-        Mat temp = type1->getDescriptors() - type2->getDescriptors();
-        log_messages.printf(MSG_DEBUG, "Check descriptors.\n");
+
+        log_messages.printf(MSG_DEBUG, "Check number of keypoints.\n");
+        vector<KeyPoint> type1_keypoints = type1->getKeypoints();
+        vector<KeyPoint> type2_keypoints = type2->getKeypoints();
+        if (type1_keypoints.size() != type2_keypoints.size()) {
+            match = false;
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of keypoints is different. %d vs %d\n", (int)type1_keypoints.size(), (int)type2_keypoints.size());
+            //exit(0);
+            sleep(10);
+            return 1;
+        }
+
+        Mat temp = desc1 - desc2;
+        log_messages.printf(MSG_DEBUG, "Check descriptors and keypoints.\n");
         for (int x=0; x<temp.rows; x++) {
             bool sub_match = true;
-            for (int y=0; y<temp.cols; y++) {
-                if (temp.at<double>(x,y) > threshold) {
-                    sub_match = false;
-                    log_messages.printf(MSG_DEBUG, "Descriptors at (%d, %d) are not the same. Difference of %f\n", x, y, (float)temp.at<double>(x,y));
+            Point diff = type1_keypoints.at(x).pt - type1_keypoints.at(x).pt;
+            double dist = sqrt(diff.x*diff.x + diff.y*diff.y);
+            if (dist == 0) {
+                for (int y=0; y<temp.cols; y++) {
+                    if (temp.at<float>(x,y) > threshold) {
+                        sub_match = false;
+                        log_messages.printf(MSG_DEBUG, "Descriptors at (%d, %d) are not the same. Difference of %E. With values (%E vs %E = %E)\n", x, y, temp.at<float>(x,y), desc1.at<float>(x,y), desc2.at<float>(x,y), desc1.at<float>(x,y)-desc2.at<float>(x,y));
+                    }
                 }
+            } else {
+                sub_match = false;
+                log_messages.printf(MSG_DEBUG, "Keypoint at index %d have incorrect locations (%f, %f) vs (%f, %f)\n", x, type1_keypoints.at(x).pt.x, type1_keypoints.at(x).pt.y, type2_keypoints.at(x).pt.x, type2_keypoints.at(x).pt.y);
             }
             if (sub_match) matches++;
         }
         if (matches < temp.rows) {
             log_messages.printf(MSG_CRITICAL, "%d/%d (%f) of descriptors match for results %d and %d \n", matches, temp.rows, (float)matches/temp.rows*100, r1.id, r2.id);
-            exit(0);
+            //exit(0);
+            sleep(10);
             return 1;
             return ERR_OPENDIR;
         }

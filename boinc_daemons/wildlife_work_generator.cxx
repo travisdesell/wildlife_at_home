@@ -181,7 +181,7 @@ bool config_is_good(string fileName, int duration_s) {
             int minutes = time / 60;
             time = time % 60;
             int seconds = time;
-            cout << "Invalid at time: " << hours << " : " << minutes << " : " << seconds << endl;
+            cout << "Config file is invalid at time: " << hours << " : " << minutes << " : " << seconds << endl;
             return false;
         }
     }
@@ -307,7 +307,9 @@ int make_job(int video_id, int species_id, int location_id, string video_address
 
         config_file.close();
         if (config_is_good(config_filename, duration_s)) {
+            cout << "Copy file to download dir: '" << config_filename << "'" << endl;
             copy_file_to_download_dir(config_filename);
+            cout << "Delete file: '" << config_filename << "'" << endl;
             remove(config_filename.c_str()); // delete the config file from the local directory.
         } else {
             remove(config_filename.c_str());
