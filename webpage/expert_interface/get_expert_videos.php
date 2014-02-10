@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd = dirname(dirname($cwd));
 
 require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
@@ -97,7 +97,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($found) {
-    $video_list_template = file_get_contents($cwd . "/expert_list_template.html");
+    $video_list_template = file_get_contents($cwd . "/templates/expert_list_template.html");
     $mustache_engine = new Mustache_Engine;
     echo $mustache_engine->render($video_list_template, $video_list);
 
