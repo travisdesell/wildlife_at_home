@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -66,6 +67,21 @@ void EventType::write(cv::FileStorage outfile) throw(runtime_error) {
     if(outfile.isOpened()) {
         outfile << getId() + "_desc" << getDescriptors();
         outfile << getId() + "_pts" << getKeypoints();
+    } else {
+        throw runtime_error("File is not open for writing");
+    }
+}
+
+void EventType::writeForSVM(ofstream &outfile, string label) throw(runtime_error) {
+    cv::Mat desc = getDescriptors();
+    if(outfile.is_open()) {
+        for(int i=0; i<desc.rows; i++) {
+            outfile << label << " ";
+            for(int j=0; j<desc.cols; j++) {
+                outfile << j << ":" << desc.at<float>(i, j) << " ";
+            }
+            outfile << endl;
+        }
     } else {
         throw runtime_error("File is not open for writing");
     }

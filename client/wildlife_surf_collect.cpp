@@ -176,6 +176,10 @@ int main(int argc, char **argv) {
 
                     double avgDist = totalDist/matches.size();
                     double stdDev = standardDeviation(matches, avgDist);
+                    //Round to four decimal places for consistency across
+                    //archetectures.
+                    // 10^4
+                    stdDev = floor(stdDev*10000 + 0.5) / 10000;
 
                     cerr << "Max dist: " << maxDist << endl;
                     cerr << "Min dist: " << minDist << endl;
@@ -291,9 +295,11 @@ void readEventsFromFile(string filename, vector<EventType*> *eventTypes) {
 
 void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     FileStorage outfile(filename, FileStorage::WRITE);
+    ofstream svmfile("svm.dat");
     try {
         for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
             (*it)->write(outfile);
+            (*it)->writeForSVM(svmfile, (*it)->getId());
         }
     } catch(const exception ex) {
         cerr << "writeEventsToFile: " << ex.what() << endl;

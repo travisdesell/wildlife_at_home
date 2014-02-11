@@ -25,11 +25,6 @@ ENDIF()
 
 # Executables
 #add_executable(wildlife_surf_collect wildlife_surf_collect)
-add_executable(wildlife_surf_collect
-    wildlife_surf_collect
-    ../source/Event
-    ../source/EventType
-    ../source/VideoType)
 
 find_package(OpenCV REQUIRED COMPONENTS videostab nonfree)
 #find_package(OpenCV REQUIRED)
@@ -42,8 +37,17 @@ MESSAGE(STATUS "OpenCV Libs: ${OpenCV_LIBS}")
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
 
+add_executable(wildlife_surf_collect
+    wildlife_surf_collect
+    ../source/Event
+    ../source/EventType
+    ../source/VideoType)
 include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
 target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+
+add_executable(wildlife_svm wildlife_svm)
+include_directories(${OpenCV_INCLUDE_DIRS})
+target_link_libraries(wildlife_svm ${OpenCV_LIBS})
 
 #add_executable(wildlife_surf_collect wildlife_surf_collect2)
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
