@@ -1,4 +1,5 @@
 //#define GUI
+#define SVM
 
 #include <stdexcept>
 #include <vector>
@@ -248,9 +249,7 @@ int main(int argc, char **argv) {
 }
 
 void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error) {
-#ifdef _BOINC_APP_
     string checkpointFilename = getBoincFilename("checkpoint.dat");
-#endif
     writeEventsToFile(checkpointFilename, eventTypes);
     FileStorage outfile(checkpointFilename, FileStorage::APPEND);
     if(!outfile.isOpened()) {
@@ -263,9 +262,7 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 bool readCheckpoint(int *checkpointFramePos, vector<EventType*> *eventTypes) {
     cerr << "Reading checkpoint..." << endl;
-#ifdef _BOINC_APP_
     string checkpointFilename = getBoincFilename("checkpoint.dat");
-#endif
     FileStorage infile(checkpointFilename, FileStorage::READ);
     if(!infile.isOpened()) return false;
     infile["CURRENT_FRAME"] >> *checkpointFramePos;
@@ -295,11 +292,15 @@ void readEventsFromFile(string filename, vector<EventType*> *eventTypes) {
 
 void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     FileStorage outfile(filename, FileStorage::WRITE);
+#ifdef SVM
     ofstream svmfile("svm.dat");
+#endif
     try {
         for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
             (*it)->write(outfile);
+#ifdef SVM
             (*it)->writeForSVM(svmfile, (*it)->getId());
+#endif
         }
     } catch(const exception ex) {
         cerr << "writeEventsToFile: " << ex.what() << endl;
@@ -369,10 +370,12 @@ int timeToSeconds(string time) {
 
 string getBoincFilename(string filename) throw(runtime_error) {
     string resolvedPath;
+#ifdef _BOINC_APP_
     if(boinc_resolve_filename_s(filename.c_str(), resolvedPath)) {
         cerr << "Could not resolve filename '" << filename.c_str() << "'" << endl;
         throw runtime_error("Boinc could not resolve filename");
     }
+#endif
     return resolvedPath;
 }
 
