@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -27,6 +28,7 @@ class EventType {
     void addKeypoints(vector<cv::KeyPoint> keypoints);
     void read(cv::FileStorage infile) throw(runtime_error);
     void write(cv::FileStorage outfile) throw(runtime_error);
+    void writeForSVM(ofstream &outfile, string label) throw(runtime_error);
 };
 
 #endif
