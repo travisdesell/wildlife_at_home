@@ -78,7 +78,7 @@ void EventType::writeForSVM(ofstream &outfile, string label) throw(runtime_error
         for(int i=0; i<desc.rows; i++) {
             outfile << label << " ";
             for(int j=0; j<desc.cols; j++) {
-                outfile << j << ":" << desc.at<float>(i, j) << " ";
+                outfile << j+1 << ":" << desc.at<float>(i, j) << " ";
             }
             outfile << endl;
         }
