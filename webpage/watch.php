@@ -163,7 +163,6 @@ echo "
         .label {
             cursor: pointer;
         }
-
     </style>
 ";
 
@@ -351,6 +350,9 @@ if ($species_id < 0 || $species_id > 3) {
 
     if ($found) {
         $active_video_id[$species_location_hash]['video_id'] = $video_id;
+        if ($active_video_id[$species_location_hash]['difficulty'] == '') {
+            $active_video_id[$species_location_hash]['difficulty'] = 'easy';
+        }
         $active_video_id[$species_location_hash]['start_time'] = date('Y-m-d H:i:s', time());
 
         $user_query = "UPDATE user SET active_video_id = '" . json_encode($active_video_id) . "' WHERE id = $user_id";
@@ -370,7 +372,7 @@ if ($species_id < 0 || $species_id > 3) {
         <div class='row'>";
 
     if ($found) {
-        echo get_watch_video_interface($species_id, $video_id, $video_filename, $animal_id, $user, $start_time);
+        echo get_watch_video_interface($species_id, $video_id, $video_filename, $animal_id, $user, $start_time, $active_video_id[$species_location_hash]['difficulty']);
     } else {
         echo "<p>No videos are currently available for the specified species and location.  You may want to adjust your settings for video lengths.</p>";
     }

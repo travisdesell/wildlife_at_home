@@ -1,61 +1,32 @@
-<div class='tab'>{{trimmed_filename}}</div>
-<div class='tab-bottom-left'>{{bossa_total_credit}} seconds watched : <span class='total_events'>{{total_events}}</span> events marked ({{valid_events}} valid, {{invalid_events}} invalid, {{missed_events}} missed)</div>
-<div class='tab-right'>
-    <button class='btn btn-small btn-info pull-right' id='help-button' style='margin:0px; padding: 2px 4px;' data-toggle='modal'>
-        <i class='icon-white icon-question-sign'></i> Instructions
-    </button>
-</div>
-<div class='tab-bottom-right'>
-    <button class='btn btn-small btn-success pull-right next-video-button' id='next-video-button-{{video_id}}' video_id='{{video_id}}'>
-        Next Video
-    </button>
+<div class='row-fluid' style="display:table;">
+    <div class='span6' style="display:table-cell; vertical-align:bottom; float:none; padding-right:5px;">
+        <div class='row-fluid'>
+            <video style='width:100%;' id='wildlife-video-{{video_id}}' start_time='{{start_time}}' controls='controls' preload='auto'>
+            <source src='http://wildlife.und.edu/{{video_file}}.ogv' type='video/ogg'>
+            <source src='http://wildlife.und.edu/{{video_file}}.mp4' type='video/mp4'>
+            This video requires a browser that supports HTML5 video.
+            </video>
+        </div> <!--row-fluid-->
 
-    <button class='btn btn-small btn-primary pull-right random-video-button' id='random-video-button-{{video_id}}' video_id='{{video_id}}' style='margin-right:10px;'>
-        Random Video
-    </button>
+        <div class='row-fluid' id='wildlife-video-buttons-{{video_id}}'>
+            <button class='btn btn-primary span5 pull-left fast-backward-button' style='margin-top:0px;' video_id='{{video_id}}'>
+                <i class='icon-backward icon-white'></i>
+            </button>
 
-    <div class='btn-group' video_id='{{video_id}}' style='margin-right:10px;'>
-        <button type='button' class='btn btn-small {{difficulty_class}} dropdown-toggle' id='difficulty-dropdown-button-{{video_id}}' data-toggle='dropdown' difficulty='easy'>Difficulty: {{difficulty_text}} <span class='caret'></span></button>
-        <ul class='dropdown-menu'>
-            <li><a href='javascript:;' class='difficulty-dropdown' difficulty='easy'>Easy</a></li>
-            <li><a href='javascript:;' class='difficulty-dropdown' difficulty='medium'>Medium</a></li>
-            <li><a href='javascript:;' class='difficulty-dropdown' difficulty='hard'>Hard</a></li>
-        </ul>
-    </div>  <!-- button group -->
-</div>
-
-
-<div class='span12'>
-    <div class='row-fluid'>
-        <div class='span6'>
-            <div class='row-fluid'>
-                <video style='width:100%;' id='wildlife-video-{{video_id}}' start_time='{{start_time}}' controls='controls' preload='auto'>
-                <source src='http://wildlife.und.edu/{{video_file}}.ogv' type='video/ogg'>
-                <source src='http://wildlife.und.edu/{{video_file}}.mp4' type='video/mp4'>
-                This video requires a browser that supports HTML5 video.
-                </video>
-            </div> <!--row-fluid-->
-
-            <div class='row-fluid' id='wildlife-video-buttons-{{video_id}}'>
-                <button class='btn btn-primary span5 pull-left fast-backward-button' style='margin-top:0px;' video_id='{{video_id}}'>
-                    <i class='icon-backward icon-white'></i>
-                </button>
-
-                <div class='span2'>
-                    <input style='width:100%; padding:3px; margin:1px;' type='text' id='speed-textbox-{{video_id}}' value='speed: 1' readonly='readonly'></input>
-                </div>
-
-                <button class='btn btn-primary span5 pull-right fast-forward-button' style='margin-top:0px;' video_id='{{video_id}}'>
-                    <i class='icon-forward icon-white'></i>
-                </button>
-            </div> <!--row-fluid-->
-        </div> <!--span6-->
-
-        <div class='span6'>
-            <div class='row-fluid'>
-                <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
-                <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
+            <div class='span2'>
+                <input style='width:100%; padding:3px; margin:1px;' type='text' id='speed-textbox-{{video_id}}' value='speed: 1' readonly='readonly'></input>
             </div>
-        </div>  <!-- span 6 -->
-    </div> <!--row fluid-->
-</div> <!--span12-->
+
+            <button class='btn btn-primary span5 pull-right fast-forward-button' style='margin-top:0px;' video_id='{{video_id}}'>
+                <i class='icon-forward icon-white'></i>
+            </button>
+        </div> <!--row-fluid-->
+    </div> <!--span6-->
+
+    <div class='span6' style="display:table-cell; float:none; padding-left:5px;">
+        <div class='row-fluid'>
+            <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
+            <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
+        </div>
+    </div>  <!-- span 6 -->
+</div> <!--row fluid-->

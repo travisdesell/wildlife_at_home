@@ -6,16 +6,16 @@
     </button>
 </div>
 <div class='tab-bottom-right'>
-    <button class='btn btn-small btn-success pull-right next-video-button' id='next-video-button-{{video_id}}' video_id='{{video_id}}'>
-        Next Video
+    <button class='btn btn-small btn-primary pull-right finished-video-button' id='finished-video-button-{{video_id}}' video_id='{{video_id}}'>
+        Finished 
     </button>
 
-    <button class='btn btn-small btn-primary pull-right random-video-button' id='random-video-button-{{video_id}}' video_id='{{video_id}}' style='margin-right:10px;'>
-        Random Video
+    <button class='btn btn-small pull-right skip-video-button' id='skip-video-button-{{video_id}}' video_id='{{video_id}}' style='margin-right:10px;'>
+        Skip
     </button>
 
     <div class='btn-group' video_id='{{video_id}}' style='margin-right:10px;'>
-        <button type='button' class='btn btn-small btn-success dropdown-toggle' id='difficulty-dropdown-button-{{video_id}}' data-toggle='dropdown' difficulty='easy'>Difficulty: Easy <span class='caret'></span></button>
+        <button type='button' class='btn btn-small {{difficulty_class}} dropdown-toggle' id='difficulty-dropdown-button-{{video_id}}' data-toggle='dropdown' difficulty='easy'>Difficulty: {{difficulty_text}} <span class='caret'></span></button>
         <ul class='dropdown-menu'>
             <li><a href='javascript:;' class='difficulty-dropdown' difficulty='easy'>Easy</a></li>
             <li><a href='javascript:;' class='difficulty-dropdown' difficulty='medium'>Medium</a></li>
@@ -25,10 +25,10 @@
 </div>
 
 
-<div class='span12'>
-    <div class='row-fluid'>
-        <div class='span6'>
-            <div class='row-fluid'>
+<div class='span12' style="display:table;">
+    <div class='row-fluid' style="display:table-row;">
+        <div class='span6' style="display:table-cell; vertical-align:bottom; float:none; padding-right:5px;">
+            <div class='row-fluid'> 
                 <video style='width:100%;' id='wildlife-video-{{video_id}}' start_time='{{start_time}}' controls='controls' preload='auto'>
                 <source src='http://wildlife.und.edu/{{video_file}}.ogv' type='video/ogg'>
                 <source src='http://wildlife.und.edu/{{video_file}}.mp4' type='video/mp4'>
@@ -51,7 +51,7 @@
             </div> <!--row-fluid-->
         </div> <!--span6-->
 
-        <div class='span6'>
+        <div class='span6' style="display:table-cell; float:none; padding-left:5px;">
             <div class='row-fluid'>
                 <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
                 <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
