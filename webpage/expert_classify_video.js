@@ -134,7 +134,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'POST',
-            url: './get_animal_ids.php',
+            url: './expert_interface/get_animal_ids.php',
             data : submission_data,
             dataType : 'text',
             success : function(response) {
@@ -182,7 +182,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'POST',
-            url: './get_expert_videos.php',
+            url: './expert_interface/get_expert_videos.php',
             data : submission_data,
             dataType : 'text',
             success : function(response) {
@@ -202,7 +202,7 @@ $(document).ready(function () {
 
                     $.ajax({
                         type: 'POST',
-                        url: './toggle_private_video.php',
+                        url: './expert_interface/toggle_private_video.php',
                         data : { is_private : is_private, video_id : video_id },
                         dataType : 'JSON',
                         success : function(response) {
@@ -233,7 +233,7 @@ $(document).ready(function () {
 
                     $.ajax({
                         type: 'POST',
-                        url: './toggle_expert_flag.php',
+                        url: './expert_interface/toggle_expert_flag.php',
                         data : { video_id : video_id },
                         dataType : 'JSON',
                         success : function(response) {
@@ -262,7 +262,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'POST',
-            url: './get_expert_count_nav.php',
+            url: './expert_interface/get_expert_count_nav.php',
             data : submission_data,
             dataType : 'text',
             success : function(response) {
@@ -296,218 +296,15 @@ $(document).ready(function () {
 
                 $.ajax({
                     type: 'POST',
-                    url: './get_expert_video.php',
+                    url: './watch_interface/get_expert_video.php',
                     data : submission_data,
                     dataType : 'text',
                     success : function(response) {
-        //                console.log("the response was:\n" + response);
+                        console.log("the response was:\n" + response);
                         $(target).html(response);
 
-                        $('.event-start-time-textbox').click(function() {
-                            var video_id = $(this).attr("video_id");
-//                            console.log("setting text for #wildlife-video-" + video_id);
-
-                            var video_start_time = $("#collapse_" + video_id).attr("start_time");
-                            var time = $("#wildlife-video-" + video_id).get(0).currentTime * 1000;
-
-                            //convert the mysql datetime to a javascript Date object
-                            var t = video_start_time.split(/[- :]/);
-                            var video_date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
-                            console.log("video_date: " + video_date);
-                            console.log("time: " + time);
-
-                            var current_time = new Date(video_date.getTime() + time);
-
-                            var hours = current_time.getHours();
-                            var minutes = current_time.getMinutes();
-                            var seconds = current_time.getSeconds();
-                            var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
-
-//                            console.log( "Time: " + result);
-                            $(this).val( result );
-                            event_start_times[video_id] = result;
-                        });
-
-                        $('.event-end-time-textbox').click(function() {
-                            var video_id = $(this).attr("video_id");
-//                            console.log("setting text for #wildlife-video-" + video_id);
-
-                            var video_start_time = $("#collapse_" + video_id).attr("start_time");
-                            var time = $("#wildlife-video-" + video_id).get(0).currentTime * 1000;
-
-                            //convert the mysql datetime to a javascript Date object
-                            var t = video_start_time.split(/[- :]/);
-                            var video_date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
-//                            console.log("video_date: " + video_date);
-
-                            var current_time = new Date(video_date.getTime() + time);
-
-                            var hours = current_time.getHours();
-                            var minutes = current_time.getMinutes();
-                            var seconds = current_time.getSeconds();
-                            var result = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
-
-//                            console.log( "Time: " + result);
-                            $(this).val( result );
-                            event_end_times[video_id] = result;
-                        });
-
-                        $('.event-dropdown').click(function(ev) {
-                            var event_id = $(this).attr("event_id");
-                            var video_id = $(this).attr("video_id");
-
-                            event_ids[video_id] = event_id;
-
-//                            console.log("target = #event-button-" + video_id);
-//                            console.log("event_ids = " + JSON.stringify(event_ids));
-
-                            function toTitleCase(str) {
-                                return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
-                            }
-
-                            $('#event-button-' + video_id).html(toTitleCase(event_ids[video_id]) + ' <span class="caret"></span>');
-
-                            /*
-                            if (event_id === '0') {
-                                $('#event-button-' + video_id).html('Unspecified <span class="caret"></span>');
-                                event_ids[video_id] = 'unspecified';
-                            } else if (event_id === '1') {
-                                $('#event-button-' + video_id).html('Bird Presence <span class="caret"></span>');
-                                event_ids[video_id] = 'bird present';
-                            } else if (event_id === '2') {
-                                $('#event-button-' + video_id).html('Bird Absence <span class="caret"></span>');
-                                event_ids[video_id] = 'bird absent';
-                            } else if (event_id === '3') {
-                                $('#event-button-' + video_id).html('Predator <span class="caret"></span>');
-                                event_ids[video_id] = 'territorial - predator';
-                            } else if (event_id === '4') {
-                                $('#event-button-' + video_id).html('Other Animal <span class="caret"></span>');
-                                event_ids[video_id] = 'territorial - other animal';
-                            } else if (event_id === '5') {
-                                $('#event-button-' + video_id).html('Nest Defense <span class="caret"></span>');
-                                event_ids[video_id] = 'territorial - nest defense';
-                            } else if (event_id === '6') {
-                                $('#event-button-' + video_id).html('Nest Success <span class="caret"></span>');
-                                event_ids[video_id] = 'nest success';
-                            } else if (event_id === '7') {
-                                $('#event-button-' + video_id).html('Chick Presence <span class="caret"></span>');
-                                event_ids[video_id] = 'chick presence';
-                            } else if (event_id === '8') {
-                                $('#event-button-' + video_id).html('Volunteer Training<span class="caret"></span>');
-                                event_ids[video_id] = 'volunteer training';
-                            }
-                            */
-
-                            ev.preventDefault();
-//                            ev.stopPropagation();
-                        });
-
-                        $('.fast-forward-button').button();
-                        $('.fast-backward-button').button();
-
-                        $('.fast-backward-button').click(function() {
-                            var video_id = $(this).attr('video_id');
-                            var video = $('#wildlife-video-' + video_id).get(0);
-                            var rate = video.playbackRate;
-
-                            if (rate === -16.0)         rate = -16.0;
-                            else if (rate === -12.0)    rate = -16.0; 
-                            else if (rate === -10.0)    rate = -12.0;
-                            else if (rate === -8.0)     rate = -10.0;
-                            else if (rate === -6.0)     rate = -8.0;
-                            else if (rate === -4.0)     rate = -6.0;
-                            else if (rate === -2.0)     rate = -4.0;
-                            else if (rate === -1.0)     rate = -2.0;
-                            else if (rate === 1.0)      rate = -1.0;
-                            else if (rate === 2.0)      rate = 1.0; 
-                            else if (rate === 4.0)      rate = 2.0;
-                            else if (rate === 6.0)      rate = 4.0;
-                            else if (rate === 8.0)      rate = 6.0;
-                            else if (rate === 10.0)     rate = 8.0;
-                            else if (rate === 12.0)     rate = 10.0;
-                            else if (rate === 16.0)     rate = 12.0;
-                            else rate = -1.0;
-
-                            video.playbackRate = rate;
-
-                            //console.log("clicking fast backward!, playback rate: " + video.playbackRate);
-
-                            $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
-                        });
-
-                        $('.fast-forward-button').click(function() {
-                            var video_id = $(this).attr('video_id');
-                            var video = $('#wildlife-video-' + video_id).get(0);
-                            var rate = video.playbackRate;
-
-                            if (rate === -16.0)         rate = -12.0;
-                            else if (rate === -12.0)    rate = -10.0; 
-                            else if (rate === -10.0)    rate = -8.0;
-                            else if (rate === -8.0)     rate = -6.0;
-                            else if (rate === -6.0)     rate = -4.0;
-                            else if (rate === -4.0)     rate = -2.0;
-                            else if (rate === -2.0)     rate = -1.0;
-                            else if (rate === -1.0)     rate = 1.0;
-                            else if (rate === 1.0)      rate = 2.0;
-                            else if (rate === 2.0)      rate = 4.0; 
-                            else if (rate === 4.0)      rate = 6.0;
-                            else if (rate === 6.0)      rate = 8.0;
-                            else if (rate === 8.0)      rate = 10.0;
-                            else if (rate === 10.0)     rate = 12.0;
-                            else if (rate === 12.0)     rate = 16.0;
-                            else if (rate === 16.0)     rate = 16.0;
-                            else rate = 1.0;
-
-                            video.playbackRate = rate;
-
-                            //console.log("clicking fast forward!, playback rate: " + video.playbackRate);
-
-                            $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
-                        });
-
-
-                        $('.submit-observation-button').click(function() {
-                            var video_id = $(this).attr("video_id");
-
-                            $(this).addClass("disabled");
-                            var div_id = "#submit-observation-button-" + video_id;
-
-                            var submission_data = {
-                                                    video_id : video_id,
-                                                    user_id : user_id,
-                                                    event_type : event_ids[video_id],
-                                                    start_time : $("#event-start-time-" + video_id).val(),
-                                                    end_time : $("#event-end-time-" + video_id).val(),
-                                                    comments : $("#comments-" + video_id).val()
-                                                  };
-
-                            $.ajax({
-                                type: 'POST',
-                                url: './submit_expert_observation.php',
-                                data : submission_data,
-                                dataType : 'json',
-                                success : function(response) {
-                                    //console.log("the response was:\n" + response);
-                                    $(div_id).removeClass("disabled");
-
-                                    var observation_id = response['observation_id'];
-                                    $("#observations-table-div-" + video_id).html( response['html'] );
-
-                                    var recorded_event_button_html = response['observation_count'];
-                                    if (recorded_event_button_html === 1) recorded_event_button_html += " recorded event";
-                                    else recorded_event_button_html += " recorded events";
-                                    $("#recorded-event-button-" + video_id).html( recorded_event_button_html );
-
-                                    enable_remove_observation_buttons();
-                                },
-                                error : function(jqXHR, textStatus, errorThrown) {
-                                    alert(errorThrown);
-                                },
-                                async: true
-                            });
-                        });
-
-                        enable_remove_observation_buttons();
+                        initialize_event_list();
+                        enable_observation_table();
                     },
                     error : function(jqXHR, textStatus, errorThrown) {
                         alert(errorThrown);
@@ -549,45 +346,6 @@ $(document).ready(function () {
             ev.stopPropagation();
         });
     }
-
-    function enable_remove_observation_buttons() {
-        $('.remove-observation-button').button();
-        $('.remove-observation-button').click(function() {
-            var observation_id = $(this).attr('observation_id');
-            var div_id = "#remove-observation-button-" + observation_id;
-            console.log("observation id: " + observation_id);
-            $(this).addClass("disabled");
-
-            var submission_data = {
-                                    observation_id : observation_id
-                                  };
-            $.ajax({
-                type: 'POST',
-                url: './remove_expert_observation.php',
-                data : submission_data,
-                dataType : 'json',
-                success : function(response) {
-                    $(div_id).removeClass("disabled");
-
-                    var observation_count = response['observation_count'];
-                    var video_id = $("#observation-row-" + observation_id).parent().parent().attr('video_id');
-                    $("#observations-table-div-" + video_id).html( response['html'] );
-
-                    var recorded_event_button_html = response['observation_count'];
-                    if (recorded_event_button_html === 1) recorded_event_button_html += " recorded event";
-                    else recorded_event_button_html += " recorded events";
-                    $("#recorded-event-button-" + video_id).html( recorded_event_button_html );
-
-                    enable_remove_observation_buttons();
-                },
-                error : function(jqXHR, textStatus, errorThrown) {
-                    alert(errorThrown);
-                },
-                async: true
-            });
-        });
-    }
-
 
     function init_dropdown() {
         $('.video-nav-list').click(function(ev) {

@@ -144,9 +144,9 @@ function get_observations($row_only, $video_id, $user_id, $observation_id, $spec
             $event_info['event_list'][$i]['new_column'] = false;
 
 //            error_log("  checking: $i == " . floor(count($event_info['event_list']) / 2) );
-            if ($i == floor(count($event_info['event_list']) / 2)) {
+            if ($i == floor(count($event_info['event_list']) / 3) || $i == floor(count($event_info['event_list']) * (2 / 3))) {
                 $event_info['event_list'][$i]['new_column'] = true;
-//                error_log("    SETTING NEW COLUMN");
+                error_log("    SETTING NEW COLUMN: i = $i");
             }   
 
             $event_count++;
@@ -180,7 +180,7 @@ function get_timed_observation_row($observation_id, $species_id, $expert_only) {
     return $mustache_engine->render($observation_table_template, $observations);
 }
 
-function get_watch_video_interface($species_id, $video_id, $video_file, $animal_id, $user, $start_time) {
+function get_watch_video_interface($species_id, $video_id, $video_file, $animal_id, $user, $start_time, $difficulty) {
     global $cwd;
     $watch_info['video_id'] = $video_id;
     $watch_info['video_file'] = $video_file;
@@ -193,10 +193,28 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
     $watch_info['invalid_events'] = $user['invalid_events'];
     $watch_info['missed_events'] = $user['missed_events'];
 
+    if ($difficulty == 'easy') $watch_info['difficulty_class'] = 'btn-success';
+    else if ($difficulty == 'medium') $watch_info['difficulty_class'] = 'btn-warning';
+    else if ($difficulty == 'hard') $watch_info['difficulty_class'] = 'btn-danger';
+
+    $watch_info['difficulty_text'] = ucfirst($difficulty);
 
     $watch_interface_template = file_get_contents($cwd . "/templates/watch_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($watch_interface_template, $watch_info);
 }
+
+function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $user) {
+    global $cwd;
+    $watch_info['video_id'] = $video_id;
+    $watch_info['video_file'] = $video_file;
+    $watch_info['animal_id'] = $animal_id;
+    $watch_info['trimmed_filename'] = trim(substr($video_file, strrpos($video_file, '/') + 1));
+    
+    $watch_interface_template = file_get_contents($cwd . "/templates/expert_row_template.html");
+    $mustache_engine = new Mustache_Engine;
+    return $mustache_engine->render($watch_interface_template, $watch_info);
+}
+
 
 ?>

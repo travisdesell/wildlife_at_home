@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd = dirname(dirname($cwd));
 
 
 require_once($cwd . '/wildlife_db.php');

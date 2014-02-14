@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd = dirname(dirname($cwd));
 
 require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/my_query.php');
@@ -17,8 +17,6 @@ $animal_id = mysql_real_escape_string($_POST['animal_id']);
 $year = mysql_real_escape_string($_POST['year']);
 $video_status = mysql_real_escape_string($_POST['video_status']);
 $video_release = mysql_real_escape_string($_POST['video_release']);
-
-error_log("video release: '" . $video_release . "'");
 
 $filter = '';
 if ($species_id > 0) $filter .= " AND species_id = $species_id";
@@ -46,7 +44,7 @@ if ($filter == '') {
     $query = "SELECT count(id) FROM video_2 vs2 WHERE $filter";
 }
 
-error_log("$query");
+//error_log("$query");
 
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");

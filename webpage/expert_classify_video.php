@@ -27,6 +27,7 @@ echo "
     <!-- For bootstrap -->
     $bootstrap_scripts
 
+    <script type='text/javascript' src='timed_observations.js'></script>
     <script type='text/javascript' src='expert_classify_video.js'></script>
 
     <style>
