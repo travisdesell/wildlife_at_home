@@ -1,70 +1,73 @@
 
-<div class='well well-large'>
-    <div class='container'>
-        <div class='row-fluid'>
-            <div class='span12'>
-                <ul class='thumbnails'>
-                    {{#thumbnail_list}}
-                    <li class='span4'>
-                        <div class='thumbnail'>
-                            <img src='{{thumbnail_image}}' alt=''></img>
-                            <h4>{{species_name}} <small>{{species_latin_name}}</small></h4>
-                            <p>{{{project_description}}}</p>
+<div class='container'>
+    <div class='row-fluid'>
+        <div class='span12'>
+            {{#thumbnail_list}}
+            <section class='well'>
+                <div class='row-fluid'>
+                    <div class='span4'>
+                        <img src='{{thumbnail_image}}' alt=''></img>
 
-                            <div class='row-fluid'>
-                                    {{#training_webpage}}
-                                        <a class='btn btn-small btn-primary span6' style='line-height:30px; margin-bottom:10px;' href='{{training_webpage}}'>Training Videos</a>
-                                    {{/training_webpage}}
-                                    {{^training_webpage}}
-                                        <a class='btn btn-mini span6 disabled' style='line-height:30px; margin-bottom:10px;'>Training Videos</a>
-                                    {{/training_webpage}}
-                                    {{#info_webpage}}
-                                        <a class='btn btn-small btn-primary span6 pull-right' style='line-height:30px; margin-bottom:10px;' href='{{info_webpage}}'>Species Information</a>
-                                    {{/info_webpage}}
-                                    {{^info_webpage}}
-                                        <a class='btn btn-mini span6 pull-right disabled' style='line-height:30px; margin-bottom:10px;'>Species Information</a>
-                                    {{/info_webpage}}
-                            </div>
+                        <div class='row-fluid' style='margin-top:10px;'>
+                                {{#training_webpage}}
+                                    <a class='btn btn-small btn-primary span6' style='line-height:30px; margin-bottom:10px;' href='{{training_webpage}}'>Training Videos</a>
+                                {{/training_webpage}}
+                                {{^training_webpage}}
+                                    <a class='btn btn-mini span6 disabled' style='line-height:30px; margin-bottom:10px;'>Training Videos</a>
+                                {{/training_webpage}}
 
-                            {{#site}}
-                            <div class='well well-small'>
-                                    <div class='row-fluid'>
-                                        <div class='span9' style='text-align:left;'>
-                                            <b>{{site_name}}</b>
-                                        </div>
-                                        <div class='span3' style='text-align:right;'>
-                                            <b>{{year}}</b>
-                                        </div>
-                                    </h5>
-                                    </div>
-                                
-                                <p>{{site_description}}</p>
-
-                                <div class='row-fluid'>
-                                    <div class='span9'>
-                                        <div class='progress' id='{{progress_id}}'>
-                                            <div class='bar bar-success' style="width: {{validated_percentage}}%;"></div>
-                                            <div class='bar bar' style="width: {{available_percentage}}%;"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class='span3'>
-                                        {{#enabled}}
-                                        <a class='btn btn-mini btn-primary pull-right' style='margin-top:0px;' href='watch.php?location={{site_id}}&species={{species_id}}'>Watch Video</a>
-                                        {{/enabled}}
-                                        {{^enabled}}
-                                        <a class='btn btn-mini pull-right disabled' style='margin-top:0px;'>Watch Video</a>
-                                        {{/enabled}}
-                                    </div>
-
-                                </div>                        
-                            </div>
-                            {{/site}}
+                                {{#info_webpage}}
+                                    <a class='btn btn-small btn-primary span6 pull-right' style='line-height:30px; margin-bottom:10px;' href='{{info_webpage}}'>Species Information</a>
+                                {{/info_webpage}}
+                                {{^info_webpage}}
+                                    <a class='btn btn-mini span6 pull-right disabled' style='line-height:30px; margin-bottom:10px;'>Species Information</a>
+                                {{/info_webpage}}
                         </div>
-                    </li>
-                    {{/thumbnail_list}}
-                </ul>
-            </div>
+                    </div>
+
+                    <div class='span4'>
+                        <div class='row-fluid'>
+                            <h4 style='margin-top:0px;'>{{species_name}} <small>{{species_latin_name}}</small></h4>
+                            <p>{{{project_description}}}</p>
+                        </div>
+                    </div>
+
+                    <div class='span4'>
+                        {{#site}}
+                            <div class='row-fluid'>
+                                <div class='span9' style='text-align:left;'>
+                                    <b>{{site_name}}</b>
+                                </div>
+                                <div class='span3' style='text-align:right;'>
+                                    <b>{{year}}</b>
+                                </div>
+                            </div>
+
+                        <p>{{site_description}}</p>
+
+                        <div class='row-fluid'>
+                            <div class='span9'>
+                                <div class='progress' id='{{progress_id}}'>
+                                    <div class='bar bar-success' style="width: {{validated_percentage}}%;"></div>
+                                    <div class='bar bar' style="width: {{available_percentage}}%;"></div>
+                                </div>
+                            </div>
+
+                            <div class='span3'>
+                                {{#enabled}}
+                                <a class='btn btn-mini btn-primary pull-right' style='margin-top:0px;' href='watch.php?location={{site_id}}&species={{species_id}}'>Watch Video</a>
+                                {{/enabled}}
+                                {{^enabled}}
+                                <a class='btn btn-mini pull-right disabled' style='margin-top:0px;'>Watch Video</a>
+                                {{/enabled}}
+                            </div>
+                        </div>
+                        {{/site}}
+
+                    </div>
+                </section>
+                {{/thumbnail_list}}
+            </ul>
         </div>
     </div>
 </div>
