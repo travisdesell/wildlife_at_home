@@ -15,7 +15,7 @@ $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 echo "
 <html>
 <head>
-<title>UND Wildlife@Home: Sharp-Tailed Grouse Ecology and Information</title>
+<title>UND Wildlife@Home: Piping Plover Ecology and Information</title>
 
 <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
@@ -59,24 +59,13 @@ echo "
                 </div>
 
                 <p>
-                Sharp-tailed Grouse (<i>Tympanuchus phasianellus</i>) are medium sized, ground-nesting birds that
-                average a length of 43 cm, a 63.5 cm wingspan, and an average weight of 880 g (Sibley 2000).
-                The coloration is a drab gray-brown mottled with white (Figure 1). Both sexes have horizontal
-                or v-shaped markings on the breast, a slight crest on the head, white spots on the wings, light
-                colored flanks and belly, and feathered legs (Johnson and Knue 1989). Males have purple air
-                sacs on the side of the neck and a yellow comb above the eyes, both of which are only visible
-                during mating season. Wings are short and rounded, used for short bursts of flight followed by
-                gliding. The tail is pale and pointed.
-                </p>
-
-                <p>
-                You can also view the training videos for identifying sharp-tailed grouse, their nests, and their predators <a href='http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php'>here</a>.
+                Piping Plovers (<it>Charadrius melodus</it>) are small federally threatened shorebirds that weigh an average of 43-63 g and can range in length from 14-18 cm. The typical wingspan of a Piping Plover is 38cm. In general they are pale grey, similar to beach sand. This coloration allows them to blend into their habitat and surroundings, making it more difficult for predators to identify them. Their underside and chest are white, and they sport a short yellow bill with a contrasting black tip. Along with their body coloration and bill, another distinguishing feature of this shorebird is their bare, orange legs. In the summer there are several coloration changes, which will diminish during the non-breeding season (winter months). Piping Plovers will develop a single black neck band and a black band on their forehead (spanning from one eye to the other). During the non-breeding season their bills will turn completely black. There are several features of the Piping Plover that distinguish males from females. Males are darker in plumage with more prominent neck bands than females. Females are smaller in size and have darker bills. These shorebirds are seen individually or traveling in a small flock.
                 </p>
             </section>
 
             <section id='distribution' class='well'>
                 <div class='row-fluid'>
-                    <img class='span4' src='BirdsOfNorthAmericaOnline_Distribution.png'></img>
+                    <img class='span4' src='http://volunteer.cs.und.edu/wildlife/piping_plover_distribution.png'></img>
 
                     <div class='span8'>
                         <div class='page-header'>
@@ -84,19 +73,14 @@ echo "
                         </div>
 
                         <p>
-                        Sharp-tailed Grouse can be found from Alaska, east to East Central Canada, south
-                        through Michigan, Minnesota and Wisconsin, and west to Southern Colorado and Utah (Figure
-                        2). Sharp-tailed Grouse prefer open, fairly treeless areas that contain a mix of dense grasses,
-                        forbs, and shrubs. Habitat is chosen based on openness and plant density (Marks 2007).
+                        Piping Plovers are primarily found in North America. Their summer breeding areas include shorelines and beaches east of the Rocky Mountains, in the Northern Great Plains, and along the great lakes. In the winter months, Piping Plovers migrate south and occupy beaches and mudflats along the coasts of Southeast America and northeastern Mexico.
                         </p>
 
+                        <div class='page-header'>
+                            <h2>Nesting Habitat</h2>
+                        </div>
                         <p>
-                        Nesting habitat of grouse depends on what is available to them. Some studies have
-                        suggested that grouse prefer to nest near areas with taller, denser shrubs. This is not a necessity
-                        for a successful nest, as many females will select areas with lower shrub cover but a higher level
-                        of forbs (Goddard et al. 2009). The extra cover provided by the shrubs or dense forbs is most
-                        important during the first 14 days after chicks hatch, which is when offspring survival rates are
-                        the lowest due to predation and adverse weather (Goddard and Dawson 2009).
+                        The nesting habitat of Piping Plovers includes open areas on dry sand and near water. They tend to avoid areas with grasses and other vegetation. Common nesting grounds are waterfront and inland sand beaches, beaches along rivers or alkali lakes, and sand dunes. Having their nesting habitats in open areas make them particularly susceptible to human disturbances and destruction, flooding, and predation. Frequently, Piping Plovers will nest near colonies of Least Terns (Sternula antillarum), Common Terns (Sternula hirundo) and Arctic Terns (Sternula paradisaea).
                         </p>
                     </div>
                 </div>
@@ -109,73 +93,25 @@ echo "
 
                 <h3>Diet</h3>
                 <p>
-                The diet of adult grouse is comprised mainly of plant material, including buds, flowers,
-                and seeds. A small portion of the adult diet consists of insects, including ants, beetles,
-                grasshoppers and crickets (Marks 2007). The only months when grouse do not consistently feed
-                on the ground are the winter months when snow covers these food sources. During these
-                months, grouse will often forage in shrubs and trees.
+                The diet of an adult Piping Plover generally consists of small invertebrates, such as marine worms, crustaceans, mollusks, insects like beetles, and fly larvae. The specific types of invertebrates consumed depend on nearby habitat and feeding locations.
                 </p>
 
-                <h3>Reproduction</h3>
+                <h3>Reproduction and Mating</h3>
                 <p>
-                Sharp-tailed Grouse are among four species of North American grouse that congregate in
-                specific areas, known as leks, to engage in elaborate mating rituals known as 'dancing' (see lek
-                videos). Mating is based on selection of suitable males, who take part in the displays, by females,
-                who do not display but rather observe male displays and choose a mate. The size of a lek is
-                relatively small, ranging from as small as a small house or as large as a baseball diamond. Leks
-                are traditionally used multiple years, although if the habitat is no longer suitable a new lek can be
-                formed elsewhere. A lek is usually found within 1-2 kilometers of denser grass cover, which is
-                necessary for nesting materials and cover (Prose 1987). Leks often have low, sparse vegetation,
-                allowing for clear vision in all directions and adequate space to engage in dancing, as well as
-                vision to help escape and minimize predation. Areas that are often used for leks include
-                rangeland, harvested or low cropland, low ridges and knolls, recent burns, and even abandoned
-                runways (Prose 1987).
+                Female Piping Plovers have an average clutch size of four eggs, laying one egg every other day. After the last egg is laid, incubation begins and lasts about 25 days. Both male and female Piping Plovers take equal turns incubating the eggs. The exchange between parents happens very quickly. Piping Plover eggs hatch all at the same time, and the young typically fledge 24 days later, when their wings have developed enough for flight. Before the young have matured enough to maintain their own body temperature, parent plovers will brood the chicks, where the parent will gather the chicks underneath their bodies and sheltering the young with their wings to provide warmth.
                 </p>
 
                 <p>
-                Beginning in March, the males gather on the lek in the morning, usually arriving 30 to
-                60 minutes before sunrise, and at its peak a lek may contain anywhere from 2 to 35 displaying
-                males. Once on the lek, males usually remain there for 2 or 3 hours. This behavior of returning
-                to the lek in the morning takes place on a lesser scale in the fall. The purpose of returning to a
-                lek in the fall is to maintain the hierarchy and structure established in the spring, which can have
-                a substantial impact on male mating success (Tsuji et. al. 1994).
-                </p>
-
-                <p>
-                The dancing ritual of the males is highly elaborate and involves both active and relaxed
-                phases. To begin, the male bends forward to the point that its body is nearly parallel with the
-                ground. It spreads its wings and fans them a bit, so they are perpendicular with its body. The
-                tail is held erect and is the only part of the body that is not held parallel to the ground, and the air
-                sacs on the side of the neck are also inflated. This position is held for the duration of the dance
-                (Prose 1987).
-                </p>
-
-                <p>
-                The movements involved in the dance are very rapid and precise. The male will either
-                rush forward or rapidly spin in a circle. No matter which the male chooses, while dancing it also
-                rapidly stomps its feet. Additionally, the male moves its central tail feathers so they make a
-                clicking noise, as well as producing hooting, cackling, cooing and gobbling sounds. Often there
-                is more than one male dancing at the same time, and the males involved often start and stop
-                specific movements at the exact same time, almost as if they were doing this on cue. These
-                dancing bouts can last from roughly 30 to 50 seconds (Marks 2007).
-                </p>
-
-                <p>
-                Within 1 to 3 days of mating the hen will lay the first egg, with an additional egg being
-                laid every 1 to 2 days. Clutch sizes average 11 to 12 eggs and the incubation period lasts 21 to
-                25 days, beginning when the last egg is laid. Although the eggs are laid days apart they all hatch
-                at the same time due to incubation not occurring until the last egg is laid, and thus, the precocial
-                (i.e., very well developed young with feathers, eyes open, and ready to leave the nest shortly
-                after hatch) young will hatch within 24 hours of one another and leave the nest (Roersma 2001).
+                Several factors may affect the birth rates of Piping Plovers. predation, human disturbances, inadequate foraging habitat and adverse weather conditions all contribute to decreased nest success. Nest predation is higher on beaches with high human traffic, where humans and their pets may damage nests. Trash left over on beaches and waterfront may also attract predators.
                 </p>
 
                 <h3>Predation</h3>
                 <p>
-                Common nest predators include coyote (<i>Canis latrans</i>), striped skunk (<i>Memphitis
-                memphitis</i>), a variety of ground squirrels, common ravens (<i>Corvus corax</i>), and common
-                predators of grouse include coyote, a variety of hawks, and great horned owl (<i>Bubo virginianus</i>,
-                Schroeder and Baydack 2001). However, our study is examining this very issue and we hope to
-                provide insight on specific rates of different predators in western North Dakota.
+                Several different species of animals prey on Piping Plovers. Predator species include the Red Fox (<it>Vulpes vulpes</it>), Striped Skunk (<it>Mephitis mephitis</it>), Virginia Opossum (<it>Didelphis virginiana</it>), Raccoon (<it>Procyon lotor</it>), American Crow (<it>Corvus brachyrhynchos</it>), Black-billed Magpie (<it>Pica hudsonia</it>), Coyote (<it>Canis latrans</it>), and domestic dogs (<it>Canis familiaris</it>) in areas with high levels of human traffic. 
+                </p>
+
+                <p>
+                To defend both themselves and their offspring against predators, Piping Plovers have adapted several behaviors. Parents often display the \"Broken wing\" behavior, which is an act where the shorebird crouches towards the ground and feigns injury when a predator approaches the nest. Once the predator is lured away from the nest, the parent flees. The appearance of easy prey draws predators away from the nest and their chicks, increasing the likelihood of their survival.
                 </p>
             </section>
 
@@ -185,19 +121,7 @@ echo "
                 </div>
 
                 <p>
-                Sharp-tailed grouse populations are in decline in areas, but this decline is not considered
-                to be a major concern yet. Many states and provinces that have Sharp-tailed Grouse populations
-                have a hunting season on the bird.
-                </p>
-
-                <p>
-                One major factor contributing to the declines noted is habitat loss. Two different factors
-                play into this. First, many acres of grassland are being converted for agriculture. Second, grouse
-                will move away from an area if too much woody vegetation is present. This is especially evident
-                in areas with leks, where males will abandon a lek where even small increases of woody
-                vegetation have occurred (Hanowski et. al. 2000). Furthermore, recent expansion of gas and oil
-                development in western North Dakota may result in fragmentation of the vast grasslands, as well
-                as frequent disturbances such as noise, additional lighting, and dust.
+                On January 10, 1986, Piping Plovers became a protected species under the Endangered Species Act, which established penalties if they are removed from their nest, harassed, or harmed in any way. Piping Plovers are listed as endangered species in Maine, New Hampshire, Iowa, Maryland, Indiana, Michigan, Pennsylvania, Minnesota, Wisconsin, and Ohio.  Other states in their breeding range, including North Dakota, consider them a federally threatened species. One of the reasons for the declining populations includes shoreline development for recreational uses and human disturbances. Over the past 50-60 years, increased human use and disturbance of shoreline habitats has decreased available nesting sites or reduced the quality of these areas.  High levels of human traffic along shorelines create more disturbances that may cause these birds to flee their nests and threaten nest success. There have also been increased efforts towards habitat protection (which may include installing predator exclosures around nests) and management programs to help sustain shorelines typically occupied by this endangered bird.
                 </p>
             </section>
 
@@ -207,61 +131,28 @@ echo "
                 </div>
 
                 <ul>
-                <li>
-                Goddard, A. D., and R. D. Dawson.  2009.  Factors influencing the survival of neonate sharp
-                tailed grouse (<i>Tympanuchus phasianellus</i>).  <i>Wildlife Biology</i> 15: 60-67.
-                </li>
+                <li>Bent, A. C. 1929. Life histories of North American shorebirds. U.S. National Mus. Bulletin.143: 236-246.</li>
 
-                <li>
-                Goddard, A. D., R. D. Dawson, and M. P. Gillingham.  2009.  Habitat selection by nesting and
-                brood-rearing sharp-tailed grouse.  <i>Canadian Journal of Zoology</i> 87: 326-336.
-                </li>
+                <li>Cohen, J. B., Houghton, L. M., and J. D. Fraser. 2009. Nest Density and Reproductive Success of Piping Plovers in Response to Storm- and Human-Created Habitat Changes. Wildlife Monographs. 173: 1-24.</li>
 
-                <li>
-                Hanowski, J. M., D. P. Christian, and G. J. Niemi.  2000.  Landscape requirements of prairie
-                sharp-tailed grouse (<i>Tympanuchus phasianellus campestris</i>) in Minnesota, USA.  <i>Wildlife 
-                Biology</i> 6: 257-263.
-                </li>
+                <li>Cuthbert, F. J., and T. Wiens. 1982. Status and Breeding Biology of the Piping Plover in Lake of the Woods County, Minnesota.</li>
 
-                <li>
-                Johnson, M. D., and Knue, J.  1989.  Feathers from the Prairie.  North Dakota Game and Fish
-                Department, Bismarck, USA.
-                </li>
+                <li>Connecticut Department of Energy and Environmental Protection. DEEP: Piping Plover Fact Sheet. CT.gov Portal. <a href='http://www.ct.gov/deep/cwp/view.asp?A=2723&Q=326062'>http://www.ct.gov/deep/cwp/view.asp?A=2723&Q=326062</a>. Accessed 26 February 2013. </li>
 
-                <li>
-                Marks, R.  2007.  Sharp-tailed Grouse (<i>Tympanuchus phasianellus</i>). U. S. Department of
-                Agriculture Publication 40, Washington, D. C., USA. 
-                </li>
+                <li>Mabee, T. J., Plissner, J. H., Haig, S. M. and J. P. Goossens. 2001. Winter distributions of North American plover in the Laguna Madre regions of Tamaulipas. Wader Study Group Bulletin. 94: 39-43. </li>
 
-                <li>
-                Prose, B.L. 1987. Habitat suitability index models: plains sharp-tailed grouse. U.S. Fish and Wildlife
-                Service Biology Report 82(10.142). 31 pp.
-                </li>
+                <li>U.S. Fish and Wildlife Service. 2012. Overview  Piping plover - Atlantic coast population Northeast Region. <a href='http://www.fws.gov/northeast/pipingplover/overview.html'>http://www.fws.gov/northeast/pipingplover/overview.html</a>. Web. Accessed 26 February 2013.</li>
 
-                <li>
-                Roersma, S. J.  2001.  Nesting and Brood Rearing Ecology of Plains Sharp-tailed Grouse
-                (<i>Tympanuchus phasianellus jarnesi</i>) in a Mixed Grass/Fescue Ecoregion of Southern
-                Alberta.  Thesis, University of Manitoba, Winnipeg, Canada.
-                </li>
+                <li>NYS Dept. of Environmental Conservation. Piping Plover Fact Sheet. <a href='http://www.dec.ny.gov/animals/7086.html'>http://www.dec.ny.gov/animals/7086.html</a>.  Accessed 26 February 2013.</li>
 
-                <li>
-                Schroeder, M. A., and R. K. Baydack.  2001.  Predation and the management of prairie grouse.  
-                <i>Wildlife Society Bulletin</i> 29(1): 24-32.
-                </li>
+                <li>Tern and Plover Conservation Partnership. Piping Plover. University of Nebraska-Lincoln. <a href='http://ternandplover.unl.edu/plover/index-plover.asp'>http://ternandplover.unl.edu/plover/index-plover.asp</a>. Accessed 26 February 2013. </li>
 
-                <li>
-                Sharp-tailed Grouse (<i>Tympanuchus phasianellus</i>).  <a href='http://sdakotabirds.com/species/sharp_tailed_grouse_info.htm'>South Dakota Birds and Birding Homepage</a>. Accessed 10 Apr 2012.
-                </li>
+                <li>Rimmer, D. W., and R. D. Deblinger. 1990. Use of Predator Exclosures to Protect Piping Plover Nests. J. Field Ornithol. 61.2: 217-223.</li>
 
-                <li>
-                Sibley, D. A.  2000.  The Sibley Guide to Birds.  Alfred A. Knopf, Dai Nippon, China.
-                </li>
+                <li>Shaffer, F., and P. Laporte. 1994. Diet of Piping Plovers on the Magdalen Islands, Quebec. Wilson Bulletin. 106: 531-536.</li>
 
-                <li>
-                Tsuji, L. J. S., D. R. Kozlovic, M. B. Sokolowski, and R. I. C. Hansell.  1994.  Relationship of
-                Body Size of Male Sharp-Tailed Grouse to Location of Individual Territories on Leks.
-                <i>The Wilson Bulletin</i> Vol. 106, 2: 329-337.
-                </li>
+                <li>Stukel, Eileen D. 1996. Piping Plover. South Dakota Department of Game, Fish and Parks, Wildlife Division. <a href='http://www3.northern.edu/natsource/ENDANG1/Piping1.htm'>http://www3.northern.edu/natsource/ENDANG1/Piping1.htm</a>. Accessed 26 February 2013.</li>
+
                 </ul>
 
             </section>
