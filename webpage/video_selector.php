@@ -229,7 +229,7 @@ $thumbnails = array('thumbnail_list' => array(
                     )
                 );
 
-$projects_template = file_get_contents($cwd . "/templates/projects_template_2.html");
+$projects_template = file_get_contents($cwd . "/templates/projects_template.html");
 
 $m = new Mustache_Engine;
 echo $m->render($projects_template, $thumbnails);
