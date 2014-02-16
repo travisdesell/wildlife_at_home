@@ -82,7 +82,7 @@ function print_navbar($active_items) {
                                 <li><a href='javascript:;'>Training Videos (Coming Soon)</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Piping Plover </a></li>
-                                <li><a href='javascript:;'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='piping_plover_info.php'>Ecology and Information</a></li>
                                 <li><a href='javascript:;'>Training Videos (Coming Soon)</a></li>
                               </ul>
                             </li>
