@@ -147,7 +147,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Sharp-Tailed Grouse',
                             'species_id' => '1',
                             'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
-                            'info_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php',
+                            'info_webpage' => 'sharptailed_grouse_info.php',
                             'species_latin_name' => 'Tympanuchus phasianellus',
                             'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p>',
                             'site' => array(
@@ -211,6 +211,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Piping Plover',
                             'species_id' => '3',
                             'species_latin_name' => 'Charadrius melodus',
+                            'info_webpage' => 'piping_plover_info.php',
                             'project_description' => 'Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.',
                             'site' => array(
                                 array (

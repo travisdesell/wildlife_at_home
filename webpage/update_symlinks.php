@@ -40,6 +40,10 @@ echo "$command\n";
 shell_exec("rm $target/watch_interface");
 shell_exec($command);
 
+$command = "ln -s $cwd/images$target/images";
+shell_exec("rm $target/images");
+shell_exec($command);
+
 $command = "ln -s $cwd/wildlife_badges $target/wildlife_badges";
 shell_exec("rm $target/wildlife_badges");
 shell_exec($command);
