@@ -54,6 +54,10 @@ echo "
     <div class='row-fluid'>
         <div class='span12'>
             <section id='identification' class='well'>
+                    <h2>Piping Plover Ecology and Information <small>by Leila Mohsenian</small></h2>
+            </section>
+
+            <section id='identification' class='well'>
                 <div class='page-header'>
                     <h2>Identification</h2>
                 </div>
@@ -102,7 +106,7 @@ echo "
                 </p>
 
                 <p>
-                Several factors may affect the birth rates of Piping Plovers. predation, human disturbances, inadequate foraging habitat and adverse weather conditions all contribute to decreased nest success. Nest predation is higher on beaches with high human traffic, where humans and their pets may damage nests. Trash left over on beaches and waterfront may also attract predators.
+                Several factors may affect the birth rates of Piping Plovers. Predation, human disturbances, inadequate foraging habitat and adverse weather conditions all contribute to decreased nest success. Nest predation is higher on beaches with high human traffic, where humans and their pets may damage nests. Trash left over on beaches and waterfront may also attract predators.
                 </p>
 
                 <h3>Predation</h3>
