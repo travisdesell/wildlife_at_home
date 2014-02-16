@@ -128,10 +128,10 @@ print_navbar($active_items);
 
 
 echo "
-    <div class='well well-small'>
-        <div class='container'>
-            <div class='row-fluid'>
-                <div class='span12'>
+    <div class='container'>
+        <div class='row-fluid'>
+            <div class='span12'>
+                <div class='well well-small'>
                 <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>, and you can go over the observations for videos you've already watched <a href='http://volunteer.cs.und.edu/wildlife/user_video_list.php'>here</a>. 
                 </div>
             </div>
@@ -149,7 +149,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
                             'info_webpage' => 'sharptailed_grouse_info.php',
                             'species_latin_name' => 'Tympanuchus phasianellus',
-                            'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p>',
+                            'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p> <p>Active projects include: <ul><li>Rebecca Eckroad - <a href="projects/becca_grouse_project.php">Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li><li>Paul Burr - <a href="http://volunteer.cs.und.edu/wildlife/alpha/projects/paul_project.php">Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
@@ -191,7 +191,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Interior Least Tern',
                             'species_id' => '2',
                             'species_latin_name' => 'Sternula antillarum',
-                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p>',
+                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="http://volunteer.cs.und.edu/wildlife/alpha/projects/alicia_project.php">NEEDS A TITLE</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($least_tern_available > 0),
@@ -212,7 +212,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_id' => '3',
                             'species_latin_name' => 'Charadrius melodus',
                             'info_webpage' => 'piping_plover_info.php',
-                            'project_description' => 'Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.',
+                            'project_description' => '<p>Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="http://volunteer.cs.und.edu/wildlife/alpha/projects/alicia_project.php">NEEDS A TITLE</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($piping_plover_available > 0),
@@ -229,7 +229,7 @@ $thumbnails = array('thumbnail_list' => array(
                     )
                 );
 
-$projects_template = file_get_contents($cwd . "/templates/projects_template.html");
+$projects_template = file_get_contents($cwd . "/templates/projects_template_2.html");
 
 $m = new Mustache_Engine;
 echo $m->render($projects_template, $thumbnails);
