@@ -10,11 +10,7 @@
         Finished 
     </button>
 
-    <button class='btn btn-small pull-right skip-video-button' id='skip-video-button-{{video_id}}' video_id='{{video_id}}' style='margin-right:10px;'>
-        Skip
-    </button>
-
-    <div class='btn-group' video_id='{{video_id}}' style='margin-right:10px;'>
+    <div class='btn-group pull-right' video_id='{{video_id}}' style='margin-right:10px;'>
         <button type='button' class='btn btn-small {{difficulty_class}} dropdown-toggle' id='difficulty-dropdown-button-{{video_id}}' data-toggle='dropdown' difficulty='easy'>Difficulty: {{difficulty_text}} <span class='caret'></span></button>
         <ul class='dropdown-menu'>
             <li><a href='javascript:;' class='difficulty-dropdown' difficulty='easy'>Easy</a></li>
@@ -22,6 +18,10 @@
             <li><a href='javascript:;' class='difficulty-dropdown' difficulty='hard'>Hard</a></li>
         </ul>
     </div>  <!-- button group -->
+
+    <button class='btn btn-small pull-right skip-video-button' id='skip-video-button-{{video_id}}' video_id='{{video_id}}' style='margin-right:10px;'>
+        Skip
+    </button>
 </div>
 
 

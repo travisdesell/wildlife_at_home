@@ -11,6 +11,48 @@ var comments_default = 'Insert comments and hashtags here.';
 
 var tag_dropdowns;
 
+function submit_observations(video_id, random) {
+    $('.random-video-button').addClass("disabled");
+    $('.next-video-button').addClass("disabled");
+
+    var submission_data = {
+            species_id : species_id,
+            location_id : location_id,
+            video_id : video_id,
+            random : random
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: './watch_interface/next_video.php',
+        data : submission_data,
+        dataType : 'json',
+        success : function(response) {
+            window.location.reload();
+        },
+        error : function(jqXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+        },
+        async: true
+    });
+}
+
+function enable_next_video_buttons() {
+    $('#random-video-button:not(.bound)').addClass('bound').click(function() {
+        var video_id = $(this).attr("video_id");
+        submit_observations(video_id, true);
+    });
+
+    $('#next-video-button:not(.bound)').addClass('bound').click(function() {
+        var video_id = $(this).attr("video_id");
+        submit_observations(video_id, false);
+    });
+
+    $('#finished-modal').on('hidden', function () {
+        window.location.reload();
+    });
+}
+
 function initialize_event_list() {
     $('.event-list-div').each(function() {
         var video_id = $(this).attr("video_id");
@@ -308,7 +350,7 @@ function enable_observation_table() {
 
 
     $('.new-observation-button:not(.bound)').addClass('bound').click(function() {
-        if (($this).hasClass("disabled")) return;
+        if ($(this).hasClass("disabled")) return;
 
         var video_id = $(this).attr("video_id");
         var div_id = "#new-observation-button-" + video_id;
@@ -588,6 +630,7 @@ $(document).ready(function () {
         $('#new-observation-button-' + video_id).addClass('disabled');
 
         var submission_data = {
+                                video_id : video_id,
                                 species_id : species_id,
                                 location_id : location_id,
                               };
@@ -607,44 +650,40 @@ $(document).ready(function () {
         });
     });
 
-    function submit_observations(video_id, random) {
+    $('.finished-video-button:not(.bound)').addClass('bound').click(function() {
+        $('.skip-video-button').addClass("disabled");
+        $('.finished-video-button').addClass("disabled");
+
+        var video_id = $(this).attr("video_id");
         $('#new-observation-button-' + video_id).addClass('disabled');
-        $('.random-video-button').addClass("disabled");
-        $('.next-video-button').addClass("disabled");
+
 
         var submission_data = {
                                 species_id : species_id,
                                 location_id : location_id,
-                                video_id : video_id,
-                                random : random
+                                video_id : video_id
                               };
 
         $.ajax({
             type: 'POST',
-            url: './watch_interface/next_video.php',
+            url: './watch_interface/finished_video.php',
             data : submission_data,
             dataType : 'json',
             success : function(response) {
-                window.location.reload();
+                console.log("GOT RESPONSE!: " + response['html']);
+
+                $('#finished-modal').html( response['html'] );
+                enable_next_video_buttons();
+
+                $('#finished-modal').modal( {keyboard: false} )
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
             },
             async: true
         });
-    }
 
-    /*
-    $('.random-video-button:not(.bound)').addClass('bound').click(function() {
-        var video_id = $(this).attr("video_id");
-        submit_observations(video_id, true);
     });
-
-    $('.next-video-button:not(.bound)').addClass('bound').click(function() {
-        var video_id = $(this).attr("video_id");
-        submit_observations(video_id, false);
-    });
-    */
 
     $('.difficulty-dropdown:not(.bound)').addClass('bound').click(function() {
         var video_id = $(this).closest(".btn-group").attr("video_id");

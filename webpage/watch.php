@@ -367,6 +367,8 @@ if ($species_id < 0 || $species_id > 3) {
     echo get_event_instructions_html($species_id, 0);
 
     echo "
+        <div id = 'finished-modal' class='modal hide fade' tabindex='-1' role='dialog' aria-labelledby='finished-modal-label'></div>
+
         <div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:40px; padding-bottom:40px;'>
         <div class='container'>
         <div class='row'>";
