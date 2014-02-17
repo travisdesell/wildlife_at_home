@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 
     int checkpointFramePos;
     if(readCheckpoint(&checkpointFramePos, &eventTypes)) {
-        cerr << "Start from checkpoint..." << endl;
+        cerr << "Start from checkpoint on frame " << checkpointFramePos << endl;
     } else {
         cerr << "Unsuccessful checkpoint read." << endl << "Starting from beginning of video." << endl;
     }
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
         int key = waitKey(1);
 #endif
         if(boinc_time_to_checkpoint()) {
-            cerr << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
+            cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
             writeCheckpoint(framePos, eventTypes);
             boinc_checkpoint_completed();
         }
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
 }
 
 void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error) {
-    string checkpointFilename = getBoincFilename("checkpoint.dat");
+    string checkpointFilename = getBoincFilename(vidFilename + ".checkpoint");
     writeEventsToFile(checkpointFilename, eventTypes);
     FileStorage outfile(checkpointFilename, FileStorage::APPEND);
     if(!outfile.isOpened()) {
