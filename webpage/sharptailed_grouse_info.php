@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd = dirname(dirname($cwd));
 
 require_once($cwd . "/navbar.php");
 require_once($cwd . "/footer.php");
@@ -54,7 +54,7 @@ echo "
     <div class='row-fluid'>
         <div class='span12'>
             <section id='identification' class='well'>
-                <h2>Sharp-Tailed Grouse Ecology and Information</h2>
+                <h2>Sharp-Tailed Grouse Ecology and Information <small>by Adam Pach</small></h2>
             </section>
 
             <section id='identification' class='well'>
@@ -80,7 +80,7 @@ echo "
 
             <section id='distribution' class='well'>
                 <div class='row-fluid'>
-                    <img class='span4' src='http://volunteer.cs.und.edu/wildlife/BirdsOfNorthAmericaOnline_Distribution.png'></img>
+                    <img class='span4' src='../images/BirdsOfNorthAmericaOnline_Distribution.png'></img>
 
                     <div class='span8'>
                         <div class='page-header'>
