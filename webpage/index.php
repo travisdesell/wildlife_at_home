@@ -35,7 +35,6 @@ require_once("/projects/wildlife/html/inc/sanitize_html.inc");
 require_once("/projects/wildlife/html/inc/translation.inc");
 require_once("/projects/wildlife/html/inc/text_transform.inc");
 
-//set_include_path("/projects/wildlife/html/project");
 require_once("/projects/wildlife/html/project/project.inc");
 
 require_once($cwd . "/navbar.php");
