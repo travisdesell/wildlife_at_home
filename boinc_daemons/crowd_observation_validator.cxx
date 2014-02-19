@@ -69,6 +69,9 @@ int seqno;
 
 using namespace std;
 
+/**
+ *  A C++ class to hold information about user observations.
+ */
 class Observation {
     public:
         const int id;
@@ -164,7 +167,9 @@ class Observation {
 
 };
 
-
+/**
+ * This calculates how many of a particular mark there were for an observation.
+ */
 void get_mark_totals(const vector< Observation* > &observations, int total_yes[], int total_no[], int total_unsure[]) {
     for (int i = 0; i < 8; i++) {
         total_yes[i] = 0;
@@ -181,6 +186,10 @@ void get_mark_totals(const vector< Observation* > &observations, int total_yes[]
     }
 }
 
+/**
+ *  An observation is potentially canonical if every mark it has matches
+ *  the most of the other marks from other users.
+ */
 bool has_potential_canonical(int expected_marks[]) {
     //Need to make sure that every mark has a total greater than the other totals
     for (int i = 0; i < 8; i++) {
@@ -190,6 +199,9 @@ bool has_potential_canonical(int expected_marks[]) {
     return true;
 }
 
+/**
+ * This returns information on if a set of observations could be canonical
+ */
 void get_expected_canonical(int total_yes[], int total_no[], int total_unsure[], int expected_marks[]) {
     for (int i = 0; i < 8; i++) {
         expected_marks[i] = -2; //set the mark to -2 if there's no agreed on marking
@@ -310,6 +322,7 @@ int main(int argc, char** argv) {
         //This checks to see if there is a stop in place, if there is it will exit the work generator.
         check_stop_daemons();
 
+        //query the database for videos which have enough observations for potential validation.
         ostringstream unvalidated_video_query;
         //    unvalidated_video_query << "SELECT id FROM video_segment_2 WHERE crowd_obs_count > 0"; // << " AND crowd_status != 'VALIDATED'";
 //        unvalidated_video_query << "SELECT id, duration_s, species_id, location_id FROM video_segment_2 WHERE (crowd_obs_count >= required_views AND crowd_status = 'WATCHED') AND validate_for_review != true";
@@ -480,6 +493,10 @@ int main(int argc, char** argv) {
             }
             */
 
+            /**
+             * Update information if the video had a canonical result, or if
+             * there were 5+ user observations without finding a canonical result.
+             */
             if (observations.size() >= 5 || canonical >= 0) {
                 for (uint32_t i = 0; i < observations.size(); i++) {
                     ostringstream user_query, observation_query, team_query;
