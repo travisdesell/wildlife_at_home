@@ -1,4 +1,8 @@
-
+/*
+ *  TODO: Some of this is used in another interface, I should really split this
+ *  up between a couple files so the different interfaces only include
+ *  the javascript they need.
+ */
 $(document).ready(function () {
 
     if (reviewing_reported) {
@@ -17,6 +21,7 @@ $(document).ready(function () {
         });
     }
 
+    //enable all the buttons to print instructions
     $('#bird_leave_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird leaves the nest, no otherwise. Only select yes if the bird completely leaves the screen.", title : 'Instructions'});
     $('#bird_return_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird returns to the nest, no otherwise. Only select yes if the bird comes from completely off the screen back to the nest.", title : 'Instructions'});
 
@@ -32,6 +37,11 @@ $(document).ready(function () {
 
     $('#video_issue_help').popover({ placement : 'top', html : true,  content: "<p>Click video problem if the video is too dark to determine if anything is happening, if there are video corruption problems (static, etc) or if something has happened to the camera preventing viewing the nest (eg., if the camera was knocked over).</p> <p>In these cases, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
 
+
+    /**
+     *  The following enables fast forward and
+     *  fast rewinding through the videos.
+     */
     $('#fast_forward_button').button();
     $('#fast_backward_button').button();
     $('#video_issue_button').button();
@@ -137,6 +147,10 @@ $(document).ready(function () {
     var interesting = 0;
 
 
+    /**
+     *  Enable the submission button when all the radio buttons
+     *  have a value.
+     */
     function enable_submit() {
         /*
         console.log("bird_leave_selected: " + bird_leave_selected);
@@ -156,6 +170,14 @@ $(document).ready(function () {
         }
     }
 
+    /**
+     *  Bootstrap doesn't have a radio button class, so we
+     *  need to fake it with javascript.
+     *
+     *  TODO: this is poorly implemented, a lot of code
+     *  is repeated in functions.  could do this with a
+     *  class instead of doing it for each id
+     */
     function fake_radio(name, which) {
         if (which === 'yes') {
             $('#' + name + '_yes').addClass("active");
@@ -374,6 +396,9 @@ $(document).ready(function () {
         enable_submit();
     });
 
+    /*
+     * These handle what happens after the use submits an observation
+     */
     var another_site_clicked = false;
     $('#another-site-button').click(function() {
             another_site_clicked = true;
@@ -384,6 +409,10 @@ $(document).ready(function () {
             window.location.reload();
     });
 
+    /**
+     * After a video is submitted this will print out the display on the
+     * modal.
+     */
     function print_modal_row(row_name, col_name, post_observation, db_observations) {
         var body_text = "<tr>";
         body_text += "<td>" + row_name + ":</td>";
@@ -469,7 +498,11 @@ $(document).ready(function () {
     }
 
 
-
+    /**
+     *  Handle submission of a video issue observation. This
+     *  happens when there was a camera problem or something
+     *  like that.
+     */
     $('#video_issue_button').click(function() {
         console.log("video_issue!");
 
