@@ -38,21 +38,15 @@
 #include <algorithm>
 #include <iterator>
 
-#include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 
 #include "undvc_common/parse_xml.hxx"
 #include "undvc_common/file_io.hxx"
 
-#include "wildlife_surf.hpp"
+#include "Event.hpp"
+#include "EventType.hpp"
 
-using std::string;
-using std::vector;
-using std::ifstream;
-
-using std::stringstream;
-using std::string;
-using std::endl;
+using namespace std;
 using namespace cv;
 
 int init_result(RESULT& result, void*& data) {
@@ -60,45 +54,47 @@ int init_result(RESULT& result, void*& data) {
     int retval;
 
     try {
-        string events_str = parse_xml<string>(result.stderr_out, "event_ids");
-        stringstream ss(events_str);
-        vector<string> event_names;
-        vector<EventType*> *event_types = new vector<EventType*>();
+        string eventString = parse_xml<string>(result.stderr_out, "event_ids");
+        stringstream ss(eventString);
+        vector<string> eventIds;
+        vector<EventType*> *eventTypes = new vector<EventType*>();
 
         string temp;
-        std::getline(ss, temp, '\n');
-        while(std::getline(ss, temp, '\n')) {
+        getline(ss, temp, '\n');
+        while(getline(ss, temp, '\n')) {
             log_messages.printf(MSG_DEBUG, "Event id: %s\n", temp.c_str());
-            event_names.push_back(temp);
+            eventIds.push_back(temp);
         }
 
         retval = get_output_file_path(result, fi.path);
         if (retval) {
             log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy: Failed to get output file path: %d %s\n", result.id, result.name);
-            exit(0);
             return retval;
         }
 
+        cout << "Result file path: '" << fi.path << "'" << endl;
         FileStorage fs(fi.path.c_str(), FileStorage::READ);
         log_messages.printf(MSG_DEBUG, "Adding events to data structure.\n");
-        for (unsigned int i=0; i<event_names.size(); i++) {
-            EventType *temp = new EventType;
-            temp->id = event_names[i];
-            fs[event_names[i]] >> temp->descriptors;
-            event_types->push_back(temp);
+        for (unsigned int i=0; i<eventIds.size(); i++) {
+            EventType *temp = new EventType(eventIds[i]);
+            temp->read(fs);
+            eventTypes->push_back(temp);
         }
-
         fs.release();
-        data = (void*)event_types;
-    } catch (string error_message) {
+        data = (void*)eventTypes;
+    } catch(string error_message) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
         result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
         result.validate_state = VALIDATE_STATE_INVALID;
 
         log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
-        //exit(0);
+        exit(0);
         return ERR_XML_PARSE;
+    } catch(const exception &ex) {
+        log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error %s\n", result.id, result.name, ex.what());
+        //exit(0);
+        return 1;
     }
 
     // Check for any null pointer errors
@@ -122,53 +118,78 @@ int compare_results(
     RESULT const& r2, void *data2,
     bool& match
 ) {
-    double threshold = 0.00006;
-    vector<EventType*> *desc1 = (vector<EventType*>*)data1;
-    vector<EventType*> *desc2 = (vector<EventType*>*)data2;
+    float threshold = 0.00006;
+    //float threshold = 0.02;
+    vector<EventType*> *events1 = (vector<EventType*>*)data1;
+    vector<EventType*> *events2 = (vector<EventType*>*)data2;
 
     log_messages.printf(MSG_DEBUG, "Check number of events.\n");
-    if(desc1->size() != desc2->size()) {
+    if(events1->size() != events2->size()) {
         match = false;
-        log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)desc1->size(), (int)desc2->size());
+        log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)events1->size(), (int)events2->size());
         exit(0);
         return 0;
     }
 
-    for (unsigned int i=0; i<desc1->size(); i++) {
+    for (unsigned int i=0; i<events1->size(); i++) {
         log_messages.printf(MSG_DEBUG, "Check event names.\n");
-        if (desc1->at(i)->id != desc2->at(i)->id) {
+        EventType *type1 = events1->at(i);
+        EventType *type2 = events2->at(i);
+        if (type1->getId() != type2->getId()) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, event names do not match. %s vs %s\n", desc1->at(i)->id.c_str(), desc2->at(i)->id.c_str());
+            log_messages.printf(MSG_CRITICAL, "ERROR, event ids do not match. %s vs %s\n", type1->getId().c_str(), type2->getId().c_str());
             exit(0);
             return 0;
         }
 
         int matches = 0;
 
-        log_messages.printf(MSG_DEBUG, "Check number of descriptors.\n");
-        double buffer = (double)desc1->at(i)->descriptors.rows / desc2->at(i)->descriptors.rows;
-        cout << buffer-1 << endl;
-        if (fabs(buffer-1) >= 0.01) {
+        log_messages.printf(MSG_DEBUG, "Check number of descriptors for '%s'.\n", type1->getId().c_str());
+        Mat desc1 = type1->getDescriptors();
+        Mat desc2 = type2->getDescriptors();
+        log_messages.printf(MSG_DEBUG, "Descriptors for '%s' (%d, %d).\n", type1->getId().c_str(), (int)desc1.rows, (int)desc2.rows);
+        if (desc1.rows != desc2.rows) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d (%f)\n", (int)desc1->at(i)->descriptors.rows, (int)desc2->at(i)->descriptors.rows, abs(buffer-1));
-            exit(0);
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of descriptors is different. %d vs %d\n", (int)desc1.rows, (int)desc2.rows);
+            //exit(0);
+            sleep(10);
             return 1;
         }
-        Mat temp = desc1->at(i)->descriptors - desc2->at(i)->descriptors;
-        log_messages.printf(MSG_DEBUG, "Check descriptors.\n");
+
+        log_messages.printf(MSG_DEBUG, "Check number of keypoints.\n");
+        vector<KeyPoint> type1_keypoints = type1->getKeypoints();
+        vector<KeyPoint> type2_keypoints = type2->getKeypoints();
+        if (type1_keypoints.size() != type2_keypoints.size()) {
+            match = false;
+            log_messages.printf(MSG_CRITICAL, "ERROR, number of keypoints is different. %d vs %d\n", (int)type1_keypoints.size(), (int)type2_keypoints.size());
+            //exit(0);
+            sleep(10);
+            return 1;
+        }
+
+        Mat temp = desc1 - desc2;
+        log_messages.printf(MSG_DEBUG, "Check descriptors and keypoints.\n");
         for (int x=0; x<temp.rows; x++) {
             bool sub_match = true;
-            for (int y=0; y<temp.cols; y++) {
-                if (temp.at<double>(x,y) > threshold) {
-                    sub_match = false;
-                    log_messages.printf(MSG_DEBUG, "Descriptors at (%d, %d) are not the same. Difference of %f\n", x, y, (float)temp.at<double>(x,y));
+            Point diff = type1_keypoints.at(x).pt - type1_keypoints.at(x).pt;
+            double dist = sqrt(diff.x*diff.x + diff.y*diff.y);
+            if (dist == 0) {
+                for (int y=0; y<temp.cols; y++) {
+                    if (temp.at<float>(x,y) > threshold) {
+                        sub_match = false;
+                        log_messages.printf(MSG_DEBUG, "Descriptors at (%d, %d) are not the same. Difference of %E. With values (%E vs %E = %E)\n", x, y, temp.at<float>(x,y), desc1.at<float>(x,y), desc2.at<float>(x,y), desc1.at<float>(x,y)-desc2.at<float>(x,y));
+                    }
                 }
+            } else {
+                sub_match = false;
+                log_messages.printf(MSG_DEBUG, "Keypoint at index %d have incorrect locations (%f, %f) vs (%f, %f)\n", x, type1_keypoints.at(x).pt.x, type1_keypoints.at(x).pt.y, type2_keypoints.at(x).pt.x, type2_keypoints.at(x).pt.y);
             }
             if (sub_match) matches++;
         }
         if (matches < temp.rows) {
             log_messages.printf(MSG_CRITICAL, "%d/%d (%f) of descriptors match for results %d and %d \n", matches, temp.rows, (float)matches/temp.rows*100, r1.id, r2.id);
-            exit(0);
+            //exit(0);
+            sleep(10);
             return 1;
             return ERR_OPENDIR;
         }

@@ -1,10 +1,11 @@
+//#define GUI
+#define SVM
+
+#include <stdexcept>
 #include <vector>
-#include <set>
-#include <sstream>
-#include <cstdio>
-#include <fstream>
 #include <iostream>
-#include <cstring>
+#include <fstream>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -23,122 +24,72 @@
 #include "mfile.h"
 #endif
 
-#include "wildlife_surf.hpp"
+#include "Event.hpp"
+#include "EventType.hpp"
+#include "VideoType.hpp"
 
 using namespace std;
 using namespace cv;
 
-struct Event {
-	 EventType *type;
-	 int start_time;
-	 int end_time;
-};
-
-struct VideoType {
-    int video_width;
-    int video_height;
-    cv::Rect *watermark_rect;
-    cv::Rect *timestamp_rect;
-};
-
 /****** PROTOTYPES ******/
 
-void write_checkpoint();
-bool read_checkpoint();
-void write_descriptors(string, Mat);
-void write_events(string, vector<EventType*>);
-void read_event_desc(string, vector<EventType*>);
-Mat read_descriptors(string, string);
-int skip_frames(VideoCapture, int);
 void printUsage();
-double standardDeviation(vector<DMatch>, double);
-int timeToSeconds(string);
-vector<Event*> readConfigFile(string, int*);
-void loadVideoTypes();
-bool readParams(int, char**);
+bool readParams(int argc, char** argv);
+string getBoincFilename(string filename) throw(runtime_error);
+int timeToSeconds(string time);
+double standardDeviation(vector<DMatch> arr, double mean);
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime);
+void writeMatrix(FileStorage outfile, string id, Mat matrix);
+Mat readMatrix(FileStorage infile, string id);
+void writeEventsToFile(string filename, vector<EventType*> eventTypes);
+vector<KeyPoint> readKeypoints(FileStorage infile, string id);
+void writeKeypoints(FileStorage outfile, string id, vector<KeyPoint> keypoints);
+void readEventsFromFile(string filename, vector<EventType*> *eventTypes);
+bool readCheckpoint(int *checkpointFramePos, vector<EventType*> *eventTypes);
+void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error);
 
 /****** END PROTOTYPES ******/
 
-string checkpoint_filename;
-string checkpoint_desc_filename;
-string config_file_name;
-string vid_file_name;
-string desc_file_name;
-int frame_pos;
-int checkpoint_frame_pos = 0;
-float total;
-int vid_time;
-
-int min_hessian = 400;
-double flann_threshold = 3.5;
-bool remove_watermark = true;
-bool remove_timestamp = true;
-
-// Vector of video types and their corresponding aspect ratios.
-vector<VideoType> video_types;
-cv::Rect *watermark_rect;
-cv::Rect *timestamp_rect;
-
-vector<EventType*> event_types;
-vector<Event*> events;
+static int  minHessian = 400;
+static double flannThreshold = 3.5;
+static bool removeWatermark = true;
+static bool removeTimestamp = true;
+static string vidFilename, configFilename, descFilename;
 
 int main(int argc, char **argv) {
-	if(argc < 5) {
-		printUsage();
-		return -1;
-	} else {
-        if (!readParams(argc, argv)) {
-            printUsage();
-            return -1;
-        }
+    // Local Variables
+    descFilename = "descriptors.dat";
+
+    if(!readParams(argc, argv)) {
+        printUsage();
+        return -1;
     }
 
-    loadVideoTypes();
-
-    cerr << "Vid file: " << vid_file_name.c_str() << endl;
-    cerr << "Config file: " << config_file_name.c_str() << endl;
-    cerr << "Min Hessian: " << min_hessian << endl;
-    cerr << "Flann Threshold: " << flann_threshold << " * standard deviation" << endl;
-    desc_file_name = "results.desc";
+    cerr << "Vid file: " << vidFilename.c_str() << endl;
+    cerr << "Config file: " << configFilename.c_str() << endl;
+    cerr << "Min Hessian: " << minHessian << endl;
+    cerr << "Flann Threshold: " << flannThreshold << " * standard deviation" << endl;
 
 #ifdef _BOINC_APP_
     cout << "Boinc enabled." << endl;
-    string resolved_config_path;
-    string resolved_vid_path;
-    string resolved_desc_path;
     cerr << "Resolving boinc file paths." << endl;
-    int retval = boinc_resolve_filename_s(config_file_name.c_str(), resolved_config_path);
-    if(retval) {
-        cerr << "Error, could not open file: '" << config_file_name.c_str() << "'" << endl;
-        cerr << "Resolved to: '" << resolved_config_path.c_str() << "'" << endl;
-        return false;
-    }
-    config_file_name = resolved_config_path;
-
-    retval = boinc_resolve_filename_s(vid_file_name.c_str(), resolved_vid_path);
-    if(retval) {
-        cerr << "Error, could not open file: '" << vid_file_name.c_str() << "'" << endl;
-        cerr << "Resolved to: '" << resolved_vid_path.c_str() << "'" << endl;
-        return false;
-    }
-    vid_file_name = resolved_vid_path;
-
-    retval = boinc_resolve_filename_s(desc_file_name.c_str(), resolved_desc_path);
-    if(retval) {
-        cerr << "Error, could not open file: '" << desc_file_name.c_str() << "'" << endl;
-        cerr << "Resolved to: '" << resolved_desc_path.c_str() << "'" << endl;
-        return false;
-    }
-    desc_file_name = resolved_desc_path;
+    configFilename = getBoincFilename(configFilename);
+    vidFilename = getBoincFilename(vidFilename);
+    descFilename = getBoincFilename(descFilename);
 #endif
 
-	events = readConfigFile(config_file_name, &vid_time);
-	cerr << "Events: " << events.size() << endl;
-	cerr << "Event Types: " << event_types.size() << endl;
+    int vidTime;
+    vector<EventType*> eventTypes;
+    vector<Event*> events;
+    if(!readConfig(configFilename, &eventTypes, &events, &vidTime)) {
+        return false; //Error occurred.
+    }
+    cerr << "Events: " << events.size() << endl;
+    cerr << "Event Types: " << eventTypes.size() << endl;
 
-	VideoCapture capture(vid_file_name.c_str());
+    VideoCapture capture(vidFilename.c_str());
     if(!capture.isOpened()) {
-        cerr << "Failed to open " << vid_file_name.c_str() << endl;
+        cerr << "Failed to open '" << vidFilename.c_str() << "'" << endl;
         return false;
     }
 
@@ -146,149 +97,120 @@ int main(int argc, char **argv) {
     boinc_init();
 #endif
 
-    checkpoint_filename = "checkpoint.txt";
-    checkpoint_desc_filename = "checkpoint.desc";
-
-    if(read_checkpoint()) {
-        cerr << "Start from checkpoint..." << endl;
+    int checkpointFramePos;
+    if(readCheckpoint(&checkpointFramePos, &eventTypes)) {
+        cerr << "Start from checkpoint on frame " << checkpointFramePos << endl;
     } else {
-        cerr << "Unseccessful checkpoint read." << endl << "Starting from beginning of video." << endl;
+        cerr << "Unsuccessful checkpoint read." << endl << "Starting from beginning of video." << endl;
     }
 
-    skip_frames(capture, checkpoint_frame_pos);
+    capture.set(CV_CAP_PROP_POS_FRAMES, checkpointFramePos);
 
-    frame_pos = capture.get(CV_CAP_PROP_POS_FRAMES);
-    total = capture.get(CV_CAP_PROP_FRAME_COUNT);
+    int framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+    int total = capture.get(CV_CAP_PROP_FRAME_COUNT);
 
-    int frame_width = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-    int frame_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+    int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
+    int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-    for(int i=0; i<video_types.size(); i++) {
-        if(video_types.at(i).video_width == frame_width && video_types.at(i).video_height == frame_height) {
-            cerr << "Found matching size." << endl;
-            watermark_rect = video_types.at(i).watermark_rect;
-            timestamp_rect = video_types.at(i).timestamp_rect;
-            break;
-        }
-    }
-    if(watermark_rect == NULL || timestamp_rect == NULL) {
-        cerr << "[ERROR] (Watermark and Timestamp removeal) There is no registered aspect ratio for this video size (" << frame_width << " X " << frame_height << ")." << endl;
+    VideoType vidType(frameWidth, frameHeight);
+
+    cerr << "Config Filename: '" << configFilename.c_str() << "'" << endl;
+    cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
+    cerr << "Current Frame: '" << framePos << "'" << endl;
+    cerr << "Frame Count: '" << total << "'" << endl;
+
+    while(framePos/total < 1.0) {
 #ifdef _BOINC_APP_
-        boinc_finish(1);
-#endif
-        exit(1);
-    }
-
-    cerr << "Config File Name: " << config_file_name.c_str() << endl;
-    cerr << "Vid File Name: " << vid_file_name.c_str() << endl;
-    cerr << "Current Frame: " << frame_pos << endl;
-    cerr << "Frame Count: " << total << endl;
-
-	// Loop through all video frames.
-	while(frame_pos/total < 1.0) {
-		//cout << "Percent complete: " << framePos/total*100 << endl;
-#ifdef _BOINC_APP_
-        boinc_fraction_done(frame_pos/total);
-
+        boinc_fraction_done((double)framePos/total);
 #ifdef GUI
         int key = waitKey(1);
 #endif
         if(boinc_time_to_checkpoint()) {
-            cerr << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
-            write_checkpoint();
+            cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
+            writeCheckpoint(framePos, eventTypes);
             boinc_checkpoint_completed();
         }
 #endif
-		Mat img;
-        capture >> img;
-		frame_pos = capture.get(CV_CAP_PROP_POS_FRAMES);
+        Mat frame;
+        capture >> frame;
+        framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
 
-		// Increment video time every 10 frames.
-		if(frame_pos % 10 == 0) vid_time++;
-		//cout << "Video time: " << vidTime << endl;
-
-    	Mat frame = img;
-
-		SurfFeatureDetector detector(min_hessian);
-		vector<KeyPoint> keypoints_frame, keypoints;
-		detector.detect(frame, keypoints_frame);
-
-        // Remove keypoints in watermark and timestamp.
-        for(int i=0; i<keypoints_frame.size(); i++) {
-            cv::Point pt = keypoints_frame.at(i).pt;
-            bool watermark = true;
-            bool timestamp = true;
-            if(!watermark_rect->contains(pt)) watermark = false;
-            if(!timestamp_rect->contains(pt)) timestamp = false;
-            /*if (!remove_watermark || pt.x < watermark_top_left.x || pt.x > watermark_bottom_right.x || pt.y < watermark_top_left.y || pt.y > watermark_bottom_right.y) {
-                watermark = false;
-            }
-            if (!remove_timestamp || pt.x < timestamp_top_left.x || pt.x > timestamp_bottom_right.x || pt.y < timestamp_top_left.y || pt.y > timestamp_bottom_right.y) {
-                timestamp = false;
-            }*/
-            if(!watermark && !timestamp) keypoints.push_back(keypoints_frame.at(i));
+        // TODO This should be in a setting file to allow for differnet frame
+        // rates.
+        if(framePos % 10 == 0) {
+            vidTime++; //Increment video time every 10 frames.
         }
-        keypoints_frame = keypoints;
 
-		SurfDescriptorExtractor extractor;
-		Mat descriptors_frame;
-		extractor.compute(frame, keypoints_frame, descriptors_frame);
+        SurfFeatureDetector detector(minHessian);
+        vector<KeyPoint> frameKeypoints;
+        Mat mask = vidType.getMask();
+        detector.detect(frame, frameKeypoints, mask);
 
-		// Add distinct features to active events.
-		int activeEvents = 0;
-		for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
-			if(vid_time >= (*it)->start_time && vid_time <= (*it)->end_time) {
-				activeEvents++;
-				if((*it)->type->descriptors.empty()) {
-					(*it)->type->descriptors.push_back(descriptors_frame);
-				} else {
-					// Find Matches
-					FlannBasedMatcher matcher;
-					vector<DMatch> matches;
-					matcher.match(descriptors_frame, (*it)->type->descriptors, matches);
+        SurfDescriptorExtractor extractor;
+        Mat frameDescriptors;
+        extractor.compute(frame, frameKeypoints, frameDescriptors);
 
-					double total_dist = 0;
-					double max_dist = 0;
-					double min_dist = 100;
+        // Add distinct descriptors and keypoints to active events.
+        int activeEvents = 0;
+        for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
+            if(vidTime >= (*it)->getStartTime() && vidTime <= (*it)->getEndTime()) {
+                activeEvents++;
+                if((*it)->getDescriptors().empty()) {
+                    (*it)->addDescriptors(frameDescriptors);
+                    (*it)->addKeypoints(frameKeypoints);
+                } else {
+                    // Find Matches
+                    FlannBasedMatcher matcher;
+                    vector<DMatch> matches;
+                    matcher.match(frameDescriptors, (*it)->getDescriptors(), matches);
 
-					for(int i=0; i<matches.size(); i++) {
-						double dist = matches[i].distance;
-						total_dist += dist;
-						if(dist < min_dist) min_dist = dist;
-						if(dist > max_dist) max_dist = dist;
-					}
+                    double totalDist = 0;
+                    double maxDist = 0;
+                    double minDist = 100;
 
-					double avg_dist = total_dist/matches.size();
-					double std_dev = standardDeviation(matches, avg_dist);
-					cerr << "Max dist: " << max_dist << endl;
-					cerr << "Avg dist: " << avg_dist << endl;
-					cerr << "Min dist: " << min_dist << endl;
-					cerr << "Avg + " << flannThreshold << "*std_ev: " << avg_dist + flannThreshold * std_dev << endl;
+                    for(int i=0; i<matches.size(); i++) {
+                        double dist = matches[i].distance;
+                        totalDist += dist;
+                        if(dist < minDist) minDist = dist;
+                        if(dist > maxDist) maxDist = dist;
+                    }
 
-					vector<DMatch> new_matches;
+                    double avgDist = totalDist/matches.size();
+                    double stdDev = standardDeviation(matches, avgDist);
+                    //Round to four decimal places for consistency across
+                    //archetectures.
+                    // 10^4
+                    stdDev = floor(stdDev*10000 + 0.5) / 10000;
 
-					for(int i=0; i<matches.size(); i++) {
-						if(matches[i].distance > avg_dist+(flann_threshold*std_dev)) {
-							new_matches.push_back(matches[i]);
-						}
-					}
+                    cerr << "Max dist: " << maxDist << endl;
+                    cerr << "Min dist: " << minDist << endl;
+                    cerr << "Avg dist: " << avgDist << endl;
+                    cerr << "Avg + " << flannThreshold << " * stdDev: " << avgDist + flannThreshold * stdDev << endl;
 
-					Mat new_descriptors;
-					cerr << (*it)->type->id.c_str() << " descriptors found: " << descriptors_frame.rows << endl;
-					for(int i=0; i<new_matches.size(); i++) {
-						new_descriptors.push_back(descriptors_frame.row(new_matches[i].queryIdx));
-					}
+                    Mat newDescriptors;
+                    vector<KeyPoint>  newKeypoints;
+                    for(int i=0; i<matches.size(); i++) {
+                        if(matches[i].distance > avgDist + (flannThreshold * stdDev)) {
+                            cv::Point a = frameKeypoints.at(matches[i].queryIdx).pt;
+                            cv::Point b = (*it)->getKeypoints().at(matches[i].trainIdx).pt;
+                            cerr << "Euclidian dist: " << sqrt(double((a.x-b.x) * (a.x-b.x)) + double((a.y-b.y) * (a.y-b.y))) << endl;
+                            newDescriptors.push_back(frameDescriptors.row(matches[i].queryIdx));
+                            newKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
+                        }
+                    }
 
-					cerr << (*it)->type->id.c_str() << " descriptors added: " << new_descriptors.rows << endl;
-					if(new_descriptors.rows > 0) {
-						(*it)->type->descriptors.push_back(new_descriptors);
-					}
-					cerr << (*it)->type->id.c_str() << " descriptors: " << (*it)->type->descriptors.size() << endl;
+                    if(newDescriptors.rows > 0) {
+                        (*it)->addDescriptors(newDescriptors);
+                        (*it)->addKeypoints(newKeypoints);
+                    }
+                    cerr << (*it)->getTypeId().c_str() << " descriptors found: " << frameDescriptors.rows << endl;
+                    cerr << (*it)->getTypeId().c_str() << " descriptors added: " << newDescriptors.rows << endl;
+                    cerr << (*it)->getTypeId().c_str() << " descriptors: " << (*it)->getDescriptors().size() << endl;
                 }
             }
         }
         if(activeEvents == 0) {
-            cerr << "[ERROR] There are no active events! (Problem with expert classification.)" << endl;
+            cerr << "[ERROR] There are no active events! (Problem with expert classification at frame " << framePos << ")" << endl;
 #ifdef _BOINC_APP_
             boinc_finish(1);
 #endif
@@ -296,30 +218,28 @@ int main(int argc, char **argv) {
         }
 
 #ifdef GUI
-        // Code to draw the points.
-        Mat frame_points = frame;
-        rectangle(frame_points, *watermark_rect, Scalar(0, 0, 100));
-        rectangle(frame_points, *timestamp_rect, Scalar(0, 0, 100));
-        drawKeypoints(frame, keypoints_frame, frame_points, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+        // Draw points on frame.
+        Mat pointsFrame = frame;
+        vidType.drawZones(pointsFrame, Scalar(0, 0, 100));
+        drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
         // Display image.
-        imshow("SURF", frame_points);
+        imshow("SURF", pointsFrame);
         if((cvWaitKey(10) & 255) == 27) break;
 #endif
     }
+    capture.release();
 
     cerr << "<event_ids>" << endl;
-    for(int i=0; i<event_types.size(); i++) {
-        cerr << event_types[i]->id.c_str() << endl;
+    for(int i=0; i<eventTypes.size(); i++) {
+        cerr << eventTypes[i]->getId().c_str() << endl;
     }
     cerr << "</event_ids>" << endl;
-    write_events(desc_file_name, event_types);
+    writeEventsToFile(descFilename, eventTypes);
 
 #ifdef GUI
     cvDestroyWindow("SURF");
 #endif
-
-    capture.release();
 
 #ifdef _BOINC_APP_
     boinc_finish(0);
@@ -328,168 +248,104 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-/** @function write_checkpoint **/
-void write_checkpoint() {
-#ifdef _BOINC_APP_
-    string resolved_path;
-    int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
-    if(retval) {
-        cerr << "Couldn't resolve file name..." << endl;
-        return;
-    }
-    checkpoint_filename = resolved_path;
-
-    retval = boinc_resolve_filename_s(checkpoint_desc_filename.c_str(), resolved_path);
-    if(retval) {
-        cerr << "Couldn't resolve file name..." << endl;
-        return;
-    }
-    checkpoint_desc_filename = resolved_path;
-#endif
-
-    ofstream checkpoint_file(checkpoint_filename.c_str());
-    if(!checkpoint_file.is_open()) {
-        cerr << "Checkpoint file not open..." << endl;
-        return;
+void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error) {
+    string checkpointFilename = getBoincFilename(vidFilename + ".checkpoint");
+    writeEventsToFile(checkpointFilename, eventTypes);
+    FileStorage outfile(checkpointFilename, FileStorage::APPEND);
+    if(!outfile.isOpened()) {
+        throw runtime_error("Checkpoint file did not open");
     }
 
-    checkpoint_file << "CURRENT_FRAME: " << frame_pos << endl;
-
-    write_events(checkpoint_desc_filename, event_types);
-
-    checkpoint_file << endl;
-    checkpoint_file.close();
+    outfile << "CURRENT_FRAME" << framePos;
+    outfile.release();
 }
 
-
-/** @function read_checkpoint **/
-bool read_checkpoint() {
+bool readCheckpoint(int *checkpointFramePos, vector<EventType*> *eventTypes) {
     cerr << "Reading checkpoint..." << endl;
-#ifdef _BOINC_APP_
-    string resolved_path;
-    int retval = boinc_resolve_filename_s(checkpoint_filename.c_str(), resolved_path);
-    if(retval) {
-        cerr << "Couldn't resolve file name..." << endl;
-        return false;
-    }
-    checkpoint_filename = resolved_path;
+    string checkpointFilename = getBoincFilename("checkpoint.dat");
+    FileStorage infile(checkpointFilename, FileStorage::READ);
+    if(!infile.isOpened()) return false;
+    infile["CURRENT_FRAME"] >> *checkpointFramePos;
+    cerr << "CURRENT_FRAME:" << " " << *checkpointFramePos << endl;
+    infile.release();
 
-    retval = boinc_resolve_filename_s(checkpoint_desc_filename.c_str(), resolved_path);
-    if(retval) {
-        cerr << "Couldn't resolve file name..." << endl;
-        return false;
-    }
-    checkpoint_desc_filename = resolved_path;
-#endif
-
-    ifstream checkpoint_file(checkpoint_filename.c_str());
-    if(!checkpoint_file.is_open()) return false;
-
-    string s;
-    checkpoint_file >> s >> checkpoint_frame_pos;
-    cerr << s.c_str() << " " << checkpoint_frame_pos << endl;
-    if(s.compare("CURRENT_FRAME:") != 0 ) {
-        cerr << "ERROR: malformed checkpoint! could not read 'CURRENT_FRAME'" << endl;
-#ifdef _BOINC_APP_
-        boinc_finish(1);
-#endif
-        exit(1);
-    }
-
-    read_event_desc(checkpoint_desc_filename, event_types);
+    readEventsFromFile(checkpointFilename, eventTypes);
     cerr << "Done reading checkpoint." << endl;
     return true;
 }
 
-/** @function write_events **/
-void write_events(string filename, vector<EventType*> event_types) {
+void readEventsFromFile(string filename, vector<EventType*> *eventTypes) {
+    FileStorage infile(filename, FileStorage::READ);
+    try {
+        for(vector<EventType*>::iterator it = eventTypes->begin(); it != eventTypes->end(); ++it) {
+            (*it)->read(infile);
+        }
+    } catch(const exception &ex) {
+        cerr << "readEventsFromFile: " << ex.what() << endl;
+#ifdef _BOINC_APP_
+        boinc_finish(1);
+#endif
+        exit(1);
+    }
+    infile.release();
+}
+
+void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     FileStorage outfile(filename, FileStorage::WRITE);
-	for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-        cerr << "Write: " << (*it)->id.c_str() << endl;
-        outfile << (*it)->id << (*it)->descriptors;
-	}
-	outfile.release();
-}
-
-/** @function read_events **/
-void read_event_desc(string filename, vector<EventType*> event_types) {
-    cerr << "Opening file: " << filename.c_str() << endl;
-    FileStorage infile(filename, FileStorage::READ);
-    if(infile.isOpened()) {
-        cerr << filename.c_str() << " is open." << endl;
-        for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-            cerr << "Read: " << (*it)->id.c_str() << endl;
-            infile[(*it)->id] >> (*it)->descriptors;
+#ifdef SVM
+    ofstream svmfile("svm.dat");
+#endif
+    try {
+        for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
+            (*it)->write(outfile);
+#ifdef SVM
+            (*it)->writeForSVM(svmfile, (*it)->getId());
+#endif
         }
-        infile.release();
-    } else {
-        cerr << "ERROR: feature file '" << filename.c_str() << "' does does not exist." << endl;
+    } catch(const exception ex) {
+        cerr << "writeEventsToFile: " << ex.what() << endl;
 #ifdef _BOINC_APP_
         boinc_finish(1);
 #endif
         exit(1);
     }
+    outfile.release();
 }
 
-/** @function read_descriptors **/
-Mat read_descriptors(string filename, string desc_name) {
-    Mat descriptors;
-    FileStorage infile(filename, FileStorage::READ);
-    if(infile.isOpened()) {
-        read(infile[desc_name], descriptors);
-        infile.release();
-    } else {
-        cerr << "ERROR: feature file '" << filename.c_str() << "' does not exists." << endl;
-#ifdef _BOINC_APP_
-        boinc_finish(1);
-#endif
-        exit(1);
-    }
-    return descriptors;
-}
-
-/** @function readConfigFile **/
-vector<Event*> readConfigFile(string fileName, int *vidStartTime) {
-	vector<Event*> events;
-
-    cerr << "Reading config file: " << fileName.c_str() << endl;
-	string line, event_id, start_time, end_time;
-	ifstream infile;
-	infile.open(fileName.c_str());
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime) {
+    cerr << "Reading config file: " << filename.c_str() << endl;
+    string line, eventId, startTime, endTime;
+    ifstream infile;
+    infile.open(filename.c_str());
     getline(infile, line);
-	*vidStartTime = timeToSeconds(line.c_str());
-    while(getline(infile, event_id, ',')) {
-		Event *newEvent = new Event();
-		EventType *event_type = NULL;
-		for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
-            cerr << "Event name: " << (*it)->id.c_str() << endl;
-			if((*it)->id.compare(event_id) == 0) {
-				event_type = *it;
-				break;
-			}
-		}
-		if(event_type == NULL) {
-			event_type = new EventType();
-			event_type->id = event_id;
-			event_types.push_back(event_type);
-		}
-        if(!getline(infile, start_time, ',') || !getline(infile, end_time)) {
-            cerr << "Error: Malformed config file!" << endl;
-#ifdef _BOINC_APP_
-            boinc_finish(1);
-#endif
-            exit(1);
+    *vidTime = timeToSeconds(line);
+    while(getline(infile, eventId, ',')) {
+        Event *newEvent = new Event();
+        EventType *eventType = NULL;
+        for(vector<EventType*>::iterator it = eventTypes->begin(); it != eventTypes->end(); ++it) {
+            cerr << "Event name: '" <<  (*it)->getId().c_str() << endl;
+            if((*it)->getId().compare(eventId) == 0) {
+                eventType = *it;
+                break;
+            }
         }
-        newEvent->type = event_type;
-        newEvent->start_time = timeToSeconds(start_time);
-        newEvent->end_time = timeToSeconds(end_time);
-		events.push_back(newEvent);
-	}
-	infile.close();
-	return events;
+        if(eventType == NULL) {
+            eventType = new EventType(eventId);
+            eventTypes->push_back(eventType);
+        }
+        if(!getline(infile, startTime, ',') || !getline(infile, endTime)) {
+            cerr << "Error: Malformed config file!" << endl;
+            return false;
+        }
+        newEvent->setType(eventType);
+        newEvent->setStartTime(timeToSeconds(startTime));
+        newEvent->setEndTime(timeToSeconds(endTime));
+        events->push_back(newEvent);
+    }
+    infile.close();
+    return true;
 }
 
-/** @function standardDeviation **/
 double standardDeviation(vector<DMatch> arr, double mean) {
     double dev=0;
     double inverse = 1.0 / static_cast<double>(arr.size());
@@ -499,85 +355,59 @@ double standardDeviation(vector<DMatch> arr, double mean) {
     return sqrt(inverse * dev);
 }
 
-/** @function timeToSeconds **/
 int timeToSeconds(string time) {
-	vector<string> temp;
-	istringstream iss(time);
-	while(getline(iss, time, ':')) {
-		temp.push_back(time);
-	}
-	int seconds = 0;
-	seconds += atoi(temp[0].c_str())*3600;
-	seconds += atoi(temp[1].c_str())*60;
-	seconds += atoi(temp[2].c_str());
-	return seconds;
-}
-
-/** @function skip_frames **/
-int skip_frames(VideoCapture capture, int n) {
-    Mat frame;
-    for (int i=0; i<n; i++) {
-        capture >> frame;
-        // Check if at end of video.
-        if (frame.empty()) {
-            return i+1;
-        }
+    vector<string> temp;
+    istringstream iss(time);
+    while(getline(iss, time, ':')) {
+        temp.push_back(time);
     }
-    return n;
+    int seconds = 0;
+    seconds += atoi(temp[0].c_str())*3600;
+    seconds += atoi(temp[1].c_str())*60;
+    seconds += atoi(temp[2].c_str());
+    return seconds;
 }
 
-/** @function loadVideoTypes **/
-void loadVideoTypes() {
-    VideoType a;
-    a.video_width = 704;
-    a.video_height = 480;
-    cv::Point watermark_top_left_a(12, 12);
-    cv::Point watermark_bottom_right_a(90, 55);
-    cv::Point timestamp_top_left_a(520, 415);
-    cv::Point timestamp_bottom_right_a(680, 470);
-    a.watermark_rect = new cv::Rect(watermark_top_left_a, watermark_bottom_right_a);
-    a.timestamp_rect = new cv::Rect(timestamp_top_left_a, timestamp_bottom_right_a);
-    video_types.push_back(a);
-
-    VideoType b;
-    b.video_width = 352;
-    b.video_height = 240;
-    cv::Point watermark_top_left_b(12, 12);
-    cv::Point watermark_bottom_right_b(90, 55);
-    cv::Point timestamp_top_left_b(240, 190);
-    cv::Point timestamp_bottom_right_b(335, 230);
-    b.watermark_rect = new cv::Rect(watermark_top_left_b, watermark_bottom_right_b);
-    b.timestamp_rect = new cv::Rect(timestamp_top_left_b, timestamp_bottom_right_b);
-    video_types.push_back(b);
+string getBoincFilename(string filename) throw(runtime_error) {
+    string resolvedPath;
+#ifdef _BOINC_APP_
+    if(boinc_resolve_filename_s(filename.c_str(), resolvedPath)) {
+        cerr << "Could not resolve filename '" << filename.c_str() << "'" << endl;
+        throw runtime_error("Boinc could not resolve filename");
+    }
+#endif
+    return resolvedPath;
 }
 
-/** @function readParams **/
-bool readParams(int argc, char **argv) {
-    for (int i=1; i<argc; i++) {
-        if (i < argc) {
-            if (string(argv[i]) == "--video" || string(argv[i]) == "--v") {
-                if (i+1 < argc) vid_file_name = argv[++i];
-            } else if (string(argv[i]) == "--config" || string(argv[i]) == "--c") {
-                if (i+1 < argc) config_file_name = argv[++i];
-            } else if (string(argv[i]) == "--hessian" || string(argv[i]) == "--h") {
-                if (i+1 < argc) min_hessian = atoi(argv[++i]);
-            } else if (string(argv[i]) == "--threshold" || string(argv[i]) == "--t") {
-                if (i+1 < argc) flann_threshold = atoi(argv[++i]);
-            } else if (string(argv[i]) == "--watermark") {
-                remove_watermark = false;
-            } else if (string(argv[i]) == "--timestamp") {
-                remove_timestamp = false;
+bool readParams(int argc, char** argv) {
+    for(int i=1; i<argc; i++) {
+        if(i < argc) {
+            if(string(argv[i]) == "--video" || string(argv[i]) == "-v") {
+                if(i+1 < argc) vidFilename = argv[++i];
+            } else if(string(argv[i]) == "--config" || string(argv[i]) == "-c") {
+                if(i+1 < argc) configFilename = argv[++i];
+            } else if(string(argv[i]) == "--desc" || string(argv[i]) == "-d") {
+                if(i+1 < argc) descFilename = argv[++i];
+            } else if(string(argv[i]) == "--hessian" || string(argv[i]) == "-h") {
+                if(i+1 < argc) minHessian = atoi(argv[++i]);
+            } else if(string(argv[i]) == "--threshold" || string(argv[i]) == "-t") {
+                if(i+1 < argc) flannThreshold = atoi(argv[++i]);
+            } else if(string(argv[i]) == "--watermark") {
+                removeWatermark = false;
+            } else if(string(argv[i]) == "--timestamp") {
+                removeTimestamp = false;
             }
         } else {
             cout << "Parameter has no matching value." << endl;
             return false;
         }
     }
-    if (vid_file_name.empty() || config_file_name.empty()) return false;
+    if(vidFilename.empty() || configFilename.empty()) return false;
     else return true;
 }
 
-/** @function printUsage **/
+// TODO This should be genereated automatically somehow... probably from the
+// readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_collect --v <video> --c <config> [--h <min hessian>] [--t <feature match threshold>] [--watermark] [--timestamp]" << endl;
+	cout << "Usage: wildlife_collect -v <video> -c <config> [-d <descriptor output>] [-f <feature output>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 }
