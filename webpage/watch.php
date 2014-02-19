@@ -13,12 +13,23 @@ require_once($cwd . '/user.php');
 
 $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
+//parse the species and site from the URL
 $species_id = mysql_real_escape_string($_GET['species']);
-$location_id = mysql_real_escape_string($_GET['site']);
 
+$location_id = mysql_real_escape_string($_GET['site']);
+if (array_key_exists('location', $_GET)) {
+    $location_id = mysql_real_escape_string($_GET['location']);
+}
+
+//Get the current logged in user and their id.
 $user = get_user();
 $user_id = $user['id'];
 
+/**
+ *  Currently using Bootstrap 2.x, really need to update
+ *  this to bootstrap 3.x.
+ *  TODO: upgrade to bootstrap 3.x
+ */
 echo "
 <!DOCTYPE html>
 <html>
@@ -32,8 +43,14 @@ echo "
     <script type='text/javascript'>
         var reviewing_reported = false;
     </script>
-    <script type='text/javascript' src='watch.js'></script>
+        <script type='text/javascript' src='watch.js'></script>";
 
+/**
+ * This is really bad. I should put this in it's own CSS file.
+ * TODO: move this into a CSS file that all the wildlife@home
+ * pages can use.
+ */
+echo"
     <style>
     body {
         padding-top: 60px;
@@ -109,21 +126,18 @@ echo "
     </style>
 ";
 
-/*
- * This is a little convoluted, but it will quickly select a random video_segment which has
- * been processed.
- *
- * select one that has been processed, not validated, and has no observation by the user already.
- *
- * first select one that has observations by OTHER users, then select one with no observations.
- */
-
+//connect to the wildlife video server; ideally i should have a php
+//file to do this instead of reusing this code everywhere.
+//TODO: make a database php script with a function to get a
+//database connection.
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
+//Get the user preferences so we can select an appropriate video
+//for them to watch.
 $prefs = simplexml_load_string($user['project_prefs']);
 //print_r($prefs);
 
@@ -139,10 +153,16 @@ if (array_key_exists('maximum_video_time', $prefs)) {
     $max_video_time = $prefs->maximum_video_time * 60;
 }
 
-//error_log("MIN VIDEO TIME IS: $min_video_time AND MAX VIDEO TIME IS: $max_video_time");
 
+/*
+ * This is a little convoluted, but it will quickly select a random video_segment which has
+ * been processed.
+ *
+ * select one that has been processed, not validated, and has no observation by the user already.
+ *
+ * first select one that has observations by OTHER users, then select one with no observations.
+ */
 
-//$query = "select r1.id, filename from video_segment_2 AS r1 JOIN (SELECT (RAND() * (SELECT MAX(id) FROM video_segment_2 WHERE processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id)) AS id) AS r2 WHERE r1.id >= r2.id AND r1.processing_status = 'DONE' AND r1.species_id = $species_id AND r1.location_id = $location_id ORDER BY r1.id ASC limit 1;";
 
 $query = "SELECT id, filename, duration_s, video_id FROM video_segment_2 vs2 WHERE vs2.crowd_status = 'WATCHED' AND vs2.release_to_public = true AND vs2.processing_status = 'DONE' AND species_id = $species_id AND location_id = $location_id AND vs2.crowd_obs_count < vs2.required_views AND duration_s >= $min_video_time AND duration_s <= $max_video_time AND NOT EXISTS (SELECT id FROM observations WHERE observations.video_segment_id = vs2.id AND user_id = $user_id) ORDER BY RAND() limit 1";
 //echo "<!-- $query -->\n";
@@ -177,6 +197,8 @@ $duration_s = $row['duration_s'];
 
 $start_time = time();
 
+//add some of the information about the video to javascript so it
+//can be used by watch.js
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
     var species_id = $species_id;
@@ -200,6 +222,7 @@ echo "
 <body>
 ";
 
+//print the navbar
 $active_items = array(
                     'home' => '',
                     'watch_video' => 'active',
@@ -235,6 +258,8 @@ $row = mysql_fetch_assoc($result);
 if (!$row) $species_name = 'unknown species';
 else $species_name = $row['name'];
 
+//print the HTML To actually display the video,
+//if we found a video.
 
 echo"
     <div class='well well-small' style='margin-top:0px;'>
@@ -276,6 +301,8 @@ echo "
                 </div>  <!-- span6 -->
                 <div class='span6'>";
 
+//this function makes it easier to print out
+//all the button information
 function print_selection_row($text, $id) {
     echo "<div class='row-fluid'>";
     echo "  <div class='span4'>";
@@ -307,6 +334,7 @@ $discuss_video_content = "I would like to discuss this video:\n" . "[" . "video"
 
 //I would like to discuss this video:\n \[video\]$segment_filename\[/video\]\"></input>
 
+//print out the remainder of the page
 echo "
                     <div class='row-fluid'>
                         <div class='span12'>
@@ -351,6 +379,7 @@ echo "
     </div>  <!-- well -->
     ";
 
+//print the footer of the webpage.
 print_footer();
 
 echo "
