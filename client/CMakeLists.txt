@@ -53,11 +53,13 @@ target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES
 #include_directories (${PROJECT_SOURCE_DIR}/../include/ ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_graphics_app ${BOINC_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(wildlife_surf_combine
-    wildlife_surf_combine
-    ../source/EventType)
-include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
-target_link_libraries(wildlife_surf_combine ${Boost_LIBRARIES} ${OpenCV_LIBS})
+IF(Boost_FOUND)
+    add_executable(wildlife_surf_combine
+        wildlife_surf_combine
+        ../source/EventType)
+    include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
+    target_link_libraries(wildlife_surf_combine ${Boost_LIBRARIES} ${OpenCV_LIBS})
+ENDIF()
 
 #add_executable(wildlife_surf_analyze wildlife_surf_analyze)
 #include_directories(${PROJECT_SOURCE_DIR}/../include/ ${Boost_INCLUDE_DIR})
