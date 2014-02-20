@@ -27,9 +27,8 @@ ENDIF()
 #add_executable(wildlife_surf_collect wildlife_surf_collect)
 
 find_package(OpenCV REQUIRED COMPONENTS videostab nonfree)
-#find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 find_package(BOINC REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem system)
 
 MESSAGE(STATUS "OpenCV Include Dirs: ${OpenCV_INCLUDE_DIRS}")
 MESSAGE(STATUS "OpenCV Libs: ${OpenCV_LIBS}")
