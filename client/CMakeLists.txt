@@ -19,8 +19,8 @@ ENDIF()
 
 IF(APPLE)
     MESSAGE(STATUS "Setting FLAGS for APPLE")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.5.8")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5.8")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.4")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.4")
 ENDIF()
 
 # Executables
@@ -52,7 +52,7 @@ target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES
 #include_directories (${PROJECT_SOURCE_DIR}/../include/ ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_graphics_app ${BOINC_LIBRARIES} ${OpenCV_LIBS})
 
-IF(Boost_FOUND)
+IF(Boost_FOUND AND NOT APPLE)
     add_executable(wildlife_surf_combine
         wildlife_surf_combine
         ../source/EventType)
