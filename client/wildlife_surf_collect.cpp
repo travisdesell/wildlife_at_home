@@ -55,6 +55,7 @@ static double flannThreshold = 3.5;
 static bool removeWatermark = true;
 static bool removeTimestamp = true;
 static string vidFilename, configFilename, descFilename;
+static string vidName;
 
 int main(int argc, char **argv) {
     // Local Variables
@@ -65,7 +66,11 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    unsigned found = vidFilename.find_last_of("/\\");
+    vidName = vidFilename.substr(found+1);
+
     cerr << "Vid file: " << vidFilename.c_str() << endl;
+    cerr << "Vid name: " << vidName.c_str() << endl;
     cerr << "Config file: " << configFilename.c_str() << endl;
     cerr << "Min Hessian: " << minHessian << endl;
     cerr << "Flann Threshold: " << flannThreshold << " * standard deviation" << endl;
@@ -249,7 +254,7 @@ int main(int argc, char **argv) {
 }
 
 void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error) {
-    string checkpointFilename = getBoincFilename(vidFilename + ".checkpoint");
+    string checkpointFilename = getBoincFilename(vidName + ".checkpoint");
     writeEventsToFile(checkpointFilename, eventTypes);
     FileStorage outfile(checkpointFilename, FileStorage::APPEND);
     if(!outfile.isOpened()) {
@@ -262,7 +267,7 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 bool readCheckpoint(int *checkpointFramePos, vector<EventType*> *eventTypes) {
     cerr << "Reading checkpoint..." << endl;
-    string checkpointFilename = getBoincFilename("checkpoint.dat");
+    string checkpointFilename = getBoincFilename(vidName + ".checkpoint");
     FileStorage infile(checkpointFilename, FileStorage::READ);
     if(!infile.isOpened()) return false;
     infile["CURRENT_FRAME"] >> *checkpointFramePos;
