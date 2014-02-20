@@ -28,7 +28,7 @@ ENDIF()
 
 find_package(OpenCV REQUIRED COMPONENTS videostab nonfree)
 #find_package(OpenCV REQUIRED)
-#find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
+find_package(Boost REQUIRED COMPONENTS program_options filesystem system)
 find_package(BOINC REQUIRED)
 
 MESSAGE(STATUS "OpenCV Include Dirs: ${OpenCV_INCLUDE_DIRS}")
@@ -53,9 +53,11 @@ target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES
 #include_directories (${PROJECT_SOURCE_DIR}/../include/ ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_graphics_app ${BOINC_LIBRARIES} ${OpenCV_LIBS})
 
-#add_executable(wildlife_surf_combine wildlife_surf_combine)
-#include_directories(${PROJECT_SOURCE_DIR}/../include/ ${Boost_INCLUDE_DIR})
-#target_link_libraries(wildlife_surf_combine ${Boost_LIBRARIES} ${OpenCV_LIBS})
+add_executable(wildlife_surf_combine
+    wildlife_surf_combine
+    ../source/EventType)
+include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
+target_link_libraries(wildlife_surf_combine ${Boost_LIBRARIES} ${OpenCV_LIBS})
 
 #add_executable(wildlife_surf_analyze wildlife_surf_analyze)
 #include_directories(${PROJECT_SOURCE_DIR}/../include/ ${Boost_INCLUDE_DIR})

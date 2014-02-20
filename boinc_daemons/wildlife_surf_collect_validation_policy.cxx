@@ -168,6 +168,7 @@ int compare_results(
         }
 
         Mat temp = desc1 - desc2;
+        float total_difference = 0;
         log_messages.printf(MSG_DEBUG, "Check descriptors and keypoints.\n");
         for (int x=0; x<temp.rows; x++) {
             bool sub_match = true;
@@ -177,6 +178,7 @@ int compare_results(
                 for (int y=0; y<temp.cols; y++) {
                     if (temp.at<float>(x,y) > threshold) {
                         sub_match = false;
+                        total_difference += temp.at<float>(x,y);
                         log_messages.printf(MSG_DEBUG, "Descriptors at (%d, %d) are not the same. Difference of %E. With values (%E vs %E = %E)\n", x, y, temp.at<float>(x,y), desc1.at<float>(x,y), desc2.at<float>(x,y), desc1.at<float>(x,y)-desc2.at<float>(x,y));
                     }
                 }
@@ -187,9 +189,13 @@ int compare_results(
             if (sub_match) matches++;
         }
         if (matches < temp.rows) {
-            log_messages.printf(MSG_CRITICAL, "%d/%d (%f) of descriptors match for results %d and %d \n", matches, temp.rows, (float)matches/temp.rows*100, r1.id, r2.id);
+            log_messages.printf(MSG_CRITICAL, "%d/%d (%f) of descriptors match for results %d and %d with a total difference of %f.\n", matches, temp.rows, (float)matches/temp.rows*100, r1.id, r2.id, total_difference);
             //exit(0);
             sleep(10);
+            if(total_difference < 0.01) {
+                matches = true;
+                return 0;
+            }
             return 1;
             return ERR_OPENDIR;
         }

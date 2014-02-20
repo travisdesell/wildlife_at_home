@@ -297,7 +297,8 @@ void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
 #endif
     try {
         for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
-            (*it)->write(outfile);
+            (*it)->writeDescriptors(outfile);
+            (*it)->writeKeypoints(outfile);
 #ifdef SVM
             (*it)->writeForSVM(svmfile, (*it)->getId());
 #endif
