@@ -23,8 +23,8 @@ IF(APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.4")
 ELSEIF(UNIX)
     MESSAGE(STATUS "Seting FLAGS for UNIX")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mieee-fp -O3 -fno-rtti -ffor-scope -DNDEBUG")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mieee-fp -O3 -fno-rtti -ffor-scope -DNDEBUG")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mieee-fp -O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mieee-fp -O3 -DNDEBUG")
 ENDIF()
 
 # Executables
