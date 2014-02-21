@@ -58,6 +58,10 @@ static string vidFilename, configFilename, descFilename;
 static string vidName;
 
 int main(int argc, char **argv) {
+    if(!(numeric_limits<float>::is_iec559 || numeric_limits<double>::is_iec559)) {
+        cerr << "WARNING: Architecture is not compatible with IEEE floating point standard!" << endl;
+    }
+
     // Local Variables
     descFilename = "descriptors.dat";
 
