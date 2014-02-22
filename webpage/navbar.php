@@ -1,6 +1,37 @@
 <?php
 
+require_once('../inc/util.inc');
+require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
+require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
+
 function print_navbar($active_items) {
+    global $boinc_passwd, $boinc_user, $wildlife_passwd, $wildlife_user;
+
+    $project_scientist = false;
+    $user = get_logged_in_user(false);
+    $user_name = "";
+    if ($user != null) {
+        $user_id = $user->id;
+        $user_name = $user->name;
+
+        ini_set("mysql.connect_timeout", 300);
+        ini_set("default_socket_timeout", 300);
+
+        $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+        mysql_select_db("wildlife", $boinc_db);
+
+        $result = mysql_query("SELECT special_user FROM forum_preferences WHERE userid=$user_id", $boinc_db);
+        $row = mysql_fetch_assoc($result);
+
+        $special_user = $row['special_user'];
+
+        if (strlen($special_user) > 6 && $special_user{6} == 1) $project_scientist = true;
+
+    } else {
+        $user_name = "Your Account";
+    }
+
 
     echo "
         <!-- NAVBAR
@@ -21,9 +52,10 @@ function print_navbar($active_items) {
                             <li class='" . $active_items['home'] . "'> <a class='brand' href='http://volunteer.cs.und.edu/wildlife/'>Wildlife@Home</a> </li>
 
                             <li class='dropdown " . $active_items['watch_video'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Watch Video<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Watch Video<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li><a href='http://volunteer.cs.und.edu/wildlife/video_selector.php'>Site and Species Descriptions</a></li>
+                                <li><a href='http://volunteer.cs.und.edu/wildlife/instructional_videos.php'>Instructional Videos</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Sharp-Tailed Grouse</a></li>
                                 <li><a href='watch.php?site=1&species=1'>Belden, ND</a></li>
@@ -39,41 +71,34 @@ function print_navbar($active_items) {
                             </li>
 
                             <li class='dropdown " . $active_items['about_wildlife'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>About the Wildlife<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li class='nav-header'>Sharp-Tailed Grouse</a></li>
                                 <li><a href='sharptailed_grouse_info.php'>Ecology and Information</a></li>
                                 <li><a href='sharptailed_grouse_training.php'>Training Videos</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Interior Least Tern</a></li>
-                                <li><a href='#'>Ecology and Information (Coming Soon)</a></li>
-                                <li><a href='#'>Training Videos (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Training Videos (Coming Soon)</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Piping Plover </a></li>
-                                <li><a href='#'>Ecology and Information (Coming Soon)</a></li>
-                                <li><a href='#'>Training Videos (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='javascript:;'>Training Videos (Coming Soon)</a></li>
                               </ul>
                             </li>
 
 
                             <li class='" . $active_items['message_boards'] . "'><a href='http://volunteer.cs.und.edu/wildlife/forum_index.php'>Message Boards</a></li>
 
-                            <li class='dropdown " . $active_items['preferences'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Your Account<b class='caret'></b></a>
-                              <ul class='dropdown-menu'>
-                                <li><a href='home.php'>Your Preferences</a></li>
-                                <li><a href='team.php'>Teams</a></li>
-                                <li><a href='cert1.php'>Certificate</a></li>
-                                <li><a href='apps.php'>Applications</a></li>
-                              </ul>
-                            </li>
-                            
                             <li class='dropdown " . $active_items['community'] . "'>
-                              <a href='#' class='dropdown-toggle' data-toggle='dropdown'>Community<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Project Information<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
+                                <li><a href='server_status.php'>Server Status</a></li>
                                 <li><a href='profile_menu.php'>Profiles</a></li>
                                 <li><a href='user_search.php'>User Search</a></li>
                                 <li><a href='language_select.php'>Languages</a></li>
+                                <li><a href='boinc_instructions.php'>BOINC Instructions</a></li>
+                                <li><a href='badge_list.php'>Badge Descriptions</a></li>
                                 <li class='nav-header'>Top Lists</li>
                                 <li><a href='top_bossa_users.php'>Top Bird Watchers</a></li>
                                 <li><a href='top_users.php'>Top Users</a></li>
@@ -82,6 +107,52 @@ function print_navbar($active_items) {
                                 <li><a href='stats.php'>More Statistics</a></li>
                               </ul>
                             </li>
+                        </ul>
+
+                        <ul class='nav pull-right'>";
+
+if ($project_scientist) {
+    $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+    mysql_select_db("wildlife_video", $wildlife_db);
+
+    $query = "SELECT count(*) FROM video_segment_2 WHERE report_status = 'REPORTED'";
+
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+
+    $row = mysql_fetch_assoc($result);
+
+    $waiting_review = $row['count(*)'];
+
+    echo "                  <li class='dropdown " . $active_items['project_management'] . " '>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Project Mangement<b class='caret'></b></a>
+                              <ul class='dropdown-menu'>
+                                <li><a href='expert_classify_video.php'>Expert Video Classification</a></li>
+                                <li><a href='review_reported_videos.php'>Review Reported Videos ($waiting_review waiting)</a></li>
+                              </ul>
+                            </li>";
+
+}
+
+
+echo "                      <li class='dropdown " . $active_items['preferences'] . " '>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>$user_name<b class='caret'></b></a>
+                              <ul class='dropdown-menu'>
+                                <li><a href='home.php'>Your Preferences</a></li>
+                                <li><a href='user_video_list.php'>Watched Videos</a></li>
+                                <li><a href='team.php'>Teams</a></li>
+                                <li><a href='cert1.php'>Certificate</a></li>
+                                <li><a href='apps.php'>Applications</a></li>";
+
+if ($user != null) {
+    $url_tokens = url_tokens($user->authenticator);
+    echo "                      <li class='divider'></li>
+                                <li><a href='logout.php?$url_tokens'>Log Out</a></li>";
+}
+
+echo "                          </ul>
+                            </li>
+
                         </ul>
                     </div> <!-- /.nav-collapse-->
                 </div>  <!-- container-fluid -->

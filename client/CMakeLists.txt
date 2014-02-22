@@ -1,37 +1,45 @@
+cmake_minimum_required (VERSION 2.6)
+project (WILDLIFE_SURF_DETECTOR)
+
+#This may need to be updated or Linux/Windows
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /usr/local/lib /opt/local/lib)
+
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../undvc_common/cmake/Modules/")
+
+#this adds the undvc_common FindX.cmake modules to look for BOINC and OpenCV
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/cmake/Modules/")
+
+#unset(BOINC_INCLUDE_DIR)
+
+#find_package(BOINC)
+#message( "boinc include dir: ${BOINC_INCLUDE_DIR}")
+
+#include_directories(${BOINC_INCLUDE_DIR})
+#include_directories(${BOINC_INCLUDE_DIR}/api)
+#include_directories(${BOINC_INCLUDE_DIR}/lib)
+
+find_package(Boost REQUIRED COMPONENTS system thread)
+
+find_package(OpenCV COMPONENTS features2d nonfree flann imgproc highgui legacy core)
+
+include_directories (${PROJECT_SOURCE_DIR})
+
 include_directories(${OpenCV_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIR}/../)
 
-message( "boinc include dir: ${BOINC_INCLUDE_DIR}")
-
-include_directories(${BOINC_INCLUDE_DIR})
-include_directories(${BOINC_INCLUDE_DIR}/api)
-include_directories(${BOINC_INCLUDE_DIR}/lib)
-
-find_package(Boost REQUIRED COMPONENTS system thread)
-#find_package(OpenGL REQUIRED)
-#find_package(GLUT REQUIRED)
-
-include_directories(${BOINC_INCLUDE_DIR})
-include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
-
-link_directories(${OPENGL_LIBRARY_DIRS} ${GLUT_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
-
-#add_definitions( -DUSE_OPENGL)
-add_definitions( -D_BOINC_APP_)
-
-#add_executable(wildlife wildlife)
-#target_link_libraries(wildlife ${BOINC_APP_LIBRARIES} ${OpenCV_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
-#target_link_libraries(wildlife ${BOINC_APP_LIBRARIES} opencv_core opencv_highgui ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY})
-
 message(STATUS "opencv libraries: ${OpenCV_LIBRARIES}")
 
-link_directories(/Users/deselt/Dropbox/software/opencv/build/lib)
+#include_directories(${BOINC_INCLUDE_DIR})
+#include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
-add_executable(wildlife_average wildlife_average)
-target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread opencv_core opencv_highgui opencv_imgproc crt1.o)
-#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} -Wl,-static -lopencv2 ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread )
+#link_directories(${OPENGL_LIBRARY_DIRS} ${GLUT_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OpenCV_LIBRARY_DIRS})
 
-#COMPILE LINE FOR ROBERT
-#target_link_libraries(wildlife_average ${BOINC_APP_LIBRARIES} pthread /home/robert/ffmpeg/libavformat/libavformat.a /home/robert/ffmpeg/libavcodec/libavcodec.a /home/robert/ffmpeg/libswscale/libswscale.a /home/robert/ffmpeg/libavutil/libavutil.a /home/robert/x264/libx264.a /home/robert/OPENCV_SOURCE_REAL/3rdparty/lib/libzlib.a)
+#add_executable(wildlife_surf wildlife_surf)
+#target_link_libraries(wildlife_surf ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
 
+add_executable(wildlife_feature_extractor wildlife_feature_extractor)
+target_link_libraries(wildlife_feature_extractor ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
+
+add_executable(wildlife_feature_comparison wildlife_feature_comparison)
+target_link_libraries(wildlife_feature_comparison ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
 

@@ -36,3 +36,6 @@ include_directories(
 
 add_executable(wildlife_work_generator wildlife_work_generator)
 target_link_libraries(wildlife_work_generator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES})
+
+add_executable(crowd_observation_validator crowd_observation_validator)
+target_link_libraries(crowd_observation_validator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES})

@@ -1,9 +1,42 @@
 
 $(document).ready(function () {
+
+    if (reviewing_reported) {
+        $('#valid-report-button').click(function() {
+            if ($(this).hasClass('active')) {
+                $(this).removeClass('active');
+                $(this).text("valid report");
+                $(this).addClass("btn-success");
+                $(this).removeClass("btn-danger");
+            } else {
+                $(this).addClass('active');
+                $(this).text("invalid report");
+                $(this).removeClass("btn-success");
+                $(this).addClass("btn-danger");
+            }
+        });
+    }
+
+    $('#bird_leave_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird leaves the nest, no otherwise. Only select yes if the bird completely leaves the screen.", title : 'Instructions'});
+    $('#bird_return_help').popover({ placement : 'left', html : true,  content : "Select yes if the bird returns to the nest, no otherwise. Only select yes if the bird comes from completely off the screen back to the nest.", title : 'Instructions'});
+
+    $('#bird_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the bird is incubating the nest for any frame of the video, no otherwise.</p> <p>If a parent is incubating the nest for part of the video, and leaves for part of the video mark this yes (along with yes for absence).</p>", title : 'Instructions'});
+    $('#bird_absence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the parent is not on the nest (off camera) for any portion of the video.</p> <p>If a parent is incubating the nest for part of the video, and leaves for part of the video mark this yes (along with yes for incubating).</p>", title : 'Instructions'});
+
+    $('#predator_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if a predator is in the video.</p>", title : 'Instructions'});
+    $('#nest_defense_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if the bird actively tries to defend the nest from a predator. You can look at the training videos for examples of this.</p>", title : 'Instructions'});
+
+    $('#nest_success_help').popover({ placement : 'left', html : true,  content : "<p>Select yes only if chicks visibly hatch from the eggs. If chicks are simply present at the nest, mark chick presence yes and this no.</p>", title : 'Instructions'});
+    $('#chick_presence_help').popover({ placement : 'left', html : true,  content : "<p>Select yes if chicks are visible at the nest.</p>", title : 'Instructions'});
+    $('#interesting_help').popover({ placement : 'left', html : true,  content : "<p>This is up to you! Mark it yes if you found the video interesting.</p>", title : 'Instructions'});
+
+    $('#video_issue_help').popover({ placement : 'top', html : true,  content: "<p>Click video problem if the video is too dark to determine if anything is happening, if there are video corruption problems (static, etc) or if something has happened to the camera preventing viewing the nest (eg., if the camera was knocked over).</p> <p>In these cases, you do not need to select any of the other buttons.<p> <p>You can still leave comments, if you think it will help figure out whats going on in the video.</p>", title: 'Instructions'});
+
     $('#fast_forward_button').button();
     $('#fast_backward_button').button();
     $('#too_dark_button').button();
-    $('#corrupt_button').button();
+    $('#video_issue_button').button();
+    $('#speed_textbox').val("speed: " + $('#wildlife_video').get(0).playbackRate);
 
     $('#fast_backward_button').click(function() {
         var video = $('#wildlife_video').get(0);
@@ -43,10 +76,6 @@ $(document).ready(function () {
             discuss_video_clicked = true;
             $("#discuss-video-form").submit();
     });
-//    $('#discuss-video-button-too-dark').button();
-//    $('#discuss-video-button-too-dark').click(function() { $("#discuss-video-form-too-dark").submit(); });
-//    $('#discuss-video-button-corrupt').button();
-//    $('#discuss-video-button-corrupt').click(function() { $("#discuss-video-form-corrupt").submit(); });
 
 
 
@@ -129,16 +158,38 @@ $(document).ready(function () {
     }
 
     function fake_radio(name, which) {
-        if (which === 'yes') $('#' + name + '_yes').addClass("active");
-        else $('#' + name + '_yes').removeClass("active");
+        if (which === 'yes') {
+            $('#' + name + '_yes').addClass("active");
 
-        if (name != 'interesting') {
-            if (which === 'unsure') $('#' + name + '_unsure').addClass("active");
-            else $('#' + name + '_unsure').removeClass("active");
+            $('#' + name + '_yes').addClass("btn-success");
+
+            $('#' + name + '_no').removeClass("btn-danger");
+            if (name != 'interesting') $('#' + name + '_unsure').removeClass("btn-warning");
+        }  else {
+            $('#' + name + '_yes').removeClass("active");
         }
 
-        if (which === 'no') $('#' + name + '_no').addClass("active");
-        else $('#' + name + '_no').removeClass("active");
+        if (name != 'interesting') {
+            if (which === 'unsure') {
+                $('#' + name + '_unsure').addClass("active");
+
+                $('#' + name + '_yes').removeClass("btn-success");
+                $('#' + name + '_no').removeClass("btn-danger");
+                $('#' + name + '_unsure').addClass("btn-warning");
+            } else {
+                $('#' + name + '_unsure').removeClass("active");
+            }
+        }
+
+        if (which === 'no') {
+            $('#' + name + '_no').addClass("active");
+
+            $('#' + name + '_yes').removeClass("btn-success");
+            $('#' + name + '_no').addClass("btn-danger");
+            if (name != 'interesting') $('#' + name + '_unsure').removeClass("btn-warning");
+        } else {
+            $('#' + name + '_no').removeClass("active");
+        }
     }
 
     $('#bird_leave_yes').click(function() {
@@ -364,6 +415,8 @@ $(document).ready(function () {
     }
 
     function generate_modal(modal_body, submission_data) {
+        console.log("attempting to show modal: '" + modal_body + "'");
+
         $.ajax({
             type: 'POST',
             url: './report_observation.php',
@@ -374,46 +427,38 @@ $(document).ready(function () {
 
                 console.log("response.post_observation.status = " + response.post_observation.status);
 
-                if (response.post_observation.status === "CANONICAL" || response.post_observation.status == "VALID") {
-                    body_text += "<p><b>Your observations were successfully validated!</b></p>";
-                    body_text += "<p><b>You have been awarded " + response.post_observation.credit + " credit.<b></p>";
-                } else if (response.post_observation.status === "INVALID") {
-                    body_text += "<p><b>Your observations did not match ones from the other users.</b></p>";
+                if (reviewing_reported === true) {
+                    body_text += "<p><b>Your review has been successfully submitted.<b></p>";
                 } else {
-                    body_text += "<p><b>We still need other observations to validate yours.</b>";
-                    body_text += "<p><b>You will be awarded credit later if it validates sucessfully.</b>";
+                    body_text += "<p><b>Your observations has been successfully reported! It has been queued and is waiting validation. You can check the <a href='./user_video_list.php'>Watched Videos</a> page to check on its validation status.<b></p>";
                 }
 
-//                if (!(response.post_observation.status === "UNVALIDATED")) {
-                    body_text += "<p>Here is how your observations compare to the other users:</p>";
-                    body_text += "<table class='table table-bordered table-striped'>";
-                    body_text += "<tr>";
-                    body_text += "<td></td>";
-                    body_text += "<td><b>You</b></td>";
-                    for (var i = 0; i <response.db_observations.length; i++) {
-                        body_text += "<td>" + response.db_observations[i]['user_name'] + "</td>";
-                    }
-                    body_text += "</tr>";
+                body_text += "<p>Here is how your observations compare to other users:</p>";
+                body_text += "<table class='table table-bordered table-striped'>";
+                body_text += "<tr>";
+                body_text += "<td></td>";
+                body_text += "<td><b>You</b></td>";
+                for (var i = 0; i <response.db_observations.length; i++) {
+                    body_text += "<td>" + response.db_observations[i]['user_name'] + "</td>";
+                }
+                body_text += "</tr>";
 
-                    if (response.post_observation.too_dark == 1) {
-                        body_text += print_modal_row('Too dark', 'too_dark', response.post_observation, response.db_observations);
-                    } else if (response.post_observation.corrupt == 1) {
-                        body_text += print_modal_row('Corrupt', 'corrupt', response.post_observation, response.db_observations);
-                    } else {
-                        body_text += print_modal_row('Bird left the nest', 'bird_leave', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird returns to the nest', 'bird_return', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird incubating the nest', 'bird_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Bird absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Predator at the nest', 'predator_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Nest defense', 'nest_defense', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Nest success', 'nest_success', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Chicks at the nest', 'chick_presence', response.post_observation, response.db_observations);
-                        body_text += print_modal_row('Interesting', 'interesting', response.post_observation, response.db_observations);
-                    }
-                    body_text += print_modal_row('Comments', 'comments', response.post_observation, response.db_observations);
+                if (response.post_observation.video_issue == 1) {
+                    body_text += print_modal_row('Video Issue', 'video_issue', response.post_observation, response.db_observations);
+                } else {
+                    body_text += print_modal_row('Parent leaves the nest', 'bird_leave', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent returns to the nest', 'bird_return', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent present at the nest', 'bird_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Parent absent from the nest', 'bird_absence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Predator at the nest', 'predator_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Nest defense', 'nest_defense', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Nest success', 'nest_success', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Chicks present at the nest', 'chick_presence', response.post_observation, response.db_observations);
+                    body_text += print_modal_row('Interesting', 'interesting', response.post_observation, response.db_observations);
+                }
+                body_text += print_modal_row('Comments', 'comments', response.post_observation, response.db_observations);
 
-                    body_text += "</table>";
-//                }
+                body_text += "</table>";
 
                 console.log("showing modal: '" + modal_body + "'");
 
@@ -426,17 +471,18 @@ $(document).ready(function () {
 
 
 
-    $('#corrupt_button').click(function() {
-        console.log("corrupt!");
+    $('#video_issue_button').click(function() {
+        console.log("video_issue!");
 
-        if (!$('#corrupt_button').hasClass("disabled")) {
-            $('#corrupt_button').addClass("disabled");
+        if (!$('#video_issue_button').hasClass("disabled")) {
+            $('#video_issue_button').addClass("disabled");
 
-            var body_text = "You flagged the video as corrupt.";
+            var body_text = "You flagged the video as video_issue.";
 
             var comments_html = $('#comments').val();
             if (!interesting_selected) interesting = -1;
             var submission_data = {
+                reviewing_reported : reviewing_reported,
                 user_id : user_id,
                 video_segment_id : video_segment_id,
                 comments : comments_html,
@@ -453,61 +499,19 @@ $(document).ready(function () {
                 species_id : species_id,
                 location_id : location_id,
                 duration_s : duration_s,
-                too_dark : 0,
-                corrupt : 1
+                video_issue : 1
             };
+            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
             var modal_body = '#submit-modal';
 
-            console.log("flagging video as corrupt, generating modal: '" + modal_body + "'");
+            console.log("flagging video as video_issue, generating modal: '" + modal_body + "'");
             generate_modal(modal_body, submission_data);
+            console.log("flagging video as video_issue, generated modal: '" + modal_body + "'");
 
-            $('#corrupt_button').removeClass("disabled");
+            $('#video_issue_button').removeClass("disabled");
         }
     });
-
-    $('#too_dark_button').click(function() {
-        console.log("too dark!");
-
-        if (!$('#too_dark_button').hasClass("disabled")) {
-            $('#too_dark_button').addClass("disabled");
-
-            var body_text = "You flagged the video as too dark.";
-
-            var comments_html = $('#comments').val();
-
-            if (!interesting_selected) interesting = -1;
-            var submission_data = {
-                user_id : user_id,
-                video_segment_id : video_segment_id,
-                comments : comments_html,
-                bird_leave : 0,
-                bird_return : 0,
-                bird_presence : 0,
-                bird_absence : 0,
-                predator_presence : 0,
-                nest_defense : 0,
-                nest_success : 0,
-                chick_presence: 0,
-                interesting : interesting,
-                start_time : start_time,
-                species_id : species_id,
-                location_id : location_id,
-                duration_s : duration_s,
-                too_dark : 1,
-                corrupt : 0
-            };
-
-            var modal_body = '#submit-modal';
-
-            console.log("flagging video as too dark, generating modal: '" + modal_body + "'");
-            generate_modal(modal_body, submission_data);
-
-            $('#too_dark_button').removeClass("disabled");
-        }
-    });
-
-
 
     $('#submit_button').click(function() {
         if (!$('#submit_button').hasClass("disabled")) {
@@ -515,6 +519,7 @@ $(document).ready(function () {
             var comments_html = $('#comments').val();
 
             var submission_data = {
+                reviewing_reported : reviewing_reported,
                 user_id : user_id,
                 video_segment_id : video_segment_id,
                 comments : comments_html,
@@ -531,9 +536,9 @@ $(document).ready(function () {
                 species_id : species_id,
                 location_id : location_id,
                 duration_s : duration_s,
-                too_dark : 0,
-                corrupt : 0
+                video_issue : 0
             };
+            if (reviewing_reported) submission_data['valid_report'] = !$("#valid-report-button").hasClass('active');
 
 //            alert( JSON.stringify(submission_data) );
 

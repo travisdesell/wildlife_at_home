@@ -63,6 +63,8 @@ get_video_progress($grouse_blaisdell_validated_s, $grouse_blaisdell_processed_s,
 get_video_progress($grouse_lostwood_validated_s, $grouse_lostwood_processed_s, $grouse_lostwood_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 3", $wildlife_db);
 get_video_progress($least_tern_validated_s, $least_tern_processed_s, $least_tern_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 2 and location_id = 4", $wildlife_db);
 get_video_progress($piping_plover_validated_s, $piping_plover_processed_s, $piping_plover_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 3 and location_id = 4", $wildlife_db);
+get_video_progress($grouse_belden_validated_s_2013, $grouse_belden_processed_s_2013, $grouse_belden_total_s_2013, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 5", $wildlife_db);
+get_video_progress($grouse_blaisdell_validated_s_2013, $grouse_blaisdell_processed_s_2013, $grouse_blaisdell_total_s_2013, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 6", $wildlife_db);
 
 $grouse_belden_available = 100 * ($grouse_belden_processed_s / $grouse_belden_total_s);
 $grouse_belden_validated = 100 * ($grouse_belden_validated_s / $grouse_belden_total_s);
@@ -74,6 +76,11 @@ $least_tern_available = 100 * ($least_tern_processed_s / $least_tern_total_s);
 $least_tern_validated = 100 * ($least_tern_validated_s / $least_tern_total_s);
 $piping_plover_available = 100 * ($piping_plover_processed_s / $piping_plover_total_s);
 $piping_plover_validated = 100 * ($piping_plover_validated_s / $piping_plover_total_s);
+
+$grouse_belden_available_2013 = 100 * ($grouse_belden_processed_s_2013 / $grouse_belden_total_s_2013);
+$grouse_belden_validated_2013 = 100 * ($grouse_belden_validated_s_2013 / $grouse_belden_total_s_2013);
+$grouse_blaisdell_available_2013 = 100 * ($grouse_blaisdell_processed_s_2013 / $grouse_blaisdell_total_s_2013);
+$grouse_blaisdell_validated_2013 = 100 * ($grouse_blaisdell_validated_s_2013 / $grouse_blaisdell_total_s_2013);
 
 echo "var grouse_belden_total = $grouse_belden_total_s;\n";
 echo "var grouse_belden_processed = $grouse_belden_processed_s;\n";
@@ -94,6 +101,15 @@ echo "var least_tern_validated = $least_tern_validated_s;\n";
 echo "var piping_plover_total = $piping_plover_total_s;\n";
 echo "var piping_plover_processed = $piping_plover_processed_s;\n";
 echo "var piping_plover_validated = $piping_plover_validated_s;\n";
+
+echo "var grouse_belden_total_2013 = $grouse_belden_total_s_2013;\n";
+echo "var grouse_belden_processed_2013  = $grouse_belden_processed_s_2013;\n";
+echo "var grouse_belden_validated_2013  = $grouse_belden_validated_s_2013;\n";
+
+echo "var grouse_blaisdell_total_2013  = $grouse_blaisdell_total_s_2013;\n";
+echo "var grouse_blaisdell_processed_2013  = $grouse_blaisdell_processed_s_2013;\n";
+echo "var grouse_blaisdell_validated_2013  = $grouse_blaisdell_validated_s_2013;\n";
+
 
 echo "</script>
 
@@ -134,7 +150,7 @@ echo "
         <div class='container'>
             <div class='row-fluid'>
                 <div class='span12'>
-                <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is also a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>. 
+                <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>, and you can go over the observations for videos you've already watched <a href='http://volunteer.cs.und.edu/wildlife/user_video_list.php'>here</a>. 
                 </div>
             </div>
         </div>
@@ -156,24 +172,29 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
                                     'site_name' => 'Belden, ND',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'grouse_belden_progress',
                                     'site_description' => 'Cameras were placed at grouse nests in areas of intense gas and oil development.',
                                     'site_id' => '1',
                                     'validated_percentage' => $grouse_belden_validated,
                                     'available_percentage' => $grouse_belden_available - $grouse_belden_validated
                                 ), 
+
                                 array (
                                     'enabled' => ($grouse_blaisdell_available > 0),
                                     'site_name' => 'Blaisdell, ND',
+                                    'year' => '2012-2013',
                                     'progress_id' => 'grouse_blaisdell_progress',
                                     'site_description' => 'Cameras were placed at grouse nests in areas of low intensity of gas and oil development.',
                                     'site_id' => '2',
                                     'validated_percentage' => $grouse_blaisdell_validated,
                                     'available_percentage' => $grouse_blaisdell_available - $grouse_blaisdell_validated
                                 ), 
+
                                 array (
                                     'enabled' => ($grouse_lostwood_available > 0),
                                     'site_name' => 'Lostwood Wildlife Refuge, ND',
+                                    'year' => '2012',
                                     'progress_id' => 'grouse_lostwood_progress',
                                     'site_description' => 'Cameras were placed at grouse nests in this National Wildlife Refuge, representing a historic grassland.',
                                     'site_id' => '3',
@@ -193,6 +214,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($least_tern_available > 0),
                                     'site_name' => 'Missouri River, ND',
+                                    'year' => '2012',
                                     'progress_id' => 'least_tern_progress',
                                     'site_description' => 'Cameras were placed at least tern nests along the Missouri River in western North Dakota.',
                                     'site_id' => '4',
@@ -212,6 +234,7 @@ $thumbnails = array('thumbnail_list' => array(
                                 array (
                                     'enabled' => ($piping_plover_available > 0),
                                     'site_name' => 'Missouri River, ND',
+                                    'year' => '2012',
                                     'progress_id' => 'piping_plover_progress',
                                     'site_description' => 'Cameras were placed at piping plover nests along the Missouri River in western North Dakota.',
                                     'site_id' => '4',
