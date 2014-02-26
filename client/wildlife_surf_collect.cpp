@@ -50,10 +50,14 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 /****** END PROTOTYPES ******/
 
+static const char *EXTRACTORS[] = {"Opponent"};
+static const char *DETECOTRS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
+static const char *MATCHERS[] = {"FlannBased", "BruteForce", "BruteForce-SL2", "BruteForce-L1", "BruteForce-Hamming", "BruteForce-HammingLUT", "BruteForce-Hamming(2)"};
 static int  minHessian = 400;
 static double flannThreshold = 3.5;
 static bool removeWatermark = true;
 static bool removeTimestamp = true;
+static int descMatcher = 1;
 static string vidFilename, configFilename, descFilename;
 static string vidName;
 
@@ -76,8 +80,9 @@ int main(int argc, char **argv) {
     cerr << "Vid file: " << vidFilename.c_str() << endl;
     cerr << "Vid name: " << vidName.c_str() << endl;
     cerr << "Config file: " << configFilename.c_str() << endl;
+    cerr << "Matcher: " << MATCHERS[descMatcher] << endl;
     cerr << "Min Hessian: " << minHessian << endl;
-    cerr << "Flann Threshold: " << flannThreshold << " * standard deviation" << endl;
+    cerr << "Threshold: " << flannThreshold << " * standard deviation" << endl;
 
 #ifdef _BOINC_APP_
     cout << "Boinc enabled." << endl;
@@ -150,14 +155,14 @@ int main(int argc, char **argv) {
             vidTime++; //Increment video time every 10 frames.
         }
 
-        SurfFeatureDetector detector(minHessian);
+        Ptr<FeatureDetector> detector = new SurfFeatureDetector(minHessian);
         vector<KeyPoint> frameKeypoints;
         Mat mask = vidType.getMask();
-        detector.detect(frame, frameKeypoints, mask);
+        detector->detect(frame, frameKeypoints, mask);
 
-        SurfDescriptorExtractor extractor;
+        Ptr<DescriptorExtractor> extractor = new SurfDescriptorExtractor();
         Mat frameDescriptors;
-        extractor.compute(frame, frameKeypoints, frameDescriptors);
+        extractor->compute(frame, frameKeypoints, frameDescriptors);
 
         // Add distinct descriptors and keypoints to active events.
         int activeEvents = 0;
@@ -169,9 +174,9 @@ int main(int argc, char **argv) {
                     (*it)->addKeypoints(frameKeypoints);
                 } else {
                     // Find Matches
-                    FlannBasedMatcher matcher;
+                    Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(MATCHERS[descMatcher]);
                     vector<DMatch> matches;
-                    matcher.match(frameDescriptors, (*it)->getDescriptors(), matches);
+                    matcher->match(frameDescriptors, (*it)->getDescriptors(), matches);
 
                     double totalDist = 0;
                     double maxDist = 0;
@@ -398,6 +403,8 @@ bool readParams(int argc, char** argv) {
                 if(i+1 < argc) configFilename = argv[++i];
             } else if(string(argv[i]) == "--desc" || string(argv[i]) == "-d") {
                 if(i+1 < argc) descFilename = argv[++i];
+            } else if(string(argv[i]) == "--matcher" || string(argv[i]) == "-m") {
+                if(i+1 < argc) descMatcher = atoi(argv[++i]);
             } else if(string(argv[i]) == "--hessian" || string(argv[i]) == "-h") {
                 if(i+1 < argc) minHessian = atoi(argv[++i]);
             } else if(string(argv[i]) == "--threshold" || string(argv[i]) == "-t") {
@@ -419,5 +426,5 @@ bool readParams(int argc, char** argv) {
 // TODO This should be genereated automatically somehow... probably from the
 // readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_collect -v <video> -c <config> [-d <descriptor output>] [-f <feature output>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
+	cout << "Usage: wildlife_collect -v <video> -c <config> [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 }
