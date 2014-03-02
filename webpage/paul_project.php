@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd = dirname($cwd);
 
 require_once($cwd . "/navbar.php");
 require_once($cwd . "/footer.php");
@@ -62,17 +62,17 @@ echo "
             <section id='figures' class='well'>
                 <div class='row-fluid'>
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/paul_project_map.png'></img>
+                        <img style='width:100%;' src='images/paul_project_map.png'></img>
                         <p>FIGURE NEEDS A CAPTION.</p>
                     </div>
 
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/paul_project_tag.png'></img>
+                        <img style='width:100%;' src='images/paul_project_tag.png'></img>
                         <p>FIGURE NEEDS A CAPTION.</p>
                     </div>
 
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/paul_project_coyote.png'></img>
+                        <img style='width:100%;' src='images/paul_project_coyote.png'></img>
                         <p>FIGURE NEEDS A CAPTION.</p>
                     </div>
                 </div>
@@ -104,12 +104,12 @@ echo "
             <section id='figures2' class='well'>
                 <div class='row-fluid'>
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/paul_project_release.png'></img>
+                        <img style='width:100%;' src='images/paul_project_release.png'></img>
                         <p>FIGURE NEEDS A CAPTION.</p>
                     </div>
 
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/paul_project_tracking.png'></img>
+                        <img style='width:100%;' src='images/paul_project_tracking.png'></img>
                         <p>FIGURE NEEDS A CAPTION.</p>
                     </div>
 

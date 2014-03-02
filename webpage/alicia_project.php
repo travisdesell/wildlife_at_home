@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd = dirname($cwd);
 
 require_once($cwd . "/navbar.php");
 require_once($cwd . "/footer.php");
@@ -15,7 +15,7 @@ $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 echo "
 <html>
 <head>
-<title>UND Wildlife@Home: THIS PROJECT NEEDS A TITLE</title>
+<title>UND Wildlife@Home: Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</title>
 
 <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
@@ -55,24 +55,24 @@ echo "
         <div class='span12'>
             <section id='title' class='well'>
                 <div class='page-header'>
-                <h2>THIS PROJECT NEEDS A TITLE <small>by Alicia Andes</small></h2>
+                <h2>Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics <small>by Alicia Andes</small></h2>
                 </div>
             </section>
 
             <section id='figures' class='well'>
                 <div class='row-fluid'>
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/alicia_plover_adult.png'></img>
+                        <img style='width:100%;' src='images/alicia_plover_adult.png'></img>
                         <p>A piping plover adult.</p>
                     </div>
 
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/alicia_plover_tern_habitat.png'></img>
+                        <img style='width:100%;' src='images/alicia_plover_tern_habitat.png'></img>
                         <p>A suitable nesting habitat for Least Terns and Piping Plovers on the Upper Missouri River.</p>
                     </div>
 
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/alicia_tern_chicks_eggs.png'></img>
+                        <img style='width:100%;' src='images/alicia_tern_chicks_eggs.png'></img>
                         <p>Two newly hatched Least Tern chicks and one egg in a nest bowl.</p>
                     </div>
                 </div>

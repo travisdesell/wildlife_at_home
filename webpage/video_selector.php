@@ -191,7 +191,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Interior Least Tern',
                             'species_id' => '2',
                             'species_latin_name' => 'Sternula antillarum',
-                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="http://volunteer.cs.und.edu/wildlife/alpha/alicia_project.php">NEEDS A TITLE</a></li></ul></p>',
+                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="http://volunteer.cs.und.edu/wildlife/alpha/alicia_project.php">Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($least_tern_available > 0),
@@ -212,7 +212,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_id' => '3',
                             'species_latin_name' => 'Charadrius melodus',
                             'info_webpage' => 'piping_plover_info.php',
-                            'project_description' => '<p>Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="http://volunteer.cs.und.edu/wildlife/alpha/alicia_project.php">NEEDS A TITLE</a></li></ul></p>',
+                            'project_description' => '<p>Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="http://volunteer.cs.und.edu/wildlife/alpha/alicia_project.php">Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($piping_plover_available > 0),

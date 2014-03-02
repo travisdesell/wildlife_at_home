@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd = dirname($cwd);
 
 require_once($cwd . "/navbar.php");
 require_once($cwd . "/footer.php");
@@ -80,7 +80,7 @@ echo "
 
             <section id='distribution' class='well'>
                 <div class='row-fluid'>
-                    <img class='span4' src='../images/BirdsOfNorthAmericaOnline_Distribution.png'></img>
+                    <img class='span4' src='images/BirdsOfNorthAmericaOnline_Distribution.png'></img>
 
                     <div class='span8'>
                         <div class='page-header'>
