@@ -2,7 +2,7 @@
 
 $cwd = __FILE__;
 if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd = dirname($cwd);
 
 require_once($cwd . "/navbar.php");
 require_once($cwd . "/footer.php");
@@ -62,16 +62,16 @@ echo "
             <section id='figures' class='well'>
                 <div class='row-fluid'>
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/becca_grouse_morning_recess.png'></img>
+                        <img style='width:100%;' src='images/becca_grouse_morning_recess.png'></img>
                         <p>Hen leaving the nest for morning recess.  Notice that both the radio collar and leg band are visible.  The band gives the bird a unique identifying number, and the collar sends out a signal allowing researchers to locate her using radio telemetry.</p>
                     </div>
 
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/becca_grouse_inspection.png'></img>
+                        <img style='width:100%;' src='images/becca_grouse_inspection.png'></img>
                         <p>Hen visually inspecting the camera.</p>
                     </div>
                     <div class='span4'>
-                        <img style='width:100%;' src='../images/becca_grouse_nest_defense.png'></img>
+                        <img style='width:100%;' src='images/becca_grouse_nest_defense.png'></img>
                         <p>Hen posturing, a behavior associated with nest defense.  The arrow points out the upright and pointed position of her tail, which gave the bird its common name.</p>
                     </div>
                 </div>
