@@ -1,23 +1,18 @@
-#include <cmath>
-#include <cstdio>
-#include <fstream>
 #include <iostream>
-#include <algorithm>
-#include <iomanip>
+using std::cerr;
+using std::cout;
+using std::endl;
+
+#include <vector>
+using std::vector;
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/features2d.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/legacy/legacy.hpp>
+using cv::Mat;
 
-#include <opencv2/core/types_c.h>
-#include <opencv2/imgproc/imgproc_c.h>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/core_c.h>
-#include <opencv2/highgui/highgui_c.h>
+#include <opencv2/features2d/features2d.hpp>
+using cv::KeyPoint;
+
+#include "file_io.hpp"
 
 using namespace std;
 using namespace cv;
@@ -28,17 +23,6 @@ int currentFrame = 0;
 void printUsage(char *binary_name) {
     cerr << "Usage:" << endl;
     cerr << "\t" << binary_name << " <feature file 1> <feature file 2> <outfile>" << endl;
-}
-
-void read_descriptors_and_keypoints(FileStorage &infile, string filename, Mat &descriptors, vector<KeyPoint> &keypoints) {
-    if (infile.isOpened()) {
-        read(infile["common_descriptors"], descriptors);
-        read(infile["common_keypoints"], keypoints);
-        infile.release();
-    } else {
-        cout << "Could not open '" << filename << "' for reading." << endl;
-        exit(-1);
-    }
 }
 
 int main(int argc, char **argv) {
@@ -54,13 +38,11 @@ int main(int argc, char **argv) {
     string presence_filename = string(argv[2]);
     string output_filename = string(argv[3]);
 
-    FileStorage absence_file(absence_filename, FileStorage::READ);
-    read_descriptors_and_keypoints(absence_file, absence_filename, absence_descriptors, absence_keypoints);
+    read_descriptors_and_keypoints(absence_filename, absence_descriptors, absence_keypoints);
     cout << "absence_descriptors: " << absence_descriptors.size() << endl;
     cout << "absence_keypoints: " << absence_keypoints.size() << endl;
 
-    FileStorage presence_file(presence_filename, FileStorage::READ);
-    read_descriptors_and_keypoints(presence_file, presence_filename, presence_descriptors, presence_keypoints);
+    read_descriptors_and_keypoints(presence_filename, presence_descriptors, presence_keypoints);
     cout << "presence_descriptors: " << presence_descriptors.size() << endl;
     cout << "presence_keypoints: " << presence_keypoints.size() << endl;
 
