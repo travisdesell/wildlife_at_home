@@ -43,3 +43,7 @@ target_link_libraries(wildlife_feature_extractor ${Boost_SYSTEM_LIBRARY} ${Boost
 add_executable(wildlife_feature_comparison wildlife_feature_comparison)
 target_link_libraries(wildlife_feature_comparison ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
 
+add_executable(wildlife_feature_matcher wildlife_feature_matcher file_io)
+target_link_libraries(wildlife_feature_matcher ${Boost_SYSTEM_LIBRARY} ${Boost_THREAD_LIBRARY} pthread ${OpenCV_LIBRARIES} ${BOINC_APP_LIBRARIES})
+
+
