@@ -30,7 +30,18 @@ SurfDescriptorExtractor extractor;
 
 void printUsage(char *binary_name) {
     cerr << "Usage:" << endl;
-    cerr << "\t" << binary_name << " <feature detection algorithm = [SURF | SIFT]> <species = [tern | plover | grouse]> <video file>" << endl;
+    cerr << "\t" << binary_name << " <species = [tern | plover | grouse]> <video file> <features file>" << endl;
+}
+
+void read_descriptors_and_keypoints(FileStorage &infile, string filename, Mat &descriptors, vector<KeyPoint> &keypoints) {
+    if (infile.isOpened()) {
+        read(infile["unmatched_descriptors"], descriptors);
+        read(infile["unmatched_keypoints"], keypoints);
+        infile.release();
+    } else {
+        cout << "Could not open '" << filename << "' for reading." << endl;
+        exit(-1);
+    }   
 }
 
 
@@ -55,19 +66,17 @@ void get_keypoints_and_descriptors(const Mat &frame, Mat &descriptors, vector<Ke
 }
 
 int main(int argc, char **argv) {
-    if (argc != 5) {
+    if (argc != 4) {
         printUsage(argv[0]);
         return 1;
     }
 
-    Rect finalRect;
-    vector<cv::Rect> boundingRects;
     vector<Point2f> tlPoints;
     vector<Point2f> brPoints;
 
-    string species = string(argv[2]);
-    string video_filename = string(argv[3]);
-    string output_filename = string(argv[4]);
+    string species = string(argv[1]);
+    string video_filename = string(argv[2]);
+    string feature_filename = string(argv[3]);
 
     int remove_rect_1_x1, remove_rect_1_x2;
     int remove_rect_1_y1, remove_rect_1_y2;
@@ -130,33 +139,15 @@ int main(int argc, char **argv) {
 
     long start_time = time(NULL);
 
-    vector<KeyPoint> common_keypoints, common_keypoints_temp;
-    Mat common_descriptors, common_descriptors_temp;
+    vector<KeyPoint> target_keypoints;
+    Mat target_descriptors;
 
-    Mat frame(cvarrToMat(cvQueryFrame(capture)));
-    current_frame = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
+    FileStorage feature_file(feature_filename, FileStorage::READ);
+    read_descriptors_and_keypoints(feature_file, feature_filename, target_descriptors, target_keypoints);
 
-    get_keypoints_and_descriptors(frame, common_descriptors, common_keypoints);
+    cout << "target_keypoints.size(): " << target_keypoints.size() << endl;
 
-    /**
-     *  Ignore all keypoints in the rectangle around the changing date/time
-     */
-    for (int i = 0; i < common_keypoints.size(); i++) {
-        int x = common_keypoints[i].pt.x;
-        int y = common_keypoints[i].pt.y;
-
-        if ( !(x >= remove_rect_1_x1 && x <= remove_rect_1_x2 && y >= remove_rect_1_y1 && y <= remove_rect_1_y2) &&
-             !(x >= remove_rect_2_x1 && x <= remove_rect_2_x2 && y >= remove_rect_2_y1 && y <= remove_rect_2_y2)
-           ) {
-            common_keypoints_temp.push_back( common_keypoints[i]);
-            common_descriptors_temp.push_back( common_descriptors.row(i) );
-        } else {
-            //            cout << "rejected: " << x << ", " << y << endl;
-        }
-    }
-
-    common_keypoints = common_keypoints_temp;
-    common_descriptors = common_descriptors_temp;
+    current_frame = 0;
 
     while (current_frame < total_frames) {
         if (current_frame % 100 == 0) {
@@ -167,111 +158,66 @@ int main(int argc, char **argv) {
         Mat frame(cvarrToMat(cvQueryFrame(capture)));
         current_frame = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
 
-        vector<KeyPoint> frame_keypoints;
-        Mat frame_descriptors;
+        vector<KeyPoint> frame_keypoints, matched_keypoints;
+        Mat frame_descriptors, matched_descriptors;
 
         get_keypoints_and_descriptors(frame, frame_descriptors, frame_keypoints);
-
-        float min_desc_val = frame_descriptors.at<float>(0, 0);
-        float max_desc_val = frame_descriptors.at<float>(0, 0);
-
-        for (int i = 0; i < frame_descriptors.rows; i++) {
-            //cout << "\t\tframe_descriptors[" << i << "]: ";
-
-            for (int j = 0; j < frame_descriptors.cols; j++) {
-                if (frame_descriptors.at<float>(i, j) < min_desc_val) min_desc_val = frame_descriptors.at<float>(i, j);
-                if (frame_descriptors.at<float>(i, j) > max_desc_val) max_desc_val = frame_descriptors.at<float>(i, j);
-
-                //cout << " " << frame_descriptors.at<float>(i,j);
-            }
-
-            //cout << endl;
-        }
-//        cout << "\tframe_descriptors(" << frame_descriptors.rows << ", " << frame_descriptors.cols << "): min val: " << min_desc_val << ", max_val: " << max_desc_val << endl;
-//        cout << "\tframe_keypoints: " << frame_keypoints.size() << endl;
-
-        int added_keypoints = 0;
 
         float min_min_distance = 128.0;
         float max_min_distance = 0.0;
         float min_max_distance = 128.0;
         float max_max_distance = 0.0;
 
-        for (int i = 0; i < frame_descriptors.rows; i++) {
+        for (int i = 0; i < target_descriptors.rows; i++) {
             //get the minimum euclidian distance of each descriptor in the current frame from each common_descriptor
             float min_euclidian_distance = 128.0;
             float max_euclidian_distance = 0.0;
 
-            for (int j = 0; j < common_descriptors.rows; j++) {
+            for (int j = 0; j < frame_descriptors.rows; j++) {
                 float euclidian_distance = 0;
 
-                for (int k = 0; k < frame_descriptors.cols; k++) {
-                    float tmp = frame_descriptors.at<float>(i,k) - common_descriptors.at<float>(j,k);
+                for (int k = 0; k < target_descriptors.cols; k++) {
+                    float tmp = target_descriptors.at<float>(i,k) - frame_descriptors.at<float>(j,k);
                     min_euclidian_distance += tmp * tmp;
-                }
+                }   
                 euclidian_distance = sqrt(min_euclidian_distance);
 
                 if (euclidian_distance < min_euclidian_distance) min_euclidian_distance = euclidian_distance;
                 if (euclidian_distance > max_euclidian_distance) max_euclidian_distance = euclidian_distance;
-            }
+            }   
 
-//            cout << "\tmin_euclidian_distance[" << i << "]: " << min_euclidian_distance << ", max_euclidian_distance: " << max_euclidian_distance << endl;
+            cout << "\tmin_euclidian_distance[" << i << "]: " << min_euclidian_distance << ", max_euclidian_distance: " << max_euclidian_distance << endl;
 
             if (min_min_distance > min_euclidian_distance) min_min_distance = min_euclidian_distance;
             if (max_min_distance < min_euclidian_distance) max_min_distance = min_euclidian_distance;
             if (min_max_distance > max_euclidian_distance) min_max_distance = max_euclidian_distance;
             if (max_max_distance < max_euclidian_distance) max_max_distance = max_euclidian_distance;
 
-            if (min_euclidian_distance > 1.6) {
-                int x = frame_keypoints[i].pt.x;
-                int y = frame_keypoints[i].pt.y;
+            if (min_euclidian_distance <= 1.6) {
+                int x = target_keypoints[i].pt.x;
+                int y = target_keypoints[i].pt.y;
 
-                if ( !(x >= remove_rect_1_x1 && x <= remove_rect_1_x2 && y >= remove_rect_1_y1 && y <= remove_rect_1_y2) &&
-                     !(x >= remove_rect_2_x1 && x <= remove_rect_2_x2 && y >= remove_rect_2_y1 && y <= remove_rect_2_y2) ) {
-                    common_keypoints.push_back( frame_keypoints[i] );
-                    common_descriptors.push_back( frame_descriptors.row(i) );
-                    added_keypoints++;
-                } else {
-//                    cout << "discared keypoint in time rectangle." << endl;
-                }
-             }
-        }
-        cout << "size: " << common_keypoints.size() << ", min_min_distance: " << min_min_distance << ", max_min_distance: " << max_min_distance << ", min_max_distance: " << min_max_distance << ", max_max_distance: " << max_max_distance << ", added " << added_keypoints << " keypoints." << endl;
+                matched_keypoints.push_back( target_keypoints[i] );
+                matched_descriptors.push_back( target_descriptors.row(i) );
+
+                cout << "matched keypoint with x: " << x << ", y: " << y << endl;
+            }   
+        }   
 
 		// Code to draw the points.
-        Mat frame_with_keypoints_common;
-        Mat frame_with_keypoints_frame;
-        drawKeypoints(frame, common_keypoints, frame_with_keypoints_common, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
-        drawKeypoints(frame, frame_keypoints, frame_with_keypoints_frame, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
+        Mat frame_with_target_keypoints;
+        drawKeypoints(frame, matched_keypoints, frame_with_target_keypoints, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
-        rectangle(frame_with_keypoints_common, Point(remove_rect_1_x1, remove_rect_1_y1), Point(remove_rect_1_x2, remove_rect_1_y2), Scalar(0, 0, 255), 1, 8, 0);
-        rectangle(frame_with_keypoints_common, Point(remove_rect_2_x1, remove_rect_2_y1), Point(remove_rect_2_x2, remove_rect_2_y2), Scalar(0, 0, 255), 1, 8, 0);
+        rectangle(frame_with_target_keypoints,  Point(remove_rect_1_x1, remove_rect_1_y1), Point(remove_rect_1_x2, remove_rect_1_y2), Scalar(0, 0, 255), 1, 8, 0);
+        rectangle(frame_with_target_keypoints,  Point(remove_rect_2_x1, remove_rect_2_y1), Point(remove_rect_2_x2, remove_rect_2_y2), Scalar(0, 0, 255), 1, 8, 0);
 
-        rectangle(frame_with_keypoints_frame,  Point(remove_rect_1_x1, remove_rect_1_y1), Point(remove_rect_1_x2, remove_rect_1_y2), Scalar(0, 0, 255), 1, 8, 0);
-        rectangle(frame_with_keypoints_frame,  Point(remove_rect_2_x1, remove_rect_2_y1), Point(remove_rect_2_x2, remove_rect_2_y2), Scalar(0, 0, 255), 1, 8, 0);
-
-
-		imshow("SURF - Common", frame_with_keypoints_common);
-		imshow("SURF - Frame", frame_with_keypoints_frame);
-		if(cvWaitKey(15)==27) break;
+		imshow("SURF - Frame", frame_with_target_keypoints);
+		if(cvWaitKey(15) == 27) break;
 	}
 
     cvDestroyWindow("SURF");
 
     cvReleaseCapture(&capture);
-
-    FileStorage outfile(output_filename, FileStorage::WRITE);
-    if (outfile.isOpened()) {
-        outfile << "common_descriptors" << common_descriptors;
-        outfile << "common_keypoints" << common_keypoints;
-        outfile.release();
-    } else {
-        cout << "Could not open '" << output_filename << "' for writing." << endl;
-        exit(-1);
-    }
-
-    cout << "common descriptors: " << common_descriptors.size() << endl;
-    cout << "common keypoints: " << common_keypoints.size() << endl;
 
     return 0;
 }
