@@ -1,26 +1,38 @@
-#include <cmath>
-#include <cstdio>
-#include <fstream>
 #include <iostream>
-#include <algorithm>
-#include <iomanip>
+using std::cerr;
+using std::cout;
+using std::endl;
+
+#include <vector>
+using std::vector;
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/features2d.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
-#include <opencv2/legacy/legacy.hpp>
+using cv::cvarrToMat;
+using cv::Point;
+using cv::Point2f;
+using cv::Scalar;
 
-#include <opencv2/core/types_c.h>
-#include <opencv2/imgproc/imgproc_c.h>
 #include <opencv2/core/mat.hpp>
-#include <opencv2/core/core_c.h>
-#include <opencv2/highgui/highgui_c.h>
+using cv::Mat;
 
-using namespace std;
-using namespace cv;
+#include <opencv2/features2d/features2d.hpp>
+using cv::KeyPoint;
+using cv::DrawMatchesFlags;
+
+#include <opencv2/highgui/highgui.hpp>
+/**
+ *  includes:
+ *      CvCapture
+ *      cvDestroyWindow
+ */
+
+#include <opencv2/nonfree/features2d.hpp>
+using cv::SurfFeatureDetector;
+using cv::SurfDescriptorExtractor;
+
+
+
+#include "file_io.hpp"
 
 int minHessian = 400;
 int currentFrame = 0;
@@ -32,18 +44,6 @@ void printUsage(char *binary_name) {
     cerr << "Usage:" << endl;
     cerr << "\t" << binary_name << " <species = [tern | plover | grouse]> <video file> <features file>" << endl;
 }
-
-void read_descriptors_and_keypoints(FileStorage &infile, string filename, Mat &descriptors, vector<KeyPoint> &keypoints) {
-    if (infile.isOpened()) {
-        read(infile["unmatched_descriptors"], descriptors);
-        read(infile["unmatched_keypoints"], keypoints);
-        infile.release();
-    } else {
-        cout << "Could not open '" << filename << "' for reading." << endl;
-        exit(-1);
-    }   
-}
-
 
 void get_keypoints_and_descriptors(const Mat &frame, Mat &descriptors, vector<KeyPoint> &keypoints) {
     detector.detect(frame, keypoints);
@@ -142,8 +142,7 @@ int main(int argc, char **argv) {
     vector<KeyPoint> target_keypoints;
     Mat target_descriptors;
 
-    FileStorage feature_file(feature_filename, FileStorage::READ);
-    read_descriptors_and_keypoints(feature_file, feature_filename, target_descriptors, target_keypoints);
+    read_descriptors_and_keypoints(feature_filename, target_descriptors, target_keypoints);
 
     cout << "target_keypoints.size(): " << target_keypoints.size() << endl;
 
