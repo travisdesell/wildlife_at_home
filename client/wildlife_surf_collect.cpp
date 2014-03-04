@@ -134,8 +134,10 @@ int main(int argc, char **argv) {
     cerr << "Frame Count: '" << total << "'" << endl;
 
     while(framePos/total < 1.0) {
+        double fraction_done = (double)framePos/total;
+        cerr << "Fraction done: " << fraction_done << endl;
 #ifdef _BOINC_APP_
-        boinc_fraction_done((double)framePos/total);
+        boinc_fraction_done(fraction_done);
 #ifdef GUI
         int key = waitKey(1);
 #endif
