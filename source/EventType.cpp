@@ -63,9 +63,16 @@ void EventType::read(cv::FileStorage infile) throw(runtime_error) {
     }
 }
 
-void EventType::write(cv::FileStorage outfile) throw(runtime_error) {
+void EventType::writeDescriptors(cv::FileStorage outfile) throw(runtime_error) {
     if(outfile.isOpened()) {
         outfile << getId() + "_desc" << getDescriptors();
+    } else {
+        throw runtime_error("File is not open for writing");
+    }
+}
+
+void EventType::writeKeypoints(cv::FileStorage outfile) throw(runtime_error) {
+    if(outfile.isOpened()) {
         outfile << getId() + "_pts" << getKeypoints();
     } else {
         throw runtime_error("File is not open for writing");
