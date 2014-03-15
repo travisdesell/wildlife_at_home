@@ -53,6 +53,69 @@ function enable_next_video_buttons() {
     });
 }
 
+function initialize_speed_buttons() {
+    $('.fast-backward-button').click(function() {
+        var video_id = $(this).attr('video_id');
+        var video = $('#wildlife-video-' + video_id).get(0);
+        var rate = video.playbackRate;
+
+        if (rate === -16.0)         rate = -16.0;
+        else if (rate === -12.0)    rate = -16.0; 
+        else if (rate === -10.0)    rate = -12.0;
+        else if (rate === -8.0)     rate = -10.0;
+        else if (rate === -6.0)     rate = -8.0;
+        else if (rate === -4.0)     rate = -6.0;
+        else if (rate === -2.0)     rate = -4.0;
+        else if (rate === -1.0)     rate = -2.0;
+        else if (rate === 1.0)      rate = -1.0;
+        else if (rate === 2.0)      rate = 1.0; 
+        else if (rate === 4.0)      rate = 2.0;
+        else if (rate === 6.0)      rate = 4.0;
+        else if (rate === 8.0)      rate = 6.0;
+        else if (rate === 10.0)     rate = 8.0;
+        else if (rate === 12.0)     rate = 10.0;
+        else if (rate === 16.0)     rate = 12.0;
+        else rate = -1.0;
+
+        video.playbackRate = rate;
+
+        //console.log("clicking fast backward!, playback rate: " + video.playbackRate);
+
+        $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
+    });
+
+    $('.fast-forward-button').click(function() {
+        var video_id = $(this).attr('video_id');
+        var video = $('#wildlife-video-' + video_id).get(0);
+        var rate = video.playbackRate;
+
+        if (rate === -16.0)         rate = -12.0;
+        else if (rate === -12.0)    rate = -10.0; 
+        else if (rate === -10.0)    rate = -8.0;
+        else if (rate === -8.0)     rate = -6.0;
+        else if (rate === -6.0)     rate = -4.0;
+        else if (rate === -4.0)     rate = -2.0;
+        else if (rate === -2.0)     rate = -1.0;
+        else if (rate === -1.0)     rate = 1.0;
+        else if (rate === 1.0)      rate = 2.0;
+        else if (rate === 2.0)      rate = 4.0; 
+        else if (rate === 4.0)      rate = 6.0;
+        else if (rate === 6.0)      rate = 8.0;
+        else if (rate === 8.0)      rate = 10.0;
+        else if (rate === 10.0)     rate = 12.0;
+        else if (rate === 12.0)     rate = 16.0;
+        else if (rate === 16.0)     rate = 16.0;
+        else rate = 1.0;
+
+        video.playbackRate = rate;
+
+        //console.log("clicking fast forward!, playback rate: " + video.playbackRate);
+
+        $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
+    });
+}
+
+
 function initialize_event_list() {
     $('.event-list-div').each(function() {
         var video_id = $(this).attr("video_id");
@@ -66,6 +129,7 @@ function initialize_event_list() {
                 $("#event-list-div-" + video_id).html( response['html'] );
 
                 enable_observation_table();
+                initialize_speed_buttons();
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -540,67 +604,8 @@ function enable_observation_table() {
 
 $(document).ready(function () {
 //    console.log("start_time: " + start_time);
-    $('.fast-backward-button').click(function() {
-        var video_id = $(this).attr('video_id');
-        var video = $('#wildlife-video-' + video_id).get(0);
-        var rate = video.playbackRate;
-
-        if (rate === -16.0)         rate = -16.0;
-        else if (rate === -12.0)    rate = -16.0; 
-        else if (rate === -10.0)    rate = -12.0;
-        else if (rate === -8.0)     rate = -10.0;
-        else if (rate === -6.0)     rate = -8.0;
-        else if (rate === -4.0)     rate = -6.0;
-        else if (rate === -2.0)     rate = -4.0;
-        else if (rate === -1.0)     rate = -2.0;
-        else if (rate === 1.0)      rate = -1.0;
-        else if (rate === 2.0)      rate = 1.0; 
-        else if (rate === 4.0)      rate = 2.0;
-        else if (rate === 6.0)      rate = 4.0;
-        else if (rate === 8.0)      rate = 6.0;
-        else if (rate === 10.0)     rate = 8.0;
-        else if (rate === 12.0)     rate = 10.0;
-        else if (rate === 16.0)     rate = 12.0;
-        else rate = -1.0;
-
-        video.playbackRate = rate;
-
-        //console.log("clicking fast backward!, playback rate: " + video.playbackRate);
-
-        $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
-    });
-
-    $('.fast-forward-button').click(function() {
-        var video_id = $(this).attr('video_id');
-        var video = $('#wildlife-video-' + video_id).get(0);
-        var rate = video.playbackRate;
-
-        if (rate === -16.0)         rate = -12.0;
-        else if (rate === -12.0)    rate = -10.0; 
-        else if (rate === -10.0)    rate = -8.0;
-        else if (rate === -8.0)     rate = -6.0;
-        else if (rate === -6.0)     rate = -4.0;
-        else if (rate === -4.0)     rate = -2.0;
-        else if (rate === -2.0)     rate = -1.0;
-        else if (rate === -1.0)     rate = 1.0;
-        else if (rate === 1.0)      rate = 2.0;
-        else if (rate === 2.0)      rate = 4.0; 
-        else if (rate === 4.0)      rate = 6.0;
-        else if (rate === 6.0)      rate = 8.0;
-        else if (rate === 8.0)      rate = 10.0;
-        else if (rate === 10.0)     rate = 12.0;
-        else if (rate === 12.0)     rate = 16.0;
-        else if (rate === 16.0)     rate = 16.0;
-        else rate = 1.0;
-
-        video.playbackRate = rate;
-
-        //console.log("clicking fast forward!, playback rate: " + video.playbackRate);
-
-        $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
-    });
-
     initialize_event_list();
+    initialize_speed_buttons();
     enable_observation_table();
 
 
