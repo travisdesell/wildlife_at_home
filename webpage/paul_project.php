@@ -63,17 +63,17 @@ echo "
                 <div class='row-fluid'>
                     <div class='span4'>
                         <img style='width:100%;' src='images/paul_project_map.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
+                        <p>Belden and Blaisdell study sites located in Mountrail county, ND. Active oil wells are shown with red dots.</p>
                     </div>
 
                     <div class='span4'>
                         <img style='width:100%;' src='images/paul_project_tag.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
+                        <p>Female sharp-tailed grouse being fitted with a radio collar so we can monitor her activities during the nesting season.</p>
                     </div>
 
                     <div class='span4'>
                         <img style='width:100%;' src='images/paul_project_coyote.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
+                        <p>Photo captured of a coyote by a trail camera during one of our predator surveys.</p>
                     </div>
                 </div>
             </section>
@@ -105,12 +105,12 @@ echo "
                 <div class='row-fluid'>
                     <div class='span4'>
                         <img style='width:100%;' src='images/paul_project_release.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
+                        <p>Female sharp-tailed grouse being flushed from her nest using radio telemetry.</p>
                     </div>
 
                     <div class='span4'>
                         <img style='width:100%;' src='images/paul_project_tracking.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
+                        <p>Installation of a camera on a sharp-tailed grouse nest.</p>
                     </div>
 
                 </div>
