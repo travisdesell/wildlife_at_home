@@ -158,16 +158,19 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
             return retval;
         }
 
-        FileStorage fs(fi.path.c_str(), FileStorage::READ);
+        FileStorage infile(fi.path.c_str(), FileStorage::READ);
         for (unsigned int i=0; i<event_names.size(); i++) {
             EventType *temp = new EventType(event_names[i]);
-            Mat descriptors;
-            fs[event_names[i]] >> descriptors;
-            temp->addDescriptors(descriptors);
+            try {
+                temp->read(infile);
+                log_messages.printf(MSG_DEBUG, "wildlife_surf_collect_assimilation_policy: Read in %d, descriptors.\n", temp->getDescriptors().rows);
+            } catch(const exception &ex) {
+                log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy get_data_from_result([RESULT#%d %s) failed with error: %s\n", canonical_result.id, canonical_result.name, ex.what());
+                return 1;
+            }
             event_types.push_back(temp);
         }
-
-        fs.release();
+        infile.release();
     } catch (string error_message) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", canonical_result.id, canonical_result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", canonical_result.stderr_out);
@@ -239,7 +242,14 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
         cerr << "Writing to: " <<  full_filename << endl;
         FileStorage outfile(full_filename, FileStorage::WRITE);
         cerr << "Write: " << (*it)->getId().c_str() << endl;
-        (*it)->write(outfile);
+        try {
+            log_messages.printf(MSG_DEBUG, "wildlife_surf_collect_assimilation_policy: Write out %d, descriptors.\n", (*it)->getDescriptors().rows);
+            (*it)->writeDescriptors(outfile);
+            //(*it)->writeKeypoints(outfile);
+        } catch(const exception &ex) {
+            log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy write_reslts([RESULT#%d %s) failed with error: %s\n", canonical_result.id, canonical_result.name, ex.what());
+            return 1;
+        }
         outfile.release();
     }
     return 0;
