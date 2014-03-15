@@ -15,7 +15,7 @@ $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 echo "
 <html>
 <head>
-<title>UND Wildlife@Home: Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</title>
+<title>UND Wildlife@Home: Publications and Presentations</title>
 
 <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
@@ -53,66 +53,82 @@ echo "
 <div class='container'>
     <div class='row-fluid'>
         <div class='span12'>
-            <section id='title' class='well'>
-                <div class='page-header'>
-                <h2>Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota <small>by Paul Burr</small></h2>
-                </div>
-            </section>
-
-            <section id='figures' class='well'>
-                <div class='row-fluid'>
-                    <div class='span4'>
-                        <img style='width:100%;' src='images/paul_project_map.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
-                    </div>
-
-                    <div class='span4'>
-                        <img style='width:100%;' src='images/paul_project_tag.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
-                    </div>
-
-                    <div class='span4'>
-                        <img style='width:100%;' src='images/paul_project_coyote.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id='text' class='well'>
+            <section id='press' class='well'>
                 <div class='row-fluid'>
                     <div class='span12'>
-                        <p>
-                        Western North Dakota has been experiencing an extreme expansion of gas and oil development in recent years. Although this energy development aids in economic stability and creates jobs opportunities, it is also having major impacts on the environment. Through the construction of thousands of oil pads, the prairie ecosystem of western North Dakota is experiencing large scale changes. This same prairie habitat is home to the sharp-tailed grouse (<i>Tympanuchus phasianellus</i>), a popular game bird species that relies on large expanses of North Dakota's grasslands. The purpose of this study was to estimate differences in nest success of sharp-tailed grouse in an area of intense oil development compared to an area of minimal oil development. In addition, we also monitored the predator communities in both areas, as nest predation is the primary cause of nest failure for this species.
-                        </p>
+                        <h3>Press</h3>
 
-                        <p>
-                        We created two study sites in western North Dakota for this project. Our first site, Belden, is an area of intense energy development with numerous oil wells within and around its boundary. Our second site, Blaisdell, is an area of minimal energy development with only one oil well within and very few oil wells around its boundary. We trapped and radio collared female grouse at both sites during the breeding season of 2012 and 2013. These hens were tracked and their nests were monitored during the summer months. Some of these nests were also monitored using surveillance cameras to capture hen behaviors and nest depredations. 
-                        </p>
+                        <ul>
+                            <li><b>Watching Wildlife at Home</b>. <i>UND Arts and Sciences Feature</i>. <a href='http://arts-sciences.und.edu/features/2014/01/watching-wildlife.cfm'>[html]</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+                        
+            <section id='publications' class='well'>
+                <div class='row-fluid'>
+                    <div class='span12'>
+                        <h3>Journal Articles</h3>
 
-                        <p>
-                        During the same time we also conducted predator surveys using motion activated field cameras placed throughout each site. These surveys were implemented to determine relative differences in the predator community between the sites. Target predators included the coyote (<i>Canis latrans</i>), red fox (<i.Vulpes vulpes</i>), badger (<i>Taxidea taxus</i>), skunk (<i>Mephitis mephitis</i>), and raccoon (<i>Procyon lotor</i>).
-                        </p>
+                        <ul>
+                            <li>Susan N. Ellis-Felege, Travis Desell, Christopher J. Felege. </b>Wildlife@Home: Conservation Outreach using Nest Cameras, Citizen Science, and Computer Vision</b>. <i>Wildlife Professional</i>. To appear.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+                        
+            <section id='publications' class='well'>
+                <div class='row-fluid'>
+                    <div class='span12'>
 
-                        <p>
-                        In total we monitored have 163 sharp-tailed grouse nests between both sites during 2012 and 2013. Of these, 92 were also monitored using our surveillance cameras. Nest success was 62% at our Belden site (intense development), and only 45.2% at our Blaisdell site (minimal development). Badgers and skunks were found to be the primary nest predator, accounting for 56% of all recorded nest depredations. Predator surveys indicate that Blaisdell is 4.9 times more likely to be occupied by a nest predator suggesting a negative relationship between energy development and predator occurrence. These results reinforce our nest success findings, and illustrate the possible indirect influence of energy development on nest success through alterations of the local predator community. 
-                        </p>
+                        <h3>Conference Proceedings</h3>
+
+                        <ul>
+                            <li>Travis Desell, Robert Bergman, Kyle Goehner, Ronald Marsh, Rebecca VanderClute, and Susan Ellis-Felege. <b>Wildlife@Home: Combining Crowd Sourcing and Volunteer Computing to Analyze Avian Nesting Video</b>. <i>In the 2013 IEEE 9th International Conference on e-Science</i>. Beijing, China. October 23-25, 2013. <a href='http://people.cs.und.edu/~tdesell/papers/2013_escience_wildlife.pdf'>[pdf]</a></li>
+                        </ul>
 
                     </div>
                 </div>
             </section>
 
-            <section id='figures2' class='well'>
+            <section id='oral_presentations' class='well'>
                 <div class='row-fluid'>
-                    <div class='span4'>
-                        <img style='width:100%;' src='images/paul_project_release.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
-                    </div>
+                    <div class='span12'>
+                        <h3>Oral Presentations</h3>
 
-                    <div class='span4'>
-                        <img style='width:100%;' src='images/paul_project_tracking.png'></img>
-                        <p>FIGURE NEEDS A CAPTION.</p>
-                    </div>
+                        <ul>
+                            <li>Susan N. Ellis-Felege, Travis Desell, and Christopher J. Felege. <b>Wildlife@Home: conservation outreach using nest cameras, citizen science and computer vision</b>. <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <a href='publications/felege_conservation_outreach_talk.pdf'>[pdf]</a> </li>
 
+                            <li>Travis Desell, Robert Bergman, Kyle Goehner, Ronald Marsh, Rebecca VanderClute, and Susan Ellis-Felege. <b>Wildlife@Home: Combining Crowd Sourcing and Volunteer Computing to Analyze Avian Nesting Video</b>. <i>The 9th International Conference on E-Science (e-Science 2013)</i>. Beijing, China. October 23, 2013. <a href='http://people.cs.und.edu/~tdesell/talks/2013_october_23_escience/index.html'>[html]</a> </li>
+
+                            <li>Travis Desell and Susan N. Ellis-Felege. <b>Wildlife@Home</b>. <i>The 8th International BOINC Workshop</i>. University of Westminster, London, UK. September 27, 2012. <a href='http://people.cs.und.edu/~tdesell/talks/2012_boinc_workshop.ppt.zip'>[ppt]</a> <a href='http://people.cs.und.edu/~tdesell/talks/2012_boinc_workshop.key'>[keynote]</a> </li>
+
+                            <li>Travis Desell and Susan N. Ellis-Felege. <b>Wildlife@Home</b>. <i>The UND Digital Media Showcase</i>. Fire Hall Theatre, Grand Forks, North Dakota, USA. April 11, 2012. <a href='http://people.cs.und.edu/~tdesell/talks/2012_und_digital_media_showcase.ppt.zip'>[ppt]</a> <a href='http://people.cs.und.edu/~tdesell/talks/2012_und_digital_media_showcase.key'>[keynote]</a> </li>
+
+
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id='poster_presentations' class='well'>
+                <div class='row-fluid'>
+                    <div class='span12'>
+
+                        <h3>Poster Presentations</h3>
+                        <ul>
+                            <li>J. P. Johnson, Rebecca A. Eckroad,  Aaron C. Robinson, and Susan N. Ellis-Felege.  <b>Nest attendance patterns in sharp-tailed grouse in western North Dakota</b>.  <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <a href='publications/RecessPoster_NDCTWS2014_Finalpdf.pdf'>[pdf]</a> </li>
+
+                            <li>Rebecca A. Eckroad, Paul C. Burr, Aaron C. Robinson, and Susan N. Ellis-Felege. <b>Impact of camera installation on nesting sharp-tailed grouse (Tympanuchus phasianellus) behavior in western North Dakota</b>.  <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <a href='publications/Becca_ND_TWS2014_small.pdf'>[pdf]</a> </li>
+
+                            <li>Alicia K. Andes, Susan N. Ellis-Felege, Terry L. Shaffer, and Mark H. Sherfy.  <b>A video camera technique to monitor piping plover and least tern nests on the Missouri River in North Dakota</b>. <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <b>Won most outstanding student poster award</b>. <a href='publications/Andes_ND_TWS_Poster_2014_small.pdf'>[pdf]</a> </li>
+
+                            <li>Leila Mohsenian, Alicia K. Andes, and Susan N. Ellis-Felege. <b>The mysterious life of piping plovers: nesting behaviors of a threatened species</b>. <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <a href='publications/mysterious_life_poster.pdf'>[pdf]</a></li>
+
+                            <li>Julia P. Johnson, Rebecca A. Eckroad, Aaron C. Robinson, and Susan N. Ellis-Felege. <b>Nest attendance patterns in sharp-tailed grouse in western North Dakota</b>. <i>The Wildlife Society’s 20th Annual Conference</i>. 4 – 10 October 2013, Milwaukee, Wisconsin (Student- In- Progress Poster Presentation; won 2nd place in undergraduate presentation category).</li>
+                        </ul>
+
+                    </div>
                 </div>
             </section>
         </div>
