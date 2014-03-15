@@ -7,8 +7,7 @@ IF(OpenCV_DIR)
     MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 ELSE()
     IF(APPLE)
-        set(OpenCV_DIR ~/Dropbox/osx/opencv/share/OpenCV)
-        #set(OpenCV_DIR /usr/local/Cellar/opencv/2.4.7.1/share/OpenCV)
+        #set(OpenCV_DIR ~/Dropbox/osx/opencv/share/OpenCV)
     ELSEIF(WIN_32)
         set(OpenCV_DIR ~/Dropbox/Windows/opencv/build)
     ELSE()
@@ -19,8 +18,8 @@ ENDIF()
 
 IF(APPLE)
     MESSAGE(STATUS "Setting FLAGS for APPLE")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.4")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.4")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.5")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
 ELSEIF(UNIX)
@@ -34,9 +33,13 @@ ENDIF()
 # Executables
 #add_executable(wildlife_surf_collect wildlife_surf_collect)
 
-find_package(OpenCV REQUIRED COMPONENTS videostab nonfree)
+#find_package(OpenCV REQUIRED COMPONENTS nonfree core)
+find_package(OpenCV REQUIRED nonfree)
 find_package(BOINC REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system)
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+
 
 MESSAGE(STATUS "OpenCV Include Dirs: ${OpenCV_INCLUDE_DIRS}")
 MESSAGE(STATUS "OpenCV Libs: ${OpenCV_LIBS}")
@@ -56,9 +59,9 @@ target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
 
-#add_executable(wildlife_graphics_app wildlife_graphics_app)
-#include_directories (${PROJECT_SOURCE_DIR}/../include/ ${BOINC_INCLUDE_DIR})
-#target_link_libraries(wildlife_graphics_app ${BOINC_LIBRARIES} ${OpenCV_LIBS})
+add_executable(wildlife_graphics_app wildlife_graphics_app)
+#include_directories ("${PROJECT_SOURCE_DIR}/../include/" ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+target_link_libraries(wildlife_graphics_app ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 IF(Boost_FOUND AND NOT APPLE)
     add_executable(wildlife_surf_combine
