@@ -7,7 +7,7 @@ IF(OpenCV_DIR)
     MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 ELSE()
     IF(APPLE)
-        #set(OpenCV_DIR ~/Dropbox/osx/opencv/share/OpenCV)
+        set(OpenCV_DIR ~/Dropbox/osx/opencv/share/OpenCV)
     ELSEIF(WIN_32)
         set(OpenCV_DIR ~/Dropbox/Windows/opencv/build)
     ELSE()
@@ -51,7 +51,8 @@ add_executable(wildlife_surf_collect
     wildlife_surf_collect
     ../source/Event
     ../source/EventType
-    ../source/VideoType)
+    ../source/VideoType
+    ../source/boinc_utils)
 include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
 target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
 
@@ -60,7 +61,7 @@ target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES
 #target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
 
 add_executable(wildlife_graphics_app wildlife_graphics_app)
-#include_directories ("${PROJECT_SOURCE_DIR}/../include/" ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+include_directories ("${PROJECT_SOURCE_DIR}/../include/" ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 target_link_libraries(wildlife_graphics_app ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 IF(Boost_FOUND AND NOT APPLE)
