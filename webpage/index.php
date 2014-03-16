@@ -382,6 +382,10 @@ echo"
                         </li>
 
                         <li>
+                        Chris Felege, Educational Outreach Coordinator, Instructor of Biology, University of North Dakota 
+                        </li>
+
+                        <li>
                         Alicia Andes, Graduate Research Assistant in Biology, University of North Dakota
                         </li>
 
@@ -398,12 +402,17 @@ echo"
                         </li>
 
                         <li>
-                        Julia Johnson, Undergraduate Research Assistant in Biology, University of North Dakota
-                        </li>
-                        <li>
                         Leila Mohsenian, Undergraduate Research Assistant in Biology, University of North Dakota
                         </li>
 
+                        <li>
+                        Rebecca VanderClute, Undergraduate Research Assistant in Computer Science, University of North Dakota
+                        </li>
+                        </ul>
+
+                        With agency support from:
+
+                        <ul>
                         <li>
                         Aaron Robinson, North Dakota Game and Fish.
                         </li>
@@ -411,14 +420,12 @@ echo"
                         <li>
                         Terry Shaffer, U.S.G.S. Northern Prairie Wildlife Research Center.
                         </li>
+
                         <li>
                         Mark Sherfy, U.S.G.S. Northern Prairie Wildlife Research Center.
                         </li>
-
-                        <li>
-                        Rebecca VanderClute, Undergraduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
                         </ul>
+
 
                         With previous support from:
                         <ul>
@@ -428,6 +435,10 @@ echo"
 
                         <li>
                         Adam Pachl, Undergraduate Research Assistant in Biology, University of North Dakota
+                        </li>
+
+                        <li>
+                        Julia Johnson, Undergraduate Research Assistant in Biology, University of North Dakota
                         </li>
 
                         <li>
