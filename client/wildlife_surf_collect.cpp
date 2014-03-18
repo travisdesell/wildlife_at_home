@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sys/time.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -22,11 +23,13 @@
 #include "filesys.h"
 #include "boinc_api.h"
 #include "mfile.h"
+#include "graphics2.h"
 #endif
 
 #include "Event.hpp"
 #include "EventType.hpp"
 #include "VideoType.hpp"
+#include "boinc_utils.hpp"
 
 using namespace std;
 using namespace cv;
@@ -35,9 +38,8 @@ using namespace cv;
 
 void printUsage();
 bool readParams(int argc, char** argv);
-string getBoincFilename(string filename) throw(runtime_error);
-int timeToSeconds(string time);
-double standardDeviation(vector<DMatch> arr, double mean);
+void calculateFPS();
+void updateSHMEM();
 bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime);
 void writeMatrix(FileStorage outfile, string id, Mat matrix);
 Mat readMatrix(FileStorage infile, string id);
@@ -60,6 +62,15 @@ static bool removeTimestamp = true;
 static int descMatcher = 1;
 static string vidFilename, configFilename, descFilename;
 static string vidName;
+
+// SHMEM
+WILDLIFE_SHMEM* shmem = NULL;
+unsigned int currentTime = 0;
+unsigned int previousTime = 0;
+unsigned int frameCount = 0;
+unsigned int framePos;
+unsigned int totalFrames;
+double fps = 10;
 
 int main(int argc, char **argv) {
     if(!(numeric_limits<float>::is_iec559 || numeric_limits<double>::is_iec559)) {
@@ -120,8 +131,8 @@ int main(int argc, char **argv) {
 
     capture.set(CV_CAP_PROP_POS_FRAMES, checkpointFramePos);
 
-    int framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
-    int total = capture.get(CV_CAP_PROP_FRAME_COUNT);
+    framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+    totalFrames = capture.get(CV_CAP_PROP_FRAME_COUNT);
 
     int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -131,10 +142,18 @@ int main(int argc, char **argv) {
     cerr << "Config Filename: '" << configFilename.c_str() << "'" << endl;
     cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
     cerr << "Current Frame: '" << framePos << "'" << endl;
-    cerr << "Frame Count: '" << total << "'" << endl;
+    cerr << "Frame Count: '" << totalFrames << "'" << endl;
 
-    while(framePos/total < 1.0) {
-        double fraction_done = (double)framePos/total;
+    cerr << "Open SHMEM: " << endl;
+    shmem = (WILDLIFE_SHMEM*)boinc_graphics_make_shmem("wildlife_surf_collect", sizeof(WILDLIFE_SHMEM));
+    fill(shmem->filename, shmem->filename + sizeof(shmem->filename), 0);
+    memcpy(shmem->filename, vidFilename.c_str(), vidFilename.size());
+    updateSHMEM();
+    boinc_register_timer_callback(updateSHMEM);
+    cerr << "SHMEM opened." << endl;
+
+    while(framePos/totalFrames < 1.0) {
+        double fraction_done = (double)framePos/totalFrames;
         cerr << "Fraction done: " << fraction_done << endl;
 #ifdef _BOINC_APP_
         boinc_fraction_done(fraction_done);
@@ -150,6 +169,8 @@ int main(int argc, char **argv) {
         Mat frame;
         capture >> frame;
         framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+        calculateFPS();
+        //cout << "FPS: " << fps << endl;
 
         // TODO This should be in a setting file to allow for differnet frame
         // rates.
@@ -363,37 +384,30 @@ bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> 
     return true;
 }
 
-double standardDeviation(vector<DMatch> arr, double mean) {
-    double dev=0;
-    double inverse = 1.0 / static_cast<double>(arr.size());
-    for(unsigned int i=0; i<arr.size(); i++) {
-        dev += pow((double)arr[i].distance - mean, 2);
-    }
-    return sqrt(inverse * dev);
+void updateSHMEM() {
+    if(!shmem) return;
+    //cout << fixed << "Time: " << getTimeInSeconds() << endl;
+    shmem->update_time = getTimeInSeconds();
+    shmem->fraction_done = boinc_get_fraction_done();
+    shmem->cpu_time = boinc_worker_thread_cpu_time();
+    boinc_get_status(&shmem->status);
+    shmem->fps = fps;
+    shmem->frame = framePos;
 }
 
-int timeToSeconds(string time) {
-    vector<string> temp;
-    istringstream iss(time);
-    while(getline(iss, time, ':')) {
-        temp.push_back(time);
-    }
-    int seconds = 0;
-    seconds += atoi(temp[0].c_str())*3600;
-    seconds += atoi(temp[1].c_str())*60;
-    seconds += atoi(temp[2].c_str());
-    return seconds;
-}
+void calculateFPS() {
+    frameCount++;
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    currentTime = time.tv_sec * 1000000 + time.tv_usec;
+    if(previousTime == 0) previousTime = currentTime;
+    unsigned int timeInterval = currentTime - previousTime;
 
-string getBoincFilename(string filename) throw(runtime_error) {
-    string resolvedPath;
-#ifdef _BOINC_APP_
-    if(boinc_resolve_filename_s(filename.c_str(), resolvedPath)) {
-        cerr << "Could not resolve filename '" << filename.c_str() << "'" << endl;
-        throw runtime_error("Boinc could not resolve filename");
+    if(timeInterval > 1000000) {
+        fps = frameCount/(timeInterval/1000000.0);
+        previousTime = currentTime;
+        frameCount = 0;
     }
-#endif
-    return resolvedPath;
 }
 
 bool readParams(int argc, char** argv) {
