@@ -146,6 +146,9 @@ int main(int argc, char **argv) {
 
     cerr << "Open SHMEM: " << endl;
     shmem = (WILDLIFE_SHMEM*)boinc_graphics_make_shmem("wildlife_surf_collect", sizeof(WILDLIFE_SHMEM));
+    fill(shmem->filename, shmem->filename + sizeof(shmem->filename), 0);
+    memcpy(shmem->filename, vidFilename.c_str(), vidFilename.size());
+    updateSHMEM();
     boinc_register_timer_callback(updateSHMEM);
     cerr << "SHMEM opened." << endl;
 
@@ -382,13 +385,14 @@ bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> 
 }
 
 void updateSHMEM() {
+    if(!shmem) return;
+    //cout << fixed << "Time: " << getTimeInSeconds() << endl;
     shmem->update_time = getTimeInSeconds();
     shmem->fraction_done = boinc_get_fraction_done();
     shmem->cpu_time = boinc_worker_thread_cpu_time();
     boinc_get_status(&shmem->status);
     shmem->fps = fps;
     shmem->frame = framePos;
-    //shmem->filename =
 }
 
 void calculateFPS() {
