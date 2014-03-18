@@ -1,8 +1,3 @@
-#include <vector>
-#include <iostream>
-
-#include <opencv2/core/core.hpp>
-
 #include "VideoType.hpp"
 
 using namespace std;

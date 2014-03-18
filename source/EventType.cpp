@@ -1,10 +1,3 @@
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/nonfree/features2d.hpp>
-
 #include "EventType.hpp"
 
 // Accessors
@@ -62,10 +55,35 @@ void EventType::read(cv::FileStorage infile) throw(runtime_error) {
     }
 }
 
-void EventType::write(cv::FileStorage outfile) throw(runtime_error) {
+void EventType::writeDescriptors(cv::FileStorage outfile) throw(runtime_error) {
     if(outfile.isOpened()) {
         outfile << getId() + "_desc" << getDescriptors();
+    } else {
+        throw runtime_error("File is not open for writing");
+    }
+}
+
+void EventType::writeKeypoints(cv::FileStorage outfile) throw(runtime_error) {
+    if(outfile.isOpened()) {
         outfile << getId() + "_pts" << getKeypoints();
+    } else {
+        throw runtime_error("File is not open for writing");
+    }
+}
+
+void EventType::writeForSVM(ofstream &outfile, string label) throw(runtime_error) {
+    cv::Mat desc = getDescriptors();
+    vector<cv::KeyPoint> feats = getKeypoints();
+    if(outfile.is_open()) {
+        for(int i=0; i<desc.rows; i++) {
+            outfile << label << " ";
+            for(int j=0; j<desc.cols; j++) {
+                outfile << j+1 << ":" << desc.at<float>(i, j) << " ";
+            }
+            outfile << desc.cols+1 << ":" << feats.at(i).pt.x << " ";
+            outfile << desc.cols+2 << ":" << feats.at(i).pt.y << " ";
+            outfile << endl;
+        }
     } else {
         throw runtime_error("File is not open for writing");
     }

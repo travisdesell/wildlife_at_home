@@ -4,7 +4,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
-#include <wildlife_surf.hpp>
+#include <EventType.hpp>
 
 using namespace std;
 using namespace cv;
@@ -53,20 +53,16 @@ int main(int argc, char **argv) {
         if(dir->path().extension().string() == ".desc") {
             string id = dir->path().stem().string();
             EventType *temp = getEventType(id);
-            cout << temp->id << endl;
-
+            cout << temp->getId() << endl;
             cout << dir->path().string() << endl;
             FileStorage infile(dir->path().string(), FileStorage::READ);
-            if (infile.isOpened()) {
-                Mat temp_descriptors;
-                infile[temp->id] >> temp_descriptors;
-                temp->descriptors.push_back(temp_descriptors);
-                cout << "Added " << temp->descriptors.rows << " descriptors to " << temp->id << endl;
-                infile.release();
-            } else {
-                cout << "[ERROR] File could not be opened: " << dir->path() << endl;
+            try {
+                temp->read(infile);
+            } catch(const exception &ex) {
+                cerr << "main: " << ex.what() << endl;
                 exit(1);
             }
+            infile.release();
         }
     }
 
@@ -83,30 +79,29 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        string filename = path.string() + event_types.at(i)->id + ".desc";
+        string filename = path.string() + event_types.at(i)->getId() + ".desc";
         FileStorage outfile(filename, FileStorage::WRITE);
-        if (outfile.isOpened()) {
-            outfile << event_types.at(i)->id << event_types.at(i)->descriptors;
-            outfile.release();
-        } else {
-            cout << "[ERROR] File could not be opened: " << filename << endl;
+        try {
+            event_types.at(i)->writeDescriptors(outfile);
+            event_types.at(i)->writeKeypoints(outfile);
+        } catch(const exception &ex) {
+            cerr << "main: " << ex.what() << endl;
             exit(1);
         }
+        outfile.release();
     }
 }
 
-/* @function getEventType */
 EventType* getEventType(string id) {
     EventType *temp = NULL;
     for (int i=0; i<event_types.size(); i++) {
-        if (event_types.at(i)->id == id) {
+        if (event_types.at(i)->getId() == id) {
             temp = event_types.at(i);
         }
     }
     if (temp == NULL) {
         cout << "Creating new event: " << id << endl;
-        temp = new EventType;
-        temp->id = id;
+        temp = new EventType(id);
         event_types.push_back(temp);
     }
     return temp;
