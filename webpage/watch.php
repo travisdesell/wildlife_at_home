@@ -19,6 +19,11 @@ $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 $user = get_user();
 $user_id = $user['id'];
 
+/**
+ *  Currently using Bootstrap 2.x, really need to update
+ *  this to bootstrap 3.x.
+ *  TODO: upgrade to bootstrap 3.x
+ */
 echo "
 <!DOCTYPE html>
 <html>
@@ -166,13 +171,14 @@ echo "
     </style>
 ";
 
-
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
+//Get the user preferences so we can select an appropriate video
+//for them to watch.
 $prefs = simplexml_load_string($user['project_prefs']);
 //print_r($prefs);
 
@@ -188,7 +194,6 @@ if (array_key_exists('maximum_video_time', $prefs)) {
     $max_video_time = $prefs->maximum_video_time * 60;
 }
 
-//error_log("MIN VIDEO TIME IS: $min_video_time AND MAX VIDEO TIME IS: $max_video_time");
 
 $start_time = time();
 
@@ -202,6 +207,8 @@ if (array_key_exists("location", $_GET)) {
     $location_id = mysql_real_escape_string($_GET['location']);
 }
 
+//add some of the information about the video to javascript so it
+//can be used by watch.js
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
     var start_time = $start_time;
@@ -214,6 +221,7 @@ echo "
 <body>
 ";
 
+//print the navbar
 $active_items = array(
                     'home' => '',
                     'watch_video' => 'active',
@@ -385,6 +393,7 @@ if ($species_id < 0 || $species_id > 3) {
         </div> <!--well-->";
 }
 
+//print the footer of the webpage.
 print_footer();
 
 echo "

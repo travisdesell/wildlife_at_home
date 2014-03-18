@@ -1,9 +1,11 @@
 //#define GUI
+#define SVM
 
 #include <stdexcept>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sys/time.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -21,11 +23,13 @@
 #include "filesys.h"
 #include "boinc_api.h"
 #include "mfile.h"
+#include "graphics2.h"
 #endif
 
 #include "Event.hpp"
 #include "EventType.hpp"
 #include "VideoType.hpp"
+#include "boinc_utils.hpp"
 
 using namespace std;
 using namespace cv;
@@ -34,9 +38,8 @@ using namespace cv;
 
 void printUsage();
 bool readParams(int argc, char** argv);
-string getBoincFilename(string filename) throw(runtime_error);
-int timeToSeconds(string time);
-double standardDeviation(vector<DMatch> arr, double mean);
+void calculateFPS();
+void updateSHMEM();
 bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime);
 void writeMatrix(FileStorage outfile, string id, Mat matrix);
 Mat readMatrix(FileStorage infile, string id);
@@ -49,26 +52,48 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 /****** END PROTOTYPES ******/
 
+static const char *EXTRACTORS[] = {"Opponent"};
+static const char *DETECOTRS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
+static const char *MATCHERS[] = {"FlannBased", "BruteForce", "BruteForce-SL2", "BruteForce-L1", "BruteForce-Hamming", "BruteForce-HammingLUT", "BruteForce-Hamming(2)"};
 static int  minHessian = 400;
 static double flannThreshold = 3.5;
 static bool removeWatermark = true;
 static bool removeTimestamp = true;
-static string vidFilename, configFilename, descFilename, featFilename;
+static int descMatcher = 1;
+static string vidFilename, configFilename, descFilename;
+static string vidName;
+
+// SHMEM
+WILDLIFE_SHMEM* shmem = NULL;
+unsigned int currentTime = 0;
+unsigned int previousTime = 0;
+unsigned int frameCount = 0;
+unsigned int framePos;
+unsigned int totalFrames;
+double fps = 10;
 
 int main(int argc, char **argv) {
+    if(!(numeric_limits<float>::is_iec559 || numeric_limits<double>::is_iec559)) {
+        cerr << "WARNING: Architecture is not compatible with IEEE floating point standard!" << endl;
+    }
+
     // Local Variables
     descFilename = "descriptors.dat";
-    featFilename = "features.dat";
 
     if(!readParams(argc, argv)) {
         printUsage();
         return -1;
     }
 
+    unsigned found = vidFilename.find_last_of("/\\");
+    vidName = vidFilename.substr(found+1);
+
     cerr << "Vid file: " << vidFilename.c_str() << endl;
+    cerr << "Vid name: " << vidName.c_str() << endl;
     cerr << "Config file: " << configFilename.c_str() << endl;
+    cerr << "Matcher: " << MATCHERS[descMatcher] << endl;
     cerr << "Min Hessian: " << minHessian << endl;
-    cerr << "Flann Threshold: " << flannThreshold << " * standard deviation" << endl;
+    cerr << "Threshold: " << flannThreshold << " * standard deviation" << endl;
 
 #ifdef _BOINC_APP_
     cout << "Boinc enabled." << endl;
@@ -99,15 +124,15 @@ int main(int argc, char **argv) {
 
     int checkpointFramePos;
     if(readCheckpoint(&checkpointFramePos, &eventTypes)) {
-        cerr << "Start from checkpoint..." << endl;
+        cerr << "Start from checkpoint on frame " << checkpointFramePos << endl;
     } else {
         cerr << "Unsuccessful checkpoint read." << endl << "Starting from beginning of video." << endl;
     }
 
     capture.set(CV_CAP_PROP_POS_FRAMES, checkpointFramePos);
 
-    int framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
-    int total = capture.get(CV_CAP_PROP_FRAME_COUNT);
+    framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+    totalFrames = capture.get(CV_CAP_PROP_FRAME_COUNT);
 
     int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -117,16 +142,26 @@ int main(int argc, char **argv) {
     cerr << "Config Filename: '" << configFilename.c_str() << "'" << endl;
     cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
     cerr << "Current Frame: '" << framePos << "'" << endl;
-    cerr << "Frame Count: '" << total << "'" << endl;
+    cerr << "Frame Count: '" << totalFrames << "'" << endl;
 
-    while(framePos/total < 1.0) {
+    cerr << "Open SHMEM: " << endl;
+    shmem = (WILDLIFE_SHMEM*)boinc_graphics_make_shmem("wildlife_surf_collect", sizeof(WILDLIFE_SHMEM));
+    fill(shmem->filename, shmem->filename + sizeof(shmem->filename), 0);
+    memcpy(shmem->filename, vidFilename.c_str(), vidFilename.size());
+    updateSHMEM();
+    boinc_register_timer_callback(updateSHMEM);
+    cerr << "SHMEM opened." << endl;
+
+    while(framePos/totalFrames < 1.0) {
+        double fraction_done = (double)framePos/totalFrames;
+        cerr << "Fraction done: " << fraction_done << endl;
 #ifdef _BOINC_APP_
-        boinc_fraction_done((double)framePos/total);
+        boinc_fraction_done(fraction_done);
 #ifdef GUI
         int key = waitKey(1);
 #endif
         if(boinc_time_to_checkpoint()) {
-            cerr << "boinc_time_to_checkpoint encountered, checkpointing" << endl;
+            cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
             writeCheckpoint(framePos, eventTypes);
             boinc_checkpoint_completed();
         }
@@ -134,6 +169,8 @@ int main(int argc, char **argv) {
         Mat frame;
         capture >> frame;
         framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
+        calculateFPS();
+        //cout << "FPS: " << fps << endl;
 
         // TODO This should be in a setting file to allow for differnet frame
         // rates.
@@ -141,14 +178,14 @@ int main(int argc, char **argv) {
             vidTime++; //Increment video time every 10 frames.
         }
 
-        SurfFeatureDetector detector(minHessian);
+        Ptr<FeatureDetector> detector = new SurfFeatureDetector(minHessian);
         vector<KeyPoint> frameKeypoints;
         Mat mask = vidType.getMask();
-        detector.detect(frame, frameKeypoints, mask);
+        detector->detect(frame, frameKeypoints, mask);
 
-        SurfDescriptorExtractor extractor;
+        Ptr<DescriptorExtractor> extractor = new SurfDescriptorExtractor();
         Mat frameDescriptors;
-        extractor.compute(frame, frameKeypoints, frameDescriptors);
+        extractor->compute(frame, frameKeypoints, frameDescriptors);
 
         // Add distinct descriptors and keypoints to active events.
         int activeEvents = 0;
@@ -160,9 +197,9 @@ int main(int argc, char **argv) {
                     (*it)->addKeypoints(frameKeypoints);
                 } else {
                     // Find Matches
-                    FlannBasedMatcher matcher;
+                    Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(MATCHERS[descMatcher]);
                     vector<DMatch> matches;
-                    matcher.match(frameDescriptors, (*it)->getDescriptors(), matches);
+                    matcher->match(frameDescriptors, (*it)->getDescriptors(), matches);
 
                     double totalDist = 0;
                     double maxDist = 0;
@@ -177,6 +214,10 @@ int main(int argc, char **argv) {
 
                     double avgDist = totalDist/matches.size();
                     double stdDev = standardDeviation(matches, avgDist);
+                    //Round to four decimal places for consistency across
+                    //archetectures.
+                    // 10^4
+                    stdDev = floor(stdDev*10000 + 0.5) / 10000;
 
                     cerr << "Max dist: " << maxDist << endl;
                     cerr << "Min dist: " << minDist << endl;
@@ -245,9 +286,7 @@ int main(int argc, char **argv) {
 }
 
 void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_error) {
-#ifdef _BOINC_APP_
-    string checkpointFilename = getBoincFilename("checkpoint.dat");
-#endif
+    string checkpointFilename = getBoincFilename(vidName + ".checkpoint");
     writeEventsToFile(checkpointFilename, eventTypes);
     FileStorage outfile(checkpointFilename, FileStorage::APPEND);
     if(!outfile.isOpened()) {
@@ -260,9 +299,7 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 bool readCheckpoint(int *checkpointFramePos, vector<EventType*> *eventTypes) {
     cerr << "Reading checkpoint..." << endl;
-#ifdef _BOINC_APP_
-    string checkpointFilename = getBoincFilename("checkpoint.dat");
-#endif
+    string checkpointFilename = getBoincFilename(vidName + ".checkpoint");
     FileStorage infile(checkpointFilename, FileStorage::READ);
     if(!infile.isOpened()) return false;
     infile["CURRENT_FRAME"] >> *checkpointFramePos;
@@ -292,9 +329,16 @@ void readEventsFromFile(string filename, vector<EventType*> *eventTypes) {
 
 void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     FileStorage outfile(filename, FileStorage::WRITE);
+#ifdef SVM
+    ofstream svmfile("svm.dat");
+#endif
     try {
         for(vector<EventType*>::iterator it = eventTypes.begin(); it != eventTypes.end(); ++it) {
-            (*it)->write(outfile);
+            (*it)->writeDescriptors(outfile);
+            (*it)->writeKeypoints(outfile);
+#ifdef SVM
+            (*it)->writeForSVM(svmfile, (*it)->getId());
+#endif
         }
     } catch(const exception ex) {
         cerr << "writeEventsToFile: " << ex.what() << endl;
@@ -340,35 +384,30 @@ bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> 
     return true;
 }
 
-double standardDeviation(vector<DMatch> arr, double mean) {
-    double dev=0;
-    double inverse = 1.0 / static_cast<double>(arr.size());
-    for(unsigned int i=0; i<arr.size(); i++) {
-        dev += pow((double)arr[i].distance - mean, 2);
-    }
-    return sqrt(inverse * dev);
+void updateSHMEM() {
+    if(!shmem) return;
+    //cout << fixed << "Time: " << getTimeInSeconds() << endl;
+    shmem->update_time = getTimeInSeconds();
+    shmem->fraction_done = boinc_get_fraction_done();
+    shmem->cpu_time = boinc_worker_thread_cpu_time();
+    boinc_get_status(&shmem->status);
+    shmem->fps = fps;
+    shmem->frame = framePos;
 }
 
-int timeToSeconds(string time) {
-    vector<string> temp;
-    istringstream iss(time);
-    while(getline(iss, time, ':')) {
-        temp.push_back(time);
-    }
-    int seconds = 0;
-    seconds += atoi(temp[0].c_str())*3600;
-    seconds += atoi(temp[1].c_str())*60;
-    seconds += atoi(temp[2].c_str());
-    return seconds;
-}
+void calculateFPS() {
+    frameCount++;
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    currentTime = time.tv_sec * 1000000 + time.tv_usec;
+    if(previousTime == 0) previousTime = currentTime;
+    unsigned int timeInterval = currentTime - previousTime;
 
-string getBoincFilename(string filename) throw(runtime_error) {
-    string resolvedPath;
-    if(boinc_resolve_filename_s(filename.c_str(), resolvedPath)) {
-        cerr << "Could not resolve filename '" << filename.c_str() << "'" << endl;
-        throw runtime_error("Boinc could not resolve filename");
+    if(timeInterval > 1000000) {
+        fps = frameCount/(timeInterval/1000000.0);
+        previousTime = currentTime;
+        frameCount = 0;
     }
-    return resolvedPath;
 }
 
 bool readParams(int argc, char** argv) {
@@ -380,8 +419,8 @@ bool readParams(int argc, char** argv) {
                 if(i+1 < argc) configFilename = argv[++i];
             } else if(string(argv[i]) == "--desc" || string(argv[i]) == "-d") {
                 if(i+1 < argc) descFilename = argv[++i];
-            } else if(string(argv[i]) == "--feat" || string(argv[i]) == "-f") {
-                if(i+1 < argc) featFilename = argv[++i];
+            } else if(string(argv[i]) == "--matcher" || string(argv[i]) == "-m") {
+                if(i+1 < argc) descMatcher = atoi(argv[++i]);
             } else if(string(argv[i]) == "--hessian" || string(argv[i]) == "-h") {
                 if(i+1 < argc) minHessian = atoi(argv[++i]);
             } else if(string(argv[i]) == "--threshold" || string(argv[i]) == "-t") {
@@ -403,5 +442,5 @@ bool readParams(int argc, char** argv) {
 // TODO This should be genereated automatically somehow... probably from the
 // readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_collect -v <video> -c <config> [-d <descriptor output>] [-f <feature output>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
+	cout << "Usage: wildlife_collect -v <video> -c <config> [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 }
