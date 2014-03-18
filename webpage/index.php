@@ -382,7 +382,7 @@ echo"
                         </li>
 
                         <li>
-                        Chris Felege, Educational Outreach Coordinator, Instructor of Biology, University of North Dakota 
+                        <a href='http://arts-sciences.und.edu/biology/faculty/chris-felege.cfm'>Chris Felege</a>, Educational Outreach Coordinator, Instructor of Biology, University of North Dakota 
                         </li>
 
                         <li>
