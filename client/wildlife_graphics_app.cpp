@@ -19,7 +19,7 @@
 
 #include <FTGL/ftgl.h>
 
-#include <boinc_gl.h>
+//#include <boinc_gl.h>
 #include <parse.h>
 #include <gutil.h>
 #include <app_ipc.h>
