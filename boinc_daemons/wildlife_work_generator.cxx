@@ -266,6 +266,26 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         config_filename = video_filename + ".config";
         ofstream config_file(config_filename.c_str());
 
+        ostringstream video_species_query;
+        video_species_query << "SELECT name"
+            << " FROM species s"
+            << " JOIN video_2 v"
+            << " ON s.id = v.species_id"
+            << " WHERE id = "
+            << video_id;
+        mysql_query_check(wildlife_db_conn, video_species_query.str());
+        MYSQL_RES *species_result = mysql_store_result(wildlife_db_conn);
+
+        MYSQL_ROW video_row;
+        string video_species = "";
+        while ((video_row = mysql_fetch_row(start_result)) != NULL) {
+            video_species = video_row[0];
+            config_file << video_species << endl;
+        }
+        cout << "Video Species: " << video_species << endl;
+
+        mysql_free_result(species_result);
+
         ostringstream video_start_query;
         video_start_query << "SELECT start_time"
             << " FROM video_2"
