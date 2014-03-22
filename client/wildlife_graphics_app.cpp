@@ -111,7 +111,7 @@ static void draw_text() {
         renderText(10, window_height-130, buf);
     } else {
         glRasterPos2f(0.05f, 0.21f);
-        renderText(10, window_height-50, "No Shared Mem");
+        renderText(10, window_height*0.5, "No Shared Mem");
     }
 }
 
