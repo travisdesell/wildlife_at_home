@@ -7,7 +7,7 @@ $cwd = dirname($cwd);
 require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/my_query.php');
 require_once($cwd . '/generate_count_nav.php');
-require_once($cwd . '/get_video_segment_query.php');
+require_once($cwd . '/get_video_filter.php');
 require_once($cwd . '/user.php');
 
 $video_min = mysql_real_escape_string($_POST['video_min']);

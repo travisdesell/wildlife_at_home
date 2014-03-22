@@ -12,7 +12,7 @@ require_once($cwd . '/footer.php');
 require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/boinc_db.php');
 require_once($cwd . '/my_query.php');
-require_once($cwd . '/get_video_segment_query.php');
+require_once($cwd . '/get_video_filter.php');
 
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);

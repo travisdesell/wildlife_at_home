@@ -166,7 +166,7 @@ if ($project_scientist) {
     echo "                  <li class='dropdown " . $active_items['project_management'] . " '>
                               <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Project Mangement ($waiting_review)<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
-                                <li><a href='expert_classify_video.php'>Expert Video Classification</a></li>
+                                <li><a href='review_videos.php'>Expert Video Classification</a></li>
                                 <li><a href='review_reported_videos.php?species_id=1'>Review Reported Videos - Sharptailed Grouse$grouse_waiting_review</a></li>
                                 <li><a href='review_reported_videos.php?species_id=2'>Review Reported Videos - Least Tern$tern_waiting_review</a></li>
                                 <li><a href='review_reported_videos.php?species_id=3'>Review Reported Videos - Piping Plover$plover_waiting_review</a></li>
@@ -180,7 +180,7 @@ echo "                      <li class='dropdown " . $active_items['preferences']
                               <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>$user_name<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li><a href='home.php'>Your Preferences</a></li>
-                                <li><a href='user_video_list.php'>Watched Videos</a></li>
+                                <li><a href='review_videos.php'>Review Videos</a></li>
                                 <li><a href='team.php'>Teams</a></li>
                                 <li><a href='cert1.php'>Certificate</a></li>
                                 <li><a href='apps.php'>Applications</a></li>";
