@@ -180,7 +180,7 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'POST',
-            url: './expert_interface/get_expert_videos.php',
+            url: './get_videos.php',
             data : submission_data,
             dataType : 'text',
             success : function(response) {
