@@ -30,3 +30,69 @@
         </div>
     </div>  <!-- span 6 -->
 </div> <!--row fluid-->
+
+{{#display_other_observations}}
+<hr>
+<div class='row-fluid' style="display:table;">
+    <div class='span12' style="display:table-cell; vertical-align:top; float:none; padding-right:5px;">
+        <h4>Events From Other Users:</h4>
+        <table class='table table-striped table-bordered table-condensed'>
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Event</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Comments</th>
+                    <th>Tags</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#other_observations}}
+                <tr>
+                    <td>{{{user_name}}}</td>
+                    <td>{{event_type}}</td>
+                    <td>{{start_time}}</td>
+                    <td>{{end_time}}</td>
+                    <td>{{comments}}</td>
+                    <td>{{tags}}</td>
+                    <td>{{status}}</td>
+                </tr>
+            {{/other_observations}}
+            </tbody>
+        </table>
+    </div>
+</div> <!--row fluid-->
+{{/display_other_observations}}
+
+{{#display_old_observations}}
+<hr>
+<div class='row-fluid' style="display:table;">
+    <div class='span12' style="display:table-cell; vertical-align:top; float:none; padding-right:5px;">
+        <h4>Events From Old Interface:</h4>
+        <table class='table table-striped table-bordered table-condensed'>
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Event</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#old_observations}}
+                <tr>
+                    <td>{{user_name}}</td>
+                    <td>{{event_type}}</td>
+                    <td>{{start_time}}</td>
+                    <td>{{end_time}}</td>
+                    <td>{{comments}}</td>
+                </tr>
+            {{/old_observations}}
+            </tbody>
+        </table>
+    </div>
+</div> <!--row fluid-->
+{{/display_old_observations}}

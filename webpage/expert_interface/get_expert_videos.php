@@ -17,12 +17,19 @@ require_once($cwd . '/my_query.php');
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
+$filter_text = mysql_real_escape_string($_POST['filter_text']);
 $species_id = mysql_real_escape_string($_POST['species_id']);
 $location_id = mysql_real_escape_string($_POST['location_id']);
 $animal_id = mysql_real_escape_string($_POST['animal_id']);
 $year = mysql_real_escape_string($_POST['year']);
 $video_status = mysql_real_escape_string($_POST['video_status']);
 $video_release = mysql_real_escape_string($_POST['video_release']);
+
+error_log("filter text: '$filter_text'");
+$filters = explode("##", $filter_text);
+foreach ($filters as $f) {
+    error_log("   filter: '$f'");
+}
 
 $filter = '';
 if ($species_id > 0) $filter .= " AND species_id = $species_id";
@@ -42,9 +49,9 @@ $video_count = mysql_real_escape_string($_POST['video_count']);
 $query = "";
 
 if ($filter != '') {
-    $query = "SELECT id, processing_status, watermarked_filename, expert_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 WHERE $filter ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
+    $query = "SELECT id, processing_status, watermarked_filename, timed_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 WHERE $filter ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
 } else {
-    $query = "SELECT id, processing_status, watermarked_filename, expert_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
+    $query = "SELECT id, processing_status, watermarked_filename, timed_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
 }
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -71,10 +78,10 @@ while ($row = mysql_fetch_assoc($result)) {
         $row['check_button_type'] = 'btn-primary';
     }
 
-    if ($row['expert_obs_count'] == 1) {
-        $row['expert_obs_count'] .= " recorded event&nbsp;";
+    if ($row['timed_obs_count'] == 1) {
+        $row['timed_obs_count'] .= " recorded event&nbsp;";
     } else {
-        $row['expert_obs_count'] .= " recorded events";
+        $row['timed_obs_count'] .= " recorded events";
     }
 
     $wf = $row['watermarked_filename'];

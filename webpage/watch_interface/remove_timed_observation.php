@@ -49,6 +49,14 @@ if (!$result) {
     die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 }
 
+$query = "UPDATE video_2 SET timed_obs_count = timed_obs_count - 1 WHERE id = $video_id";
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) { 
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
+
+
 $response['html'] = '';
 //$response['html'] = get_timed_observation_table($video_id, $user_id, $response['observation_count']);
 
