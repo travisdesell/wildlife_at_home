@@ -30,7 +30,9 @@ $row = mysql_fetch_assoc($result);
 $species_id = $row['species_id'];
 
 
-$response['html'] = get_timed_observation_table($video_id, $user_id, $response['observation_count'], $species_id, 0);
+//need to pass in expert_only as the last argument
+//error_log("is expert user: " . is_special_user__fixme($user, false));
+$response['html'] = get_timed_observation_table($video_id, $user_id, $response['observation_count'], $species_id, is_special_user__fixme($user, false));
 
 echo json_encode($response);
 ?>

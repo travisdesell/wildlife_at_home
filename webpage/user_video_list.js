@@ -47,7 +47,7 @@ $(document).ready(function () {
     });
 
     var video_min = 0;
-    var video_count = 5;
+    var video_count = 15;
 
     reload_videos();
 
@@ -265,6 +265,17 @@ $(document).ready(function () {
             ev.preventDefault();
             ev.stopPropagation();
         });
+
+        $('#display-15-dropdown').click(function(ev) {
+            if (video_count != 15) {
+                video_count = 15;
+                reload_videos(false);
+            }
+
+            ev.preventDefault();
+            ev.stopPropagation();
+        });
+
 
         $('#display-20-dropdown').click(function(ev) {
             if (video_count != 20) {

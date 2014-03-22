@@ -85,10 +85,10 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
                                 Display $video_count videos <span class='caret'></span>
                                 </button>
                                 <ul class='dropdown-menu'>
-                                    <li><a href='javascript:;' id='display-1-dropdown'>Display  1 videos</a></li>
-                                    <li><a href='javascript:;' id='display-5-dropdown'>Display  5 videos</a></li>
-                                    <li><a href='javascript:;' id='display-10-dropdown'>Display 10 videos</a></li>
-                                    <li><a href='javascript:;' id='display-20-dropdown'>Display 20 videos</a></li>
+                                    <li><a href='javascript:;' class='display-dropdown' count='5' >Display  5 videos</a></li>
+                                    <li><a href='javascript:;' class='display-dropdown' count='10'>Display 10 videos</a></li>
+                                    <li><a href='javascript:;' class='display-dropdown' count='15'>Display 15 videos</a></li>
+                                    <li><a href='javascript:;' class='display-dropdown' count='20'>Display 20 videos</a></li>
                                 </ul>
                             </div>
 

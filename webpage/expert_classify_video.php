@@ -30,92 +30,7 @@ echo "
     <script type='text/javascript' src='timed_observations.js'></script>
     <script type='text/javascript' src='expert_classify_video.js'></script>
 
-    <style>
-    body {
-        padding-top: 60px;
-    }
-
-    @media (max-width: 979px) {
-        body {
-            padding-top: 0px;
-        }
-    }
-
-        .well {
-           position: relative;
-           margin: 15px 5px;
-           padding: 39px 19px 14px;
-           *padding-top: 19px;
-           border: 1px solid #ddd;
-           -webkit-border-radius: 4px;
-           -moz-border-radius: 4px;
-           border-radius: 4px; 
-        }
-
-        .tab {
-           position: absolute;
-           top: -1px;
-           left: -1px;
-           padding: 3px 7px;
-           font-size: 14px;
-           font-weight: bold;
-           background-color: #f5f5f5;
-           border: 1px solid #ddd;
-           color: #606060; 
-           -webkit-border-radius: 4px 0 4px 0;
-           -moz-border-radius: 4px 0 4px 0;
-           border-radius: 4px 0 4px 0;
-        }
-
-        .title {
-            text-align: center;
-           position: absolute;
-           top: -1px;
-           left: -1px;
-           width: 100%;
-           padding: 3px 0px 0px 0px;
-           font-size: 14px;
-           font-weight: bold;
-           background-color: #f5f5f5;
-           border: 1px solid #ddd;
-           color: #606060; 
-           -webkit-border-radius: 4px 4px 0px 0px;
-           -moz-border-radius: 4px 4px 0px 0px;
-           border-radius: 4px 4px 0px 0px;
-        }
-
-        .label {
-            cursor: pointer;
-        }
-
-.accordion-body.in { overflow:visible; }
-
-.bottom-up {top: auto; bottom: 100%; }
-.dropdown-menu.bottom-up:before { border-bottom: 0px solid transparent !important; border-top: 7px solid rgba(0, 0, 0, 0.2); top: auto !important; bottom: -7px; }
-.dropdown-menu.bottom-up:after  { border-bottom: 0px solid transparent !important; border-top: 6px solid white;              top: auto !important; bottom: -6px; }
-
-.navbar .dropdown-menu [class*='span'] {
-    padding-top: 10px;
-}
-.navbar .dropdown-menu > li.column-menu ul {
-    display: inline-block;
-    list-style: none outside none;
-    list-style-type: none outside none;
-    margin: 0 0 16px;
-    width: 100%;
-}
-.navbar .dropdown-menu > li.column-menu li {
-    display: inline;
-    list-style-type: none outside none;
-    float: left;
-    width: 100%;
-}
-.navbar .dropdown-menu > li.column-menu.firstcolumn {
-    margin-left: 0;
-    padding-left: 0;
-}
-
-    </style>
+    <link rel='stylesheet' type='text/css' href='custom.css'>
 ";
 
 echo "<script type='text/javascript'>
@@ -152,19 +67,6 @@ $result = mysql_query("SELECT special_user FROM forum_preferences WHERE userid=$
 $row = mysql_fetch_assoc($result);
 
 $special_user = $row['special_user'];
-
-/*
-$result2 = mysql_query("SELECT project_prefs FROM user WHERE id =$user_id", $boinc_db);
-$row2 = mysql_fetch_assoc($result2);
-
-$prefs = simplexml_load_string($row2['project_prefs']);
-print_r($prefs);
-
-$min_video_time = $prefs->minimum_video_time;
-$max_video_time = $prefs->maximum_video_time;
-
-echo "MIN VIDEO TIME IS: $min_video_time AND MAX VIDEO TIME IS: $max_video_time";}{{{
- */
 
 if (is_special_user__fixme($user, true)) {
     echo "

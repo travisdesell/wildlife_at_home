@@ -422,6 +422,12 @@ function enable_observation_table() {
 
         $(".total_events").text( parseInt($(".total_events").text(), 10) + 1 );
 
+        var reb_text = $("#recorded-event-button-" + video_id).text();
+        reb_text = (parseInt( reb_text.substring(0, reb_text.indexOf(" ")), 10) + 1);
+        if (reb_text === 1) reb_text += " recorded event";
+        else reb_text += " recorded events";
+        $("#recorded-event-button-" + video_id).text( reb_text );
+
         var submission_data = {
                                 video_id : video_id,
                                 event_id : 0,
@@ -458,6 +464,12 @@ function enable_observation_table() {
         $(this).addClass("disabled");
 
         $(".total_events").text( $(".total_events").text() - 1 );
+
+        var reb_text = $("#recorded-event-button-" + video_id).text();
+        reb_text = (parseInt( reb_text.substring(0, reb_text.indexOf(" ")), 10) - 1);
+        if (reb_text === 1) reb_text += " recorded event";
+        else reb_text += " recorded events";
+        $("#recorded-event-button-" + video_id).text( reb_text );
 
         var submission_data = {
                                 observation_id : observation_id

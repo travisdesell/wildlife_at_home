@@ -1,16 +1,19 @@
 $(document).ready(function () {
 
+    /*
     var path = document.location.pathname;
     var dev_dir = path.substr(path.indexOf('/', 1) + 1, path.lastIndexOf('/') - path.indexOf('/', 1));
 
     console.log("path:    '" + path + "'");
     console.log("dev_dir: '" + dev_dir + "'");
+    */
 
+    var filter_text = '';
     var location_id = -1;
     var species_id = -1;
     var animal_id = -1;
     var video_min = 0;
-    var video_count = 10;
+    var video_count = 15;
     var event_ids = {};
     var comments = {};
     var event_end_times = {};
@@ -170,6 +173,7 @@ $(document).ready(function () {
 
     function load_videos() {
         var submission_data = {
+                                filter_text : filter_text,
                                 species_id : species_id,
                                 location_id : location_id,
                                 animal_id : animal_id,
@@ -296,7 +300,7 @@ $(document).ready(function () {
 
                 $.ajax({
                     type: 'POST',
-                    url: './watch_interface/get_expert_video.php',
+                    url: './expert_interface/get_expert_video.php',
                     data : submission_data,
                     dataType : 'text',
                     success : function(response) {
@@ -392,9 +396,10 @@ $(document).ready(function () {
         });
 
 
-        $('#display-5-dropdown').click(function(ev) {
-            if (video_count != 5) {
-                video_count = 5;
+        $('.display-dropdown:not(.bound)').addClass('bound').click(function() {
+            var new_count = $(this).attr('count');
+            if (video_count != new_count) {
+                video_count = new_count;
                 load_videos();
             }
 
@@ -402,27 +407,76 @@ $(document).ready(function () {
             ev.stopPropagation();
         });
 
-        $('#display-10-dropdown').click(function(ev) {
-            if (video_count != 10) {
-                video_count = 10;
-                load_videos();
-            }
+        $('.filter-dropdown:not(.bound)').addClass('bound').click(function() {
+            if ($('#filter-list').html().indexOf($(this).text()) < 0) {
+                $('#display-videos-text').text("Displaying Videos");
+                var append_text = "<div style='display:table-row;'><div style='display:table-cell;'>";
+                
+                if ($('#filter-list').html().length > 0) {
+                    append_text += "<span class='label and-label-toggle' style='margin-top:3px; padding-bottom:2px; margin-right:3px;'>and</span>";
+                }
 
-            ev.preventDefault();
-            ev.stopPropagation();
+                var desc_text = $(this).text();
+                if ($(this).hasClass('location-filter') || $(this).hasClass('year-filter')) {
+                    append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>from</span>";
+                } else if ($(this).hasClass('animal-id-filter')) {
+                    append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
+                    desc_text = "id " + desc_text;
+                } else {
+                    append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
+                }
+
+                append_text += "<span class='badge badge-info' style='margin-top:3px; padding-bottom:2px; float:right;'>" + desc_text + "</span></div></div>";
+                $('#filter-list').append(append_text);
+                apply_label_toggles();
+            } else {
+                $('#display-videos-text').text("Displaying All Videos");
+            }
         });
 
-        $('#display-20-dropdown').click(function(ev) {
-            if (video_count != 20) {
-                video_count = 20;
+        $('#apply-filter-button:not(.bound)').addClass('bound').click(function() {
+            console.log("applying filter!");
+
+            var query_text = "";
+            $('#filter-list span').each(function() {
+//                console.log("span text is: '" + $(this).text() + "'");
+                query_text += $(this).text() + "##";
+            });
+//            console.log("query text: '" + query_text + "'");
+
+            if (filter_text !== query_text) {
+                console.log("RELOADING!");
+                filter_text = query_text;
                 load_videos();
             }
 
-            ev.preventDefault();
-            ev.stopPropagation();
+        });
+
+        $('#clear-filter-button:not(.bound)').addClass('bound').click(function() {
+            console.log("clearing filter!");
+
+            $('#display-videos-text').text("Displaying All Videos");
+            $('#filter-list').text("");
         });
     }
 
+    function apply_label_toggles() {
+        $('.and-label-toggle:not(.bound)').addClass('bound').click(function() {
+            var text = $(this).text();
+            if (text == 'and') {
+                $(this).text('or');
+            } else {
+                $(this).text('and');
+            }
+        });
 
+        $('.with-label-toggle:not(.bound)').addClass('bound').click(function() {
+            var text = $(this).text();
+            if (text == 'from')             $(this).text('not from');
+            else if (text == 'not from')    $(this).text('from');
+            else if (text == 'with')        $(this).text('without');
+            else                            $(this).text('with');
+        });
+    }
 });
 

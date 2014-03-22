@@ -88,7 +88,14 @@ function get_observations($row_only, $video_id, $user_id, $observation_id, $spec
             $event_info['possible_tags'] = $tags;
         }
 
-        $query = "SELECT id, category, name, instructions FROM observation_types WHERE expert_only = $expert_only AND ";
+        if ($expert_only == 1) {
+//            error_log("EXPERT_ONLY = 1");
+            $query = "SELECT id, category, name, instructions FROM observation_types WHERE ";
+        } else {
+            error_log("EXPERT_ONLY: " . $expert_only);
+            $query = "SELECT id, category, name, instructions FROM observation_types WHERE expert_only = $expert_only AND ";
+        }
+
         if ($species_id == 1) { //sharptailed grouse
             $query .= "sharptailed_grouse = 1";
         } else if ($species_id == 2) { //least tern
@@ -146,7 +153,7 @@ function get_observations($row_only, $video_id, $user_id, $observation_id, $spec
 //            error_log("  checking: $i == " . floor(count($event_info['event_list']) / 2) );
             if ($i == floor(count($event_info['event_list']) / 3) || $i == floor(count($event_info['event_list']) * (2 / 3))) {
                 $event_info['event_list'][$i]['new_column'] = true;
-                error_log("    SETTING NEW COLUMN: i = $i");
+//                error_log("    SETTING NEW COLUMN: i = $i");
             }   
 
             $event_count++;
@@ -205,12 +212,53 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
 }
 
 function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $user) {
-    global $cwd;
+    global $cwd, $wildlife_db, $boinc_db;
     $watch_info['video_id'] = $video_id;
     $watch_info['video_file'] = $video_file;
     $watch_info['animal_id'] = $animal_id;
     $watch_info['trimmed_filename'] = trim(substr($video_file, strrpos($video_file, '/') + 1));
-    
+
+    $query = "SELECT * FROM expert_observations WHERE video_id = $video_id";
+    $result = attempt_query_with_ping($query, $wildlife_db);
+
+    while ($row = mysql_fetch_assoc($result)) {
+        $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+        $name_result = attempt_query_with_ping($name_query, $boinc_db);
+        $name_row = mysql_fetch_assoc($name_result);
+
+        $row['user_name'] = $name_row['name'];
+
+//        error_log( json_encode($row) );
+        $watch_info['old_observations'][] = $row;
+    }
+
+    if (count($watch_info['old_observations']) > 0) {
+        $watch_info['display_old_observations'] = true;
+    }
+
+    $query = "SELECT timed_observations.*, observation_types.name, observation_types.category FROM timed_observations LEFT JOIN observation_types ON (timed_observations.event_id = observation_types.id) WHERE video_id = $video_id AND user_id != " . $user['id'] . " ORDER BY user_id, start_time";
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    while ($row = mysql_fetch_assoc($result)) {
+        $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+        $name_result = attempt_query_with_ping($name_query, $boinc_db);
+        $name_row = mysql_fetch_assoc($name_result);
+
+        $row['event_type'] = $row['category'] . " - " . $row['name'];
+
+
+        $row['user_name'] = $name_row['name'];
+        if ($row['expert'] == 1) $row['user_name'] = "<b>" . $row['user_name'] . " (expert)</b>";
+
+//        error_log( json_encode($row) );
+        $watch_info['other_observations'][] = $row;
+    }
+
+    if (count($watch_info['other_observations']) > 0) {
+        $watch_info['display_other_observations'] = true;
+    }
+
+
+
     $watch_interface_template = file_get_contents($cwd . "/templates/expert_row_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($watch_interface_template, $watch_info);
