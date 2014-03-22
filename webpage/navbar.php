@@ -55,7 +55,6 @@ function print_navbar($active_items) {
                               <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Watch Video<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
                                 <li><a href='video_selector.php'>Site and Species Descriptions</a></li>
-                                <li><a href='instructional_videos.php'>Instructional Videos</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Sharp-Tailed Grouse</a></li>
                                 <li><a href='watch.php?location=1&species=1'>Belden, ND</a></li>

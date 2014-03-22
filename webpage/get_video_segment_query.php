@@ -1,31 +1,42 @@
 <?php
 
-
-function create_filter($filters, &$filter, &$reported_filter) {
-    $filter = '';
-    $reported_filter = '';
-
-    foreach ($filters as $key => $value) {
-        error_log("    '$key' => '$value'");
-
-        if ($key == 'report_status') {
-            $reported_filter .= " AND vs2.report_status = '" . mysql_real_escape_string($value) . "'";
-        } else if ($key == 'instructional') {
-            $reported_filter .= " AND vs2.instructional = true ";
+function create_filter($filter_text, &$query) {
+    error_log("filter text: '$filter_text'");
+    $filters = explode("##", $filter_text);
+    $with = true;
+    foreach ($filters as $f) {
+        error_log("   filter: '$f'");
+        if (0 == strcmp($f, "with") || 0 == strcmp($f, "from")) {
+            $with = true;
+        } else if (0 == strcmp($f, "without") || 0 == strcmp($f, "not from")) {
+            $with = false;
+        } else if (0 == strcmp($f, "and")) {
+            $query .= " AND ";
+        } else if (0 == strcmp($f, "or")) {
+            $query .= " OR ";
+        } else if (0 == strcmp($f, "")) {
+            break;
         } else {
-            if ($value == 'VALID or CANONICAL') {
-                $filter .= " AND (o." . mysql_real_escape_string($key) . " = 'VALID' OR o." . mysql_real_escape_string($key) . " = 'CANONICAL') ";
-            } else if (!is_numeric($value)) {
-                $filter .= " AND o." . mysql_real_escape_string($key) . " = '" . mysql_real_escape_string($value) . "' ";
-            } else {
-                $filter .= " AND o." . mysql_real_escape_string($key) . " = " . mysql_real_escape_string($value) . " ";
+            $parts = explode(" ", $f);
+
+            $eq = "=";
+            if (!$with) $eq = "!=";
+
+            if (0 == strcmp($parts[0], "event")) {
+                $query .= "obs.event_id $eq " . $parts[1] . "";
+            } else if (0 == strcmp($parts[0], "animal_id")) {
+                $query .= "v2.animal_id $eq '" . $parts[1] . "'";
+            } else if (0 == strcmp($parts[0], "year")) {
+                $query .= "DATE_FORMAT(v2.start_time, '%Y') $eq " . $parts[1];
+            } else if (0 == strcmp($parts[0], "location")) {
+                $query .= "v2.location_id $eq '" . $parts[1];
+            } else if (0 == strcmp($parts[0], "species")) {
+                $query .= "v2.species_id $eq " . $parts[1];
+            } else if (0 == strcmp($parts[0], "other")) {
+                $query .= " '$f' ";
             }
         }
     }
-
-    if (strlen($reported_filter) > 5) $reported_filter = substr($reported_filter, 4);
-    if (strlen($filter) > 5) $filter = substr($filter, 4);
-
 }
 
 ?>
