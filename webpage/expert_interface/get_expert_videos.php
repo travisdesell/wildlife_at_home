@@ -12,51 +12,30 @@ require_once($cwd . '/footer.php');
 require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/boinc_db.php');
 require_once($cwd . '/my_query.php');
+require_once($cwd . '/get_video_segment_query.php');
 
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
 $filter_text = mysql_real_escape_string($_POST['filter_text']);
-$species_id = mysql_real_escape_string($_POST['species_id']);
-$location_id = mysql_real_escape_string($_POST['location_id']);
-$animal_id = mysql_real_escape_string($_POST['animal_id']);
-$year = mysql_real_escape_string($_POST['year']);
-$video_status = mysql_real_escape_string($_POST['video_status']);
-$video_release = mysql_real_escape_string($_POST['video_release']);
-
-error_log("filter text: '$filter_text'");
-$filters = explode("##", $filter_text);
-foreach ($filters as $f) {
-    error_log("   filter: '$f'");
-}
-
-$filter = '';
-if ($species_id > 0) $filter .= " AND species_id = $species_id";
-if ($location_id > 0) $filter .= " AND location_id = $location_id";
-if ($animal_id !== '-1' && $animal_id !== '0') $filter .= " AND animal_id = '$animal_id'";
-if ($year !== '') $filter .= " AND DATE_FORMAT(start_time, '%Y') = $year";
-if ($video_status !== '') $filter .= " AND expert_finished = '$video_status'";
-if ($video_release !== '') $filter .= " AND release_to_public = $video_release";
-
-if (strlen($filter) > 4) $filter = substr($filter, 4);
-
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
 
-//fix query to filter by ids
+//if not expert, add flag so that videos are only the users own videos
+if ($filter_text != '') {
+    $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2, timed_observations AS obs WHERE v2.id = obs.video_id AND ";
 
-$query = "";
-
-if ($filter != '') {
-    $query = "SELECT id, processing_status, watermarked_filename, timed_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 WHERE $filter ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
+    create_filter($filter_text, $query);
+    
+    $query .= " ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
+    error_log("QUERY: $query");
 } else {
     $query = "SELECT id, processing_status, watermarked_filename, timed_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
 }
 
 $result = attempt_query_with_ping($query, $wildlife_db);
 
-//error_log("query: $query");
 
 $found = false;
 while ($row = mysql_fetch_assoc($result)) {

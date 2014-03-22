@@ -174,14 +174,8 @@ $(document).ready(function () {
     function load_videos() {
         var submission_data = {
                                 filter_text : filter_text,
-                                species_id : species_id,
-                                location_id : location_id,
-                                animal_id : animal_id,
-                                year : year,
                                 video_min : video_min,
                                 video_count : video_count,
-                                video_status : video_status,
-                                video_release : video_release
                               };
 
         $.ajax({
@@ -266,11 +260,11 @@ $(document).ready(function () {
 
         $.ajax({
             type: 'POST',
-            url: './expert_interface/get_expert_count_nav.php',
+            url: './get_video_count_nav.php',
             data : submission_data,
             dataType : 'text',
             success : function(response) {
-//                console.log("the response was:\n" + response);
+                console.log("the response was:\n" + response);
                 $("#videos-nav-placeholder").html(response);
                 init_dropdown();
             },
@@ -416,17 +410,35 @@ $(document).ready(function () {
                     append_text += "<span class='label and-label-toggle' style='margin-top:3px; padding-bottom:2px; margin-right:3px;'>and</span>";
                 }
 
+                var attr_text = "";
                 var desc_text = $(this).text();
-                if ($(this).hasClass('location-filter') || $(this).hasClass('year-filter')) {
+                if ($(this).hasClass('location-filter')) {
                     append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>from</span>";
+                    attr_text = "location-filter='" + $(this).attr("location_id") + "'";
+
+                } else if ($(this).hasClass('year-filter')) {
+                    append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>from</span>";
+                    attr_text = "year-filter='" + $(this).attr("year") + "'";
+
                 } else if ($(this).hasClass('animal-id-filter')) {
                     append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
-                    desc_text = "id " + desc_text;
-                } else {
+                    desc_text = "id #" + desc_text;
+                    attr_text = "animal-id-filter='" + $(this).attr("animal_id") + "'";
+
+                } else if ($(this).hasClass('species-filter')) {
                     append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
+                    attr_text = "species-filter='" + $(this).attr("species_id") + "'";
+
+                } else if ($(this).hasClass('other-filter')) {
+                    append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
+                    attr_text = "other-filter";
+
+                } else {    //event-filter
+                    append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
+                    attr_text = "event-filter='" + $(this).attr("event_id") + "'";
                 }
 
-                append_text += "<span class='badge badge-info' style='margin-top:3px; padding-bottom:2px; float:right;'>" + desc_text + "</span></div></div>";
+                append_text += "<span class='badge badge-info' style='margin-top:3px; padding-bottom:2px; float:right;' " + attr_text + ">" + desc_text + "</span></div></div>";
                 $('#filter-list').append(append_text);
                 apply_label_toggles();
             } else {
@@ -440,7 +452,24 @@ $(document).ready(function () {
             var query_text = "";
             $('#filter-list span').each(function() {
 //                console.log("span text is: '" + $(this).text() + "'");
-                query_text += $(this).text() + "##";
+                var attr_text = "";
+                if ($(this).attr('location-filter') !== undefined) {
+                    attr_text += "location " + $(this).attr('location-filter');
+                } else if ($(this).attr('animal-id-filter') !== undefined) {
+                    attr_text += "animal_id " + $(this).attr('animal-id-filter');
+                } else if ($(this).attr('year-filter') !== undefined) {
+                    attr_text += "year " + $(this).attr('year-filter');
+                } else if ($(this).attr('species-filter') !== undefined) {
+                    attr_text += "species " + $(this).attr('species-filter');
+                } else if ($(this).attr('event-filter') !== undefined) {
+                    attr_text += "event " + $(this).attr('event-filter') + " ";
+                } else if ($(this).attr('other-filter') !== undefined) {
+                    attr_text += "other ";
+                } else {
+                    attr_text = $(this).text();
+                }
+
+                query_text += attr_text + "##";
             });
 //            console.log("query text: '" + query_text + "'");
 

@@ -73,9 +73,9 @@ if (is_special_user__fixme($user, true)) {
         <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Year Filter <span class='caret'></span> </button>
 
         <ul class='dropdown-menu'>
-            <li><a href='javascript:;' class='filter-dropdown year-filter'>2011</a></li>
-            <li><a href='javascript:;' class='filter-dropdown year-filter'>2012</a></li>
-            <li><a href='javascript:;' class='filter-dropdown year-filter'>2013</a></li>
+            <li><a href='javascript:;' class='filter-dropdown year-filter' year=2011>2011</a></li>
+            <li><a href='javascript:;' class='filter-dropdown year-filter' year=2012>2012</a></li>
+            <li><a href='javascript:;' class='filter-dropdown year-filter' year=2013>2013</a></li>
         </ul>
     </div> <!--button group-->";
 
@@ -84,9 +84,9 @@ if (is_special_user__fixme($user, true)) {
         <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Species Filter <span class='caret'></span> </button>
 
         <ul class='dropdown-menu'>
-            <li><a href='javascript:;' class='filter-dropdown'>Sharp-tailed Grouse</a></li>
-            <li><a href='javascript:;' class='filter-dropdown'>Piping Plover</a></li>
-            <li><a href='javascript:;' class='filter-dropdown'>Interior Least Tern</a></li>
+            <li><a href='javascript:;' class='filter-dropdown species-filter'species_id=1>Sharp-tailed Grouse</a></li>
+            <li><a href='javascript:;' class='filter-dropdown species-filter'species_id=2>Interior Least Tern</a></li>
+            <li><a href='javascript:;' class='filter-dropdown species-filter'species_id=3>Piping Plover</a></li>
         </ul>
     </div> <!--button group-->";
 
@@ -95,10 +95,10 @@ if (is_special_user__fixme($user, true)) {
         <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Location Filter <span class='caret'></span> </button>
 
         <ul class='dropdown-menu'>
-            <li><a href='javascript:;' class='filter-dropdown location-filter'>Belden</a></li>
-            <li><a href='javascript:;' class='filter-dropdown location-filter'>Blaisdell</a></li>
-            <li><a href='javascript:;' class='filter-dropdown location-filter'>Lostwood</a></li>
-            <li><a href='javascript:;' class='filter-dropdown location-filter'>Missouri River</a></li>
+            <li><a href='javascript:;' class='filter-dropdown location-filter' location_id=1>Belden</a></li>
+            <li><a href='javascript:;' class='filter-dropdown location-filter' location_id=2>Blaisdell</a></li>
+            <li><a href='javascript:;' class='filter-dropdown location-filter' location_id=3>Lostwood</a></li>
+            <li><a href='javascript:;' class='filter-dropdown location-filter' location_id=4>Missouri River</a></li>
         </ul>
     </div> <!--button group-->";
 
@@ -126,7 +126,7 @@ if (is_special_user__fixme($user, true)) {
                 <li class='column-menu span2' style='margin-left:10px;'>
                 <ul style='list-style-type: none; margin-right:5px; margin-left:5px;'>";
         }
-        echo "  <li style='padding-left:0px; padding-right:0px;'><a href='javascript:;' class='filter-dropdown animal-id-filter' style='padding-left:0px; padding-right:0px;'>" . $row['animal_id'] . "</a></li>";
+        echo "  <li style='padding-left:0px; padding-right:0px;'><a href='javascript:;' class='filter-dropdown animal-id-filter' animal_id='" . $row['animal_id'] . "' style='padding-left:0px; padding-right:0px;'>" . $row['animal_id'] . "</a></li>";
 
         $prev_row = $row;
         $count++;
@@ -169,13 +169,8 @@ if (is_special_user__fixme($user, true)) {
 
         if (0 != strcmp($prev_row['category'], $row['category'])) {
             echo "<li class='nav-header'>" . $row['category'] . "</li>";
-
-            if ($row['category'] == "Miscellaneous") {
-                echo "  <li><a href='javascript:;' class='filter-dropdown' event_id='converted_events'>Converted Events</a></li>";
-                echo "  <li><a href='javascript:;' class='filter-dropdown' event_id='invalid_times'>Invalid Times</a></li>";
-            }
         }
-        echo "  <li><a href='javascript:;' class='filter-dropdown' event_id='" . $row['id'] . "'>" . $row['name'] . "</a></li>";
+        echo "  <li><a href='javascript:;' class='filter-dropdown event-filter' event_id='" . $row['id'] . "'>" . $row['name'] . "</a></li>";
 
         $prev_row = $row;
         $count++;
@@ -186,6 +181,21 @@ if (is_special_user__fixme($user, true)) {
     echo "
         <ul>
     </div>  <!-- button group -->";
+
+
+    echo "
+    <div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+        <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Other Filter <span class='caret'></span> </button>
+
+        <ul class='dropdown-menu'>
+            <li><a href='javascript:;' class='filter-dropdown other-filter'>Converted Events</a></li>
+            <li><a href='javascript:;' class='filter-dropdown other-filter'>Invalid Times</a></li>
+            <li><a href='javascript:;' class='filter-dropdown other-filter'>Private</a></li>
+            <li><a href='javascript:;' class='filter-dropdown other-filter'>Unwatched</a></li>
+            <li><a href='javascript:;' class='filter-dropdown other-filter'>Watched</a></li>
+            <li><a href='javascript:;' class='filter-dropdown other-filter'>Finished</a></li>
+        </ul>
+    </div> <!--button group-->";
 
     echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
     echo "<b style='float:right;' id='display-videos-text'>Displaying All Videos</b>";
