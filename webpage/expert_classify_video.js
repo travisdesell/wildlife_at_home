@@ -294,7 +294,7 @@ $(document).ready(function () {
 
                 $.ajax({
                     type: 'POST',
-                    url: './expert_interface/get_expert_video.php',
+                    url: './get_video.php',
                     data : submission_data,
                     dataType : 'text',
                     success : function(response) {
