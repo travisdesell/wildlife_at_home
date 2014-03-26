@@ -33,10 +33,12 @@ ENDIF()
 # Executables
 #add_executable(wildlife_surf_collect wildlife_surf_collect)
 
+set(Boost_USE_MULTITHREADED OFF)
+
 #find_package(OpenCV REQUIRED COMPONENTS nonfree core)
 find_package(OpenCV REQUIRED nonfree)
 find_package(BOINC REQUIRED)
-find_package(Boost COMPONENTS program_options filesystem system)
+find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(Freetype REQUIRED)
@@ -80,7 +82,10 @@ IF(Boost_FOUND AND NOT APPLE)
         wildlife_surf_combine
         ../source/EventType)
     include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
-    target_link_libraries(wildlife_surf_combine ${Boost_LIBRARIES} ${OpenCV_LIBS})
+    target_link_libraries(wildlife_surf_combine
+        ${Boost_LIBRARIES}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${OpenCV_LIBS})
 ENDIF()
 
 #add_executable(wildlife_surf_analyze wildlife_surf_analyze)

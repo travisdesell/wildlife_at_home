@@ -9,10 +9,13 @@
 using namespace std;
 using namespace cv;
 
+enum class CV {ALL, LEAVE_ONE_OUT, TWO_FOLD};
+
 EventType* getEventType(string);
 
 string tag_dir;
 string root_dir = "/projects/wildlife/feature_files/";
+string cross_validation = ALL;
 string output_dir = "combined";
 vector<EventType*> event_types;
 
@@ -23,10 +26,11 @@ int main(int argc, char **argv) {
 
     po::options_description desc("Allowed options");
     desc.add_options()
-        ("help", "Show help menu")
-        ("tag", po::value<string>(), "Tag of features to be combined")
-        ("root", po::value<string>(), "Root feature directory")
-        ("output", po::value<string>(), "Directory name for combined features")
+        ("help,h", "Show help menu")
+        ("tag,t", po::value<string>(), "Tag of features to be combined")
+        ("root,r", po::value<string>()->required(), "Root feature directory")
+        ("cv", po::value<string>()->required(), "Cross-validation type")
+        ("output,o", po::value<string>(), "Directory name for combined features")
     ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -47,14 +51,40 @@ int main(int argc, char **argv) {
         output_dir = vm["output"].as<string>();
     }
 
+    if (vm.count("cv")) {
+        if(to_upper(vm["cv"].as<string>()) == "LEAVE_ONE_OUT") {
+            cross_validation = CV.LEAVE_ONE_OUT;
+        } else if(to_upper(vm["cv".as<string>()]) == "TWO_FOLD") {
+            cross_validation = CV.TWO_FOLD;
+        } else {
+            cross_validation = CV.ALL;
+        }
+    }
+
+    cout << "Tag: '" << tag_dir << "'" << endl;
+    cout << "Root: '" << root_dir << "'" << endl;
+    cout << "Output: '" << output_dir << "'" << endl;
+    cout << "CV: '" << cross_validation << "'" << endl;
+
     string working_directory = root_dir + tag_dir;
     cout << working_directory << endl;
+
+    // Count videos
+    int vid_count = count_if(
+            directory_iterator(working_directory),
+            directory_iterator(),
+            bind(static_cast<bool(*)(const path&)>(is_directory),
+                bind(&directory_entry::path, _1)));
+    cout << "Vid Count: " << vid_count << endl;
+
+    // Collect Events
     for (fs::recursive_directory_iterator end, dir(working_directory); dir != end; ++dir) {
         if(dir->path().extension().string() == ".desc") {
             string id = dir->path().stem().string();
             EventType *temp = getEventType(id);
             cout << temp->getId() << endl;
             cout << dir->path().string() << endl;
+            cout << dir->path().branch_path().string() << endl;
             FileStorage infile(dir->path().string(), FileStorage::READ);
             try {
                 temp->read(infile);
