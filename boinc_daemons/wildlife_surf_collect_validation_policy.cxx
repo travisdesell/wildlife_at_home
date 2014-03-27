@@ -49,6 +49,21 @@
 using namespace std;
 using namespace cv;
 
+static inline std::string &ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
+}
+
+static inline std::string &rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+    std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    return s;
+}
+
+static inline std::string &trim(std::string &s) {
+    return ltrim(rtrim(s));
+}
+
 int init_result(RESULT& result, void*& data) {
     OUTPUT_FILE_INFO fi;
     int retval;
@@ -62,7 +77,8 @@ int init_result(RESULT& result, void*& data) {
         string temp;
         getline(ss, temp, '\n');
         while(getline(ss, temp, '\n')) {
-            log_messages.printf(MSG_DEBUG, "Event id: %s\n", temp.c_str());
+            trim(temp);
+            log_messages.printf(MSG_DEBUG, "Event id: '%s'\n", temp.c_str());
             eventIds.push_back(temp);
         }
 
@@ -89,7 +105,7 @@ int init_result(RESULT& result, void*& data) {
         result.validate_state = VALIDATE_STATE_INVALID;
 
         log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
-        exit(0);
+        //exit(0);
         return ERR_XML_PARSE;
     } catch(const exception &ex) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error %s\n", result.id, result.name, ex.what());
@@ -132,12 +148,12 @@ int compare_results(
     }
 
     for (unsigned int i=0; i<events1->size(); i++) {
-        log_messages.printf(MSG_DEBUG, "Check event names.\n");
         EventType *type1 = events1->at(i);
         EventType *type2 = events2->at(i);
-        if (type1->getId() != type2->getId()) {
+        log_messages.printf(MSG_DEBUG, "Check event names. '%s' vs '%s'\n", type1->getId().c_str(), type2->getId().c_str());
+        if (type1->getId().compare(type2->getId()) != 0) {
             match = false;
-            log_messages.printf(MSG_CRITICAL, "ERROR, event ids do not match. %s vs %s\n", type1->getId().c_str(), type2->getId().c_str());
+            log_messages.printf(MSG_CRITICAL, "ERROR, event ids do not match. '%s' vs '%s'\n", type1->getId().c_str(), type2->getId().c_str());
             exit(0);
             return 0;
         }
