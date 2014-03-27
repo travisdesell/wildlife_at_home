@@ -147,7 +147,8 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
         string temp;
         std::getline(ss, temp, '\n');
         while(std::getline(ss, temp, '\n')) {
-            log_messages.printf(MSG_DEBUG, "Event id: %s\n", temp.c_str());
+            boost::algorithm::trim(temp);
+            log_messages.printf(MSG_DEBUG, "Event id: '%s'\n", temp.c_str());
             event_names.push_back(temp);
         }
 
@@ -210,7 +211,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     //  SELECT id, species_id, location_id FROM video_segment_2 WHERE video_id = video_id and number = i
 
     ostringstream full_video_query;
-    full_video_query << "SELECT species_id, location_id FROM video_2 WHERE id = " << video_id << endl;
+    full_video_query << "SELECT species_id, location_id FROM video_2 WHERE id = '" << video_id  << "'" << endl;
 
     mysql_query_check(wildlife_db_conn, full_video_query.str());
     MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
@@ -239,13 +240,13 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
         }
 
         string full_filename = pathname + filename;
-        cerr << "Writing to: " <<  full_filename << endl;
+        cerr << "Writing to: '" <<  full_filename << "'" << endl;
         FileStorage outfile(full_filename, FileStorage::WRITE);
-        cerr << "Write: " << (*it)->getId().c_str() << endl;
+        cerr << "Write: '" << (*it)->getId().c_str() << "'" << endl;
         try {
             log_messages.printf(MSG_DEBUG, "wildlife_surf_collect_assimilation_policy: Write out %d, descriptors.\n", (*it)->getDescriptors().rows);
             (*it)->writeDescriptors(outfile);
-            //(*it)->writeKeypoints(outfile);
+            (*it)->writeKeypoints(outfile);
         } catch(const exception &ex) {
             log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy write_reslts([RESULT#%d %s) failed with error: %s\n", canonical_result.id, canonical_result.name, ex.what());
             return 1;
