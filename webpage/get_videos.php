@@ -13,25 +13,39 @@ require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/boinc_db.php');
 require_once($cwd . '/my_query.php');
 require_once($cwd . '/get_video_filter.php');
+require_once($cwd . '/user.php');
 
 
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$filter_text = mysql_real_escape_string($_POST['filter_text']);
+$video_filter_text = mysql_real_escape_string($_POST['video_filter_text']);
+$event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
 
-//if not expert, add flag so that videos are only the users own videos
-if ($filter_text != '') {
-    $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2, timed_observations AS obs WHERE v2.id = obs.video_id AND ";
+$user = get_user();
+$query = "";
 
-    create_filter($filter_text, $query);
+//if not expert, add flag so that videos are only the users own videos
+if ($video_filter_text != '' || $event_filter_text != '') {
+    create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query);
+
+    if (is_special_user__fixme($user, true)) {
+        $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2 WHERE " . $filter_query;
+    } else {
+        $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE " . $filter_query;
+    }
     
     $query .= " ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
     error_log("QUERY: $query");
 } else {
-    $query = "SELECT id, processing_status, watermarked_filename, timed_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
+    if (is_special_user__fixme($user, true)) {
+        $query = "SELECT id, processing_status, watermarked_filename, timed_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
+    } else {
+        $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 as v2 RIGHT JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE v2.timed_obs_count > 0 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
+        error_log($query);
+    }
 }
 
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -63,22 +77,13 @@ while ($row = mysql_fetch_assoc($result)) {
         $row['timed_obs_count'] .= " recorded events";
     }
 
+
+    if (is_special_user__fixme($user, true)) {
+        $row['special_user'] = true;
+    }
+
     $wf = $row['watermarked_filename'];
-
-    /*
-    for ($i = 0; $i < 7; $i++) {
-        $wf = substr($wf, strpos($wf, '/') + 1);
-    }
-    $wf = str_replace("/", " - ", $wf);
-     */
-    $wf = basename($wf);
-    if ($row['rivermile'] == NULL) {
-        $wf = $row['animal_id'] . " - " . $row['start_time'] . " - " . $wf;
-    } else {
-        $wf = $row['animal_id'] . " - " . $row['rivermile'] . " - " . $row['start_time'] . " - " . $wf;
-    }
-
-    $row['cleaned_filename'] = $wf;
+    $row['cleaned_filename'] = basename($wf);
     $video_list['video_list'][] = $row;
 }
 

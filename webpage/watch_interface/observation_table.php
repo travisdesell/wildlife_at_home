@@ -218,25 +218,36 @@ function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $
     $watch_info['animal_id'] = $animal_id;
     $watch_info['trimmed_filename'] = trim(substr($video_file, strrpos($video_file, '/') + 1));
 
-    $query = "SELECT * FROM expert_observations WHERE video_id = $video_id";
-    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (is_special_user__fixme($user, false)) {
+        $query = "SELECT * FROM expert_observations WHERE video_id = $video_id";
+        $result = attempt_query_with_ping($query, $wildlife_db);
 
-    while ($row = mysql_fetch_assoc($result)) {
-        $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
-        $name_result = attempt_query_with_ping($name_query, $boinc_db);
-        $name_row = mysql_fetch_assoc($name_result);
+        while ($row = mysql_fetch_assoc($result)) {
+            $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+            $name_result = attempt_query_with_ping($name_query, $boinc_db);
+            $name_row = mysql_fetch_assoc($name_result);
 
-        $row['user_name'] = $name_row['name'];
+            $row['user_name'] = $name_row['name'];
 
-//        error_log( json_encode($row) );
-        $watch_info['old_observations'][] = $row;
+    //        error_log( json_encode($row) );
+            $watch_info['old_observations'][] = $row;
+        }
+
+        if (count($watch_info['old_observations']) > 0) {
+            $watch_info['display_old_observations'] = true;
+        }
+    } else {
+        $watch_info['display_old_observations'] = false;
+        $watch_info['regular_user'] = true;
     }
 
-    if (count($watch_info['old_observations']) > 0) {
-        $watch_info['display_old_observations'] = true;
+    $query = "";
+    if (is_special_user__fixme($user, false)) {
+        $query = "SELECT timed_observations.*, observation_types.name, observation_types.category FROM timed_observations LEFT JOIN observation_types ON (timed_observations.event_id = observation_types.id) WHERE video_id = $video_id AND user_id != " . $user['id'] . " ORDER BY user_id, start_time";
+    } else {
+        $query = "SELECT timed_observations.*, observation_types.name, observation_types.category FROM timed_observations LEFT JOIN observation_types ON (timed_observations.event_id = observation_types.id) WHERE video_id = $video_id ORDER BY user_id, start_time";
     }
 
-    $query = "SELECT timed_observations.*, observation_types.name, observation_types.category FROM timed_observations LEFT JOIN observation_types ON (timed_observations.event_id = observation_types.id) WHERE video_id = $video_id AND user_id != " . $user['id'] . " ORDER BY user_id, start_time";
     $result = attempt_query_with_ping($query, $wildlife_db);
     while ($row = mysql_fetch_assoc($result)) {
         $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
@@ -257,9 +268,7 @@ function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $
         $watch_info['display_other_observations'] = true;
     }
 
-
-
-    $watch_interface_template = file_get_contents($cwd . "/templates/expert_row_template.html");
+    $watch_interface_template = file_get_contents($cwd . "/templates/row_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($watch_interface_template, $watch_info);
 }

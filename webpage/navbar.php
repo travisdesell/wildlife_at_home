@@ -188,7 +188,7 @@ echo "                      <li class='dropdown " . $active_items['preferences']
 if ($user != null) {
     $url_tokens = url_tokens__fixme($user['authenticator']);
     echo "                      <li class='divider'></li>
-                                <li><a href='logout.php?$url_tokens'>Log Out</a></li>";
+                                <li><a href='http://volunteer.cs.und.edu/wildlife/logout.php?$url_tokens'>Log Out</a></li>";
 }
 
 echo "                          </ul>

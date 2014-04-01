@@ -8,172 +8,17 @@ $(document).ready(function () {
     console.log("dev_dir: '" + dev_dir + "'");
     */
 
-    var filter_text = '';
-    var location_id = -1;
-    var species_id = -1;
-    var animal_id = -1;
+    var video_filter_text = '';
+    var event_filter_text = '';
     var video_min = 0;
     var video_count = 15;
-    var event_ids = {};
-    var comments = {};
-    var event_end_times = {};
-    var event_start_times = {};
-    var video_observations = {};
-    var year = '';
-    var video_status = '';
-    var video_release = '';
-
-    $('.status-dropdown').click(function() {
-        var new_status = $(this).attr("video_status");
-
-        if (new_status !== video_status) {
-            video_status = new_status;
-            if (video_status === '') {
-                $('#status-button').html("Any Status <span class='caret'></span>");
-            } else if (video_status === 'UNWATCHED') {
-                $('#status-button').html("Unwatched <span class='caret'></span>");
-            } else if (video_status === 'WATCHED') {
-                $('#status-button').html("Watched <span class='caret'></span>");
-            } else if (video_status === 'FINISHED') {
-                $('#status-button').html("Finished <span class='caret'></span>");
-            }
-
-            load_animal_ids();
-            load_videos();
-        }
-    });
-
-    $('.release-dropdown').click(function() {
-        var new_release = $(this).attr("release_to_public");
-
-        if (new_release !== video_release) {
-            video_release = new_release;
-            if (video_release === '') {
-                $('#release-button').html("Release <span class='caret'></span>");
-            } else if (video_release === 'false') {
-                $('#release-button').html("Private <span class='caret'></span>");
-            } else if (video_release === 'true') {
-                $('#release-button').html("Public <span class='caret'></span>");
-            }
-
-            load_animal_ids();
-            load_videos();
-        }
-    });
-
-
-    $('.year-dropdown').click(function() {
-        var new_year = $(this).attr("year");
-
-        if (new_year !== year) {
-            year = new_year;
-            if (year === '') {
-                $('#year-button').html("Year <span class='caret'></span>");
-            } else {
-                $('#year-button').html(year + " <span class='caret'></span>");
-            }
-
-            load_animal_ids();
-            load_videos();
-        }
-    });
-
-    $('.species-dropdown').click(function() {
-        var new_species_id = $(this).attr("species_id");
-
-        if (new_species_id !== species_id) {
-            species_id = new_species_id;
-
-            if (species_id == 0) {
-                $('#species-button').html('Species <span class="caret"></span>');
-            } else if (species_id == 1) {
-                $('#species-button').html('Sharp-tailed Grouse <span class="caret"></span>');
-            } else if (species_id == 2) {
-                $('#species-button').html('Interior Least Tern <span class="caret"></span>');
-            } else if (species_id == 3) {
-                $('#species-button').html('Piping Plover <span class="caret"></span>');
-            }
-
-            load_animal_ids();
-            load_videos();
-        }
-    });
-
-    $('.location-dropdown').click(function() {
-        var new_location_id = $(this).attr("location_id");
-
-        if (new_location_id !== location_id) {
-            location_id = new_location_id;
-
-            if (location_id == 0) {
-                $('#location-button').html('Location <span class="caret"></span>');
-            } else if (location_id == 1) {
-                $('#location-button').html('Belden, ND <span class="caret"></span>');
-            } else if (location_id == 2) {
-                $('#location-button').html('Blaisdell, ND <span class="caret"></span>');
-            } else if (location_id == 3) {
-                $('#location-button').html('Lostwood Wildlife Refuge, ND <span class="caret"></span>');
-            } else if (location_id == 4) {
-                $('#location-button').html('Missouri River, ND <span class="caret"></span>');
-            }
-
-            load_animal_ids();
-            load_videos();
-        }
-    });
-
-    load_animal_ids();
-
-    function load_animal_ids() {
-        animal_id = -1
-        $('#animal-id-button').html("Animal ID <span class='caret'></span>");
-
-        var submission_data = {
-                                species_id : species_id,
-                                location_id : location_id,
-                                video_status : video_status,
-                                year : year
-                              };
-
-        $.ajax({
-            type: 'POST',
-            url: './expert_interface/get_animal_ids.php',
-            data : submission_data,
-            dataType : 'text',
-            success : function(response) {
-//                console.log("the response was:\n" + response);
-                $("#animal-id-dropdown-menu").html(response);
-                enable_animal_id_dropdown();
-            },
-            error : function(jqXHR, textStatus, errorThrown) {
-                alert(errorThrown);
-            },
-            async: true
-        });
-    }
-
-    function enable_animal_id_dropdown() {
-        $('.animal-id-dropdown').click(function() {
-            var new_animal_id = $(this).attr("animal_id");
-
-            if (new_animal_id !== animal_id) {
-                animal_id = new_animal_id;
-
-                if (animal_id == 0) {
-                    $('#animal-id-button').html('Animal ID <span class="caret"></span>');
-                } else {
-                    $('#animal-id-button').html(animal_id + ' <span class="caret"></span>');
-                }
-                load_videos();
-            }
-        });
-    }
 
     load_videos();
 
     function load_videos() {
         var submission_data = {
-                                filter_text : filter_text,
+                                event_filter_text : event_filter_text,
+                                video_filter_text : video_filter_text,
                                 video_min : video_min,
                                 video_count : video_count,
                               };
@@ -229,13 +74,15 @@ $(document).ready(function () {
                     var video_id = $(this).attr('video_id');
                     var video_button = $(this);
 
+                    console.log("clicked tag video button");
+
                     $.ajax({
                         type: 'POST',
                         url: './expert_interface/toggle_expert_flag.php',
                         data : { video_id : video_id },
                         dataType : 'JSON',
                         success : function(response) {
-//                            console.log("response: " + JSON.stringify(response));
+                            console.log("response: " + JSON.stringify(response));
                             if (response['expert_finished'] === 'FINISHED') {
                                 video_button.removeClass("btn-primary");
                                 video_button.addClass("btn-success");
@@ -264,7 +111,7 @@ $(document).ready(function () {
             data : submission_data,
             dataType : 'text',
             success : function(response) {
-                console.log("the response was:\n" + response);
+//                console.log("the response was:\n" + response);
                 $("#videos-nav-placeholder").html(response);
                 init_dropdown();
             },
@@ -290,7 +137,7 @@ $(document).ready(function () {
                                         video_converted : $( $(this).attr('href') ).attr('video_converted')
                                       };
 
-                console.log("target is: '" + target + "'");
+//                console.log("target is: '" + target + "'");
 
                 $.ajax({
                     type: 'POST',
@@ -298,10 +145,11 @@ $(document).ready(function () {
                     data : submission_data,
                     dataType : 'text',
                     success : function(response) {
-                        console.log("the response was:\n" + response);
+//                        console.log("the response was:\n" + response);
                         $(target).html(response);
 
                         initialize_event_list();
+//                        console.log("enabling observation table!");
                         enable_observation_table();
                     },
                     error : function(jqXHR, textStatus, errorThrown) {
@@ -401,12 +249,12 @@ $(document).ready(function () {
             ev.stopPropagation();
         });
 
-        $('.filter-dropdown:not(.bound)').addClass('bound').click(function() {
-            if ($('#filter-list').html().indexOf($(this).text()) < 0) {
+        $('.video-filter-dropdown:not(.bound)').addClass('bound').click(function() {
+            if ($('#video-filter-list').html().indexOf($(this).text()) < 0) {
                 $('#display-videos-text').text("Displaying Videos");
-                var append_text = "<div style='display:table-row;'><div style='display:table-cell;'>";
+                var append_text = "<div class='display-video-table-row' style='display:table-row;'><div style='display:table-cell;'>";
                 
-                if ($('#filter-list').html().length > 0) {
+                if ($('#video-filter-list').html().length > 0) {
                     append_text += "<span class='label and-label-toggle' style='margin-top:3px; padding-bottom:2px; margin-right:3px;'>and</span>";
                 }
 
@@ -429,28 +277,57 @@ $(document).ready(function () {
                     append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
                     attr_text = "species-filter='" + $(this).attr("species_id") + "'";
 
-                } else if ($(this).hasClass('other-filter')) {
+                } else if ($(this).hasClass('other-video-filter')) {
                     append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
-                    attr_text = "other-filter";
+                    attr_text = "other-video-filter='" + $(this).attr("other_id") + "'";
 
+                } else {    //should not get here
+                    console.log("unknown video filter added.");
+                }
+
+                append_text += "<br><span class='badge badge-info label-removal-element video-label' style='margin-top:3px; padding-bottom:2px; float:right;' " + attr_text + " label_text='" + desc_text + "'>" + desc_text + "</span></div></div>";
+                $('#video-filter-list').append(append_text);
+                apply_label_toggles();
+                apply_label_removal();
+            } else {
+                $('#display-videos-text').text("Displaying All Videos");
+            }
+        });
+
+
+        $('.event-filter-dropdown:not(.bound)').addClass('bound').click(function() {
+            if ($('#event-filter-list').html().indexOf($(this).text()) < 0) {
+                $('#display-events-text').text("With Events");
+                var append_text = "<div class='display-video-table-row' style='display:table-row;'><div style='display:table-cell;'>";
+                
+                if ($('#event-filter-list').html().length > 0) {
+                    append_text += "<span class='label and-label-toggle' style='margin-top:3px; padding-bottom:2px; margin-right:3px;'>and</span>";
+                }
+
+                var attr_text = "";
+                var desc_text = $(this).text();
+                if ($(this).hasClass('other-event-filter')) {
+                    append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
+                    attr_text = "other-event-filter='" + $(this).attr("other_id") + "'";
                 } else {    //event-filter
                     append_text += "<span class='label with-label-toggle' style='margin-top:3px; padding-bottom:2px;'>with</span>";
                     attr_text = "event-filter='" + $(this).attr("event_id") + "'";
                 }
 
-                append_text += "<span class='badge badge-info' style='margin-top:3px; padding-bottom:2px; float:right;' " + attr_text + ">" + desc_text + "</span></div></div>";
-                $('#filter-list').append(append_text);
+                append_text += "<br><span class='badge badge-info label-removal-element event-label' style='margin-top:3px; padding-bottom:2px; float:right;' " + attr_text + " label_text='" + desc_text + "'>" + desc_text + "</span></div></div>";
+                $('#event-filter-list').append(append_text);
                 apply_label_toggles();
+                apply_label_removal();
             } else {
-                $('#display-videos-text').text("Displaying All Videos");
+                $('#display-events-text').text("With Any Events");
             }
         });
 
         $('#apply-filter-button:not(.bound)').addClass('bound').click(function() {
             console.log("applying filter!");
 
-            var query_text = "";
-            $('#filter-list span').each(function() {
+            var video_query_text = "";
+            $('#video-filter-list span').each(function() {
 //                console.log("span text is: '" + $(this).text() + "'");
                 var attr_text = "";
                 if ($(this).attr('location-filter') !== undefined) {
@@ -461,31 +338,49 @@ $(document).ready(function () {
                     attr_text += "year " + $(this).attr('year-filter');
                 } else if ($(this).attr('species-filter') !== undefined) {
                     attr_text += "species " + $(this).attr('species-filter');
-                } else if ($(this).attr('event-filter') !== undefined) {
-                    attr_text += "event " + $(this).attr('event-filter') + " ";
-                } else if ($(this).attr('other-filter') !== undefined) {
-                    attr_text += "other ";
+                } else if ($(this).attr('other-video-filter') !== undefined) {
+                    attr_text += "other " + $(this).attr('other-video-filter');
                 } else {
                     attr_text = $(this).text();
                 }
 
-                query_text += attr_text + "##";
+                video_query_text += attr_text + "##";
             });
-//            console.log("query text: '" + query_text + "'");
+            console.log("video_query text: '" + video_query_text + "'");
 
-            if (filter_text !== query_text) {
+            var event_query_text = "";
+            $('#event-filter-list span').each(function() {
+//                console.log("span text is: '" + $(this).text() + "'");
+                var attr_text = "";
+                if ($(this).attr('event-filter') !== undefined) {
+                    attr_text += "event " + $(this).attr('event-filter');
+                } else if ($(this).attr('other-event-filter') !== undefined) {
+                    attr_text += "other " + $(this).attr('other-event-filter');
+                } else {
+                    attr_text = $(this).text();
+                }
+
+                event_query_text += attr_text + "##";
+            });
+            console.log("event_query text: '" + event_query_text + "'");
+
+
+            if (video_filter_text !== video_query_text || event_filter_text !== event_query_text) {
                 console.log("RELOADING!");
-                filter_text = query_text;
+                video_filter_text = video_query_text;
+                event_filter_text = event_query_text;
                 load_videos();
             }
 
         });
 
         $('#clear-filter-button:not(.bound)').addClass('bound').click(function() {
-            console.log("clearing filter!");
-
             $('#display-videos-text').text("Displaying All Videos");
-            $('#filter-list').text("");
+            $('#video-filter-list').text("");
+            $('#display-events-text').text("With Any Events");
+            $('#event-filter-list').text("");
+//            filter_text = "";
+//            load_videos();
         });
     }
 
@@ -507,5 +402,53 @@ $(document).ready(function () {
             else                            $(this).text('with');
         });
     }
+
+    function apply_label_removal() {
+        $('.label-removal-element:not(.over-bound)').addClass('over-bound').mouseover(function(ev) {
+            var label_text = $(this).attr("label_text");
+//                console.log("mouse is over: '" + label_text + "'");
+            if ( !$(this).hasClass("has-remove-icon") ) { 
+                $(this).addClass("has-remove-icon");
+                $(this).append(" <i class='icon-white icon-remove-sign'></i>");
+            }   
+        }); 
+
+        $('.label-removal-element:not(.leave-bound)').addClass('leave-bound').mouseleave(function(ev) {
+            var label_text = $(this).attr("label_text");
+//                console.log("mouse is over: '" + label_text + "'");
+            $(this).text(label_text);
+            $(this).removeClass("has-remove-icon");
+        }); 
+
+        $('.label-removal-element:not(.click-bound)').addClass('click-bound').click(function(ev) {
+            var filter_type_text = "video-";
+            if ($(this).hasClass("event-label")) {
+                filter_type_text = "event-";
+            }
+
+            var label_text = $(this).attr("label_text");
+
+            $(this).parent().parent().remove();
+
+            //check to see if we removed the first filter, if so we need to remove the "and" or "or" before the new first one.
+            if ($("#" + filter_type_text + "filter-list").children().length) {
+//                console.log("#" + filter_type_text + "filter-list.children().first().html(): " + $("#" + filter_type_text + "filter-list").children().first().html());
+
+                var first_html = $("#" + filter_type_text + "filter-list").children().first().html();
+                if (first_html.indexOf(">and</span>") > 0 || first_html.indexOf(">or</span>") > 0) {
+                    console.log("trying to remove: " + $("span:first", $("#" + filter_type_text + "filter-list").children().first()).html());
+
+                    $("span:first", $("#" + filter_type_text + "filter-list").children().first()).remove();
+                }
+            } else {
+                if (filter_type_text === "video-") {
+                    $('#display-videos-text').text("Displaying All Videos");
+                } else {
+                    $('#display-events-text').text("With Any Events");
+                }
+            }
+        }); 
+    }   
+
 });
 

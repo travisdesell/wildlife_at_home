@@ -55,7 +55,7 @@ if (!$result) {
 }
 $observation_id = mysql_insert_id($wildlife_db);
 
-$query = "UPDATE video_2 SET timed_obs_count = timed_obs_count + 1 WHERE id = $video_id";
+$query = "UPDATE video_2 SET timed_obs_count = timed_obs_count + 1, expert_finished = IF(expert_finished = 'UNWATCHED', 'WATCHED', expert_finished) WHERE id = $video_id";
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");

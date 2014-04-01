@@ -176,9 +176,6 @@ function enable_observation_table() {
         var video_id = $(this).attr("video_id");
         var observation_id = $(this).attr("observation_id");
 
-        //console.log("target = #event-button-" + video_id);
-        //console.log("event_ids = " + JSON.stringify(event_ids));
-
         function toTitleCase(str) {
             return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
         }
