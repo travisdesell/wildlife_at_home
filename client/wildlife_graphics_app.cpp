@@ -19,7 +19,6 @@
 
 #include <FTGL/ftgl.h>
 
-#include <boinc_gl.h>
 #include <parse.h>
 #include <gutil.h>
 #include <app_ipc.h>
@@ -103,9 +102,16 @@ static void draw_text() {
         } else if (shmem->status.suspended) {
             renderText(10, window_height*0.5, "App Suspended");
         }
+
+        sprintf(buf, "Features Collected: %d", shmem->feature_count);
+        renderText(10, window_height-90, buf);
+        sprintf(buf, "Average Collected Features: %f", shmem->feature_average);
+        renderText(10, window_height-110, buf);
+        sprintf(buf, "Species: %s", shmem->species);
+        renderText(10, window_height-130, buf);
     } else {
         glRasterPos2f(0.05f, 0.21f);
-        renderText(10, window_height-50, "No Shared Mem");
+        renderText(10, window_height*0.5, "No Shared Mem");
     }
 }
 
