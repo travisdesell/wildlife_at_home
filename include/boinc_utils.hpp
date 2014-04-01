@@ -31,6 +31,9 @@ struct WILDLIFE_SHMEM {
     double fps;
     BOINC_STATUS status;
     unsigned int frame;
+    unsigned int feature_count;
+    float feature_average;
+    char species[256];
     char filename[256];
 };
 

@@ -40,7 +40,7 @@ void printUsage();
 bool readParams(int argc, char** argv);
 void calculateFPS();
 void updateSHMEM();
-bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime);
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species);
 void writeMatrix(FileStorage outfile, string id, Mat matrix);
 Mat readMatrix(FileStorage infile, string id);
 void writeEventsToFile(string filename, vector<EventType*> eventTypes);
@@ -62,6 +62,7 @@ static bool removeTimestamp = true;
 static int descMatcher = 1;
 static string vidFilename, configFilename, descFilename;
 static string vidName;
+static string species;
 
 // SHMEM
 WILDLIFE_SHMEM* shmem = NULL;
@@ -70,6 +71,8 @@ unsigned int previousTime = 0;
 unsigned int frameCount = 0;
 unsigned int framePos;
 unsigned int totalFrames;
+unsigned int featuresCollected = 0;
+float averageFeatures = 0;
 double fps = 10;
 
 int main(int argc, char **argv) {
@@ -106,7 +109,7 @@ int main(int argc, char **argv) {
     int vidTime;
     vector<EventType*> eventTypes;
     vector<Event*> events;
-    if(!readConfig(configFilename, &eventTypes, &events, &vidTime)) {
+    if(!readConfig(configFilename, &eventTypes, &events, &vidTime, &species)) {
         return false; //Error occurred.
     }
     cerr << "Events: " << events.size() << endl;
@@ -148,6 +151,8 @@ int main(int argc, char **argv) {
     shmem = (WILDLIFE_SHMEM*)boinc_graphics_make_shmem("wildlife_surf_collect", sizeof(WILDLIFE_SHMEM));
     fill(shmem->filename, shmem->filename + sizeof(shmem->filename), 0);
     memcpy(shmem->filename, vidFilename.c_str(), vidFilename.size());
+    fill(shmem->species, shmem->species + sizeof(shmem->species), 0);
+    memcpy(shmem->species, species.c_str(), species.size());
     updateSHMEM();
     boinc_register_timer_callback(updateSHMEM);
     cerr << "SHMEM opened." << endl;
@@ -240,9 +245,11 @@ int main(int argc, char **argv) {
                         (*it)->addDescriptors(newDescriptors);
                         (*it)->addKeypoints(newKeypoints);
                     }
+                    featuresCollected = (*it)->getDescriptors().rows;
+
                     cerr << (*it)->getTypeId().c_str() << " descriptors found: " << frameDescriptors.rows << endl;
                     cerr << (*it)->getTypeId().c_str() << " descriptors added: " << newDescriptors.rows << endl;
-                    cerr << (*it)->getTypeId().c_str() << " descriptors: " << (*it)->getDescriptors().size() << endl;
+                    cerr << (*it)->getTypeId().c_str() << " descriptors: " << featuresCollected << endl;
                 }
             }
         }
@@ -350,11 +357,13 @@ void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     outfile.release();
 }
 
-bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime) {
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species) {
     cerr << "Reading config file: " << filename.c_str() << endl;
     string line, eventId, startTime, endTime;
     ifstream infile;
     infile.open(filename.c_str());
+    getline(infile, line);
+    *species = line;
     getline(infile, line);
     *vidTime = timeToSeconds(line);
     while(getline(infile, eventId, ',')) {
@@ -392,6 +401,8 @@ void updateSHMEM() {
     shmem->cpu_time = boinc_worker_thread_cpu_time();
     boinc_get_status(&shmem->status);
     shmem->fps = fps;
+    shmem->feature_count = featuresCollected;
+    shmem->feature_average = featuresCollected/(float)framePos;;
     shmem->frame = framePos;
 }
 
