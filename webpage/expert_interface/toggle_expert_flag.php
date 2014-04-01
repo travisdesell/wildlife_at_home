@@ -21,12 +21,13 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$query = "SELECT expert_obs_count FROM video_2 WHERE id = $video_id";
+$query = "SELECT count(*) FROM timed_observations WHERE video_id = $video_id";
+
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
 $row = mysql_fetch_assoc($result);
-$previous = $row['expert_obs_count'];
+$previous = $row['count(*)'];
 
 if ($previous == 0) $previous = 'UNWATCHED';
 else $previous = 'WATCHED';
