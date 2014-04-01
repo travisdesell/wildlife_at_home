@@ -71,7 +71,7 @@ echo "
                         <h3>Journal Articles</h3>
 
                         <ul>
-                            <li>Susan N. Ellis-Felege, Travis Desell, Christopher J. Felege. </b>Wildlife@Home: Conservation Outreach using Nest Cameras, Citizen Science, and Computer Vision</b>. <i>Wildlife Professional</i>. To appear.</li>
+                            <li>Susan N. Ellis-Felege, Travis Desell, Christopher J. Felege. </b>Wildlife@Home: Conservation Outreach using Nest Cameras, Citizen Science, and Computer Vision</b>. <i>Wildlife Professional</i>. <a href='./publications/birds_eye_view.pdf'>[pdf]</a> courtsey of <a href='http://www.wildlife.org/publications/twp'>The Wildlife Professional.</a></li>
                         </ul>
                     </div>
                 </div>
