@@ -24,7 +24,7 @@ echo "
 <html>
 <head>
     <meta charset='utf-8'>
-    <title>Wildlife@Home: Watched Videos</title>
+    <title>Wildlife@Home: Reviewing Videos</title>
 
     <!-- For bootstrap -->
     $bootstrap_scripts
