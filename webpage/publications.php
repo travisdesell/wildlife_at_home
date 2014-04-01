@@ -71,7 +71,7 @@ echo "
                         <h3>Journal Articles</h3>
 
                         <ul>
-                            <li>Susan N. Ellis-Felege, Travis Desell, Christopher J. Felege. </b>Wildlife@Home: Conservation Outreach using Nest Cameras, Citizen Science, and Computer Vision</b>. <i>Wildlife Professional</i>. <a href='./publications/birds_eye_view.pdf'>[pdf]</a> courtsey of <a href='http://www.wildlife.org/publications/twp'>The Wildlife Professional.</a></li>
+                            <li>Susan N. Ellis-Felege, Travis Desell, Christopher J. Felege. <b>A Bird's Eye View of... Birds: Combining Technology and Citizen Science for Conservation</b>. <i>Wildlife Professional</i>. <a href='./publications/birds_eye_view.pdf'>[pdf]</a> courtsey of <a href='http://www.wildlife.org/publications/twp'>The Wildlife Professional.</a></li>
                         </ul>
                     </div>
                 </div>
@@ -97,7 +97,7 @@ echo "
                         <h3>Oral Presentations</h3>
 
                         <ul>
-                            <li>Susan N. Ellis-Felege, Travis Desell, and Christopher J. Felege. <b>Wildlife@Home: conservation outreach using nest cameras, citizen science and computer vision</b>. <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <a href='publications/felege_conservation_outreach_talk.pdf'>[pdf]</a> </li>
+                            <li>Susan N. Ellis-Felege, Travis Desell, and Christopher J. Felege. <b>Wildlife@Home: Conservation Outreach Using Nest Cameras, Citizen Science and Computer vision</b>. <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <a href='publications/felege_conservation_outreach_talk.pdf'>[pdf]</a> </li>
 
                             <li>Travis Desell, Robert Bergman, Kyle Goehner, Ronald Marsh, Rebecca VanderClute, and Susan Ellis-Felege. <b>Wildlife@Home: Combining Crowd Sourcing and Volunteer Computing to Analyze Avian Nesting Video</b>. <i>The 9th International Conference on E-Science (e-Science 2013)</i>. Beijing, China. October 23, 2013. <a href='http://people.cs.und.edu/~tdesell/talks/2013_october_23_escience/index.html'>[html]</a> </li>
 
