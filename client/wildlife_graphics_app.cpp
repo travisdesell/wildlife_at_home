@@ -47,6 +47,7 @@ GLuint texture = 0;
 
 // FTGL
 FTGLPixmapFont *font;
+string font_filename = "LiberationSans-Regular.ttf";
 
 // OpenCV
 VideoCapture capture;
@@ -186,7 +187,12 @@ void app_graphics_init() {
     // Load logo from disk here and initialize the viewport
     cerr << "Init..." << endl;
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    font = new FTGLPixmapFont("../../fonts/LiberationSans-Regular.ttf");
+
+#ifdef _BOINC_APP_
+    font_filename = getBoincFilename(font_filename);
+#endif
+
+    font = new FTGLPixmapFont(font_filename.c_str());
     if(font->Error()) {
         cerr << "The font file could not be loaded." << endl;
         exit(1);
