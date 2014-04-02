@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
     // Count videos
     set<string> vid_set;
     for (fs::recursive_directory_iterator end, dir(working_directory); dir != end; ++dir) {
-        if(dir->path().extension().string() == ".desc") {
+        if(dir->path().extension()  == ".desc") {
             string filename = dir->path().branch_path().string();
             //cout << filename << endl;
             vid_set.insert(filename);
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
         for(int j=0; j<group_sizes[i]; j++) {
             cout << "********** Vid File: '" << vid_files[current_index] << "'" << endl;
             for(fs::recursive_directory_iterator end, dir(vid_files[current_index]); dir != end; ++dir) {
-                if(dir->path().extension().string() == ".desc") {
+                if(dir->path().extension() == ".desc") {
                     string id = dir->path().stem().string();
                     EventType *temp = getEventType(id, i);
                     //cout << temp->getId() << endl;
@@ -170,10 +170,9 @@ int main(int argc, char **argv) {
             string pathname = combined_feats_directory;
 
             fs::path path(pathname);
-            sys::error_code returnedError;
-            fs::create_directories(path, returnedError);
+            bool created = fs::create_directories(path);
 
-            if(returnedError) {
+            if(!created) {
                 cout << "[ERROR] wildlife_surf_collect_assimilation_policy failed with 'cannot create directories error', directory: " << pathname << endl;
                 return 1;
                 return 0;
