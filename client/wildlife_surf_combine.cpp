@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
             cout << "********** Vid File: '" << vid_files[current_index] << "'" << endl;
             for(fs::recursive_directory_iterator end, dir(vid_files[current_index]); dir != end; ++dir) {
                 if(dir->path().extension() == ".desc") {
-                    string id = dir->path().stem().string();
+                    string id = dir->path().stem();
                     EventType *temp = getEventType(id, i);
                     //cout << temp->getId() << endl;
                     //cout << dir->path().string() << endl;
