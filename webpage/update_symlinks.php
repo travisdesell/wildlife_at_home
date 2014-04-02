@@ -30,9 +30,32 @@ foreach (glob("*.js") as $filename) {
     shell_exec($command);
 }
 
+foreach (glob("*.css") as $filename) {
+    //echo $filename . "\n";
+    $command = "ln -s $cwd/$filename $target/$filename";
+    echo "$command\n";
+    shell_exec("rm $target/$filename");
+    shell_exec($command);
+}
+
+
+$command = "ln -s $cwd/expert_interface $target/expert_interface";
+echo "$command\n";
+shell_exec("rm $target/expert_interface");
+shell_exec($command);
+
 $command = "ln -s $cwd/watch_interface $target/watch_interface";
 echo "$command\n";
 shell_exec("rm $target/watch_interface");
+shell_exec($command);
+
+$command = "ln -s $cwd/publications $target/publications";
+echo "$command\n";
+shell_exec("rm $target/publications");
+shell_exec($command);
+
+$command = "ln -s $cwd/images $target/images";
+shell_exec("rm $target/images");
 shell_exec($command);
 
 $command = "ln -s $cwd/wildlife_badges $target/wildlife_badges";

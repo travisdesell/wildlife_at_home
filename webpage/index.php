@@ -35,7 +35,6 @@ require_once("/projects/wildlife/html/inc/sanitize_html.inc");
 require_once("/projects/wildlife/html/inc/translation.inc");
 require_once("/projects/wildlife/html/inc/text_transform.inc");
 
-//set_include_path("/projects/wildlife/html/project");
 require_once("/projects/wildlife/html/project/project.inc");
 
 require_once($cwd . "/navbar.php");
@@ -368,6 +367,23 @@ echo"
 
             <div class='span6'>
                     <section id='contact'>
+                        <div class='page-header'><h2>Active Projects</h2></div>
+                        <ul>
+                            <li>Alicia Andes - <a href='alicia_project.php'>Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li>
+                            <li>Paul Burr - <a href='paul_project.php'>Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li>
+                            <li>Rebecca Eckroad - <a href='becca_grouse_project.php'>Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li>
+                        </ul>
+
+                    </section>
+
+                    <section id='contact'>
+                        <div class='page-header'><h2>Publications</h2></div>
+                        <p>
+                            All publications, talks and posters about Wildlife@Home can be viewed on our <a href='publications.php'>publications page</a>.
+                        </p>
+                    </section>
+
+                    <section id='contact'>
                         <div class='page-header'><h2>Contact Information</h2></div>
                         <p>Please email any questions or suggestions to <a href='mailto:tdesell@cs.und.edu'>Travis Desell</a>, or feel free to post a message in our <a href='forum_index.php'>forums</a>.
                         <p>
@@ -382,7 +398,7 @@ echo"
                         </li>
 
                         <li>
-                        Chris Felege, Educational Outreach Coordinator, Instructor of Biology, University of North Dakota 
+                        <a href='http://arts-sciences.und.edu/biology/faculty/chris-felege.cfm'>Chris Felege</a>, Educational Outreach Coordinator, Instructor of Biology, University of North Dakota 
                         </li>
 
                         <li>

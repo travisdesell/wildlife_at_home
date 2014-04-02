@@ -18,8 +18,6 @@ $event_id  = mysql_real_escape_string($_POST['event_id']);
 $start_time = mysql_real_escape_string($_POST['start_time']);
 $end_time = mysql_real_escape_string($_POST['end_time']);
 $comments = mysql_real_escape_string($_POST['comments']);
-$species_id = mysql_real_escape_string($_POST['species_id']);
-$location_id = mysql_real_escape_string($_POST['location_id']);
 
 
 ini_set("mysql.connect_timeout", 300);
@@ -36,9 +34,18 @@ if (!$user_result) {
 }
 
 
-
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
+
+$query = "SELECT species_id, location_id FROM video_2 WHERE id = $video_id";
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
+$row = mysql_fetch_assoc($result);
+$species_id = $row['species_id'];
+$location_id = $row['location_id'];
 
 $query = "INSERT INTO timed_observations SET user_id = $user_id, start_time = '$start_time', end_time = '$end_time', start_time_s = '-1', end_time_s = '-1', event_id ='$event_id', comments = '$comments', video_id = '$video_id', species_id = $species_id, location_id = $location_id, expert = $is_special_user";
 $result = attempt_query_with_ping($query, $wildlife_db);
@@ -46,8 +53,16 @@ if (!$result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
     die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 }
-
 $observation_id = mysql_insert_id($wildlife_db);
+
+$query = "UPDATE video_2 SET timed_obs_count = timed_obs_count + 1, expert_finished = IF(expert_finished = 'UNWATCHED', 'WATCHED', expert_finished) WHERE id = $video_id";
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
+
+
 
 $response['observation_id'] = $observation_id;
 $response['html'] = get_timed_observation_row($observation_id, $species_id, 0);

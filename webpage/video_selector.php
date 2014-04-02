@@ -48,56 +48,50 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-function get_video_progress(&$validated, &$available, &$total, $query, $db) {
-    $results = attempt_query_with_ping($query, $db);
-    if (!$results) die ("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "\nquery: $query\n");
+function get_video_progress($species_id, $location_id, &$available, &$validated) {
+    global $wildlife_db;
 
+    $results = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE location_id = $location_id AND species_id = $species_id", $wildlife_db);
+    if (!$results) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
     $row = mysql_fetch_assoc($results);
-    $validated = $row['validated_video_s'];
-    $available = $row['available_video_s'];
-    $total = $row['total_video_s'];
+    $total = $row['count(*)'];
+
+    $results = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE location_id = $location_id AND species_id = $species_id AND processing_status != 'UNWATERMARKED' AND release_to_public = true", $wildlife_db);
+    if (!$results) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    $row = mysql_fetch_assoc($results);
+    $available = $row['count(*)'];
+
+    $results = attempt_query_with_ping("SELECT count(*) FROM video_2 WHERE location_id = $location_id AND species_id = $species_id AND crowd_status = 'VALIDATED'", $wildlife_db);
+    if (!$results) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    $row = mysql_fetch_assoc($results);
+    $validated = $row['count(*)'];
+
+    $species = "";
+    if ($species_id == 1)       $species = "grouse";
+    else if ($species_id == 2)  $species = "least_tern";
+    else if ($species_id == 3)  $species = "piping_plover";
+
+    $location = "";
+    if ($location_id == 1)       $location = "belden";
+    else if ($location_id == 2)  $location = "blaisdell";
+    else if ($location_id == 3)  $location = "lostwood";
+    else if ($location_id == 4)  $location = "missouri_river";
+
+    echo "var $species" . "_" . "$location" . "_total = " . $total . ";\n";
+    echo "var $species" . "_" . "$location" . "_available = " . $available . ";\n";
+    echo "var $species" . "_" . "$location" . "_validated = " . $validated . ";\n";
+
+    $available = 100 * ($available / $total);
+    $validated = 100 * ($validated / $total);
 }
 /**
  *  Get the progress of the videos for each species at each site.
  */
-
-get_video_progress($grouse_belden_validated_s, $grouse_belden_processed_s, $grouse_belden_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 1", $wildlife_db);
-get_video_progress($grouse_blaisdell_validated_s, $grouse_blaisdell_processed_s, $grouse_blaisdell_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 2", $wildlife_db);
-get_video_progress($grouse_lostwood_validated_s, $grouse_lostwood_processed_s, $grouse_lostwood_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 1 and location_id = 3", $wildlife_db);
-get_video_progress($least_tern_validated_s, $least_tern_processed_s, $least_tern_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 2 and location_id = 4", $wildlife_db);
-get_video_progress($piping_plover_validated_s, $piping_plover_processed_s, $piping_plover_total_s, "SELECT validated_video_s, available_video_s, total_video_s FROM progress WHERE species_id = 3 and location_id = 4", $wildlife_db);
-
-$grouse_belden_available = 100 * ($grouse_belden_processed_s / $grouse_belden_total_s);
-$grouse_belden_validated = 100 * ($grouse_belden_validated_s / $grouse_belden_total_s);
-$grouse_blaisdell_available = 100 * ($grouse_blaisdell_processed_s / $grouse_blaisdell_total_s);
-$grouse_blaisdell_validated = 100 * ($grouse_blaisdell_validated_s / $grouse_blaisdell_total_s);
-$grouse_lostwood_available = 100 * ($grouse_lostwood_processed_s / $grouse_lostwood_total_s);
-$grouse_lostwood_validated = 100 * ($grouse_lostwood_validated_s / $grouse_lostwood_total_s);
-$least_tern_available = 100 * ($least_tern_processed_s / $least_tern_total_s);
-$least_tern_validated = 100 * ($least_tern_validated_s / $least_tern_total_s);
-$piping_plover_available = 100 * ($piping_plover_processed_s / $piping_plover_total_s);
-$piping_plover_validated = 100 * ($piping_plover_validated_s / $piping_plover_total_s);
-
-echo "var grouse_belden_total = $grouse_belden_total_s;\n";
-echo "var grouse_belden_processed = $grouse_belden_processed_s;\n";
-echo "var grouse_belden_validated = $grouse_belden_validated_s;\n";
-
-echo "var grouse_blaisdell_total = $grouse_blaisdell_total_s;\n";
-echo "var grouse_blaisdell_processed = $grouse_blaisdell_processed_s;\n";
-echo "var grouse_blaisdell_validated = $grouse_blaisdell_validated_s;\n";
-
-echo "var grouse_lostwood_total = $grouse_lostwood_total_s;\n";
-echo "var grouse_lostwood_processed = $grouse_lostwood_processed_s;\n";
-echo "var grouse_lostwood_validated = $grouse_lostwood_validated_s;\n";
-
-echo "var least_tern_total = $least_tern_total_s;\n";
-echo "var least_tern_processed = $least_tern_processed_s;\n";
-echo "var least_tern_validated = $least_tern_validated_s;\n";
-
-echo "var piping_plover_total = $piping_plover_total_s;\n";
-echo "var piping_plover_processed = $piping_plover_processed_s;\n";
-echo "var piping_plover_validated = $piping_plover_validated_s;\n";
-
+get_video_progress(1, 1, $grouse_belden_available, $grouse_belden_validated);
+get_video_progress(1, 2, $grouse_blaisdell_available, $grouse_blaisdell_validated);
+get_video_progress(1, 3, $grouse_lostwood_available, $grouse_lostwood_validated);
+get_video_progress(2, 4, $least_tern_available, $least_tern_validated);
+get_video_progress(3, 4, $piping_plover_available, $piping_plover_validated);
 
 echo "</script>
 
@@ -134,10 +128,10 @@ print_navbar($active_items);
 
 
 echo "
-    <div class='well well-small'>
-        <div class='container'>
-            <div class='row-fluid'>
-                <div class='span12'>
+    <div class='container'>
+        <div class='row-fluid'>
+            <div class='span12'>
+                <div class='well well-small'>
                 <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>, and you can go over the observations for videos you've already watched <a href='http://volunteer.cs.und.edu/wildlife/user_video_list.php'>here</a>. 
                 </div>
             </div>
@@ -153,9 +147,9 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Sharp-Tailed Grouse',
                             'species_id' => '1',
                             'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
-                            'info_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_info.php',
+                            'info_webpage' => 'sharptailed_grouse_info.php',
                             'species_latin_name' => 'Tympanuchus phasianellus',
-                            'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p>',
+                            'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p> <p>Active projects include: <ul><li>Rebecca Eckroad - <a href="becca_grouse_project.php">Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li><li>Paul Burr - <a href="paul_project.php">Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($grouse_belden_available > 0),
@@ -197,7 +191,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Interior Least Tern',
                             'species_id' => '2',
                             'species_latin_name' => 'Sternula antillarum',
-                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p>',
+                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="alicia_project.php">Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($least_tern_available > 0),
@@ -217,7 +211,8 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_name' => 'Piping Plover',
                             'species_id' => '3',
                             'species_latin_name' => 'Charadrius melodus',
-                            'project_description' => 'Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.',
+                            'info_webpage' => 'piping_plover_info.php',
+                            'project_description' => '<p>Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="alicia_project.php">Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($piping_plover_available > 0),
@@ -234,7 +229,7 @@ $thumbnails = array('thumbnail_list' => array(
                     )
                 );
 
-$projects_template = file_get_contents($cwd . "/projects_template.html");
+$projects_template = file_get_contents($cwd . "/templates/projects_template.html");
 
 $m = new Mustache_Engine;
 echo $m->render($projects_template, $thumbnails);
