@@ -34,7 +34,8 @@ using namespace cv;
 
 float white[4] = {1.0, 1.0, 1.0, 1.0};
 float black[4] = {0.0, 0.0, 0.0, 1.0};
-float color[4] = {0.7, 0.2, 0.5, 1.0};
+float green[4] = {0.0, 0.6, 0.3, 1.0};
+float color[4];
 
 //TEXTURE_DESC logo;
 APP_INIT_DATA uc_aid;
@@ -58,7 +59,8 @@ unsigned int currentFrame = 0;
 unsigned int shmemFrame = 0;
 double fps = 0;
 
-void renderText(float x, float y, const char* text) {
+
+void renderText(float x, float y, const char* text, const int size, const float color[4] = white) {
     int viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
     glMatrixMode(GL_PROJECTION);
@@ -67,8 +69,10 @@ void renderText(float x, float y, const char* text) {
     glOrtho(viewport[0], viewport[2], viewport[1], viewport[3], -1, 1);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glColor4f(color[0], color[1], color[2], color[3]);
     glRasterPos2f(x, viewport[3] - y);
     const int length = (int)strlen(text);
+    font->FaceSize(size);
     font->Render(text);
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -84,14 +88,16 @@ static void draw_text() {
         fd = shmem->fraction_done;
         cpu = shmem->cpu_time;
     }
+    sprintf(buf, "Wildlife@Home");
+    renderText(window_width-(window_width/1.5), window_width/12 + 12, buf, window_width/12, color);
     sprintf(buf, "User: %s", uc_aid.user_name);
-    renderText(10, window_height-10, buf);
+    renderText(10, window_height-10, buf, 25);
     sprintf(buf, "Team: %s", uc_aid.team_name);
-    renderText(10, window_height-30, buf);
+    renderText(10, window_height-30, buf, 25);
     sprintf(buf, "%% Done: %f", 100*fd);
-    renderText(10, window_height-50, buf);
+    renderText(10, window_height-50, buf, 25);
     sprintf(buf, "CPU time: %f", cpu);
-    renderText(10, window_height-70, buf);
+    renderText(10, window_height-70, buf, 25);
     if(shmem) {
         //cout << fixed << "Time: " << getTimeInSeconds() << endl;
         dt = getTimeInSeconds() - shmem->update_time;
@@ -99,20 +105,20 @@ static void draw_text() {
         if(dt > 10) {
             boinc_close_window_and_quit("shmem not updated");
         } else if (dt > 5) {
-            renderText(10, window_height*0.5, "App not running - exiting");
+            renderText(10, window_height*0.5, "App not running - exiting", 25);
         } else if (shmem->status.suspended) {
-            renderText(10, window_height*0.5, "App Suspended");
+            renderText(10, window_height*0.5, "App Suspended", 25);
         }
 
         sprintf(buf, "Features Collected: %d", shmem->feature_count);
-        renderText(10, window_height-90, buf);
+        renderText(10, window_height-90, buf, 25);
         sprintf(buf, "Average Collected Features: %f", shmem->feature_average);
-        renderText(10, window_height-110, buf);
+        renderText(10, window_height-110, buf, 25);
         sprintf(buf, "Species: %s", shmem->species);
-        renderText(10, window_height-130, buf);
+        renderText(10, window_height-130, buf, 25);
     } else {
         glRasterPos2f(0.05f, 0.21f);
-        renderText(10, window_height*0.5, "No Shared Mem");
+        renderText(10, window_height*0.5, "No Shared Mem", 25);
     }
 }
 
@@ -170,6 +176,21 @@ void load_frame() {
             cerr << "Exiting... " << endl;
             exit(0);
         } else {
+            cv::Rect roi(window_width-(window_width/1.5), window_width/12 + 12, 100, 50);
+            Mat image_roi = frame(roi);
+            Scalar avg = cv::mean(image_roi);
+            if (avg.val[0] * 0.2126 < 30) {
+                color[0] = green[0];
+                color[1] = green[1];
+                color[2] = green[2];
+                color[3] = green[3];
+            } else {
+                color[0] = white[0];
+                color[1] = white[1];
+                color[2] = white[2];
+                color[3] = white[3];
+            }
+            //cout << "Pixel intensity over ROI = " << avg.val[0] * 0.2126 << ", " << avg.val[1] * 0.7152 << ", " << avg.val[2] * 0.0722 << endl;
             cvtColor(frame, frame, CV_BGR2RGB);
             gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, frame.cols, frame.rows, GL_RGB, GL_UNSIGNED_BYTE, frame.data);
         }
@@ -197,7 +218,6 @@ void app_graphics_init() {
         cerr << "The font file could not be loaded." << endl;
         exit(1);
     }
-    font->FaceSize(25);
 
     cerr << "Start SHMEM..." << endl;
     if (shmem == NULL) {
