@@ -14,6 +14,7 @@ $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
 $video_filter_text = mysql_real_escape_string($_POST['video_filter_text']);
 $event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
+$showing_all_videos = mysql_real_escape_string($_POST['showing_all_videos']);
 
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
@@ -28,7 +29,7 @@ $user = get_user();
 $query = "";
 
 if ($video_filter_text == '' && $event_filter_text == '') {
-    if (is_special_user__fixme($user, true)) {
+    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT count(v2.id) FROM video_2 AS v2";
     } else {
         $query = "SELECT count(v2.id) FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE v2.timed_obs_count > 0";
@@ -38,7 +39,7 @@ if ($video_filter_text == '' && $event_filter_text == '') {
 } else {
     create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query);
 
-    if (is_special_user__fixme($user, true)) {
+    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT count(v2.id) FROM video_2 AS v2 WHERE " . $filter_query;
     } else {
         $query = "SELECT count(v2.id) FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE " . $filter_query;

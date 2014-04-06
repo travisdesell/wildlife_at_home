@@ -23,6 +23,9 @@ $video_filter_text = mysql_real_escape_string($_POST['video_filter_text']);
 $event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
+$showing_all_videos = mysql_real_escape_string($_POST['showing_all_videos']);
+
+error_log("SHOWING ALL VIDEOS: $showing_all_videos\n");
 
 $user = get_user();
 $query = "";
@@ -31,7 +34,7 @@ $query = "";
 if ($video_filter_text != '' || $event_filter_text != '') {
     create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query);
 
-    if (is_special_user__fixme($user, true)) {
+    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2 WHERE " . $filter_query;
     } else {
         $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE " . $filter_query;
@@ -40,7 +43,7 @@ if ($video_filter_text != '' || $event_filter_text != '') {
     $query .= " ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
     error_log("QUERY: $query");
 } else {
-    if (is_special_user__fixme($user, true)) {
+    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT id, processing_status, watermarked_filename, timed_obs_count, expert_finished, release_to_public, start_time, animal_id, rivermile FROM video_2 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
     } else {
         $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 as v2 RIGHT JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE v2.timed_obs_count > 0 ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
