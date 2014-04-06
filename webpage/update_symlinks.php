@@ -65,4 +65,8 @@ shell_exec($command);
 $command = "ln -s $cwd/review_interface $target/review_interface";
 shell_exec("rm $target/review_interface");
 shell_exec($command);
+
+$command = "ln -s $cwd/js $target/js";
+shell_exec("rm $target/js");
+shell_exec($command);
 ?>

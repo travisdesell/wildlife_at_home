@@ -92,3 +92,7 @@ body {
     color: rgba(0,0,0,0.25);
 }
 
+.popover {
+    max-width: 800px;
+    width: auto;
+}
