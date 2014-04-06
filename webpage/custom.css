@@ -84,4 +84,11 @@ body {
     padding-left: 0;
 }
 
+.default_comments_text {
+    color: rgba(0,0,0,0.25);
+}
+
+.default_time_text {
+    color: rgba(0,0,0,0.25);
+}
 

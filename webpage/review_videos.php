@@ -226,6 +226,12 @@ echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
 
 echo "<button type='button' class='btn btn-small btn-default btn-block' id='apply-filter-button' style='padding-left:5px;'>Apply Filter</button>";
 echo "<button type='button' class='btn btn-small btn-default btn-block' id='clear-filter-button' style='padding-left:5px;'>Clear Filter</button>";
+
+if (is_special_user__fixme($user, true)) { //other event filters only apply to special users
+    echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
+    echo "<button type='button' class='btn btn-small btn-default btn-block' id='all-videos-button' style='padding-left:5px;'>Showing All Videos</button>";
+}
+
 echo "      </div>";
 echo "  </div>";
 

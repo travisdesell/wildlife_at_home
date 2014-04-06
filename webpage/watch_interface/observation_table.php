@@ -260,6 +260,15 @@ function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $
         $row['user_name'] = $name_row['name'];
         if ($row['expert'] == 1) $row['user_name'] = "<b>" . $row['user_name'] . " (expert)</b>";
 
+        if ($row['report_status'] == 'RESPONDED') {
+            $row['responded'] = 1;
+        } else if ($row['report_status'] == 'REPORTED') {
+            $row['reported'] = 1;
+        } else {
+            $row['unreported'] = 1;
+        }
+
+
 //        error_log( json_encode($row) );
         $watch_info['other_observations'][] = $row;
     }
