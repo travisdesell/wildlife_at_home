@@ -152,6 +152,7 @@ $(document).ready(function () {
 
                         initialize_event_list();
                         enable_observation_table();
+                        initialize_speed_buttons();
 
                         enable_user_review();
                         enable_expert_review();
