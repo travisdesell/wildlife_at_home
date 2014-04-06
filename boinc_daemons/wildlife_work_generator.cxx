@@ -136,9 +136,10 @@ bool config_is_good(string fileName, int duration_s) {
     vector<Event*> events;
 
     int video_start_time;
-    string line, event_id, start_time, end_time;
+    string line, species, event_id, start_time, end_time;
     ifstream infile;
     infile.open(fileName.c_str());
+    getline(infile, species);
     getline(infile, line);
     video_start_time = time_to_seconds(line.c_str());
     while(getline(infile, event_id, ',')) {
@@ -271,17 +272,17 @@ int make_job(int video_id, int species_id, int location_id, string video_address
             << " FROM species s"
             << " JOIN video_2 v"
             << " ON s.id = v.species_id"
-            << " WHERE id = "
+            << " WHERE v.id = "
             << video_id;
         mysql_query_check(wildlife_db_conn, video_species_query.str());
         MYSQL_RES *species_result = mysql_store_result(wildlife_db_conn);
 
-        MYSQL_ROW video_row;
+        MYSQL_ROW species_row;
         string video_species = "";
-        while ((video_row = mysql_fetch_row(start_result)) != NULL) {
-            video_species = video_row[0];
-            config_file << video_species << endl;
+        while ((species_row = mysql_fetch_row(species_result)) != NULL) {
+            video_species = species_row[0];
         }
+        config_file << video_species << endl;
         cout << "Video Species: " << video_species << endl;
 
         mysql_free_result(species_result);

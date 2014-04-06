@@ -268,7 +268,7 @@ int main(int argc, char **argv) {
         drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT);
 
         // Display image.
-        imshow("SURF", pointsFrame);
+        imshow("Wildlife@Home", pointsFrame);
         if((cvWaitKey(10) & 255) == 27) break;
 #endif
     }
@@ -282,7 +282,7 @@ int main(int argc, char **argv) {
     writeEventsToFile(descFilename, eventTypes);
 
 #ifdef GUI
-    cvDestroyWindow("SURF");
+    cvDestroyWindow("Wildlife@Home");
 #endif
 
 #ifdef _BOINC_APP_
