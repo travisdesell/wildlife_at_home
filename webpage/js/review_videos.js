@@ -12,11 +12,13 @@ $(document).ready(function () {
     var event_filter_text = '';
     var video_min = 0;
     var video_count = 15;
+    var showing_all_videos = true;
 
     load_videos();
 
     function load_videos() {
         var submission_data = {
+                                showing_all_videos : showing_all_videos,
                                 event_filter_text : event_filter_text,
                                 video_filter_text : video_filter_text,
                                 video_min : video_min,
@@ -96,6 +98,7 @@ $(document).ready(function () {
 
                         },
                         async: true
+
                     });
                 });
             },
@@ -145,12 +148,14 @@ $(document).ready(function () {
                     data : submission_data,
                     dataType : 'text',
                     success : function(response) {
-//                        console.log("the response was:\n" + response);
                         $(target).html(response);
 
                         initialize_event_list();
-//                        console.log("enabling observation table!");
                         enable_observation_table();
+                        initialize_speed_buttons();
+
+                        enable_user_review();
+                        enable_expert_review();
                     },
                     error : function(jqXHR, textStatus, errorThrown) {
                         alert(errorThrown);
@@ -381,6 +386,17 @@ $(document).ready(function () {
             $('#event-filter-list').text("");
 //            filter_text = "";
 //            load_videos();
+        });
+
+        $('#all-videos-button:not(.bound)').addClass('bound').click(function() {
+            if ($('#all-videos-button').text() === "Showing My Videos") {
+                $('#all-videos-button').text("Showing All Videos");
+            } else {
+                $('#all-videos-button').text("Showing My Videos");
+            }
+            $(this).toggleClass('active');
+            showing_all_videos = !showing_all_videos;
+            load_videos();
         });
     }
 

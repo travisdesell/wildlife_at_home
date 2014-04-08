@@ -11,7 +11,7 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
     if ($display_nav_numbers) {
 
-        echo "<div class='pagination span8' style='margin-top:0px; margin-bottom:0px;'><ul>";
+        echo "<div class='pagination span7' style='margin-top:0px; margin-bottom:0px;'><ul>";
         if ($video_min > 0) {
             $new_min = $video_min - $video_count;
             if ($new_min < 0) $new_min = 0;
@@ -64,11 +64,11 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
         echo "</ul></div>";
     } else {
-        echo "<div class='span8'></div>";
+        echo "<div class='span7'></div>";
     }
 
     echo "
-                        <div class='span4'>
+                        <div class='span5'>
 
                             <div class='btn-group pull-right'>
                                 <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='sort-by-dropdown'>
