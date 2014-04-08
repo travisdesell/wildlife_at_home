@@ -5,7 +5,12 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+
+#ifdef _WIN32
+#include <time.h>
+#else
 #include <sys/time.h>
+#endif
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -183,14 +188,18 @@ int main(int argc, char **argv) {
             vidTime++; //Increment video time every 10 frames.
         }
 
-        Ptr<FeatureDetector> detector = new SurfFeatureDetector(minHessian);
+        //Ptr<FeatureDetector> detector = new SurfFeatureDetector(minHessian);
+        SurfFeatureDetector *detector = new SurfFeatureDetector(minHessian);
         vector<KeyPoint> frameKeypoints;
         Mat mask = vidType.getMask();
         detector->detect(frame, frameKeypoints, mask);
+        delete(detector);
 
-        Ptr<DescriptorExtractor> extractor = new SurfDescriptorExtractor();
+        //Ptr<DescriptorExtractor> extractor = new SurfDescriptorExtractor();
+        SurfDescriptorExtractor *extractor = new SurfDescriptorExtractor();
         Mat frameDescriptors;
         extractor->compute(frame, frameKeypoints, frameDescriptors);
+        delete(extractor);
 
         // Add distinct descriptors and keypoints to active events.
         int activeEvents = 0;
@@ -254,11 +263,11 @@ int main(int argc, char **argv) {
             }
         }
         if(activeEvents == 0) {
-            cerr << "[ERROR] There are no active events! (Problem with expert classification at frame " << framePos << ")" << endl;
+            cerr << "[ERROR CODE 2] There are no active events! (Problem with expert classification at frame " << framePos << ")" << endl;
 #ifdef _BOINC_APP_
-            boinc_finish(1);
+            boinc_finish(0);
 #endif
-            exit(1);
+            return 0;
         }
 
 #ifdef GUI
@@ -325,7 +334,7 @@ void readEventsFromFile(string filename, vector<EventType*> *eventTypes) {
             (*it)->read(infile);
         }
     } catch(const exception &ex) {
-        cerr << "readEventsFromFile: " << ex.what() << endl;
+        cerr << "[ERROR CODE 0] readEventsFromFile: " << ex.what() << endl;
 #ifdef _BOINC_APP_
         boinc_finish(1);
 #endif
@@ -348,7 +357,7 @@ void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
 #endif
         }
     } catch(const exception ex) {
-        cerr << "writeEventsToFile: " << ex.what() << endl;
+        cerr << "[ERROR CODE 1] writeEventsToFile: " << ex.what() << endl;
 #ifdef _BOINC_APP_
         boinc_finish(1);
 #endif
@@ -394,7 +403,7 @@ bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> 
 }
 
 void updateSHMEM() {
-    if(!shmem) return;
+    if(shmem == NULL) return;
     //cout << fixed << "Time: " << getTimeInSeconds() << endl;
     shmem->update_time = getTimeInSeconds();
     shmem->fraction_done = boinc_get_fraction_done();
@@ -408,9 +417,17 @@ void updateSHMEM() {
 
 void calculateFPS() {
     frameCount++;
+
+#ifdef WIN32
+    SYSTEMTIME st;
+    GetSystemTime(&st);
+    currentTime = st.wSecond * 1000000 + st.wMilliseconds * 1000;
+#else
     struct timeval time;
     gettimeofday(&time, NULL);
     currentTime = time.tv_sec * 1000000 + time.tv_usec;
+#endif
+
     if(previousTime == 0) previousTime = currentTime;
     unsigned int timeInterval = currentTime - previousTime;
 
