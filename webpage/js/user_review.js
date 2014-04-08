@@ -18,7 +18,7 @@ function enable_user_review() {
     });
 
     $('.report-comments:not(.bound-change)').addClass('bound-change').bind('input propertychange', function() {
-        var observation_id = $("#report-comments-" + video_id).attr("observation_id");
+        var observation_id = $(this).attr("observation_id");
 
         if ($.trim( $(this).val() ) == '') {
             $(this).addClass('default_comments_text');
