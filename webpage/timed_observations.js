@@ -54,7 +54,9 @@ function enable_next_video_buttons() {
 }
 
 function initialize_speed_buttons() {
-    $('.fast-backward-button').click(function() {
+    console.log("initializing speed buttons!");
+
+    $('.fast-backward-button:not(.bound)').addClass('bound').click(function() {
         var video_id = $(this).attr('video_id');
         var video = $('#wildlife-video-' + video_id).get(0);
         var rate = video.playbackRate;
@@ -70,6 +72,7 @@ function initialize_speed_buttons() {
         else if (rate === 1.0)      rate = -1.0;
         else if (rate === 2.0)      rate = 1.0; 
         else if (rate === 4.0)      rate = 2.0;
+        else if (rate === 5.0)      rate = 4.0;
         else if (rate === 6.0)      rate = 4.0;
         else if (rate === 8.0)      rate = 6.0;
         else if (rate === 10.0)     rate = 8.0;
@@ -77,14 +80,16 @@ function initialize_speed_buttons() {
         else if (rate === 16.0)     rate = 12.0;
         else rate = -1.0;
 
+        console.log("clicking fast backward!, attempting rate: " + rate);
+
         video.playbackRate = rate;
 
-        //console.log("clicking fast backward!, playback rate: " + video.playbackRate);
+        console.log("clicking fast backward!, playback rate: " + video.playbackRate);
 
         $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
     });
 
-    $('.fast-forward-button').click(function() {
+    $('.fast-forward-button:not(.bound)').addClass('bound').click(function() {
         var video_id = $(this).attr('video_id');
         var video = $('#wildlife-video-' + video_id).get(0);
         var rate = video.playbackRate;
@@ -100,6 +105,7 @@ function initialize_speed_buttons() {
         else if (rate === 1.0)      rate = 2.0;
         else if (rate === 2.0)      rate = 4.0; 
         else if (rate === 4.0)      rate = 6.0;
+        else if (rate === 5.0)      rate = 6.0;
         else if (rate === 6.0)      rate = 8.0;
         else if (rate === 8.0)      rate = 10.0;
         else if (rate === 10.0)     rate = 12.0;
@@ -107,9 +113,11 @@ function initialize_speed_buttons() {
         else if (rate === 16.0)     rate = 16.0;
         else rate = 1.0;
 
+        console.log("clicking fast forward!, attempting rate: " + rate);
+
         video.playbackRate = rate;
 
-        //console.log("clicking fast forward!, playback rate: " + video.playbackRate);
+        console.log("clicking fast forward!, playback rate: " + video.playbackRate);
 
         $('#speed-textbox-' + video_id).val("speed:" + video.playbackRate);
     });

@@ -56,12 +56,18 @@ function create_filter($video_filter_text, $event_filter_text, &$query, &$has_ob
                 } else if ($parts[1] == 'invalid_times') {
                     $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id $usr_str AND obs.start_time_s > obs.end_time_s)";
                 } else if ($parts[1] == 'unreported_events') {
-                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id $usr_str AND obs.report_status = 'UNREPORTED')";
+                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id AND obs.report_status = 'UNREPORTED')";
                 } else if ($parts[1] == 'reported_events') {
-                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id $usr_str AND obs.report_status = 'REPORTED')";
+                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id AND obs.report_status = 'REPORTED')";
                 } else if ($parts[1] == 'responded_events') {
-                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id $usr_str AND obs.report_status = 'RESPONDED')";
-                }
+                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id AND obs.report_status = 'RESPONDED')";
+                } else if ($parts[1] == 'unvalidated') {
+                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id AND obs.status = 'UNVALIDATED')";
+                } else if ($parts[1] == 'valid') {
+                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id $usr_str AND obs.status = 'VALID')";
+                } else if ($parts[1] == 'invalid') {
+                    $query .= "$ex EXISTS (SELECT obs.id FROM timed_observations AS obs WHERE v2.id = obs.video_id $usr_str AND obs.status = 'INVALID')";
+                 }
             }
 
             /*

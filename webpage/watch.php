@@ -207,8 +207,7 @@ if (array_key_exists("location", $_GET)) {
     $location_id = mysql_real_escape_string($_GET['location']);
 }
 
-//add some of the information about the video to javascript so it
-//can be used by watch.js
+//add some of the information about the video to javascript
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
     var start_time = $start_time;

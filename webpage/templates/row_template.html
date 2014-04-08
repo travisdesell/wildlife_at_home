@@ -26,8 +26,22 @@
     <div class='span6' style="display:table-cell; float:none; padding-left:5px;">
         <div class='row-fluid'>
             {{^regular_user}}
-                    <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
-                    <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
+                <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
+                <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
+            {{/regular_user}}
+
+            {{#regular_user}}
+                <div class='report-comments-div hidden' id='report-comments-div-{{video_id}}'>
+                    <b id='report-comments-title-{{video_id}}'>Observation reported:</b>
+                    <textarea style='width:98%;' rows=6 class='report-comments' id='report-comments-{{video_id}}' video_id={{video_id}}> </textarea>
+                </div>
+                <button class='btn btn-small btn-success pull-right submit-report-button disabled hidden' id='submit-report-button-{{video_id}}' video_id='{{video_id}}'>Submit Report</button>
+
+                <div class='response-comments-div hidden' id='response-comments-div-{{video_id}}'>
+                    <b id='response-comments-title-{{video_id}}'>Expert response:</b>
+                    <textarea readonly style='width:98%;' rows=6 class='response-comments' id='response-comments-{{video_id}}' video_id={{video_id}}> </textarea>
+                </div>
+
             {{/regular_user}}
         </div>
     </div>  <!-- span 6 -->
@@ -50,8 +64,15 @@
                     <th>Comments</th>
                     <th>Tags</th>
                     <th>Status</th>
+                    {{#regular_user}}
+                    <th>Report?</th>
+                    {{/regular_user}}
+                    {{^regular_user}}
+                    <th>View Report</th>
+                    {{/regular_user}}
                 </tr>
             </thead>
+
             <tbody>
             {{#other_observations}}
                 <tr>
@@ -62,6 +83,17 @@
                     <td>{{comments}}</td>
                     <td>{{tags}}</td>
                     <td>{{status}}</td>
+
+                    {{#regular_user}}
+                    <td style='text-align:center;'>
+                        <button class='btn btn-small {{#unreported}}btn-danger{{/unreported}} {{#reported}}btn-warning{{/reported}} {{#responded}}btn-success{{/responded}} pull-center report-observation-button rob-{{video_id}}' observation_id='{{id}}' video_id='{{video_id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text="{{report_comments}}" report_status="{{report_status}}" reporter_name="{{reporter_name}}" response_comments_text='{{response_comments}}' responder_name='{{responder_name}}'><i class='{{^responded}}icon-question-sign{{/responded}} {{#responded}}icon-ok-sign{{/responded}} icon-white'></i></button>
+                    </td>
+                    {{/regular_user}}
+                    {{^regular_user}}
+                    <td style='text-align:center;'>
+                        <button class='btn btn-small {{#unreported}}btn-info{{/unreported}} {{#reported}}btn-warning{{/reported}} {{#responded}}btn-success{{/responded}} pull-center expert-respond-button erb-{{video_id}}' observation_id='{{id}}' video_id='{{video_id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text="{{report_comments}}" report_status="{{report_status}}" reporter_name="{{reporter_name}}" response_comments_text='{{response_comments}}' responder_name='{{responder_name}}'><i class='{{^responded}}icon-question-sign{{/responded}} {{#responded}}icon-ok-sign{{/responded}} icon-white'></i></button>
+                    </td>
+                    {{/regular_user}}
                 </tr>
             {{/other_observations}}
             </tbody>

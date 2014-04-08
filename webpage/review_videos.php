@@ -32,7 +32,9 @@ echo "
     <link rel='stylesheet' type='text/css' href='custom.css'>
 
     <script type='text/javascript' src='timed_observations.js'></script>
-    <script type='text/javascript' src='review_videos.js'></script>
+    <script type='text/javascript' src='js/user_review.js'></script>
+    <script type='text/javascript' src='js/expert_review.js'></script>
+    <script type='text/javascript' src='js/review_videos.js'></script>
 
     <script type='text/javascript'>
         var user_id = $user_id; 
@@ -204,20 +206,26 @@ echo "      </ul>
     <ul>
 </div>  <!-- button group -->"; //end the button group for events
 
-if (is_special_user__fixme($user, true)) { //other event filters only apply to special users
-    echo "
-    <div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
-        <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Other Event Filter <span class='caret'></span> </button>
+echo "
+<div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+    <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Other Event Filter <span class='caret'></span> </button>
 
-        <ul class='dropdown-menu'>
-            <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='converted_events'>Converted</a></li>
+    <ul class='dropdown-menu'>";
+if (is_special_user__fixme($user, true)) { //other event filters only apply to special users
+    echo "  <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='converted_events'>Converted</a></li>
             <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='invalid_times'>Invalid Times</a></li>
-            <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='unreported_events'>Unreported</a></li>
+            <li class='divider'></li>";
+} //other filters really only apply to the expert interface
+
+echo "      <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='unreported_events'>Unreported</a></li>
             <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='reported_events'>Reported</a></li>
             <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='responded_events'>Responded</a></li>
+            <li class='divider'></li>
+            <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='unvalidated'>Unvalidated</a></li>
+            <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='valid'>Valid</a></li>
+            <li><a href='javascript:;' class='event-filter-dropdown other-event-filter' other_id='invalid'>Invalid</a></li>
         </ul>
     </div> <!--button group-->";    //end button group for other event filters
-} //other filters really only apply to the expert interface
 
 echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
 echo "<b style='float:right;' id='display-events-text'>With Any Events</b>";
@@ -226,6 +234,12 @@ echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
 
 echo "<button type='button' class='btn btn-small btn-default btn-block' id='apply-filter-button' style='padding-left:5px;'>Apply Filter</button>";
 echo "<button type='button' class='btn btn-small btn-default btn-block' id='clear-filter-button' style='padding-left:5px;'>Clear Filter</button>";
+
+if (is_special_user__fixme($user, true)) { //other event filters only apply to special users
+    echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
+    echo "<button type='button' class='btn btn-small btn-default btn-block' id='all-videos-button' style='padding-left:5px;'>Showing All Videos</button>";
+}
+
 echo "      </div>";
 echo "  </div>";
 
