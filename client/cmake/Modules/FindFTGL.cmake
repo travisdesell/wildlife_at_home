@@ -19,11 +19,11 @@
 
 # Created by Richard Ulrich.
 
-FIND_PATH(FTGL_INCLUDE_DIR FTGL/ftgl.h
-    HINTS
-    $ENV{FTGL_DIR}
+FIND_PATH(FTGL_INCLUDE_DIR
+    NAMES FTGL/ftgl.h
     PATH_SUFFIXES include src
     PATHS
+    ${FTGL_DIR}/include
     /usr/include
     /usr/local/include
     /sw/include
@@ -33,10 +33,9 @@ FIND_PATH(FTGL_INCLUDE_DIR FTGL/ftgl.h
 
 FIND_LIBRARY(FTGL_LIBRARY
     NAMES ftgl libftgl ftgl_static
-    HINTS
-    $ENV{FTGL_DIR}
     PATH_SUFFIXES lib64 lib
     PATHS
+    ${FTGL_DIR}/lib
     /usr/lib
     /usr/local/lib
     /sw
