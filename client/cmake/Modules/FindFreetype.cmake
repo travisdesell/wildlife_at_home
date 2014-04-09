@@ -9,7 +9,11 @@ MESSAGE(STATUS "Freetype Dir: " ${FREETYPE_INCLUDE_DIR_ft2build})
 find_path(FREETYPE_INCLUDE_DIR_freetype2 NAMES freetype/config/ftheader.h
     PATHS
     ${FREETYPE_DIR}/include
-    ${FREETYPE_DIR}/include/freetype2)
+    ${FREETYPE_DIR}/include/freetype2
+    /usr/X11R6/include
+    /usr/X11R6/include/freetype2
+    /usr/include
+    /usr/include/freetype2)
 MESSAGE(STATUS "Freetype Dir: " ${FREETYPE_INCLUDE_DIR_freetype2})
 
 find_library(FREETYPE_LIBRARY NAMES freetype libfreetype freetype219
