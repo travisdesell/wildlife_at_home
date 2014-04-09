@@ -398,7 +398,6 @@ bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> 
         newEvent->setType(eventType);
         newEvent->setStartTime(timeToSeconds(startTime));
         newEvent->setEndTime(timeToSeconds(endTime));
-        cerr << "Event time: " << newEvent->getStartTime() << " - " << newEvent->getEndTime() << endl;
         events->push_back(newEvent);
     }
     infile.close();
