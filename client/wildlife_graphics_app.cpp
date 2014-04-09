@@ -163,7 +163,12 @@ void display() {
 }
 
 void load_frame() {
+#ifdef _WIN32
+    Sleep(1000/fps);
+#else
     usleep(1000000/fps);
+#endif
+
     if(shmem) {
         if(currentFrame != shmemFrame) {
             currentFrame = shmemFrame;
