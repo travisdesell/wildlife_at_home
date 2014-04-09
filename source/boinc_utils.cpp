@@ -28,7 +28,7 @@ int timeToSeconds(const string time) {
     vector<string> temp;
     istringstream iss(time);
     while(getline(iss, line, ':')) {
-        temp.push_back(time);
+        temp.push_back(line);
     }
     int seconds = 0;
     seconds += atoi(temp[0].c_str())*3600;

@@ -263,7 +263,9 @@ int main(int argc, char **argv) {
             }
         }
         if(activeEvents == 0) {
+            cerr << "<error>" << endl;
             cerr << "[ERROR CODE 2] There are no active events! (Problem with expert classification at frame " << framePos << ")" << endl;
+            cerr << "</error>" << endl;
 #ifdef _BOINC_APP_
             boinc_finish(0);
 #endif
@@ -396,6 +398,7 @@ bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> 
         newEvent->setType(eventType);
         newEvent->setStartTime(timeToSeconds(startTime));
         newEvent->setEndTime(timeToSeconds(endTime));
+        cerr << "Event time: " << newEvent->getStartTime() << " - " << newEvent->getEndTime() << endl;
         events->push_back(newEvent);
     }
     infile.close();
