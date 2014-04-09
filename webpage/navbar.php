@@ -116,60 +116,24 @@ if ($project_scientist) {
     $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
     mysql_select_db("wildlife_video", $wildlife_db);
 
-    $query = "SELECT waiting_review FROM species WHERE id = 1";
+    $query = "SELECT count(*) FROM timed_observations WHERE report_status = 'REPORTED'";
 
     $result = attempt_query_with_ping($query, $wildlife_db);
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
     $row = mysql_fetch_assoc($result);
+    $waiting_review = $row['count(*)'];
 
-    $grouse_waiting_review = $row['waiting_review'];
-
-    $query = "SELECT waiting_review FROM species WHERE id = 2";
-
-    $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-
-    $row = mysql_fetch_assoc($result);
-
-    $tern_waiting_review = $row['waiting_review'];
-
-    $query = "SELECT waiting_review FROM species WHERE id = 3";
-
-    $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-
-    $row = mysql_fetch_assoc($result);
-
-    $plover_waiting_review = $row['waiting_review'];
-
-    $waiting_review = $grouse_waiting_review + $plover_waiting_review + $tern_waiting_review;
-
-    if ($grouse_waiting_review > 0) {
-        $grouse_waiting_review = " ($grouse_waiting_review)";
+    if ($waiting_review == 0) {
+        $waiting_review = "";
     } else {
-        $grouse_waiting_review = "";
-    }
-
-    if ($tern_waiting_review > 0) {
-        $tern_waiting_review = " ($tern_waiting_review)";
-    } else {
-        $tern_waiting_review = "";
-    }
-
-    if ($plover_waiting_review > 0) {
-        $plover_waiting_review = " ($plover_waiting_review)";
-    } else {
-        $plover_waiting_review = "";
+        $waiting_review = " (" . $waiting_review . ")";
     }
 
     echo "                  <li class='dropdown " . $active_items['project_management'] . " '>
-                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Project Mangement ($waiting_review)<b class='caret'></b></a>
+                              <a href='javascript:;' class='dropdown-toggle' data-toggle='dropdown'>Project Mangement$waiting_review<b class='caret'></b></a>
                               <ul class='dropdown-menu'>
-                                <li><a href='review_videos.php'>Expert Video Classification</a></li>
-                                <li><a href='review_reported_videos.php?species_id=1'>Review Reported Videos - Sharptailed Grouse$grouse_waiting_review</a></li>
-                                <li><a href='review_reported_videos.php?species_id=2'>Review Reported Videos - Least Tern$tern_waiting_review</a></li>
-                                <li><a href='review_reported_videos.php?species_id=3'>Review Reported Videos - Piping Plover$plover_waiting_review</a></li>
+                                <li><a href='review_videos.php'>Expert Video Classification$waiting_review</a></li>
                               </ul>
                             </li>";
 
