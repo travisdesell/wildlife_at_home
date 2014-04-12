@@ -95,6 +95,15 @@ IF(Boost_FOUND AND NOT(MSVC OR APPLE))
         ${Boost_LIBRARIES}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${OpenCV_LIBS})
+
+    add_executable(wildlife_surf_svm_generate
+        wildlife_surf_svm_generate
+        ../source/EventType)
+    include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
+    target_link_libraries(wildlife_surf_svm_generate
+        ${Boost_LIBRARIES}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${OpenCV_LIBS})
 ENDIF()
 
 #add_executable(wildlife_surf_analyze wildlife_surf_analyze)
