@@ -108,7 +108,7 @@ if (is_special_user__fixme($user, true)) { //per susan, only special users can s
     <div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
         <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Animal ID Filter <span class='caret'></span> </button>
 
-        <ul class='dropdown-menu' style='width:500px;'>";
+        <ul class='dropdown-menu scrollable-dropdown-menu' style='width:500px;'>";
 
     $query = "SELECT distinct(animal_id) FROM video_2 ORDER BY animal_id";
     $result = mysql_query($query, $wildlife_db);
