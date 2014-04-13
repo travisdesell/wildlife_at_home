@@ -8,9 +8,9 @@ IF(OpenCV_DIR)
 ELSE()
     IF(APPLE)
         set(OpenCV_DIR ~/Dropbox/osx/opencv/share/OpenCV)
-    ELSEIF(WIN_32)
-        set(GLUT_ROOT_PATH ~/Dropbox/Windows/freedult)
-        set(FREETYPE_DIR ~/Dropbox/Widdows/freetype)
+    ELSEIF(MSVC)
+        set(GLUT_ROOT_PATH ~/Dropbox/Windows/freeglut)
+        set(FREETYPE_DIR ~/Dropbox/Windows/freetype)
         set(FTGL_DIR ~/Dropbox/Windows/ftgl)
         set(OpenCV_DIR ~/Dropbox/Windows/opencv/build)
     ELSE()
@@ -61,7 +61,11 @@ add_executable(wildlife_surf_collect
     ../source/VideoType
     ../source/boinc_utils)
 include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
-target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY})
+IF(MSVC)
+    target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY})
+ELSE()
+    target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+ENDIF()
 
 #add_executable(wildlife_surf_collect wildlife_surf_collect2)
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
@@ -88,6 +92,15 @@ IF(Boost_FOUND AND NOT(MSVC OR APPLE))
         ../source/EventType)
     include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
     target_link_libraries(wildlife_surf_combine
+        ${Boost_LIBRARIES}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${OpenCV_LIBS})
+
+    add_executable(wildlife_surf_svm_generate
+        wildlife_surf_svm_generate
+        ../source/EventType)
+    include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
+    target_link_libraries(wildlife_surf_svm_generate
         ${Boost_LIBRARIES}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${OpenCV_LIBS})

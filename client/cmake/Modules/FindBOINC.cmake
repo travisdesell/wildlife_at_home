@@ -44,7 +44,7 @@ FIND_LIBRARY(BOINC_API_LIBRARY
 MESSAGE(STATUS "BOINC_API_LIBRARY: ${BOINC_API_LIBRARY}")
 
 FIND_LIBRARY(BOINC_GRAPHICS_LIBRARY
-    NAMES boinc_graphics2 libboincgraphics2_staticcrt
+    NAMES boinc_graphics2 libboincgraphics2_staticcrt libgraphics2
     PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment /Users/Kyle/Dropbox/Windows/win32_boinc ~/BOINC_SOURCE/
     PATH_SUFFIXES api
 )
@@ -52,7 +52,7 @@ MESSAGE(STATUS "BOINC_GRAPHICS_LIBRARY: ${BOINC_GRAPHICS_LIBRARY}")
 
 FIND_LIBRARY(BOINC_SCHED_LIBRARY
     NAMES sched
-    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment ~/BOINC_SOURCE/
+    PATHS /usr/local/lib /boinc/src/boinc /home/tdesell/boinc /Users/kgoehner/repos/boinc_build/boinc/mac_build/build/Deployment /Users/Kyle/Dropbox/Windows/win32_boinc ~/BOINC_SOURCE/
     PATH_SUFFIXES sched
 )
 MESSAGE(STATUS "BOINC_SCHED_LIBRARY: ${BOINC_SCHED_LIBRARY}")

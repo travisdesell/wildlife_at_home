@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
             cout << "********** Vid File: '" << vid_files[current_index] << "'" << endl;
             for(fs::recursive_directory_iterator end, dir(vid_files[current_index]); dir != end; ++dir) {
                 if(dir->path().extension() == ".desc") {
-                    string id = dir->path().stem();
+                    string id = dir->path().stem().string();
                     EventType *temp = getEventType(id, i);
                     //cout << temp->getId() << endl;
                     //cout << dir->path().string() << endl;
@@ -174,8 +174,8 @@ int main(int argc, char **argv) {
 
             if(!created) {
                 cout << "[ERROR] wildlife_surf_collect_assimilation_policy failed with 'cannot create directories error', directory: " << pathname << endl;
-                return 1;
-                return 0;
+                //return 1;
+                //return 0;
             }
 
             string filename = path.string() + (*it)->getId() + ".desc";
