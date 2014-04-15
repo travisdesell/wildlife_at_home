@@ -34,6 +34,7 @@
 #include "Event.hpp"
 #include "EventType.hpp"
 #include "VideoType.hpp"
+#include "utils.hpp"
 #include "boinc_utils.hpp"
 
 using namespace std;

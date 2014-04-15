@@ -59,6 +59,7 @@ add_executable(wildlife_surf_collect
     ../source/Event
     ../source/EventType
     ../source/VideoType
+    ../source/utils
     ../source/boinc_utils)
 include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
 IF(MSVC)
@@ -74,6 +75,7 @@ ENDIF()
 IF(FTGL_FOUND)
     add_executable(wildlife_graphics_app
         wildlife_graphics_app
+        ../source/utils
         ../source/boinc_utils)
     include_directories ("${PROJECT_SOURCE_DIR}/../include/" ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${FTGL_INCLUDE_DIRS})
     target_link_libraries(wildlife_graphics_app
@@ -98,7 +100,8 @@ IF(Boost_FOUND AND NOT(MSVC OR APPLE))
 
     add_executable(wildlife_surf_svm_generate
         wildlife_surf_svm_generate
-        ../source/EventType)
+        ../source/EventType
+        ../source/utils)
     include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
     target_link_libraries(wildlife_surf_svm_generate
         ${Boost_LIBRARIES}
