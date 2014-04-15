@@ -15,6 +15,7 @@ $video_count = mysql_real_escape_string($_POST['video_count']);
 $video_filter_text = mysql_real_escape_string($_POST['video_filter_text']);
 $event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
 $showing_all_videos = mysql_real_escape_string($_POST['showing_all_videos']);
+$video_id_filter = mysql_real_escape_string($_POST['video_id_filter']);
 
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
@@ -28,7 +29,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 $user = get_user();
 $query = "";
 
-if ($video_filter_text == '' && $event_filter_text == '') {
+if ($video_filter_text == '' && $event_filter_text == '' && !is_numeric($video_id_filter)) {
     if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT count(v2.id) FROM video_2 AS v2";
     } else {
@@ -37,7 +38,7 @@ if ($video_filter_text == '' && $event_filter_text == '') {
 
 //    error_log("COUNT NAV QUERY: $query");
 } else {
-    create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query);
+    create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query, $video_id_filter);
 
     if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT count(v2.id) FROM video_2 AS v2 WHERE " . $filter_query;

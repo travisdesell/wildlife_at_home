@@ -69,8 +69,12 @@ echo "
 
 //echo $mustache_engine->render($filter_list_template, $filter_list);
 
+if (is_special_user__fixme($user, true)) { //per susan, only special users can see the animal ids
+    echo "<input type='text' id='video-id-textarea' placeholder='Filter by Video ID' style='width:90%; height:22px; padding: 4px 6px 4px 6px; display: block; margin-left: auto; margin-right: auto;'>";
+}
+
 echo "
-<div class='btn-group' style='width:100%; margin-left:5px;'>
+<div class='btn-group' style='width:100%; margin-left:0px;'>
     <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Year Filter <span class='caret'></span> </button>
 
     <ul class='dropdown-menu'>
@@ -81,7 +85,7 @@ echo "
 </div> <!--button group-->";
 
 echo "
-<div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+<div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
     <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Species Filter <span class='caret'></span> </button>
 
     <ul class='dropdown-menu'>
@@ -92,7 +96,7 @@ echo "
 </div> <!--button group-->";
 
 echo "
-<div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+<div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
     <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Location Filter <span class='caret'></span> </button>
 
     <ul class='dropdown-menu'>
@@ -105,7 +109,7 @@ echo "
 
 if (is_special_user__fixme($user, true)) { //per susan, only special users can see the animal ids
     echo "
-    <div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+    <div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
         <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Animal ID Filter <span class='caret'></span> </button>
 
         <ul class='dropdown-menu scrollable-dropdown-menu' style='width:500px;'>";
@@ -115,7 +119,7 @@ if (is_special_user__fixme($user, true)) { //per susan, only special users can s
 
     echo "
             <li class='column-menu span2 firstcolumn' style='margin-left:10px;'>
-                <ul style='list-style-type: none; margin-left:5px; margin-right:5px;'>";
+                <ul style='list-style-type: none; margin-left:0px; margin-right:5px;'>";
 
     $num_rows = mysql_num_rows($result);
     $count = 0;
@@ -126,7 +130,7 @@ if (is_special_user__fixme($user, true)) { //per susan, only special users can s
                 </li>
 
                 <li class='column-menu span2' style='margin-left:10px;'>
-                <ul style='list-style-type: none; margin-right:5px; margin-left:5px;'>";
+                <ul style='list-style-type: none; margin-right:5px; margin-left:0px;'>";
         }
         echo "  <li style='padding-left:0px; padding-right:0px;'><a href='javascript:;' class='video-filter-dropdown animal-id-filter' animal_id='" . $row['animal_id'] . "' style='padding-left:0px; padding-right:0px;'>" . $row['animal_id'] . "</a></li>";
 
@@ -141,7 +145,7 @@ if (is_special_user__fixme($user, true)) { //per susan, only special users can s
 
 if (is_special_user__fixme($user, true)) { //other video filters only apply to special users
     echo "
-    <div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+    <div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
         <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Other Video Filter <span class='caret'></span> </button>
 
         <ul class='dropdown-menu'>
@@ -161,7 +165,7 @@ echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
 
 
 echo "
-<div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+<div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
     <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Event Type Filter <span class='caret'></span> </button>
 
     <ul class='dropdown-menu' style='width:525px;'>";
@@ -175,7 +179,7 @@ $result = mysql_query($query, $wildlife_db);
 
 echo "
             <li class='column-menu span4 firstcolumn'>
-            <ul style='list-style-type: none; margin-left:5px; margin-right:5px;'>";
+            <ul style='list-style-type: none; margin-left:0px; margin-right:5px;'>";
 
 $num_rows = mysql_num_rows($result);
 $prev_row = mysql_fetch_assoc($result);
@@ -190,7 +194,7 @@ while ($row = mysql_fetch_assoc($result)) {
             </li>
 
             <li class='column-menu span4'>
-            <ul style='list-style-type: none; margin-right:5px; margin-left:5px;'>";
+            <ul style='list-style-type: none; margin-right:5px; margin-left:0px;'>";
     }
 
     if (0 != strcmp($prev_row['category'], $row['category'])) {
@@ -207,7 +211,7 @@ echo "      </ul>
 </div>  <!-- button group -->"; //end the button group for events
 
 echo "
-<div class='btn-group' style='width:100%; margin-left:5px; margin-top:5px;'>
+<div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
     <button type='button' class='btn btn-small dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Add Other Event Filter <span class='caret'></span> </button>
 
     <ul class='dropdown-menu'>";
