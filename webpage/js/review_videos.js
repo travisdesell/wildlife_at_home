@@ -8,6 +8,8 @@ $(document).ready(function () {
     console.log("dev_dir: '" + dev_dir + "'");
     */
 
+    var video_id_text = '';
+
     var video_filter_text = '';
     var event_filter_text = '';
     var video_min = 0;
@@ -23,6 +25,7 @@ $(document).ready(function () {
                                 video_filter_text : video_filter_text,
                                 video_min : video_min,
                                 video_count : video_count,
+                                video_id_filter : video_id_text
                               };
 
         $.ajax({
@@ -369,11 +372,13 @@ $(document).ready(function () {
             });
             console.log("event_query text: '" + event_query_text + "'");
 
+            console.log("video_id_text: '" + video_id_text + "'");
 
-            if (video_filter_text !== video_query_text || event_filter_text !== event_query_text) {
+            if (video_filter_text !== video_query_text || event_filter_text !== event_query_text || video_id_text !== $("#video-id-textarea").val()) {
                 console.log("RELOADING!");
                 video_filter_text = video_query_text;
                 event_filter_text = event_query_text;
+                video_id_text = $("#video-id-textarea").val();
                 load_videos();
             }
 

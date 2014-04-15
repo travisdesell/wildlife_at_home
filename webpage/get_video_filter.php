@@ -6,7 +6,7 @@ $cwd = dirname($cwd);
 
 require_once($cwd . '/user.php');
 
-function create_filter($video_filter_text, $event_filter_text, &$query, &$has_observation_filter) {
+function create_filter($video_filter_text, $event_filter_text, &$query, &$has_observation_filter, $video_id_filter) {
     $query = "";
 
     $user = get_user();
@@ -17,6 +17,15 @@ function create_filter($video_filter_text, $event_filter_text, &$query, &$has_ob
             
     error_log("video filter text: '$video_filter_text'");
     error_log("event filter text: '$event_filter_text'");
+    error_log("video id filter: '$video_id_filter' is numeric? " . is_numeric($video_id_filter));
+
+    if (is_numeric($video_id_filter)) {
+        $query .= " v2.id = $video_id_filter ";
+
+        if ($event_filter_text != '' || $video_filter_text != '') {
+            $query .= "AND ";
+        }
+    }
 
     $event_filters = explode("##", $event_filter_text);
     $with = true;

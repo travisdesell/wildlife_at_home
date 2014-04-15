@@ -24,6 +24,7 @@ $event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
 $showing_all_videos = mysql_real_escape_string($_POST['showing_all_videos']);
+$video_id_filter = mysql_real_escape_string($_POST['video_id_filter']);
 
 error_log("SHOWING ALL VIDEOS: $showing_all_videos\n");
 
@@ -31,8 +32,8 @@ $user = get_user();
 $query = "";
 
 //if not expert, add flag so that videos are only the users own videos
-if ($video_filter_text != '' || $event_filter_text != '') {
-    create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query);
+if ($video_filter_text != '' || $event_filter_text != '' || is_numeric($video_id_filter)) {
+    create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query, $video_id_filter);
 
     if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2 WHERE " . $filter_query;
