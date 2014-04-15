@@ -2,19 +2,19 @@
 
 // Accessors
 
-EventType::EventType(std::string id) {
+EventType::EventType(const std::string id) {
     this->id = id;
 }
 
-void EventType::setId(std::string id) {
+void EventType::setId(const std::string id) {
    this->id = id;
 }
 
-void EventType::setDescriptors(cv::Mat descriptors) {
+void EventType::setDescriptors(const cv::Mat descriptors) {
     this->descriptors = descriptors;
 }
 
-void EventType::setKeypoints(vector<cv::KeyPoint> keypoints) {
+void EventType::setKeypoints(const vector<cv::KeyPoint> keypoints) {
     this->keypoints = keypoints;
 }
 
@@ -32,11 +32,11 @@ vector<cv::KeyPoint> EventType::getKeypoints() {
 
 // Functions
 
-void EventType::addDescriptors(cv::Mat descriptors) {
+void EventType::addDescriptors(const cv::Mat descriptors) {
     this->descriptors.push_back(descriptors);
 }
 
-void EventType::addKeypoints(vector<cv::KeyPoint> keypoints) {
+void EventType::addKeypoints(const vector<cv::KeyPoint> keypoints) {
     for(unsigned int i=0; i<keypoints.size(); i++) {
         this->keypoints.push_back(keypoints.at(i));
     }

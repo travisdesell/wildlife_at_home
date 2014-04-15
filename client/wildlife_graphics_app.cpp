@@ -27,6 +27,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "utils.hpp"
 #include "boinc_utils.hpp"
 
 using namespace std;

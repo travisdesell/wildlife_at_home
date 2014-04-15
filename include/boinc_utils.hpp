@@ -1,10 +1,8 @@
 #ifndef BOINC_UTILS_HEADER
 #define BOINC_UTILS_HEADER
 
-#include <vector>
 #include <iostream>
 #include <stdexcept>
-#include <ctime>
 
 #ifdef _BOINC_APP_
 #ifdef _WIN32
@@ -19,11 +17,6 @@
 #include "mfile.h"
 #endif
 
-#include <opencv2/nonfree/features2d.hpp>
-
-using namespace std;
-using namespace cv;
-
 struct WILDLIFE_SHMEM {
     double update_time;
     double fraction_done;
@@ -37,9 +30,6 @@ struct WILDLIFE_SHMEM {
     char filename[256];
 };
 
-string getBoincFilename(string filename) throw(runtime_error);
-double standardDeviation(vector<DMatch> arr, const double mean);
-int timeToSeconds(const string time);
-double getTimeInSeconds();
+std::string getBoincFilename(std::string filename) throw(std::runtime_error);
 
 #endif

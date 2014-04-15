@@ -16,16 +16,16 @@ class EventType {
     cv::Mat descriptors;
     vector<cv::KeyPoint> keypoints;
     public:
-    EventType(std::string);
-    void setId(std::string);
-    void setDescriptors(cv::Mat);
-    void setKeypoints(vector<cv::KeyPoint> keypoints);
+    EventType(const std::string);
+    void setId(const std::string);
+    void setDescriptors(const cv::Mat);
+    void setKeypoints(const vector<cv::KeyPoint> keypoints);
     std::string getId();
     cv::Mat getDescriptors();
     vector<cv::KeyPoint> getKeypoints();
 
-    void addDescriptors(cv::Mat descriptors);
-    void addKeypoints(vector<cv::KeyPoint> keypoints);
+    void addDescriptors(const cv::Mat descriptors);
+    void addKeypoints(const vector<cv::KeyPoint> keypoints);
     void read(cv::FileStorage infile) throw(runtime_error);
     void writeDescriptors(cv::FileStorage outfile) throw(runtime_error);
     void writeKeypoints(cv::FileStorage outfile) throw(runtime_error);

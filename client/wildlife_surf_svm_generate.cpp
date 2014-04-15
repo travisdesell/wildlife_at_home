@@ -1,17 +1,25 @@
+#include <vector>
+
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+
 #include <EventType.hpp>
+#include <utils.hpp>
 
 using namespace std;
+using namespace cv;
 using namespace boost;
-
 
 string root_dir = "/projects/wildlife/feature_files/";
 string output_file = "svm.dat";
 vector<string> positive_files;
 vector<string> negative_files;
-vector<EventType*> *event_types;
+EventType positive_events("positive");
+EventType negative_events("negative");
+bool subtract_similar;
 
 int main(int argc, char **argv) {
     namespace po = program_options;
@@ -22,8 +30,9 @@ int main(int argc, char **argv) {
     desc.add_options()
         ("help,h", "Show help menu")
         ("root,r", po::value<string>(), "Root feature directory")
-        ("positive,p", po::value<string>(), "Tags for positive features")
-        ("negative,n", po::value<string>(), "Tags for negative features")
+        ("positive,p", po::value<vector<string> >(), "Tags for positive features")
+        ("negative,n", po::value<vector<string> >(), "Tags for negative features")
+        ("substract,s", po::value(&subtract_similar)->zero_tokens(), "Subtract similar features")
         ("output,o", po::value<string>(), "Filename for SVM features")
     ;
     po::variables_map vm;
@@ -36,11 +45,25 @@ int main(int argc, char **argv) {
     }
 
     root_dir = vm["root"].as<string>();
-    positive_files.push_back(vm["positive"].as<string>());
+
+    vector<string> positives = vm["positive"].as<vector<string> >();
+    //cout << "Positives: " << positives.size() << endl;
+    for(int i=0; i < positives.size(); i++) {
+        positive_files.push_back(positives[i]);
+    }
 
     if (vm.count("negative")) {
-        negative_files.push_back(vm["negative"].as<string>());
+        vector<string> negatives = vm["negative"].as<vector<string> >();
+        //cout << "Negaties: " << negatives.size() << endl;
+        for(int i=0; i < negatives.size(); i++) {
+            negative_files.push_back(negatives[i]);
+        }
+    } else {
+        // Get all file names in directory.
+        cout << "[ERROR] No negative names given!" << endl;
     }
+
+    cout << "Subtract: " << subtract_similar << endl;
 
     if (vm.count("output")) {
         output_file = vm["output"].as<string>();
@@ -56,4 +79,89 @@ int main(int argc, char **argv) {
         cout << "\t" << negative_files[i] << endl;
     }
     cout << "Output     : '" << output_file << "'" << endl;
+
+    // Load all positive files.
+    for(int i=0; i < positive_files.size(); i++) {
+        string filename = root_dir + positive_files[i] + ".desc";
+        cv::FileStorage infile(filename, cv::FileStorage::READ);
+        cout << "Loading from file: " << filename << endl;
+        try {
+            positive_events.setId(positive_files[i]); //Set Id to read in correct events.
+            positive_events.read(infile);
+        } catch (const std::exception &ex) {
+            cerr << "main positives: " << ex.what() << endl;
+            exit(1);
+        }
+        infile.release();
+    }
+    
+    // Load all negative files.
+    for(int i=0; i < negative_files.size(); i++) {
+        string filename = root_dir + negative_files[i] + ".desc";
+        cv::FileStorage infile(filename, cv::FileStorage::READ);
+        try {
+            negative_events.setId(negative_files[i]); //Set Id to read in correct events.
+            negative_events.read(infile);
+        } catch (const std::exception &ex) {
+            cerr << "main negatives: " << ex.what() << endl;
+            exit(1);
+        }
+        infile.release();
+    }
+
+    cout << "Positive Size: " << positive_events.getKeypoints().size() << endl;
+    cout << "Negative Size: " << negative_events.getKeypoints().size() << endl;
+
+    // Subtract similar features
+    if(subtract_similar) {
+        Mat positive_desc = positive_events.getDescriptors();
+        Mat negative_desc = negative_events.getDescriptors();
+        vector<KeyPoint> positive_keypoints = positive_events.getKeypoints();
+        Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce");
+        vector<DMatch> matches;
+        matcher->match(positive_desc, negative_desc, matches);
+
+        double totalDist = 0;
+        double maxDist = 0;
+        double minDist = 100;
+
+        for(int i=0; i<matches.size(); i++) {
+            double dist = matches[i].distance;
+            totalDist += dist;
+            if(dist < minDist) minDist = dist;
+            if(dist > maxDist) maxDist = dist;
+        }
+
+        double avgDist = totalDist/matches.size();
+        double stdDev = standardDeviation(matches, avgDist);
+
+        cout << "Max dist: " << maxDist << endl;
+        cout << "Min dist: " << minDist << endl;
+        cout << "Avg dist: " << avgDist << endl;
+        cout << "Std Dev : " << stdDev << endl;
+
+        Mat newDesc;
+        vector<KeyPoint> newKeypoints;
+        // matcher->match(train, query, matches);
+        for(int i=0; i<matches.size(); i++) {
+            if(matches[i].distance > avgDist + (3 * stdDev)) {
+                newDesc.push_back(positive_desc.row(matches[i].trainIdx));
+                newKeypoints.push_back(positive_keypoints.at(matches[i].trainIdx));
+            }
+        }
+
+        positive_events.setDescriptors(newDesc);
+        positive_events.setKeypoints(newKeypoints);
+
+        cout << "Positive Size: " << positive_events.getKeypoints().size() << endl;
+        cout << "Negative Size: " << negative_events.getKeypoints().size() << endl;
+    } else {
+        // Did not subtract out similar features
+    }
+
+    ofstream outfile;
+    outfile.open((output_file).c_str(), ofstream::out);
+    positive_events.writeForSVM(outfile, "+1");
+    negative_events.writeForSVM(outfile, "-1");
+    outfile.close();
 }
