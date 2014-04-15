@@ -71,6 +71,8 @@ echo "
 
 if (is_special_user__fixme($user, true)) { //per susan, only special users can see the animal ids
     echo "<input type='text' id='video-id-textarea' placeholder='Filter by Video ID' style='width:90%; height:22px; padding: 4px 6px 4px 6px; display: block; margin-left: auto; margin-right: auto;'>";
+
+    echo "<hr style='margin-top:5px; margin-bottom:5px;'>";
 }
 
 echo "
