@@ -356,7 +356,7 @@ void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
             (*it)->writeDescriptors(outfile);
             (*it)->writeKeypoints(outfile);
 #ifdef SVM
-            (*it)->writeForSVM(svmfile, (*it)->getId());
+            (*it)->writeForSVM(svmfile, (*it)->getId(), true);
 #endif
         }
     } catch(const exception ex) {
