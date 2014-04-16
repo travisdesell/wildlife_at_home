@@ -20,6 +20,7 @@ vector<string> negative_files;
 EventType positive_events("positive");
 EventType negative_events("negative");
 bool subtract_similar;
+bool add_keypoints;
 
 int main(int argc, char **argv) {
     namespace po = program_options;
@@ -33,6 +34,7 @@ int main(int argc, char **argv) {
         ("positive,p", po::value<vector<string> >(), "Tags for positive features")
         ("negative,n", po::value<vector<string> >(), "Tags for negative features")
         ("substract,s", po::value(&subtract_similar)->zero_tokens(), "Subtract similar features")
+        ("add_keypoints,k", po::value(&subtract_similar)->zero_tokens(), "Add x and y positions to values")
         ("output,o", po::value<string>(), "Filename for SVM features")
     ;
     po::variables_map vm;
@@ -64,6 +66,7 @@ int main(int argc, char **argv) {
     }
 
     cout << "Subtract: " << subtract_similar << endl;
+    cout << "Keypoints: " << add_keypoints << endl;
 
     if (vm.count("output")) {
         output_file = vm["output"].as<string>();
@@ -94,7 +97,7 @@ int main(int argc, char **argv) {
         }
         infile.release();
     }
-    
+
     // Load all negative files.
     for(int i=0; i < negative_files.size(); i++) {
         string filename = root_dir + negative_files[i] + ".desc";
@@ -161,7 +164,7 @@ int main(int argc, char **argv) {
 
     ofstream outfile;
     outfile.open((output_file).c_str(), ofstream::out);
-    positive_events.writeForSVM(outfile, "+1");
-    negative_events.writeForSVM(outfile, "-1");
+    positive_events.writeForSVM(outfile, "+1", add_keypoints);
+    negative_events.writeForSVM(outfile, "-1", add_keypoints);
     outfile.close();
 }
