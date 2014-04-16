@@ -29,7 +29,7 @@ class EventType {
     void read(cv::FileStorage infile) throw(runtime_error);
     void writeDescriptors(cv::FileStorage outfile) throw(runtime_error);
     void writeKeypoints(cv::FileStorage outfile) throw(runtime_error);
-    void writeForSVM(ofstream &outfile, string label) throw(runtime_error);
+    void writeForSVM(ofstream &outfile, string label, bool add_keypoints) throw(runtime_error);
 };
 
 #endif

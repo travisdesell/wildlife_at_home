@@ -71,7 +71,7 @@ void EventType::writeKeypoints(cv::FileStorage outfile) throw(runtime_error) {
     }
 }
 
-void EventType::writeForSVM(ofstream &outfile, string label) throw(runtime_error) {
+void EventType::writeForSVM(ofstream &outfile, string label, bool add_keypoints) throw(runtime_error) {
     cv::Mat desc = getDescriptors();
     vector<cv::KeyPoint> feats = getKeypoints();
     if(outfile.is_open()) {
@@ -80,8 +80,10 @@ void EventType::writeForSVM(ofstream &outfile, string label) throw(runtime_error
             for(int j=0; j<desc.cols; j++) {
                 outfile << j+1 << ":" << desc.at<float>(i, j) << " ";
             }
-            outfile << desc.cols+1 << ":" << feats.at(i).pt.x << " ";
-            outfile << desc.cols+2 << ":" << feats.at(i).pt.y << " ";
+            if(add_keypoints) {
+                outfile << desc.cols+1 << ":" << feats.at(i).pt.x << " ";
+                outfile << desc.cols+2 << ":" << feats.at(i).pt.y << " ";
+            }
             outfile << endl;
         }
     } else {
