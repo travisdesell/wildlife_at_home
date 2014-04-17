@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         ("positive,p", po::value<vector<string> >(), "Tags for positive features")
         ("negative,n", po::value<vector<string> >(), "Tags for negative features")
         ("substract,s", po::value(&subtract_similar)->zero_tokens(), "Subtract similar features")
-        ("add_keypoints,k", po::value(&subtract_similar)->zero_tokens(), "Add x and y positions to values")
+        ("add_keypoints,k", po::value(&add_keypoints)->zero_tokens(), "Add x and y positions to values")
         ("output,o", po::value<string>(), "Filename for SVM features")
     ;
     po::variables_map vm;
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
         vector<KeyPoint> newKeypoints;
         // matcher->match(train, query, matches);
         for(int i=0; i<matches.size(); i++) {
-            if(matches[i].distance > avgDist + (3 * stdDev)) {
+            if(matches[i].distance > avgDist + (1 * stdDev)) {
                 newDesc.push_back(positive_desc.row(matches[i].trainIdx));
                 newKeypoints.push_back(positive_keypoints.at(matches[i].trainIdx));
             }

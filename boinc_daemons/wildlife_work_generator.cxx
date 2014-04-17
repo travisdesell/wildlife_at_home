@@ -190,7 +190,7 @@ bool config_is_good(string fileName, int duration_s) {
 }
 
 // create one new job
-int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, string md5_hash, string features_file, string tag) {
+int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, int min_hessian, string md5_hash, string features_file, string tag) {
     DB_WORKUNIT wu;
 
     char name[256], path[256];
@@ -344,7 +344,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         cout << "\tinfile[1]: " << infiles[1] << endl;
         n_files = 2;
 
-        sprintf(command_line, " -c input.config -v video.mp4");
+        sprintf(command_line, " -c input.config -v video.mp4 -h %d", min_hessian);
     } else {
         video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
         infiles[0] = video_filename.c_str();
@@ -505,8 +505,13 @@ void main_loop(const vector<string> &arguments) {
     get_argument(arguments, "--tag", true, tag);
 
     string features_file;
+    int min_hessian;
     if (0 == strcmp(app_name, "wildlife_surf")) {
         get_argument(arguments, "--features_file", true, features_file);
+        if(!get_argument(arguments, "--min_hessian", false, min_hessian)) {
+            min_hessian = 500;
+        }
+        cout << "Generateing jobs with hessian value of " << min_hessian << "." << endl;
     }
 
     initialize_database();
@@ -599,7 +604,7 @@ void main_loop(const vector<string> &arguments) {
         int filesize = atoi(video_row[5]);
         string md5_hash = video_row[6];
 
-        int job_id = make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash, features_file, tag); 
+        int job_id = make_job(video_id, species_id, location_id, video_address, duration_s, filesize, min_hessian, md5_hash, features_file, tag); 
         if (job_id == -1) {
             total_errors++;
         } else {
