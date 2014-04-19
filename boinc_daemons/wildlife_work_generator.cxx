@@ -264,7 +264,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
         infiles[1] = video_filename.c_str();
 
-        config_filename = video_filename + ".config";
+        config_filename = video_filename + "." + name + ".config";
         ofstream config_file(config_filename.c_str());
 
         ostringstream video_species_query;
@@ -477,6 +477,7 @@ void main_loop(const vector<string> &arguments) {
     int species_id = 0;
     int location_id = 0;
     int number_jobs = 100;  //jobs to generate when under the cushion
+    int min_hessian = 500;
 
     if (!get_argument(arguments, "--species_id", false, species_id)) {
         cout << "generating workunits for all species." << endl;
@@ -493,7 +494,6 @@ void main_loop(const vector<string> &arguments) {
     if (!get_argument(arguments, "--number_jobs", false, number_jobs)) {
         cout << "generating a max of " << number_jobs << " workunits, to run for all videos set number_jobs <= 0." << endl;
     } else {
-
         if (number_jobs <= 0) {
             cout << "generating workunits for all videos.." << endl;
         } else {
@@ -501,17 +501,19 @@ void main_loop(const vector<string> &arguments) {
         }
     }
 
-    string tag;
-    get_argument(arguments, "--tag", true, tag);
-
-    string features_file;
-    int min_hessian;
-    if (0 == strcmp(app_name, "wildlife_surf")) {
-        get_argument(arguments, "--features_file", true, features_file);
+    if (0 == strcmp(app_name, "wildlife_surf_collect")) {
         if(!get_argument(arguments, "--min_hessian", false, min_hessian)) {
             min_hessian = 500;
         }
         cout << "Generateing jobs with hessian value of " << min_hessian << "." << endl;
+    }
+
+    string tag;
+    get_argument(arguments, "--tag", true, tag);
+
+    string features_file;
+    if (0 == strcmp(app_name, "wildlife_surf")) {
+        get_argument(arguments, "--features_file", true, features_file);
     }
 
     initialize_database();
