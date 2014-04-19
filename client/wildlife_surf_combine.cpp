@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
             current_index++;
         }
 
-        string combined_feats_directory = working_directory + "/" + output_dir + "/" + lexical_cast<string>(i) + "/";
+        string combined_feats_directory = output_dir + "/" + lexical_cast<string>(i) + "/";
         for (vector<EventType*>::iterator it = event_types[i].begin(); it != event_types[i].end(); ++it) {
             string pathname = combined_feats_directory;
 

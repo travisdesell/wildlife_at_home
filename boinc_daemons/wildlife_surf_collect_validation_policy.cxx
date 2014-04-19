@@ -69,6 +69,38 @@ int init_result(RESULT& result, void*& data) {
     int retval;
 
     try {
+        string eventString = parse_xml<string>(result.stderr_out, "error");
+
+        stringstream ss(eventString);
+        vector<string> eventIds;
+        vector<EventType*> *eventTypes = new vector<EventType*>();
+
+        string temp;
+        getline(ss, temp, '\n');
+        while(getline(ss, temp, '\n')) {
+            trim(temp);
+            log_messages.printf(MSG_DEBUG, "Error: '%s'\n", temp.c_str());
+            eventIds.push_back(temp);
+        }
+
+        for (unsigned int i=0; i<eventIds.size(); i++) {
+            EventType *temp = new EventType(eventIds[i]);
+            eventTypes->push_back(temp);
+        }
+
+        data = (void*)eventTypes;
+
+        return 0;
+    } catch(string error_message) {
+        log_messages.printf(MSG_DEBUG, "wildlife_surf_collect_validation_policy get_error_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
+
+    } catch(const exception &ex) {
+        log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_validation_policy get_data_from_result([RESULT#%d %s]) failed with error %s\n", result.id, result.name, ex.what());
+        //exit(0);
+        return 1;
+    }
+
+    try {
         string eventString = parse_xml<string>(result.stderr_out, "event_ids");
         stringstream ss(eventString);
         vector<string> eventIds;
@@ -156,6 +188,14 @@ int compare_results(
             log_messages.printf(MSG_CRITICAL, "ERROR, event ids do not match. '%s' vs '%s'\n", type1->getId().c_str(), type2->getId().c_str());
             exit(0);
             return 0;
+        }
+
+        if (type1->getId().find("ERROR") != string::npos) {
+            // Type is an error and both WUs errored, accept.
+            match = true;
+            log_messages.printf(MSG_DEBUG, "Events match and are both errors: '%s'", type1->getId().c_str());
+            exit(0);
+            return 1;
         }
 
         int matches = 0;
