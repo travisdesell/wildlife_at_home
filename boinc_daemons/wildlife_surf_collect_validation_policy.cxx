@@ -193,8 +193,8 @@ int compare_results(
         if (type1->getId().find("ERROR") != string::npos) {
             // Type is an error and both WUs errored, accept.
             match = true;
-            log_messages.printf(MSG_DEBUG, "Events match and are both errors: '%s'", type1->getId().c_str());
-            exit(0);
+            log_messages.printf(MSG_DEBUG, "Events match and are both errors: '%s'\n", type1->getId().c_str());
+            //exit(0);
             return 1;
         }
 
