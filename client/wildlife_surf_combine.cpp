@@ -26,7 +26,7 @@ string root_dir = "/projects/wildlife/feature_files/";
 string species_dir;
 string location_dir;
 unsigned int cross_validation = ALL;
-string cv_dir = NULL;
+string cv_dir = "";
 string output_dir = "combined";
 vector<EventType*> *event_types;
 
