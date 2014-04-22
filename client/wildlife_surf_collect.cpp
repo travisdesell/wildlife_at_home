@@ -1,4 +1,4 @@
-//#define GUI
+#define GUI
 #define SVM
 
 #include <stdexcept>

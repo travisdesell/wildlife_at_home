@@ -68,6 +68,21 @@ ELSE()
     target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
 ENDIF()
 
+add_executable(wildlife_surf_predict
+    wildlife_surf_predict
+    ../source/Event
+    ../source/EventType
+    ../source/VideoType
+    ../source/utils
+    ../source/boinc_utils
+    ../source/svm)
+include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
+IF(MSVC)
+    target_link_libraries(wildlife_surf_predict ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY})
+ELSE()
+    target_link_libraries(wildlife_surf_predict ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+ENDIF()
+
 #add_executable(wildlife_surf_collect wildlife_surf_collect2)
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
