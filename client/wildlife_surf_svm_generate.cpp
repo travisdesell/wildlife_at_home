@@ -150,9 +150,10 @@ int main(int argc, char **argv) {
         vector<KeyPoint> newKeypoints;
         // matcher->match(train, query, matches);
         for(int i=0; i<matches.size(); i++) {
-            if(matches[i].distance > avgDist + (1 * stdDev)) {
-                newDesc.push_back(positive_desc.row(matches[i].trainIdx));
-                newKeypoints.push_back(positive_keypoints.at(matches[i].trainIdx));
+            if(matches[i].distance > avgDist + (2 * stdDev)) {
+                cout << "Index: " << matches[i].queryIdx << endl;
+                newDesc.push_back(positive_desc.row(matches[i].queryIdx));
+                newKeypoints.push_back(positive_keypoints.at(matches[i].queryIdx));
             }
         }
 
