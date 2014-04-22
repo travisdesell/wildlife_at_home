@@ -15,6 +15,7 @@ using namespace boost;
 
 string root_dir = "/projects/wildlife/feature_files/";
 string output_file = "svm.dat";
+string positive_desc_file = "posFeat.dat";
 vector<string> positive_files;
 vector<string> negative_files;
 EventType positive_events("positive");
@@ -35,6 +36,7 @@ int main(int argc, char **argv) {
         ("negative,n", po::value<vector<string> >(), "Tags for negative features")
         ("substract,s", po::value(&subtract_similar)->zero_tokens(), "Subtract similar features")
         ("add_keypoints,k", po::value(&add_keypoints)->zero_tokens(), "Add x and y positions to values")
+        ("desc_output,do", po::value<string>(), "Filename for positive descriptor features")
         ("output,o", po::value<string>(), "Filename for SVM features")
     ;
     po::variables_map vm;
@@ -82,6 +84,7 @@ int main(int argc, char **argv) {
         cout << "\t" << negative_files[i] << endl;
     }
     cout << "Output     : '" << output_file << "'" << endl;
+    cout << "Desc Out   : '" << positive_desc_file << "'" << endl;
 
     // Load all positive files.
     for(int i=0; i < positive_files.size(); i++) {
@@ -162,8 +165,12 @@ int main(int argc, char **argv) {
         // Did not subtract out similar features
     }
 
+    FileStorage storage_file(positiive_desc_file);
+    positive_evenst.writeDescriptors(storage_file);
+    storage_file.release();
+
     ofstream outfile;
-    outfile.open((output_file).c_str(), ofstream::out);
+    outfile.open(output_file.c_str(), ofstream::out);
     positive_events.writeForSVM(outfile, "+1", add_keypoints);
     negative_events.writeForSVM(outfile, "-1", add_keypoints);
     outfile.close();
