@@ -99,9 +99,9 @@ int main(int argc, char **argv) {
     unsigned found = vidFilename.find_last_of("/\\");
     vidName = vidFilename.substr(found+1);
 
-    cerr << "Vid file: " << vidFilename.c_str() << endl;
-    cerr << "Vid name: " << vidName.c_str() << endl;
-    cerr << "Config file: " << configFilename.c_str() << endl;
+    cerr << "Vid file: " << vidFilename << endl;
+    cerr << "Vid name: " << vidName << endl;
+    cerr << "Model file: " << modelFilename << endl;
     cerr << "Matcher: " << MATCHERS[descMatcher] << endl;
     cerr << "Min Hessian: " << minHessian << endl;
     cerr << "Threshold: " << flannThreshold << " * standard deviation" << endl;
@@ -109,19 +109,12 @@ int main(int argc, char **argv) {
 #ifdef _BOINC_APP_
     cout << "Boinc enabled." << endl;
     cerr << "Resolving boinc file paths." << endl;
-    configFilename = getBoincFilename(configFilename);
+    modelFilename = getBoincFilename(modelFilename);
     vidFilename = getBoincFilename(vidFilename);
     descFilename = getBoincFilename(descFilename);
 #endif
 
     int vidTime;
-    vector<EventType*> eventTypes;
-    vector<Event*> events;
-    if(!readConfig(configFilename, &eventTypes, &events, &vidTime, &species)) {
-        return false; //Error occurred.
-    }
-    cerr << "Events: " << events.size() << endl;
-    cerr << "Event Types: " << eventTypes.size() << endl;
 
     VideoCapture capture(vidFilename.c_str());
     if(!capture.isOpened()) {
@@ -133,12 +126,14 @@ int main(int argc, char **argv) {
     boinc_init();
 #endif
 
-    int checkpointFramePos;
+    int checkpointFramePos = 0;
+    /*
     if(readCheckpoint(&checkpointFramePos, &eventTypes)) {
         cerr << "Start from checkpoint on frame " << checkpointFramePos << endl;
     } else {
         cerr << "Unsuccessful checkpoint read." << endl << "Starting from beginning of video." << endl;
     }
+    */
 
     capture.set(CV_CAP_PROP_POS_FRAMES, checkpointFramePos);
 
@@ -150,7 +145,7 @@ int main(int argc, char **argv) {
 
     VideoType vidType(frameWidth, frameHeight);
 
-    cerr << "Config Filename: '" << configFilename.c_str() << "'" << endl;
+    cerr << "Model Filename: '" << modelFilename.c_str() << "'" << endl;
     cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
     cerr << "Current Frame: '" << framePos << "'" << endl;
     cerr << "Frame Count: '" << totalFrames << "'" << endl;
@@ -165,8 +160,21 @@ int main(int argc, char **argv) {
     boinc_register_timer_callback(updateSHMEM);
     cerr << "SHMEM opened." << endl;
 
-    Mat globalDescriptors;
-    vector<KeyPoint> globalKeypoints;
+    EventType positiveEventType("parent behavior - on nest");
+    FileStorage infile(configFilename, FileStorage::READ);
+    positiveEventType.read(infile);
+    infile.release();
+    Mat storedDescriptors = positiveEventType.getDescriptors();
+
+    vector<KeyPoint> positiveKeypoints;
+    vector<KeyPoint> negativeKeypoints;
+
+    svm_model *model;
+	if((model=svm_load_model(modelFilename.c_str()))==0)
+	{
+		fprintf(stderr,"can't open model file %s\n", modelFilename.c_str());
+		exit(1);
+	}
 
     while(framePos/totalFrames < 1.0) {
         double fraction_done = (double)framePos/totalFrames;
@@ -178,7 +186,7 @@ int main(int argc, char **argv) {
 #endif
         if(boinc_time_to_checkpoint()) {
             cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
-            writeCheckpoint(framePos, eventTypes);
+            //writeCheckpoint(framePos, eventTypes);
             boinc_checkpoint_completed();
         }
 #endif
@@ -207,37 +215,50 @@ int main(int argc, char **argv) {
         extractor->compute(frame, frameKeypoints, frameDescriptors);
         delete(extractor);
 
-        globalDescriptors.push_back(frameDescriptors);
-        globalKeypoints.insert(globalKeypoints.end(), frameKeypoints.begin(), frameKeypoints.end());
-        cout << globalDescriptors.size() << endl;
+        Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce");
+        vector<DMatch> matches;
+        matcher->match(frameDescriptors, storedDescriptors, matches);
+
+        //Collect Matching Keypoints
+        vector<KeyPoint> matchingKeypoints;
+        for(int i=0; i < matches.size(); i++) {
+            if(matches[i].distance < 0.4) {
+                matchingKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
+            }
+        }
 
         //Run points through SVM
-        /*
-        svm_node *nodes = new svm_node[frameDescriptors.cols];
+        negativeKeypoints.clear();
+        svm_node *nodes = new svm_node[frameDescriptors.cols+1];
         for(int i=0; i < frameDescriptors.rows; i++) {
             for (int j=0; j < frameDescriptors.cols; j++) {
                 nodes[j].index = j;
                 nodes[j].value = double(frameDescriptors.at<float>(i, j));
             }
-            double val = -1;
-            //double val = svm_predict(model, nodes); // Slow line!
+            nodes[frameDescriptors.cols].index = -1;
+            nodes[frameDescriptors.cols].value = 0;
+
+            double val = svm_predict(model, nodes); // Slow line!
+            //cout << "Val: " << val << endl;
             if(val == -1) {
+                //cout << "Val: " << val << endl;
                 negativeKeypoints.push_back(frameKeypoints[i]);
             } else {
-                cout << "Val: " << val << endl;
+                //cout << "Val: " << val << endl;
                 positiveKeypoints.push_back(frameKeypoints[i]);
             }
         }
+        cout << "Positive: " << positiveKeypoints.size() << endl;
         delete(nodes);
-        */
 
 #ifdef GUI
         // Draw points on frame.
         Mat pointsFrame = frame;
         vidType.drawZones(pointsFrame, Scalar(0, 0, 100));
-        drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT); // Draw random colors
-        //drawKeypoints(frame, positiveKeypoints, pointsFrame, Scalar(0, 255, 0), DrawMatchesFlags::DEFAULT);
-        //drawKeypoints(frame, negativeKeypoints, pointsFrame, Scalar(0, 0, 255), DrawMatchesFlags::DEFAULT);
+        //drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT); // Draw random colors
+        drawKeypoints(frame, negativeKeypoints, pointsFrame, Scalar(0, 0, 255), DrawMatchesFlags::DEFAULT);
+        drawKeypoints(frame, positiveKeypoints, pointsFrame, Scalar(0, 255, 0), DrawMatchesFlags::DEFAULT);
+        drawKeypoints(frame, matchingKeypoints, pointsFrame, Scalar(255, 0, 0), DrawMatchesFlags::DEFAULT);
 
         // Display image.
         imshow("Wildlife@Home", pointsFrame);
@@ -245,7 +266,7 @@ int main(int argc, char **argv) {
 #endif
     }
 
-
+    /*
     vector<KeyPoint> positiveKeypoints;
 
     //Run points through SVM
@@ -266,6 +287,7 @@ int main(int argc, char **argv) {
         }
     }
     delete(nodes);
+    */
     svm_free_and_destroy_model(&model);
 
 #ifdef GUI
@@ -285,12 +307,7 @@ int main(int argc, char **argv) {
 
     capture.release();
 
-    cerr << "<event_ids>" << endl;
-    for(int i=0; i<eventTypes.size(); i++) {
-        cerr << eventTypes[i]->getId().c_str() << endl;
-    }
-    cerr << "</event_ids>" << endl;
-    writeEventsToFile(descFilename, eventTypes);
+    // Log stuff here...
 
 #ifdef GUI
     cvDestroyWindow("Wildlife@Home");
@@ -467,13 +484,13 @@ bool readParams(int argc, char** argv) {
             return false;
         }
     }
-    if(vidFilename.empty() || configFilename.empty() || modelFilename.empty()) return false;
+    if(vidFilename.empty() || modelFilename.empty()) return false;
     else return true;
 }
 
 // TODO This should be genereated automatically somehow... probably from the
 // readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_predict -v <video> -c <config> -s <model> [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
+	cout << "Usage: wildlife_predict -v <video> -s <model> [-c <config>] [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 
 }
