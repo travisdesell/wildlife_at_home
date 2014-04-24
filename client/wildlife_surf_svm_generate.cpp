@@ -70,7 +70,11 @@ int main(int argc, char **argv) {
     cout << "Subtract: " << subtract_similar << endl;
     cout << "Keypoints: " << add_keypoints << endl;
 
-    if (vm.count("output")) {
+    if(vm.count("desc_output")) {
+        positive_desc_file = vm["desc_output"].as<string>();
+    }
+
+    if(vm.count("output")) {
         output_file = vm["output"].as<string>();
     }
 
@@ -150,8 +154,8 @@ int main(int argc, char **argv) {
         vector<KeyPoint> newKeypoints;
         // matcher->match(train, query, matches);
         for(int i=0; i<matches.size(); i++) {
-            if(matches[i].distance > avgDist + (2 * stdDev)) {
-                cout << "Index: " << matches[i].queryIdx << endl;
+            if(matches[i].distance > avgDist + 3.5 * stdDev)) {
+                //cout << "Index: " << matches[i].queryIdx << endl;
                 newDesc.push_back(positive_desc.row(matches[i].queryIdx));
                 newKeypoints.push_back(positive_keypoints.at(matches[i].queryIdx));
             }
@@ -166,8 +170,8 @@ int main(int argc, char **argv) {
         // Did not subtract out similar features
     }
 
-    FileStorage storage_file(positiive_desc_file);
-    positive_evenst.writeDescriptors(storage_file);
+    FileStorage storage_file(positive_desc_file, FileStorage::WRITE);
+    positive_events.writeDescriptors(storage_file);
     storage_file.release();
 
     ofstream outfile;
