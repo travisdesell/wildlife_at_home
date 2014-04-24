@@ -68,7 +68,7 @@ static double flannThreshold = 3.5;
 static bool removeWatermark = true;
 static bool removeTimestamp = true;
 static int descMatcher = 1;
-static string vidFilename, configFilename, modelFilename, descFilename;
+static string vidFilename, outputFilename, configFilename, modelFilename, descFilename;
 static string vidName;
 static string species;
 
@@ -145,6 +145,19 @@ int main(int argc, char **argv) {
 
     VideoType vidType(frameWidth, frameHeight);
 
+    VideoWriter outputVideo;
+    if(!outputFilename.empty()) {
+        // Open Video Writer
+        int ex = static_cast<int>(capture.get(CV_CAP_PROP_FOURCC));
+        cv::Size s = cv::Size(frameWidth, frameHeight);
+        outputVideo.open(outputFilename.c_str(), ex, capture.get(CV_CAP_PROP_FPS), s, true);
+        if(!outputVideo.isOpened()) {
+            cerr << "ERROR: Could not open the output video file." << endl;
+            exit(1);
+        }
+    }
+
+
     cerr << "Model Filename: '" << modelFilename.c_str() << "'" << endl;
     cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
     cerr << "Current Frame: '" << framePos << "'" << endl;
@@ -168,6 +181,7 @@ int main(int argc, char **argv) {
 
     vector<KeyPoint> positiveKeypoints;
     vector<KeyPoint> negativeKeypoints;
+    vector<KeyPoint> matchingKeypoints;
 
     svm_model *model;
 	if((model=svm_load_model(modelFilename.c_str()))==0)
@@ -220,7 +234,6 @@ int main(int argc, char **argv) {
         matcher->match(frameDescriptors, storedDescriptors, matches);
 
         //Collect Matching Keypoints
-        vector<KeyPoint> matchingKeypoints;
         for(int i=0; i < matches.size(); i++) {
             if(matches[i].distance < 0.4) {
                 matchingKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
@@ -251,7 +264,6 @@ int main(int argc, char **argv) {
         cout << "Positive: " << positiveKeypoints.size() << endl;
         delete(nodes);
 
-#ifdef GUI
         // Draw points on frame.
         Mat pointsFrame = frame;
         vidType.drawZones(pointsFrame, Scalar(0, 0, 100));
@@ -260,52 +272,21 @@ int main(int argc, char **argv) {
         drawKeypoints(frame, positiveKeypoints, pointsFrame, Scalar(0, 255, 0), DrawMatchesFlags::DEFAULT);
         drawKeypoints(frame, matchingKeypoints, pointsFrame, Scalar(255, 0, 0), DrawMatchesFlags::DEFAULT);
 
+        if(!outputFilename.empty()) {
+            outputVideo << pointsFrame;
+        }
+
+#ifdef GUI
         // Display image.
         imshow("Wildlife@Home", pointsFrame);
         if((cvWaitKey(10) & 255) == 27) break;
 #endif
     }
 
-    /*
-    vector<KeyPoint> positiveKeypoints;
-
-    //Run points through SVM
-    svm_model *model = svm_load_model(modelFilename.c_str());
-    svm_node *nodes = new svm_node[globalDescriptors.cols];
-    for(int i=0; i < globalDescriptors.rows; i++) {
-        for (int j=0; j < globalDescriptors.cols; j++) {
-            nodes[j].index = j;
-            nodes[j].value = double(globalDescriptors.at<float>(i, j));
-        }
-        double val = svm_predict(model, nodes); // Slow line!
-        cout << "Val: " << val << endl;
-        if(val == -1) {
-            //negativeKeypoints.push_back(globalKeypoints[i]);
-        } else {
-            cout << "Positive Val: " << val << endl;
-            positiveKeypoints.push_back(globalKeypoints[i]);
-        }
-    }
-    delete(nodes);
-    */
     svm_free_and_destroy_model(&model);
 
-#ifdef GUI
-        // Draw points on frame.
-        Mat frame;
-        capture >> frame;
-        Mat pointsFrame = frame;
-        vidType.drawZones(pointsFrame, Scalar(0, 0, 100));
-        //drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT); // Draw random colors
-        drawKeypoints(frame, positiveKeypoints, pointsFrame, Scalar(0, 255, 0), DrawMatchesFlags::DEFAULT);
-        //drawKeypoints(frame, negativeKeypoints, pointsFrame, Scalar(0, 0, 255), DrawMatchesFlags::DEFAULT);
-
-        // Display image.
-        imshow("Wildlife@Home", pointsFrame);
-        cvWaitKey(10);
-#endif
-
     capture.release();
+    outputVideo.release();
 
     // Log stuff here...
 
@@ -462,6 +443,8 @@ bool readParams(int argc, char** argv) {
         if(i < argc) {
             if(string(argv[i]) == "--video" || string(argv[i]) == "-v") {
                 if(i+1 < argc) vidFilename = argv[++i];
+            } else if(string(argv[i]) == "--output" || string(argv[i]) == "-o") {
+                if(i+1 < argc) outputFilename = argv[++i];
             } else if(string(argv[i]) == "--config" || string(argv[i]) == "-c") {
                 if(i+1 < argc) configFilename = argv[++i];
             } else if(string(argv[i]) == "--svm_model" || string(argv[i]) == "-s") {
@@ -484,13 +467,13 @@ bool readParams(int argc, char** argv) {
             return false;
         }
     }
-    if(vidFilename.empty() || modelFilename.empty()) return false;
+    if(vidFilename.empty() || modelFilename.empty() || configFilename.empty()) return false;
     else return true;
 }
 
 // TODO This should be genereated automatically somehow... probably from the
 // readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_predict -v <video> -s <model> [-c <config>] [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
+	cout << "Usage: wildlife_predict -v <video> -s <model> -c <config> [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 
 }
