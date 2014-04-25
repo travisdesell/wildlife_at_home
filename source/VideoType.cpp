@@ -3,10 +3,9 @@
 using namespace std;
 
 // Accessors
-VideoType::VideoType(const cv::Size size) : VideoType(size.width, size.height) {};
-VideoType::VideoType(const int width, const int height) {
-    this->width = width;
-    this->height = height;
+VideoType::VideoType(const cv::Size size) {
+    this->width = size.width;
+    this->height = size.height;
 
     // Cache Vars
     this->updateMask = true;

@@ -142,8 +142,8 @@ int main(int argc, char **argv) {
 
     int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-    VideoType vidType(frameWidth, frameHeight);
+    cv::Size frameSize(frameWidth, frameHeight);
+    VideoType vidType(frameSize);
 
     VideoWriter outputVideo;
     if(!outputFilename.empty()) {
