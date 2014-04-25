@@ -63,12 +63,12 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 static const char *EXTRACTORS[] = {"Opponent"};
 static const char *DETECOTRS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
 static const char *MATCHERS[] = {"FlannBased", "BruteForce", "BruteForce-SL2", "BruteForce-L1", "BruteForce-Hamming", "BruteForce-HammingLUT", "BruteForce-Hamming(2)"};
-static int  minHessian = 400;
+static int  minHessian = 500;
 static double flannThreshold = 3.5;
 static bool removeWatermark = true;
 static bool removeTimestamp = true;
 static int descMatcher = 1;
-static string vidFilename, outputFilename, configFilename, modelFilename, descFilename;
+static string vidFilename, outputFilename, configFilename, modelFilename, scaleFilename, descFilename;
 static string vidName;
 static string species;
 
@@ -190,6 +190,11 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
+    //Get feature size
+    int feat_size=0;
+    while(model->SV[0][feat_size++].index != -1);
+    cout << "Number Features: " << feat_size << endl;
+
     while(framePos/totalFrames < 1.0) {
         double fraction_done = (double)framePos/totalFrames;
         cerr << "Fraction done: " << fraction_done << endl;
@@ -231,23 +236,35 @@ int main(int argc, char **argv) {
 
         Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce");
         vector<DMatch> matches;
-        matcher->match(frameDescriptors, storedDescriptors, matches);
+        matcher->match(storedDescriptors, frameDescriptors, matches);
 
         //Collect Matching Keypoints
         for(int i=0; i < matches.size(); i++) {
-            if(matches[i].distance < 0.4) {
-                matchingKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
-            }
+            //if(matches[i].distance < 0.4) {
+                matchingKeypoints.push_back(frameKeypoints.at(matches[i].trainIdx));
+            //}
         }
 
         //Run points through SVM
         negativeKeypoints.clear();
-        svm_node *nodes = new svm_node[frameDescriptors.cols+1];
+        svm_node *nodes = new svm_node[frameDescriptors.cols+3];
         for(int i=0; i < frameDescriptors.rows; i++) {
-            for (int j=0; j < frameDescriptors.cols; j++) {
+            int j;
+            for (j=0; j < frameDescriptors.cols; j++) {
                 nodes[j].index = j;
                 nodes[j].value = double(frameDescriptors.at<float>(i, j));
             }
+            if(feat_size > frameDescriptors.cols+1) {
+                // Set X
+                nodes[j].index = j;
+                nodes[j].value = (float)frameKeypoints.at(i).pt.x / frameWidth;
+                j++;
+                // Set Y
+                nodes[j].index = frameDescriptors.cols;
+                nodes[j].value = (float)frameKeypoints.at(i).pt.y / frameHeight;
+                j++;
+            }
+            // End
             nodes[frameDescriptors.cols].index = -1;
             nodes[frameDescriptors.cols].value = 0;
 
@@ -449,6 +466,8 @@ bool readParams(int argc, char** argv) {
                 if(i+1 < argc) configFilename = argv[++i];
             } else if(string(argv[i]) == "--svm_model" || string(argv[i]) == "-s") {
                 if(i+1 < argc) modelFilename = argv[++i];
+            } else if(string(argv[i]) == "--svm_scale" || string(argv[i]) == "-a") {
+                if(i+1 < argc) scaleFilename = argv[++i];
             } else if(string(argv[i]) == "--desc" || string(argv[i]) == "-d") {
                 if(i+1 < argc) descFilename = argv[++i];
             } else if(string(argv[i]) == "--matcher" || string(argv[i]) == "-m") {
@@ -474,6 +493,6 @@ bool readParams(int argc, char** argv) {
 // TODO This should be genereated automatically somehow... probably from the
 // readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_predict -v <video> -s <model> -c <config> [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
+	cout << "Usage: wildlife_predict -v <video> -s <model> -c <config> [-a <scale file>] [-o <video output>] [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 
 }
