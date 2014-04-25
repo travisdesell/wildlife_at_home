@@ -2,6 +2,8 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -29,6 +31,10 @@ unsigned int cross_validation = ALL;
 string cv_dir = "";
 string output_dir = "combined";
 vector<EventType*> *event_types;
+
+int get_rand(const int i) {
+    return rand()%i;
+}
 
 int main(int argc, char **argv) {
     namespace po = program_options;
@@ -114,8 +120,9 @@ int main(int argc, char **argv) {
     cout << "Vid Count: " << vid_set.size() << endl;
 
     // Shuffle Files
+    srand(time(NULL));
     vector<string> vid_files(vid_set.begin(), vid_set.end());
-    random_shuffle(vid_files.begin(), vid_files.end());
+    random_shuffle(vid_files.begin(), vid_files.end(), get_rand);
 
     // Split Files
     unsigned int num_vid_groups = 1;
