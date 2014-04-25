@@ -145,8 +145,8 @@ int main(int argc, char **argv) {
 
     int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-    VideoType vidType(frameWidth, frameHeight);
+    cv::Size frameSize(frameWidth, frameHeight);
+    VideoType vidType(frameSize);
 
     cerr << "Config Filename: '" << configFilename.c_str() << "'" << endl;
     cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
@@ -209,7 +209,7 @@ int main(int argc, char **argv) {
                 activeEvents++;
                 if((*it)->getDescriptors().empty()) {
                     (*it)->addDescriptors(frameDescriptors);
-                    (*it)->addKeypoints(frameKeypoints);
+                    (*it)->addKeypoints(frameKeypoints, frameSize);
                 } else {
                     // Find Matches
                     Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(MATCHERS[descMatcher]);
@@ -243,9 +243,9 @@ int main(int argc, char **argv) {
                     vector<KeyPoint>  newKeypoints;
                     for(int i=0; i<matches.size(); i++) {
                         if(matches[i].distance > avgDist + (flannThreshold * stdDev)) {
-                            cv::Point a = frameKeypoints.at(matches[i].queryIdx).pt;
-                            cv::Point b = (*it)->getKeypoints().at(matches[i].trainIdx).pt;
-                            cerr << "Euclidian dist: " << sqrt(double((a.x-b.x) * (a.x-b.x)) + double((a.y-b.y) * (a.y-b.y))) << endl;
+                            cv::Point2f a = frameKeypoints.at(matches[i].queryIdx).pt;
+                            cv::Point2f b = (*it)->getKeypoints().at(matches[i].trainIdx);
+                            cerr << "Euclidian dist: " << sqrt((a.x-b.x) * (a.x-b.x) + (a.y-b.y) * (a.y-b.y)) << endl;
                             newDescriptors.push_back(frameDescriptors.row(matches[i].queryIdx));
                             newKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
                         }
@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
 
                     if(newDescriptors.rows > 0) {
                         (*it)->addDescriptors(newDescriptors);
-                        (*it)->addKeypoints(newKeypoints);
+                        (*it)->addKeypoints(newKeypoints, frameSize);
                     }
                     featuresCollected = (*it)->getDescriptors().rows;
 

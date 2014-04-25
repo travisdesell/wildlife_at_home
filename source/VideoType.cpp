@@ -3,8 +3,8 @@
 using namespace std;
 
 // Accessors
-
-VideoType::VideoType(int width, int height) {
+VideoType::VideoType(const cv::Size size) : VideoType(size.width, size.height) {};
+VideoType::VideoType(const int width, const int height) {
     this->width = width;
     this->height = height;
 
@@ -51,15 +51,15 @@ void VideoType::drawZones(cv::Mat &frame, const cv::Scalar &color) {
 
 // Private
 
-void VideoType::setWatermarkRect(cv::Point topLeft, cv::Point bottomRight) {
+void VideoType::setWatermarkRect(const cv::Point topLeft, const cv::Point bottomRight) {
     this->watermarkRect = cv::Rect(topLeft, bottomRight);
 }
 
-void VideoType::setTimestampRect(cv::Point topLeft, cv::Point bottomRight) {
+void VideoType::setTimestampRect(const cv::Point topLeft, const cv::Point bottomRight) {
     this->timestampRect = cv::Rect(topLeft, bottomRight);
 }
 
-void VideoType::fillRectOnMat(cv::Mat &mat, cv::Rect rect) {
+void VideoType::fillRectOnMat(cv::Mat &mat, const cv::Rect rect) {
     cv::Point tl = rect.tl();
     cv::Point br = rect.br();
     for(int x=tl.x; x<br.x; x++) {
