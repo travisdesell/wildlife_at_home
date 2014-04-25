@@ -8,8 +8,7 @@
 using namespace std;
 
 class VideoType {
-	 int width;
-	 int height;
+     cv::Size size;
      cv::Mat mask;
      cv::Rect watermarkRect;
      cv::Rect timestampRect;
@@ -22,6 +21,7 @@ class VideoType {
 
      int getWidth();
      int getHeight();
+     cv::Size getSize();
      cv::Rect getWatermarkRect();
      cv::Rect getTimestampRect();
 
