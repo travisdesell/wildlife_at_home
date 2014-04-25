@@ -19,7 +19,6 @@ class VideoType {
 
     public:
      VideoType(const cv::Size);
-     VideoType(const int width, const int height);
 
      int getWidth();
      int getHeight();
