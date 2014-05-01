@@ -58,8 +58,8 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 /****** END PROTOTYPES ******/
 
-static const char *EXTRACTORS[] = {"Opponent"};
-static const char *DETECOTRS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
+//static const char *EXTRACTORS[] = {"Opponent"};
+//static const char *DETECTORS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
 static const char *MATCHERS[] = {"FlannBased", "BruteForce", "BruteForce-SL2", "BruteForce-L1", "BruteForce-Hamming", "BruteForce-HammingLUT", "BruteForce-Hamming(2)"};
 static int  minHessian = 400;
 static double flannThreshold = 3.5;
@@ -168,9 +168,7 @@ int main(int argc, char **argv) {
         cerr << "Fraction done: " << fraction_done << endl;
 #ifdef _BOINC_APP_
         boinc_fraction_done(fraction_done);
-#ifdef GUI
-        int key = waitKey(1);
-#endif
+
         if(boinc_time_to_checkpoint()) {
             cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
             writeCheckpoint(framePos, eventTypes);
