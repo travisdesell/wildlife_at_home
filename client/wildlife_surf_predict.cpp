@@ -48,7 +48,6 @@ void printUsage();
 bool readParams(int argc, char** argv);
 void calculateFPS();
 void updateSHMEM();
-bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species);
 void writeMatrix(FileStorage outfile, string id, Mat matrix);
 Mat readMatrix(FileStorage infile, string id);
 void writeEventsToFile(string filename, vector<EventType*> eventTypes);
@@ -60,8 +59,8 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 /****** END PROTOTYPES ******/
 
-static const char *EXTRACTORS[] = {"Opponent"};
-static const char *DETECOTRS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
+//static const char *EXTRACTORS[] = {"Opponent"};
+//static const char *DETECTORS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
 static const char *MATCHERS[] = {"FlannBased", "BruteForce", "BruteForce-SL2", "BruteForce-L1", "BruteForce-Hamming", "BruteForce-HammingLUT", "BruteForce-Hamming(2)"};
 static int  minHessian = 500;
 static double flannThreshold = 3.5;
@@ -113,8 +112,6 @@ int main(int argc, char **argv) {
     vidFilename = getBoincFilename(vidFilename);
     descFilename = getBoincFilename(descFilename);
 #endif
-
-    int vidTime;
 
     VideoCapture capture(vidFilename.c_str());
     if(!capture.isOpened()) {
@@ -200,9 +197,7 @@ int main(int argc, char **argv) {
         cerr << "Fraction done: " << fraction_done << endl;
 #ifdef _BOINC_APP_
         boinc_fraction_done(fraction_done);
-#ifdef GUI
-        int key = waitKey(1);
-#endif
+
         if(boinc_time_to_checkpoint()) {
             cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
             //writeCheckpoint(framePos, eventTypes);
@@ -214,12 +209,6 @@ int main(int argc, char **argv) {
         framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
         calculateFPS();
         //cout << "FPS: " << fps << endl;
-
-        // TODO This should be in a setting file to allow for differnet frame
-        // rates.
-        if(framePos % 10 == 0) {
-            vidTime++; //Increment video time every 10 frames.
-        }
 
         //Ptr<FeatureDetector> detector = new SurfFeatureDetector(minHessian);
         SurfFeatureDetector *detector = new SurfFeatureDetector(minHessian);
@@ -381,42 +370,6 @@ void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
         exit(1);
     }
     outfile.release();
-}
-
-bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species) {
-    cerr << "Reading config file: " << filename.c_str() << endl;
-    string line, eventId, startTime, endTime;
-    ifstream infile;
-    infile.open(filename.c_str());
-    getline(infile, line);
-    *species = line;
-    getline(infile, line);
-    *vidTime = timeToSeconds(line);
-    while(getline(infile, eventId, ',')) {
-        Event *newEvent = new Event();
-        EventType *eventType = NULL;
-        for(vector<EventType*>::iterator it = eventTypes->begin(); it != eventTypes->end(); ++it) {
-            cerr << "Event name: '" <<  (*it)->getId().c_str() << endl;
-            if((*it)->getId().compare(eventId) == 0) {
-                eventType = *it;
-                break;
-            }
-        }
-        if(eventType == NULL) {
-            eventType = new EventType(eventId);
-            eventTypes->push_back(eventType);
-        }
-        if(!getline(infile, startTime, ',') || !getline(infile, endTime)) {
-            cerr << "Error: Malformed config file!" << endl;
-            return false;
-        }
-        newEvent->setType(eventType);
-        newEvent->setStartTime(timeToSeconds(startTime));
-        newEvent->setEndTime(timeToSeconds(endTime));
-        events->push_back(newEvent);
-    }
-    infile.close();
-    return true;
 }
 
 void updateSHMEM() {

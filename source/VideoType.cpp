@@ -38,7 +38,6 @@ cv::Rect VideoType::getTimestampRect() {
 cv::Mat VideoType::getMask() {
     if(this->updateMask) {
         this->mask = cv::Mat(this->size.height, this->size.width, CV_8UC1, cv::Scalar(1));
-        const static int CV_FILLED = -1;
         fillRectOnMat(this->mask, timestampRect);
         fillRectOnMat(this->mask, watermarkRect);
         this->updateMask = false;
