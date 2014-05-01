@@ -49,7 +49,7 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(FTGL)
-find_package(Boost REQUIRED COMPONENTS system filesystem program_options)
+find_package(Boost COMPONENTS system filesystem program_options)
 
 
 MESSAGE(STATUS "OpenCV Include Dirs: ${OpenCV_INCLUDE_DIRS}")
