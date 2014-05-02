@@ -273,6 +273,7 @@ void boinc_app_key_press(int which, int is_down) {}
 void boinc_app_key_release(int which, int is_down) {}
 
 int main(int argc, char** argv) {
+    setNumThreads(0);
     boinc_init_graphics_diagnostics(BOINC_DIAG_DEFAULTS);
 
 #ifdef __APPLE__
