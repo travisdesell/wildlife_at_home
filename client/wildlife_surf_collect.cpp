@@ -82,6 +82,7 @@ float averageFeatures = 0;
 double fps = 10;
 
 int main(int argc, char **argv) {
+    setNumThreads(0);
     if(!(numeric_limits<float>::is_iec559 || numeric_limits<double>::is_iec559)) {
         cerr << "WARNING: Architecture is not compatible with IEEE floating point standard!" << endl;
     }
