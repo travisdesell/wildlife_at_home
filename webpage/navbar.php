@@ -77,7 +77,7 @@ function print_navbar($active_items) {
                                 <li><a href='sharptailed_grouse_training.php'>Training Videos</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Interior Least Tern</a></li>
-                                <li><a href='javascript:;'>Ecology and Information (Coming Soon)</a></li>
+                                <li><a href='least_tern_info.php'>Ecology and Information</a></li>
                                 <li><a href='javascript:;'>Training Videos (Coming Soon)</a></li>
                                 <li class='divider'></li>
                                 <li class='nav-header'>Piping Plover </a></li>

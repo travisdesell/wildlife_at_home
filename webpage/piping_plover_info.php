@@ -69,7 +69,7 @@ echo "
 
             <section id='distribution' class='well'>
                 <div class='row-fluid'>
-                    <img class='span4' src='http://volunteer.cs.und.edu/wildlife/piping_plover_distribution.png'></img>
+                    <img class='span4' src='http://volunteer.cs.und.edu/wildlife/images/piping_plover_distribution.png'></img>
 
                     <div class='span8'>
                         <div class='page-header'>
