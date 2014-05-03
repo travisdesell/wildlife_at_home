@@ -72,7 +72,6 @@ void renderText(float x, float y, const char* text, const int size, const float 
     glLoadIdentity();
     glColor4f(color[0], color[1], color[2], color[3]);
     glRasterPos2f(x, viewport[3] - y);
-    const int length = (int)strlen(text);
     font->FaceSize(size);
     font->Render(text);
     glMatrixMode(GL_PROJECTION);
@@ -82,7 +81,6 @@ void renderText(float x, float y, const char* text, const int size, const float 
 }
 
 static void draw_text() {
-    static float x=0, y=0;
     char buf[256];
     double fd = 0, cpu=0, dt;
     if (shmem) {
@@ -275,6 +273,7 @@ void boinc_app_key_press(int which, int is_down) {}
 void boinc_app_key_release(int which, int is_down) {}
 
 int main(int argc, char** argv) {
+    setNumThreads(0);
     boinc_init_graphics_diagnostics(BOINC_DIAG_DEFAULTS);
 
 #ifdef __APPLE__

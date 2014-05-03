@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
     if(subtract_similar) {
         Mat positive_desc = positive_events.getDescriptors();
         Mat negative_desc = negative_events.getDescriptors();
-        vector<KeyPoint> positive_keypoints = positive_events.getKeypoints();
+        vector<Point2f> positive_keypoints = positive_events.getKeypoints();
         Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce");
         vector<DMatch> matches;
         matcher->match(positive_desc, negative_desc, matches);
@@ -151,10 +151,10 @@ int main(int argc, char **argv) {
         cout << "Std Dev : " << stdDev << endl;
 
         Mat newDesc;
-        vector<KeyPoint> newKeypoints;
+        vector<Point2f> newKeypoints;
         // matcher->match(train, query, matches);
         for(int i=0; i<matches.size(); i++) {
-            if(matches[i].distance > avgDist + 3.5 * stdDev)) {
+            if(matches[i].distance > avgDist + 3 * stdDev) {
                 //cout << "Index: " << matches[i].queryIdx << endl;
                 newDesc.push_back(positive_desc.row(matches[i].queryIdx));
                 newKeypoints.push_back(positive_keypoints.at(matches[i].queryIdx));

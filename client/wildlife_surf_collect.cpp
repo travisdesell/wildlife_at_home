@@ -1,4 +1,4 @@
-#define GUI
+//#define GUI
 #define SVM
 
 #include <stdexcept>
@@ -58,8 +58,8 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 /****** END PROTOTYPES ******/
 
-static const char *EXTRACTORS[] = {"Opponent"};
-static const char *DETECOTRS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
+//static const char *EXTRACTORS[] = {"Opponent"};
+//static const char *DETECTORS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
 static const char *MATCHERS[] = {"FlannBased", "BruteForce", "BruteForce-SL2", "BruteForce-L1", "BruteForce-Hamming", "BruteForce-HammingLUT", "BruteForce-Hamming(2)"};
 static int  minHessian = 400;
 static double flannThreshold = 3.5;
@@ -82,6 +82,7 @@ float averageFeatures = 0;
 double fps = 10;
 
 int main(int argc, char **argv) {
+    setNumThreads(0);
     if(!(numeric_limits<float>::is_iec559 || numeric_limits<double>::is_iec559)) {
         cerr << "WARNING: Architecture is not compatible with IEEE floating point standard!" << endl;
     }
@@ -145,8 +146,8 @@ int main(int argc, char **argv) {
 
     int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-    VideoType vidType(frameWidth, frameHeight);
+    cv::Size frameSize(frameWidth, frameHeight);
+    VideoType vidType(frameSize);
 
     cerr << "Config Filename: '" << configFilename.c_str() << "'" << endl;
     cerr << "Vid Filename: '" << vidFilename.c_str() << "'" << endl;
@@ -168,9 +169,7 @@ int main(int argc, char **argv) {
         cerr << "Fraction done: " << fraction_done << endl;
 #ifdef _BOINC_APP_
         boinc_fraction_done(fraction_done);
-#ifdef GUI
-        int key = waitKey(1);
-#endif
+
         if(boinc_time_to_checkpoint()) {
             cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
             writeCheckpoint(framePos, eventTypes);
@@ -209,7 +208,7 @@ int main(int argc, char **argv) {
                 activeEvents++;
                 if((*it)->getDescriptors().empty()) {
                     (*it)->addDescriptors(frameDescriptors);
-                    (*it)->addKeypoints(frameKeypoints);
+                    (*it)->addKeypoints(frameKeypoints, frameSize);
                 } else {
                     // Find Matches
                     Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create(MATCHERS[descMatcher]);
@@ -243,9 +242,9 @@ int main(int argc, char **argv) {
                     vector<KeyPoint>  newKeypoints;
                     for(int i=0; i<matches.size(); i++) {
                         if(matches[i].distance > avgDist + (flannThreshold * stdDev)) {
-                            cv::Point a = frameKeypoints.at(matches[i].queryIdx).pt;
-                            cv::Point b = (*it)->getKeypoints().at(matches[i].trainIdx).pt;
-                            cerr << "Euclidian dist: " << sqrt(double((a.x-b.x) * (a.x-b.x)) + double((a.y-b.y) * (a.y-b.y))) << endl;
+                            cv::Point2f a = frameKeypoints.at(matches[i].queryIdx).pt;
+                            cv::Point2f b = (*it)->getKeypoints().at(matches[i].trainIdx);
+                            cerr << "Euclidian dist: " << sqrt((a.x-b.x) * (a.x-b.x) + (a.y-b.y) * (a.y-b.y)) << endl;
                             newDescriptors.push_back(frameDescriptors.row(matches[i].queryIdx));
                             newKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
                         }
@@ -253,7 +252,7 @@ int main(int argc, char **argv) {
 
                     if(newDescriptors.rows > 0) {
                         (*it)->addDescriptors(newDescriptors);
-                        (*it)->addKeypoints(newKeypoints);
+                        (*it)->addKeypoints(newKeypoints, frameSize);
                     }
                     featuresCollected = (*it)->getDescriptors().rows;
 

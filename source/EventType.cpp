@@ -14,7 +14,7 @@ void EventType::setDescriptors(const cv::Mat descriptors) {
     this->descriptors = descriptors;
 }
 
-void EventType::setKeypoints(const vector<cv::KeyPoint> keypoints) {
+void EventType::setKeypoints(const vector<cv::Point2f> keypoints) {
     this->keypoints = keypoints;
 }
 
@@ -26,7 +26,7 @@ cv::Mat EventType::getDescriptors() {
     return this->descriptors;
 }
 
-vector<cv::KeyPoint> EventType::getKeypoints() {
+vector<cv::Point2f> EventType::getKeypoints() {
     return this->keypoints;
 }
 
@@ -36,7 +36,7 @@ void EventType::addDescriptors(const cv::Mat descriptors) {
     this->descriptors.push_back(descriptors);
 }
 
-void EventType::addKeypoints(const vector<cv::KeyPoint> keypoints) {
+void EventType::addKeypoints(const vector<cv::Point2f> keypoints) {
     for(unsigned int i=0; i<keypoints.size(); i++) {
         this->keypoints.push_back(keypoints.at(i));
     }
@@ -44,7 +44,7 @@ void EventType::addKeypoints(const vector<cv::KeyPoint> keypoints) {
 
 void EventType::read(cv::FileStorage infile) throw(runtime_error) {
     cv::Mat descriptors;
-    vector<cv::KeyPoint> keypoints;
+    vector<cv::Point2f> keypoints;
     if(infile.isOpened()) {
         cv::read(infile[getId() + "_desc"], descriptors); // infile[getId()] >> descriptors;
         cv::read(infile[getId() + "_pts"], keypoints); // infile[getId()] >> keypoints;
@@ -73,7 +73,7 @@ void EventType::writeKeypoints(cv::FileStorage outfile) throw(runtime_error) {
 
 void EventType::writeForSVM(ofstream &outfile, string label, bool add_keypoints) throw(runtime_error) {
     cv::Mat desc = getDescriptors();
-    vector<cv::KeyPoint> feats = getKeypoints();
+    vector<cv::Point2f> points = getKeypoints();
     if(outfile.is_open()) {
         for(int i=0; i<desc.rows; i++) {
             outfile << label << " ";
@@ -81,8 +81,8 @@ void EventType::writeForSVM(ofstream &outfile, string label, bool add_keypoints)
                 outfile << j+1 << ":" << desc.at<float>(i, j) << " ";
             }
             if(add_keypoints) {
-                outfile << desc.cols+1 << ":" << feats.at(i).pt.x << " ";
-                outfile << desc.cols+2 << ":" << feats.at(i).pt.y << " ";
+                outfile << desc.cols+1 << ":" << points.at(i).x << " ";
+                outfile << desc.cols+2 << ":" << points.at(i).y << " ";
             }
             outfile << endl;
         }

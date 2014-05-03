@@ -3,10 +3,8 @@
 using namespace std;
 
 // Accessors
-
-VideoType::VideoType(int width, int height) {
-    this->width = width;
-    this->height = height;
+VideoType::VideoType(const cv::Size size) {
+    this->size = size;
 
     // Cache Vars
     this->updateMask = true;
@@ -16,11 +14,15 @@ VideoType::VideoType(int width, int height) {
 
 
 int VideoType::getWidth() {
-    return this->width;
+    return this->size.width;
 }
 
 int VideoType::getHeight() {
-    return this->height;
+    return this->size.height;
+}
+
+cv::Size VideoType::getSize() {
+    return this->size;
 }
 
 cv::Rect VideoType::getWatermarkRect() {
@@ -35,8 +37,7 @@ cv::Rect VideoType::getTimestampRect() {
 
 cv::Mat VideoType::getMask() {
     if(this->updateMask) {
-        this->mask = cv::Mat(this->height, this->width, CV_8UC1, cv::Scalar(1));
-        const static int CV_FILLED = -1;
+        this->mask = cv::Mat(this->size.height, this->size.width, CV_8UC1, cv::Scalar(1));
         fillRectOnMat(this->mask, timestampRect);
         fillRectOnMat(this->mask, watermarkRect);
         this->updateMask = false;
@@ -51,15 +52,15 @@ void VideoType::drawZones(cv::Mat &frame, const cv::Scalar &color) {
 
 // Private
 
-void VideoType::setWatermarkRect(cv::Point topLeft, cv::Point bottomRight) {
+void VideoType::setWatermarkRect(const cv::Point topLeft, const cv::Point bottomRight) {
     this->watermarkRect = cv::Rect(topLeft, bottomRight);
 }
 
-void VideoType::setTimestampRect(cv::Point topLeft, cv::Point bottomRight) {
+void VideoType::setTimestampRect(const cv::Point topLeft, const cv::Point bottomRight) {
     this->timestampRect = cv::Rect(topLeft, bottomRight);
 }
 
-void VideoType::fillRectOnMat(cv::Mat &mat, cv::Rect rect) {
+void VideoType::fillRectOnMat(cv::Mat &mat, const cv::Rect rect) {
     cv::Point tl = rect.tl();
     cv::Point br = rect.br();
     for(int x=tl.x; x<br.x; x++) {
@@ -71,14 +72,14 @@ void VideoType::fillRectOnMat(cv::Mat &mat, cv::Rect rect) {
 
 // TODO This needs to be fixed to load in from a config file.
 void VideoType::loadType() {
-    if(width == 704 && height ==480) {
+    if(size.width == 704 && size.height == 480) {
         cv::Point watermarkTopLeft(12, 12);
         cv::Point watermarkBottomRight(90, 55);
         cv::Point timestampTopLeft(520, 415);
         cv::Point timestampBottomRight(680, 470);
         setWatermarkRect(watermarkTopLeft, watermarkBottomRight);
         setTimestampRect(timestampTopLeft, timestampBottomRight);
-    } else if(width == 352 && height == 240) {
+    } else if(size.width == 352 && size.height == 240) {
         cv::Point watermarkTopLeft(12, 12);
         cv::Point watermarkBottomRight(90, 55);
         cv::Point timestampTopLeft(240, 190);
