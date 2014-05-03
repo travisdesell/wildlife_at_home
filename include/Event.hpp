@@ -21,9 +21,10 @@ class Event {
      int getEndTime();
 
      void addDescriptors(cv::Mat descriptors);
-     void addKeypoints(vector<cv::KeyPoint> keypoints);
+     void addKeypoints(vector<cv::Point2f> keypoints);
+     void addKeypoints(vector<cv::KeyPoint> keypoints, cv::Size);
      cv::Mat getDescriptors();
-     vector<cv::KeyPoint> getKeypoints();
+     vector<cv::Point2f> getKeypoints();
      string getTypeId();
 };
 

@@ -48,7 +48,6 @@ void printUsage();
 bool readParams(int argc, char** argv);
 void calculateFPS();
 void updateSHMEM();
-bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species);
 void writeMatrix(FileStorage outfile, string id, Mat matrix);
 Mat readMatrix(FileStorage infile, string id);
 void writeEventsToFile(string filename, vector<EventType*> eventTypes);
@@ -60,15 +59,15 @@ void writeCheckpoint(int framePos, vector<EventType*> eventTypes) throw(runtime_
 
 /****** END PROTOTYPES ******/
 
-static const char *EXTRACTORS[] = {"Opponent"};
-static const char *DETECOTRS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
+//static const char *EXTRACTORS[] = {"Opponent"};
+//static const char *DETECTORS[] = {"Grid", "Pyramid", "Dynamic", "HARRIS"};
 static const char *MATCHERS[] = {"FlannBased", "BruteForce", "BruteForce-SL2", "BruteForce-L1", "BruteForce-Hamming", "BruteForce-HammingLUT", "BruteForce-Hamming(2)"};
-static int  minHessian = 400;
+static int  minHessian = 500;
 static double flannThreshold = 3.5;
 static bool removeWatermark = true;
 static bool removeTimestamp = true;
 static int descMatcher = 1;
-static string vidFilename, outputFilename, configFilename, modelFilename, descFilename;
+static string vidFilename, outputFilename, configFilename, modelFilename, scaleFilename, descFilename;
 static string vidName;
 static string species;
 
@@ -114,8 +113,6 @@ int main(int argc, char **argv) {
     descFilename = getBoincFilename(descFilename);
 #endif
 
-    int vidTime;
-
     VideoCapture capture(vidFilename.c_str());
     if(!capture.isOpened()) {
         cerr << "Failed to open '" << vidFilename.c_str() << "'" << endl;
@@ -142,8 +139,8 @@ int main(int argc, char **argv) {
 
     int frameWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     int frameHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-
-    VideoType vidType(frameWidth, frameHeight);
+    cv::Size frameSize(frameWidth, frameHeight);
+    VideoType vidType(frameSize);
 
     VideoWriter outputVideo;
     if(!outputFilename.empty()) {
@@ -190,14 +187,17 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
+    //Get feature size
+    int feat_size=0;
+    while(model->SV[0][feat_size++].index != -1);
+    cout << "Number Features: " << feat_size << endl;
+
     while(framePos/totalFrames < 1.0) {
         double fraction_done = (double)framePos/totalFrames;
         cerr << "Fraction done: " << fraction_done << endl;
 #ifdef _BOINC_APP_
         boinc_fraction_done(fraction_done);
-#ifdef GUI
-        int key = waitKey(1);
-#endif
+
         if(boinc_time_to_checkpoint()) {
             cerr << "boinc_time_to_checkpoint encountered, checkpointing at frame " << framePos << endl;
             //writeCheckpoint(framePos, eventTypes);
@@ -209,12 +209,6 @@ int main(int argc, char **argv) {
         framePos = capture.get(CV_CAP_PROP_POS_FRAMES);
         calculateFPS();
         //cout << "FPS: " << fps << endl;
-
-        // TODO This should be in a setting file to allow for differnet frame
-        // rates.
-        if(framePos % 10 == 0) {
-            vidTime++; //Increment video time every 10 frames.
-        }
 
         //Ptr<FeatureDetector> detector = new SurfFeatureDetector(minHessian);
         SurfFeatureDetector *detector = new SurfFeatureDetector(minHessian);
@@ -231,23 +225,35 @@ int main(int argc, char **argv) {
 
         Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce");
         vector<DMatch> matches;
-        matcher->match(frameDescriptors, storedDescriptors, matches);
+        matcher->match(storedDescriptors, frameDescriptors, matches);
 
         //Collect Matching Keypoints
         for(int i=0; i < matches.size(); i++) {
-            if(matches[i].distance < 0.4) {
-                matchingKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
-            }
+            //if(matches[i].distance < 0.4) {
+                matchingKeypoints.push_back(frameKeypoints.at(matches[i].trainIdx));
+            //}
         }
 
         //Run points through SVM
         negativeKeypoints.clear();
-        svm_node *nodes = new svm_node[frameDescriptors.cols+1];
+        svm_node *nodes = new svm_node[frameDescriptors.cols+3];
         for(int i=0; i < frameDescriptors.rows; i++) {
-            for (int j=0; j < frameDescriptors.cols; j++) {
+            int j;
+            for (j=0; j < frameDescriptors.cols; j++) {
                 nodes[j].index = j;
                 nodes[j].value = double(frameDescriptors.at<float>(i, j));
             }
+            if(feat_size > frameDescriptors.cols+1) {
+                // Set X
+                nodes[j].index = j;
+                nodes[j].value = (float)frameKeypoints.at(i).pt.x / frameWidth;
+                j++;
+                // Set Y
+                nodes[j].index = frameDescriptors.cols;
+                nodes[j].value = (float)frameKeypoints.at(i).pt.y / frameHeight;
+                j++;
+            }
+            // End
             nodes[frameDescriptors.cols].index = -1;
             nodes[frameDescriptors.cols].value = 0;
 
@@ -366,42 +372,6 @@ void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     outfile.release();
 }
 
-bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species) {
-    cerr << "Reading config file: " << filename.c_str() << endl;
-    string line, eventId, startTime, endTime;
-    ifstream infile;
-    infile.open(filename.c_str());
-    getline(infile, line);
-    *species = line;
-    getline(infile, line);
-    *vidTime = timeToSeconds(line);
-    while(getline(infile, eventId, ',')) {
-        Event *newEvent = new Event();
-        EventType *eventType = NULL;
-        for(vector<EventType*>::iterator it = eventTypes->begin(); it != eventTypes->end(); ++it) {
-            cerr << "Event name: '" <<  (*it)->getId().c_str() << endl;
-            if((*it)->getId().compare(eventId) == 0) {
-                eventType = *it;
-                break;
-            }
-        }
-        if(eventType == NULL) {
-            eventType = new EventType(eventId);
-            eventTypes->push_back(eventType);
-        }
-        if(!getline(infile, startTime, ',') || !getline(infile, endTime)) {
-            cerr << "Error: Malformed config file!" << endl;
-            return false;
-        }
-        newEvent->setType(eventType);
-        newEvent->setStartTime(timeToSeconds(startTime));
-        newEvent->setEndTime(timeToSeconds(endTime));
-        events->push_back(newEvent);
-    }
-    infile.close();
-    return true;
-}
-
 void updateSHMEM() {
     if(shmem == NULL) return;
     //cout << fixed << "Time: " << getTimeInSeconds() << endl;
@@ -449,6 +419,8 @@ bool readParams(int argc, char** argv) {
                 if(i+1 < argc) configFilename = argv[++i];
             } else if(string(argv[i]) == "--svm_model" || string(argv[i]) == "-s") {
                 if(i+1 < argc) modelFilename = argv[++i];
+            } else if(string(argv[i]) == "--svm_scale" || string(argv[i]) == "-a") {
+                if(i+1 < argc) scaleFilename = argv[++i];
             } else if(string(argv[i]) == "--desc" || string(argv[i]) == "-d") {
                 if(i+1 < argc) descFilename = argv[++i];
             } else if(string(argv[i]) == "--matcher" || string(argv[i]) == "-m") {
@@ -474,6 +446,6 @@ bool readParams(int argc, char** argv) {
 // TODO This should be genereated automatically somehow... probably from the
 // readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_predict -v <video> -s <model> -c <config> [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
+	cout << "Usage: wildlife_predict -v <video> -s <model> -c <config> [-a <scale file>] [-o <video output>] [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 
 }

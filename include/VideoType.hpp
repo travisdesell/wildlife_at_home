@@ -8,8 +8,7 @@
 using namespace std;
 
 class VideoType {
-	 int width;
-	 int height;
+     cv::Size size;
      cv::Mat mask;
      cv::Rect watermarkRect;
      cv::Rect timestampRect;
@@ -18,10 +17,11 @@ class VideoType {
      bool updateMask;
 
     public:
-     VideoType(int width, int height);
+     VideoType(const cv::Size);
 
      int getWidth();
      int getHeight();
+     cv::Size getSize();
      cv::Rect getWatermarkRect();
      cv::Rect getTimestampRect();
 
@@ -29,9 +29,9 @@ class VideoType {
      void drawZones(cv::Mat &frame, const cv::Scalar &color);
 
     private:
-     void setWatermarkRect(cv::Point, cv::Point);
-     void setTimestampRect(cv::Point, cv::Point);
-     void fillRectOnMat(cv::Mat &mat, cv::Rect rect);
+     void setWatermarkRect(const cv::Point, const cv::Point);
+     void setTimestampRect(const cv::Point, const cv::Point);
+     void fillRectOnMat(cv::Mat &mat, const cv::Rect rect);
      void loadType();
 };
 

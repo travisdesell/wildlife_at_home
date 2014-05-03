@@ -213,8 +213,8 @@ int compare_results(
         }
 
         log_messages.printf(MSG_DEBUG, "Check number of keypoints.\n");
-        vector<KeyPoint> type1_keypoints = type1->getKeypoints();
-        vector<KeyPoint> type2_keypoints = type2->getKeypoints();
+        vector<Point2f> type1_keypoints = type1->getKeypoints();
+        vector<Point2f> type2_keypoints = type2->getKeypoints();
         if (type1_keypoints.size() != type2_keypoints.size()) {
             match = false;
             log_messages.printf(MSG_CRITICAL, "ERROR, number of keypoints is different. %d vs %d\n", (int)type1_keypoints.size(), (int)type2_keypoints.size());
@@ -228,7 +228,7 @@ int compare_results(
         log_messages.printf(MSG_DEBUG, "Check descriptors and keypoints.\n");
         for (int x=0; x<temp.rows; x++) {
             bool sub_match = true;
-            Point diff = type1_keypoints.at(x).pt - type1_keypoints.at(x).pt;
+            Point diff = type1_keypoints.at(x) - type1_keypoints.at(x);
             double dist = sqrt(diff.x*diff.x + diff.y*diff.y);
             if (dist == 0) {
                 for (int y=0; y<temp.cols; y++) {
@@ -240,7 +240,7 @@ int compare_results(
                 }
             } else {
                 sub_match = false;
-                log_messages.printf(MSG_DEBUG, "Keypoint at index %d have incorrect locations (%f, %f) vs (%f, %f)\n", x, type1_keypoints.at(x).pt.x, type1_keypoints.at(x).pt.y, type2_keypoints.at(x).pt.x, type2_keypoints.at(x).pt.y);
+                log_messages.printf(MSG_DEBUG, "Keypoint at index %d have incorrect locations (%f, %f) vs (%f, %f)\n", x, type1_keypoints.at(x).x, type1_keypoints.at(x).y, type2_keypoints.at(x).x, type2_keypoints.at(x).y);
             }
             if (sub_match) matches++;
         }

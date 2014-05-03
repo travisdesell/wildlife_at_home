@@ -3,6 +3,8 @@ PROJECT(Wildlife_Client)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
+MESSAGE(STATUS "BUILD TYPE: ${CMAKE_BUILD_TYPE}")
+
 IF(OpenCV_DIR)
     MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 ELSE()
@@ -23,6 +25,8 @@ IF(APPLE)
     MESSAGE(STATUS "Setting FLAGS for APPLE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mmacosx-version-min=10.5")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mmacosx-version-min=10.5")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -Wall")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -Wall")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
 ELSEIF(UNIX)
@@ -45,11 +49,14 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(FTGL)
-find_package(Boost COMPONENTS program_options filesystem system)
+find_package(Boost COMPONENTS system filesystem program_options)
 
 
 MESSAGE(STATUS "OpenCV Include Dirs: ${OpenCV_INCLUDE_DIRS}")
 MESSAGE(STATUS "OpenCV Libs: ${OpenCV_LIBS}")
+
+MESSAGE(STATUS "Boost Include Dirs: ${Boost_INCLUDE_DIRS}")
+MESSAGE(STATUS "Boost Libs: ${Boost_LIBRARIES}")
 
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
@@ -110,7 +117,6 @@ IF(Boost_FOUND AND NOT(MSVC OR APPLE))
     include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
     target_link_libraries(wildlife_surf_combine
         ${Boost_LIBRARIES}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${OpenCV_LIBS})
 
     add_executable(wildlife_surf_svm_generate
@@ -120,10 +126,6 @@ IF(Boost_FOUND AND NOT(MSVC OR APPLE))
     include_directories("${PROJECT_SOURCE_DIR}/../include/" ${Boost_INCLUDE_DIR})
     target_link_libraries(wildlife_surf_svm_generate
         ${Boost_LIBRARIES}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${OpenCV_LIBS})
 ENDIF()
 
-#add_executable(wildlife_surf_analyze wildlife_surf_analyze)
-#include_directories(${PROJECT_SOURCE_DIR}/../include/ ${Boost_INCLUDE_DIR})
-#target_link_libraries(wildlife_surf_analyze ${Boost_LIBRARIES} ${OpenCV_LIBS})
