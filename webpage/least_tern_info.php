@@ -54,7 +54,7 @@ echo "
     <div class='row-fluid'>
         <div class='span12'>
             <section id='identification' class='well'>
-                    <h2>Interior Least Tern Ecology and Information <small>by Leila Mohsenian</small></h2>
+                    <h2>Interior Least Tern Ecology and Information <small>by Alicia Andes</small></h2>
             </section>
 
             <section id='identification' class='well'>
@@ -69,7 +69,10 @@ echo "
 
             <section id='distribution' class='well'>
                 <div class='row-fluid'>
-                    <img class='span4' src='http://volunteer.cs.und.edu/wildlife/images/least_tern_distribution.png'></img>
+                    <div class='span4'>
+                        <img src='http://volunteer.cs.und.edu/wildlife/images/least_tern_distribution.png' style='width:100%;'></img>
+                        Yearly Distribution of the Least Tern (<i>Cornell Lab of Ornithology - All About Birds</i>)
+                    </div>
 
                     <div class='span8'>
                         <div class='page-header'>
