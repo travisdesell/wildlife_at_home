@@ -125,7 +125,7 @@ echo "
 
                             <li>Leila Mohsenian, Alicia K. Andes, and Susan N. Ellis-Felege. <b>The mysterious life of piping plovers: nesting behaviors of a threatened species</b>. <i>The North Dakota Chapter of the Wildlife Society Conference</i>. 12-14 February 2014, Mandan, ND. <a href='publications/mysterious_life_poster.pdf'>[pdf]</a></li>
 
-                            <li>Julia P. Johnson, Rebecca A. Eckroad, Aaron C. Robinson, and Susan N. Ellis-Felege. <b>Nest attendance patterns in sharp-tailed grouse in western North Dakota</b>. <i>The Wildlife Society’s 20th Annual Conference</i>. 4 – 10 October 2013, Milwaukee, Wisconsin (Student- In- Progress Poster Presentation; won 2nd place in undergraduate presentation category). <a href='http://volunteer.cs.und.edu/wildlife/alpha/publications/2013_10_poster_nest_attendence_patterns.pdf'>[pdf]</a></li>
+                            <li>Julia P. Johnson, Rebecca A. Eckroad, Aaron C. Robinson, and Susan N. Ellis-Felege. <b>Nest attendance patterns in sharp-tailed grouse in western North Dakota</b>. <i>The Wildlife Society’s 20th Annual Conference</i>. 4 – 10 October 2013, Milwaukee, Wisconsin (Student- In- Progress Poster Presentation; won 2nd place in undergraduate presentation category). <a href='publications/2013_10_poster_nest_attendence_patterns.pdf'>[pdf]</a></li>
                         </ul>
 
                     </div>
