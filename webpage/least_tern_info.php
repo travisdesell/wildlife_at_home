@@ -71,7 +71,7 @@ echo "
                 <div class='row-fluid'>
                     <div class='span4'>
                         <img src='http://volunteer.cs.und.edu/wildlife/images/least_tern_distribution.png' style='width:100%;'></img>
-                        Yearly Distribution of the Least Tern (<i>Cornell Lab of Ornithology - All About Birds</i>)
+                        Yearly Distribution of the Least Tern (<a href='http://www.allaboutbirds.org/guide/least_tern/id'><i>Cornell Lab of Ornithology - All About Birds</i></a>)
                     </div>
 
                     <div class='span8'>
