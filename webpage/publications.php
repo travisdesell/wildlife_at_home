@@ -71,7 +71,7 @@ echo "
                         <h3>Journal Articles</h3>
 
                         <ul>
-                            <li>Susan N. Ellis-Felege, Travis Desell, Christopher J. Felege. <b>A Bird's Eye View of... Birds: Combining Technology and Citizen Science for Conservation</b>. <i>Wildlife Professional</i>. <a href='./publications/birds_eye_view.pdf'>[pdf]</a> courtsey of <a href='http://www.wildlife.org/publications/twp'>The Wildlife Professional.</a></li>
+                            <li>Susan N. Ellis-Felege, Travis Desell, Christopher J. Felege. <b>A Bird's Eye View of... Birds: Combining Technology and Citizen Science for Conservation</b>. <i>Wildlife Professional 8: 27-30</i>. Spring 2014. <a href='./publications/birds_eye_view.pdf'>[pdf]</a> courtsey of <a href='http://www.wildlife.org/publications/twp'>The Wildlife Professional.</a></li>
                         </ul>
                     </div>
                 </div>
