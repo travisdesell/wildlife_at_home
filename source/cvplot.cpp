@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <iostream>
 #include "cvplot.hpp"
 
@@ -215,26 +216,31 @@ void Figure::drawAxis(Mat *output) {
 	// y max
 	if ((y_max - y_ref) > 0.05 * (y_max - y_min))
 	{
-		snprintf(text, sizeof(text)-1, "%.1f", y_max);
+		//snprintf(text, sizeof(text)-1, "%.1f", y_max);
+		sprintf(text, "%.1f", y_max);
 		putText(*output, text, Point(bs / 5, bs - chh / 2), FONT_HERSHEY_PLAIN, 0.55, text_color);
 	}
 	// y min
 	if ((y_ref - y_min) > 0.05 * (y_max - y_min))
 	{
-		snprintf(text, sizeof(text)-1, "%.1f", y_min);
+		//snprintf(text, sizeof(text)-1, "%.1f", y_min);
+		sprintf(text, "%.1f", y_min);
 		putText(*output, text, Point(bs / 5, h - bs + chh), FONT_HERSHEY_PLAIN, 0.55, text_color);
 	}
 
 	// x axis
-	snprintf(text, sizeof(text)-1, "%.1f", y_ref);
+	//snprintf(text, sizeof(text)-1, "%.1f", y_ref);
+	sprintf(text, "%.1f", y_ref);
 	putText(*output, text, Point(bs / 5, x_axis_pos + chh / 2), FONT_HERSHEY_PLAIN, 0.55, text_color);
 
 	// Write the scale of the x axis
-	snprintf(text, sizeof(text)-1, "%.0f", x_max );
+	//snprintf(text, sizeof(text)-1, "%.0f", x_max );
+	sprintf(text, "%.0f", x_max );
 	putText(*output, text, Point(w - bs - strlen(text) * chw, x_axis_pos + chh), FONT_HERSHEY_PLAIN, 0.55, text_color);
 
 	// x min
-	snprintf(text, sizeof(text)-1, "%.0f", x_min );
+	//snprintf(text, sizeof(text)-1, "%.0f", x_min );
+	sprintf(text, "%.0f", x_min );
 	putText(*output, text, Point(bs, x_axis_pos + chh), FONT_HERSHEY_PLAIN, 0.55, text_color);
 }
 

@@ -42,7 +42,7 @@ void EventType::addKeypoints(const vector<cv::Point2f> keypoints) {
     }
 }
 
-void EventType::read(cv::FileStorage infile, cv::Rect bounds) throw(runtime_error) {
+void EventType::read(cv::FileStorage infile, cv::Rect_<float> bounds) throw(runtime_error) {
     cv::Mat descriptors, new_descriptors;
     vector<cv::Point2f> keypoints, new_keypoints;
     if(infile.isOpened()) {
