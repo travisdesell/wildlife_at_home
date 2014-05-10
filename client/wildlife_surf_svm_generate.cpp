@@ -20,6 +20,8 @@ vector<string> positive_files;
 vector<string> negative_files;
 EventType positive_events("positive");
 EventType negative_events("negative");
+Point2f top_left(0,0);
+Point2f bottom_right(1,1);
 bool subtract_similar;
 bool add_keypoints;
 
@@ -34,6 +36,8 @@ int main(int argc, char **argv) {
         ("root,r", po::value<string>(), "Root feature directory")
         ("positive,p", po::value<vector<string> >(), "Tags for positive features")
         ("negative,n", po::value<vector<string> >(), "Tags for negative features")
+        ("top_left,t", po::value<std::vector<float> >()->multitoken(), "Top-left box corner")
+        ("bottom_right,b", po::value<std::vector<float> >()->multitoken(), "Bottom-right box corner")
         ("substract,s", po::value(&subtract_similar)->zero_tokens(), "Subtract similar features")
         ("add_keypoints,k", po::value(&add_keypoints)->zero_tokens(), "Add x and y positions to values")
         ("desc_output,do", po::value<string>(), "Filename for positive descriptor features")
@@ -67,6 +71,18 @@ int main(int argc, char **argv) {
         cout << "[ERROR] No negative names given!" << endl;
     }
 
+    if(vm.count("top_left") && vm["top_left"].as<vector<float> >().size() == 2) {
+        top_left.x = vm["top_left"].as<vector<float> >().at(0);
+        top_left.y = vm["top_left"].as<vector<float> >().at(1);
+        cout << "TL: " << top_left << endl;
+    }
+
+    if(vm.count("bottom_right") && vm["bottom_right"].as<vector<float> >().size() == 2) {
+        bottom_right.x = vm["bottom_right"].as<vector<float> >().at(0);
+        bottom_right.y = vm["bottom_right"].as<vector<float> >().at(1);
+        cout << "BR: " << bottom_right << endl;
+    }
+
     cout << "Subtract: " << subtract_similar << endl;
     cout << "Keypoints: " << add_keypoints << endl;
 
@@ -97,7 +113,7 @@ int main(int argc, char **argv) {
         cout << "Loading from file: " << filename << endl;
         try {
             positive_events.setId(positive_files[i]); //Set Id to read in correct events.
-            positive_events.read(infile);
+            positive_events.read(infile, cv::Rect_<float>(top_left, bottom_right));
         } catch (const std::exception &ex) {
             cerr << "main positives: " << ex.what() << endl;
             exit(1);

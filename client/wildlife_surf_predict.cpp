@@ -38,6 +38,9 @@
 #include "VideoType.hpp"
 #include "utils.hpp"
 #include "boinc_utils.hpp"
+#include "cvplot.hpp"
+
+#include <unistd.h>
 
 using namespace std;
 using namespace cv;
@@ -48,6 +51,7 @@ void printUsage();
 bool readParams(int argc, char** argv);
 void calculateFPS();
 void updateSHMEM();
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species);
 void writeMatrix(FileStorage outfile, string id, Mat matrix);
 Mat readMatrix(FileStorage infile, string id);
 void writeEventsToFile(string filename, vector<EventType*> eventTypes);
@@ -87,9 +91,6 @@ int main(int argc, char **argv) {
         cerr << "WARNING: Architecture is not compatible with IEEE floating point standard!" << endl;
     }
 
-    // Local Variables
-    descFilename = "descriptors.dat";
-
     if(!readParams(argc, argv)) {
         printUsage();
         return -1;
@@ -100,6 +101,8 @@ int main(int argc, char **argv) {
 
     cerr << "Vid file: " << vidFilename << endl;
     cerr << "Vid name: " << vidName << endl;
+    cerr << "Config file: " << configFilename << endl;
+    cerr << "Output video file: " << outputFilename << endl;
     cerr << "Model file: " << modelFilename << endl;
     cerr << "Matcher: " << MATCHERS[descMatcher] << endl;
     cerr << "Min Hessian: " << minHessian << endl;
@@ -109,9 +112,21 @@ int main(int argc, char **argv) {
     cout << "Boinc enabled." << endl;
     cerr << "Resolving boinc file paths." << endl;
     modelFilename = getBoincFilename(modelFilename);
+    configFilename = getBoincFilename(configFilename);
     vidFilename = getBoincFilename(vidFilename);
     descFilename = getBoincFilename(descFilename);
 #endif
+
+    int vidTime;
+    vector<EventType*> eventTypes;
+    vector<Event*> events;
+    if(!configFilename.empty()) {
+        if(!readConfig(configFilename, &eventTypes, &events, &vidTime, &species)) {
+            return false; //Error occurred.
+        }
+        cerr << "Events: " << events.size() << endl;
+        cerr << "Event Types: " << eventTypes.size() << endl;
+    }
 
     VideoCapture capture(vidFilename.c_str());
     if(!capture.isOpened()) {
@@ -143,12 +158,14 @@ int main(int argc, char **argv) {
     VideoType vidType(frameSize);
 
     VideoWriter outputVideo;
+    VideoWriter graphVideo;
     if(!outputFilename.empty()) {
         // Open Video Writer
         int ex = static_cast<int>(capture.get(CV_CAP_PROP_FOURCC));
         cv::Size s = cv::Size(frameWidth, frameHeight);
         outputVideo.open(outputFilename.c_str(), ex, capture.get(CV_CAP_PROP_FPS), s, true);
-        if(!outputVideo.isOpened()) {
+        graphVideo.open(outputFilename + "_graph", ex, capture.get(CV_CAP_PROP_FPS), cv::Size(600, 260), true);
+        if(!outputVideo.isOpened() || !graphVideo.isOpened()) {
             cerr << "ERROR: Could not open the output video file." << endl;
             exit(1);
         }
@@ -171,7 +188,7 @@ int main(int argc, char **argv) {
     cerr << "SHMEM opened." << endl;
 
     EventType positiveEventType("parent behavior - on nest");
-    FileStorage infile(configFilename, FileStorage::READ);
+    FileStorage infile(descFilename, FileStorage::READ);
     positiveEventType.read(infile);
     infile.release();
     Mat storedDescriptors = positiveEventType.getDescriptors();
@@ -179,6 +196,9 @@ int main(int argc, char **argv) {
     vector<KeyPoint> positiveKeypoints;
     vector<KeyPoint> negativeKeypoints;
     vector<KeyPoint> matchingKeypoints;
+    vector<unsigned long> positiveMatchesInFrame;
+    vector<unsigned long> positiveKeypointsInFrame;
+    vector<Scalar> frameColor;
 
     svm_model *model;
 	if((model=svm_load_model(modelFilename.c_str()))==0)
@@ -210,6 +230,10 @@ int main(int argc, char **argv) {
         calculateFPS();
         //cout << "FPS: " << fps << endl;
 
+        if(framePos % 10 == 0) {
+            vidTime++; //Increment video time every 10 frames.
+        }
+
         //Ptr<FeatureDetector> detector = new SurfFeatureDetector(minHessian);
         SurfFeatureDetector *detector = new SurfFeatureDetector(minHessian);
         vector<KeyPoint> frameKeypoints;
@@ -228,13 +252,16 @@ int main(int argc, char **argv) {
         matcher->match(storedDescriptors, frameDescriptors, matches);
 
         //Collect Matching Keypoints
+        unsigned long match_count = 0;
         for(int i=0; i < matches.size(); i++) {
-            //if(matches[i].distance < 0.4) {
+            if(matches[i].distance < 0.5) {
                 matchingKeypoints.push_back(frameKeypoints.at(matches[i].trainIdx));
-            //}
+                match_count++;
+            }
         }
 
         //Run points through SVM
+        unsigned long positive_count = 0;
         negativeKeypoints.clear();
         svm_node *nodes = new svm_node[frameDescriptors.cols+3];
         for(int i=0; i < frameDescriptors.rows; i++) {
@@ -257,7 +284,7 @@ int main(int argc, char **argv) {
             nodes[frameDescriptors.cols].index = -1;
             nodes[frameDescriptors.cols].value = 0;
 
-            double val = svm_predict(model, nodes); // Slow line!
+            double val = svm_predict(model, nodes);
             //cout << "Val: " << val << endl;
             if(val == -1) {
                 //cout << "Val: " << val << endl;
@@ -265,9 +292,29 @@ int main(int argc, char **argv) {
             } else {
                 //cout << "Val: " << val << endl;
                 positiveKeypoints.push_back(frameKeypoints[i]);
+                positive_count++;
             }
         }
+
+        bool on_nest = false;
+        for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
+            if((*it)->getType()->getId() == "parent behavior - on nest" && vidTime >= (*it)->getStartTime() && vidTime <= (*it)->getEndTime()) {
+                cout << "On Nest!" << endl;
+                frameColor.push_back(Scalar(150, 150, 150, 0));
+                on_nest = true;
+                break;
+            }
+        }
+
+        if(!on_nest) {
+            cout << "Not On Nest" << endl;
+            frameColor.push_back(Scalar(255, 255, 255, 0));
+        }
+
+        positiveMatchesInFrame.push_back(match_count);
+        positiveKeypointsInFrame.push_back(positive_count);
         cout << "Positive: " << positiveKeypoints.size() << endl;
+        cout << "Positive Second: " << positive_count << endl;
         delete(nodes);
 
         // Draw points on frame.
@@ -275,11 +322,18 @@ int main(int argc, char **argv) {
         vidType.drawZones(pointsFrame, Scalar(0, 0, 100));
         //drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT); // Draw random colors
         drawKeypoints(frame, negativeKeypoints, pointsFrame, Scalar(0, 0, 255), DrawMatchesFlags::DEFAULT);
-        drawKeypoints(frame, positiveKeypoints, pointsFrame, Scalar(0, 255, 0), DrawMatchesFlags::DEFAULT);
         drawKeypoints(frame, matchingKeypoints, pointsFrame, Scalar(255, 0, 0), DrawMatchesFlags::DEFAULT);
+        drawKeypoints(frame, positiveKeypoints, pointsFrame, Scalar(0, 255, 0), DrawMatchesFlags::DEFAULT);
+
+        CvPlot::clear("Positives");
+        CvPlot::plot("Positives", &positiveKeypointsInFrame[0], positiveKeypointsInFrame.size(), 1, Scalar(0, 0, 0, 0), &frameColor[0]);
+        CvPlot::label("Classification");
+        CvPlot::plot("Positives", &positiveMatchesInFrame[0], positiveMatchesInFrame.size(), 1, Scalar(0, 0, 0, 0));
+        CvPlot::label("Match");
 
         if(!outputFilename.empty()) {
             outputVideo << pointsFrame;
+            graphVideo << CvPlot::getImage("Positives");
         }
 
 #ifdef GUI
@@ -372,6 +426,42 @@ void writeEventsToFile(string filename, vector<EventType*> eventTypes) {
     outfile.release();
 }
 
+bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species) {
+    cerr << "Reading config file: " << filename.c_str() << endl;
+    string line, eventId, startTime, endTime;
+    ifstream infile;
+    infile.open(filename.c_str());
+    getline(infile, line);
+    *species = line;
+    getline(infile, line);
+    *vidTime = timeToSeconds(line);
+    while(getline(infile, eventId, ',')) {
+        Event *newEvent = new Event();
+        EventType *eventType = NULL;
+        for(vector<EventType*>::iterator it = eventTypes->begin(); it != eventTypes->end(); ++it) {
+            cerr << "Event name: '" <<  (*it)->getId().c_str() << endl;
+            if((*it)->getId().compare(eventId) == 0) {
+                eventType = *it;
+                break;
+            }
+        }
+        if(eventType == NULL) {
+            eventType = new EventType(eventId);
+            eventTypes->push_back(eventType);
+        }
+        if(!getline(infile, startTime, ',') || !getline(infile, endTime)) {
+            cerr << "Error: Malformed config file!" << endl;
+            return false;
+        }
+        newEvent->setType(eventType);
+        newEvent->setStartTime(timeToSeconds(startTime));
+        newEvent->setEndTime(timeToSeconds(endTime));
+        events->push_back(newEvent);
+    }
+    infile.close();
+    return true;
+}
+
 void updateSHMEM() {
     if(shmem == NULL) return;
     //cout << fixed << "Time: " << getTimeInSeconds() << endl;
@@ -439,13 +529,12 @@ bool readParams(int argc, char** argv) {
             return false;
         }
     }
-    if(vidFilename.empty() || modelFilename.empty() || configFilename.empty()) return false;
+    if(vidFilename.empty() || modelFilename.empty() || descFilename.empty()) return false;
     else return true;
 }
 
 // TODO This should be genereated automatically somehow... probably from the
 // readParams function.
 void printUsage() {
-	cout << "Usage: wildlife_predict -v <video> -s <model> -c <config> [-a <scale file>] [-o <video output>] [-d <descriptor output>] [-f <feature output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
-
+	cout << "Usage: wildlife_predict -v <video> -s <model> -c <config> -d <descriptor input> [-a <scale file>] [-o <video output>] [-m <matcher>] [-h <min hessian>] [-t <feature match threshold>] [-watermark] [-timestamp]" << endl;
 }

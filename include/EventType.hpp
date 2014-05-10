@@ -27,7 +27,7 @@ class EventType {
 
     void addDescriptors(const cv::Mat descriptors);
     void addKeypoints(const vector<cv::Point2f> keypoints);
-    void read(cv::FileStorage infile) throw(runtime_error);
+    void read(cv::FileStorage infile, const cv::Rect_<float> bounds = cv::Rect_<float>(cv::Point2f(0,0), cv::Point2f(1,1))) throw(runtime_error);
     void writeDescriptors(cv::FileStorage outfile) throw(runtime_error);
     void writeKeypoints(cv::FileStorage outfile) throw(runtime_error);
     void writeForSVM(ofstream &outfile, string label, bool add_keypoints) throw(runtime_error);
