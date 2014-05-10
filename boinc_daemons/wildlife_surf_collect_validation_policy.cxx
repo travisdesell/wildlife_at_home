@@ -175,7 +175,6 @@ int compare_results(
     if(events1->size() != events2->size()) {
         match = false;
         log_messages.printf(MSG_CRITICAL, "ERROR, number of event types is different. %d vs %d\n", (int)events1->size(), (int)events2->size());
-        exit(0);
         return 0;
     }
 

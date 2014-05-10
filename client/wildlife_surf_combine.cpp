@@ -28,7 +28,6 @@ string root_dir = "/projects/wildlife/feature_files/";
 string species_dir;
 string location_dir;
 unsigned int cross_validation = ALL;
-string cv_dir = "";
 string output_dir = "combined";
 vector<EventType*> *event_types;
 
@@ -50,7 +49,6 @@ int main(int argc, char **argv) {
         ("location,l", po::value<string>(), "Location of features to be combined")
         ("root,r", po::value<string>(), "Root feature directory")
         ("cv", po::value<string>(), "Cross-validation type")
-        ("dir,d", po::value<string>(), "Directory for LOO Cross-validation")
         ("output,o", po::value<string>(), "Directory name for combined features")
     ;
     po::variables_map vm;
@@ -85,9 +83,6 @@ int main(int argc, char **argv) {
         alg::to_upper(cv);
         if(cv == "LEAVE_ONE_OUT") {
             cross_validation = LEAVE_ONE_OUT;
-            if(vm.count("dir")) {
-                cv_dir = vm["dir"].as<string>();
-            }
         } else if(cv == "TWO_FOLD") {
             cross_validation = TWO_FOLD;
         } else {
@@ -101,7 +96,6 @@ int main(int argc, char **argv) {
     cout << "Location   : '" << location_dir << "'" << endl;
     cout << "Output     : '" << output_dir << "'" << endl;
     cout << "CV         : '" << cross_validation << "'" << endl;
-    cout << "CV Dir     : '" << cv_dir << "'" << endl;
 
     string working_directory = root_dir + tag_dir;
     if(!species_dir.empty()) working_directory += "/" + species_dir;

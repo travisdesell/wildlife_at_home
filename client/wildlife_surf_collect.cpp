@@ -98,9 +98,9 @@ int main(int argc, char **argv) {
     unsigned found = vidFilename.find_last_of("/\\");
     vidName = vidFilename.substr(found+1);
 
-    cerr << "Vid file: " << vidFilename.c_str() << endl;
-    cerr << "Vid name: " << vidName.c_str() << endl;
-    cerr << "Config file: " << configFilename.c_str() << endl;
+    cerr << "Vid file: " << vidFilename << endl;
+    cerr << "Vid name: " << vidName << endl;
+    cerr << "Config file: " << configFilename << endl;
     cerr << "Matcher: " << MATCHERS[descMatcher] << endl;
     cerr << "Min Hessian: " << minHessian << endl;
     cerr << "Threshold: " << flannThreshold << " * standard deviation" << endl;
