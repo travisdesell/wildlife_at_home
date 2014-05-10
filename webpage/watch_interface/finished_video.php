@@ -33,7 +33,7 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 //Add this video to the list of watched videos for this user.
-$watched_videos_query = "REPLACE INTO watched_videos SET user_id = $user_id, video_id = $video_id, start_time='$watching_start_time', end_time = '" . date('Y-m-d H:i:s', time()) . "', difficulty = '$difficulty'";
+$watched_videos_query = "INSERT INTO watched_videos SET user_id = $user_id, video_id = $video_id, start_time='$watching_start_time', end_time = '" . date('Y-m-d H:i:s', time()) . "', difficulty = '$difficulty'";
 $watched_videos_result = attempt_query_with_ping($watched_videos_query, $wildlife_db);
 if (!$watched_videos_result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $watched_videos_query\n");
