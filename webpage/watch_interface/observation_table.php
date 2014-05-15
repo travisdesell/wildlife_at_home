@@ -92,7 +92,7 @@ function get_observations($row_only, $video_id, $user_id, $observation_id, $spec
 //            error_log("EXPERT_ONLY = 1");
             $query = "SELECT id, category, name, instructions FROM observation_types WHERE ";
         } else {
-            error_log("EXPERT_ONLY: " . $expert_only);
+//            error_log("EXPERT_ONLY: " . $expert_only);
             $query = "SELECT id, category, name, instructions FROM observation_types WHERE expert_only = $expert_only AND ";
         }
 
