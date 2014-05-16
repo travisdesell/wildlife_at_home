@@ -235,7 +235,18 @@ print_navbar($active_items);
 
 //echo "<p>Got this for video: $video_id, and file: $video_file</p>";
 
-if ($species_id < 0 || $species_id > 3) {
+if ($user_id == NULL) {
+    echo "<div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:15px; padding-bottom:15px;'>
+        <div class='container'>
+        <div class='row'>
+
+        <p>User was returned as null, this could cause repeat videos!</p>
+
+        </div> <!--row-->
+        </div> <!--container-->
+        </div> <!--well-->";
+
+} else if ($species_id < 0 || $species_id > 3) {
     echo "
         <div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:15px; padding-bottom:15px;'>
         <div class='container'>
@@ -280,8 +291,8 @@ if ($species_id < 0 || $species_id > 3) {
 
     } else {
         //try to get a video that has already been watched
-        $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count > 0 AND v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND duration_s >= $min_video_time AND duration_s <= $max_video_time AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
-        //echo "<!-- $query -->\n";
+        $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count > 0 AND v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
+        error_log("FIRST TRY QUERY: $query\n");
 
         $result = attempt_query_with_ping($query, $wildlife_db);
         if (!$result) {
@@ -295,7 +306,8 @@ if ($species_id < 0 || $species_id > 3) {
         if (!$row) {    //try again with any video (not just watched videos)
             $found = true;
 
-            $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND duration_s >= $min_video_time AND duration_s <= $max_video_time AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
+            $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
+            error_log("SECOND TRY QUERY: $query\n");
             //    echo "<!-- $query -->\n";
 
             $result = attempt_query_with_ping($query, $wildlife_db);
@@ -305,23 +317,9 @@ if ($species_id < 0 || $species_id > 3) {
             }
 
             $row = mysql_fetch_assoc($result);
-
-            if (!$row) {    //try again with any video time
-                $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
-                //    echo "<!-- $query -->\n";
-
-                $result = attempt_query_with_ping($query, $wildlife_db);
-                if (!$result) {
-                    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-                    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-                }
-
-                $row = mysql_fetch_assoc($result);
-
-                if (!$row) {
-                    $found = false;
-                    //error_log("did not find a watched video segment 2 on second try");
-                }   
+            if (!$row) {
+                $found = false;
+                error_log("did not find a watched video segment 2 on second try");
             }   
         }
     }
