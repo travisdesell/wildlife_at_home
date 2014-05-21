@@ -101,6 +101,8 @@ function get_bossa_badge($user) {
     global $bossa_badge_info;
     $badges = "";
 
+    $user->bossa_total_credit += $user->bossa_credit_v2;
+
     for ($i = 0; $i < count($bossa_badge_info); $i++) {
         if ($user->bossa_total_credit > $bossa_badge_info[$i]['credit']) {
             $badges .= "<img style='height:40px;' src='wildlife_badges/" . $bossa_badge_info[$i]['img_src'] . "' title='" . $bossa_badge_info[$i]['name'] . " badge for watching " . $bossa_badge_info[$i]['value'] . " of validated video.'></img>";
