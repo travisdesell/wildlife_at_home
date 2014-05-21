@@ -49,6 +49,7 @@ using namespace cv;
 
 void printUsage();
 bool readParams(int argc, char** argv);
+unsigned long calculateMean(const vector<unsigned long> array, const unsigned long begin = 0);
 void calculateFPS();
 void updateSHMEM();
 bool readConfig(string filename, vector<EventType*> *eventTypes, vector<Event*> *events, int *vidTime, string *species);
@@ -198,7 +199,10 @@ int main(int argc, char **argv) {
     vector<KeyPoint> matchingKeypoints;
     vector<unsigned long> positiveMatchesInFrame;
     vector<unsigned long> positiveKeypointsInFrame;
+    vector<unsigned long> positiveMean;
     vector<Scalar> frameColor;
+    unsigned long lastPosition = 0;
+    bool toggle = false;
 
     svm_model *model;
 	if((model=svm_load_model(modelFilename.c_str()))==0)
@@ -249,13 +253,15 @@ int main(int argc, char **argv) {
 
         Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce");
         vector<DMatch> matches;
-        matcher->match(storedDescriptors, frameDescriptors, matches);
+        matcher->match(frameDescriptors, storedDescriptors, matches);
 
         //Collect Matching Keypoints
         unsigned long match_count = 0;
+        matchingKeypoints.clear();
+        cout << "Matches: " << matches.size() << endl;
         for(int i=0; i < matches.size(); i++) {
-            if(matches[i].distance < 0.5) {
-                matchingKeypoints.push_back(frameKeypoints.at(matches[i].trainIdx));
+            if(matches[i].distance < 0.4) {
+                matchingKeypoints.push_back(frameKeypoints.at(matches[i].queryIdx));
                 match_count++;
             }
         }
@@ -299,6 +305,15 @@ int main(int argc, char **argv) {
         bool on_nest = false;
         for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
             if((*it)->getType()->getId() == "parent behavior - on nest" && vidTime >= (*it)->getStartTime() && vidTime <= (*it)->getEndTime()) {
+                if(toggle == true) {
+                    toggle = false;
+                    unsigned int mean = calculateMean(positiveMatchesInFrame, lastPosition);
+                    cout << "Positive Mean: " << mean << endl;
+                    while(positiveMean.size() < positiveMatchesInFrame.size()) {
+                        positiveMean.push_back(mean);
+                    }
+                    lastPosition = positiveMean.size();
+                }
                 cout << "On Nest!" << endl;
                 frameColor.push_back(Scalar(150, 150, 150, 0));
                 on_nest = true;
@@ -308,6 +323,15 @@ int main(int argc, char **argv) {
 
         if(!on_nest) {
             cout << "Not On Nest" << endl;
+            if(toggle == false) {
+                toggle = true;
+                unsigned int mean = calculateMean(positiveMatchesInFrame, lastPosition);
+                cout << "False Mean: " << mean << endl;
+                while(positiveMean.size() < positiveMatchesInFrame.size()) {
+                    positiveMean.push_back(mean);
+                }
+                lastPosition = positiveMean.size();
+            }
             frameColor.push_back(Scalar(255, 255, 255, 0));
         }
 
@@ -320,6 +344,8 @@ int main(int argc, char **argv) {
         // Draw points on frame.
         Mat pointsFrame = frame;
         vidType.drawZones(pointsFrame, Scalar(0, 0, 100));
+        //rectangle(pointsFrame, Point2f(vidType.getWidth() * 0.3, vidType.getHeight() * 0.4167), Point2f(vidType.getWidth() * 0.4375, vidType.getHeight() * 0.5291), Scalar(200, 0, 0));
+        rectangle(pointsFrame, Point2f(vidType.getWidth() * 0.288, vidType.getHeight() * 0.2263), Point2f(vidType.getWidth() * 0.7909, vidType.getHeight() * 0.7695), Scalar(200, 0, 0));
         //drawKeypoints(frame, frameKeypoints, pointsFrame, Scalar::all(-1), DrawMatchesFlags::DEFAULT); // Draw random colors
         drawKeypoints(frame, negativeKeypoints, pointsFrame, Scalar(0, 0, 255), DrawMatchesFlags::DEFAULT);
         drawKeypoints(frame, matchingKeypoints, pointsFrame, Scalar(255, 0, 0), DrawMatchesFlags::DEFAULT);
@@ -330,6 +356,10 @@ int main(int argc, char **argv) {
         CvPlot::label("Classification");
         CvPlot::plot("Positives", &positiveMatchesInFrame[0], positiveMatchesInFrame.size(), 1, Scalar(0, 0, 0, 0));
         CvPlot::label("Match");
+        if(positiveMean.size() > 0) {
+            CvPlot::plot("Positives", &positiveMean[0], positiveMean.size(), 1, Scalar(0, 0, 0, 0));
+            CvPlot::label("Mean");
+        }
 
         if(!outputFilename.empty()) {
             outputVideo << pointsFrame;
@@ -347,6 +377,7 @@ int main(int argc, char **argv) {
 
     capture.release();
     outputVideo.release();
+    graphVideo.release();
 
     // Log stuff here...
 
@@ -473,6 +504,16 @@ void updateSHMEM() {
     shmem->feature_count = featuresCollected;
     shmem->feature_average = featuresCollected/(float)framePos;;
     shmem->frame = framePos;
+}
+
+unsigned long calculateMean(const vector<unsigned long> array, const unsigned long begin) {
+    unsigned long val = 0;
+    for(vector<unsigned long>::const_iterator it = array.begin() + begin; it != array.end(); it++) {
+        val += *it;
+    }
+    val = val / (array.size() - begin);
+    cout << "Mean: " << val << endl;
+    return val;
 }
 
 void calculateFPS() {

@@ -10,6 +10,7 @@ IF(OpenCV_DIR)
 ELSE()
     IF(APPLE)
         set(OpenCV_DIR ~/Dropbox/osx/opencv/share/OpenCV)
+        #set(OpenCV_DIR)
     ELSEIF(MSVC)
         set(GLUT_ROOT_PATH ~/Dropbox/Windows/freeglut)
         set(FREETYPE_DIR ~/Dropbox/Windows/freetype)
@@ -44,10 +45,10 @@ set(Boost_USE_MULTITHREADED OFF)
 
 #find_package(OpenCV REQUIRED COMPONENTS nonfree core)
 find_package(OpenCV REQUIRED nonfree)
-find_package(BOINC REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(BOINC)
 find_package(FTGL)
 find_package(Boost COMPONENTS system filesystem program_options)
 
@@ -61,54 +62,56 @@ MESSAGE(STATUS "Boost Libs: ${Boost_LIBRARIES}")
 #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
 #target_link_libraries(wildlife_surf_collect pthread ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
 
-add_executable(wildlife_surf_collect
-    wildlife_surf_collect
-    ../source/Event
-    ../source/EventType
-    ../source/VideoType
-    ../source/utils
-    ../source/boinc_utils)
-include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
-IF(MSVC)
-    target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY})
-ELSE()
-    target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
-ENDIF()
-
-add_executable(wildlife_surf_predict
-    wildlife_surf_predict
-    ../source/Event
-    ../source/EventType
-    ../source/VideoType
-    ../source/utils
-    ../source/boinc_utils
-    ../source/svm
-    ../source/cvplot)
-include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
-IF(MSVC)
-    target_link_libraries(wildlife_surf_predict ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY})
-ELSE()
-    target_link_libraries(wildlife_surf_predict ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
-ENDIF()
-
-#add_executable(wildlife_surf_collect wildlife_surf_collect2)
-#include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
-#target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
-
-IF(FTGL_FOUND)
-    add_executable(wildlife_graphics_app
-        wildlife_graphics_app
+if(BOINC_APP_FOUND AND OpenCV_DIR)
+    add_executable(wildlife_surf_collect
+        wildlife_surf_collect
+        ../source/Event
+        ../source/EventType
+        ../source/VideoType
         ../source/utils
         ../source/boinc_utils)
-    include_directories ("${PROJECT_SOURCE_DIR}/../include/" ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${FTGL_INCLUDE_DIRS})
-    target_link_libraries(wildlife_graphics_app
-        ${OpenCV_LIBS}
-        ${BOINC_APP_LIBRARIES}
-        ${BOINC_GRAPHICS_LIBRARY}
-        ${OPENGL_LIBRARIES}
-        ${GLUT_LIBRARY}
-        ${FREETYPE_LIBS}
-        ${FTGL_LIBRARIES})
+    include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
+    IF(MSVC)
+        target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY})
+    ELSE()
+        target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+    ENDIF()
+
+    add_executable(wildlife_surf_predict
+        wildlife_surf_predict
+        ../source/Event
+        ../source/EventType
+        ../source/VideoType
+        ../source/utils
+        ../source/boinc_utils
+        ../source/svm
+        ../source/cvplot)
+    include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIRS} ${BOINC_INCLUDE_DIR})
+    IF(MSVC)
+        target_link_libraries(wildlife_surf_predict ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES} ${BOINC_GRAPHICS_LIBRARY})
+    ELSE()
+        target_link_libraries(wildlife_surf_predict ${OpenCV_LIBS} ${BOINC_APP_LIBRARIES})
+    ENDIF()
+
+    #add_executable(wildlife_surf_collect wildlife_surf_collect2)
+    #include_directories("${PROJECT_SOURCE_DIR}/../include/" ${OpenCV_INCLUDE_DIR} ${BOINC_INCLUDE_DIR})
+    #target_link_libraries(wildlife_surf_collect ${OpenCV_LIBS} ${BOINC_API_LIBRARY} ${BOINC_APP_LIBRARIES})
+
+    IF(FTGL_FOUND)
+        add_executable(wildlife_graphics_app
+            wildlife_graphics_app
+            ../source/utils
+            ../source/boinc_utils)
+        include_directories ("${PROJECT_SOURCE_DIR}/../include/" ${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS} ${FTGL_INCLUDE_DIRS})
+        target_link_libraries(wildlife_graphics_app
+            ${OpenCV_LIBS}
+            ${BOINC_APP_LIBRARIES}
+            ${BOINC_GRAPHICS_LIBRARY}
+            ${OPENGL_LIBRARIES}
+            ${GLUT_LIBRARY}
+            ${FREETYPE_LIBS}
+            ${FTGL_LIBRARIES})
+    ENDIF()
 ENDIF()
 
 IF(Boost_FOUND AND NOT(MSVC OR APPLE))

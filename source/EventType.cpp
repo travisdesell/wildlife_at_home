@@ -48,14 +48,19 @@ void EventType::read(cv::FileStorage infile, cv::Rect_<float> bounds) throw(runt
     if(infile.isOpened()) {
         cv::read(infile[getId() + "_desc"], descriptors); // infile[getId()] >> descriptors;
         cv::read(infile[getId() + "_pts"], keypoints); // infile[getId()] >> keypoints;
-        for(int i=0; i<keypoints.size(); i++) {
-            if(bounds.contains(keypoints[i])) {
-                new_descriptors.push_back(descriptors.row(i));
-                new_keypoints.push_back(keypoints.at(i));
+        if(keypoints.size() > 0) {
+            for(int i=0; i<keypoints.size(); i++) {
+                if(bounds.contains(keypoints[i])) {
+                    new_descriptors.push_back(descriptors.row(i));
+                    new_keypoints.push_back(keypoints.at(i));
+                }
             }
+            addDescriptors(new_descriptors);
+            addKeypoints(new_keypoints);
+        } else {
+            addDescriptors(descriptors);
+            addKeypoints(keypoints);
         }
-        addDescriptors(new_descriptors);
-        addKeypoints(new_keypoints);
     } else {
         throw runtime_error("File is not open for reading");
     }
