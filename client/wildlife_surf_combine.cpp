@@ -49,8 +49,7 @@ int main(int argc, char **argv) {
         ("location,l", po::value<string>(), "Location of features to be combined")
         ("root,r", po::value<string>(), "Root feature directory")
         ("cv", po::value<string>(), "Cross-validation type")
-        ("output,o", po::value<string>(), "Directory name for combined features")
-    ;
+        ("output,o", po::value<string>(), "Directory name for combined features");
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
     po::notify(vm);
