@@ -33,7 +33,7 @@ $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passw
 mysql_select_db("wildlife_video", $wildlife_db);
 
 //Add this video to the list of watched videos for this user.
-$watched_videos_query = "INSERT INTO watched_videos SET user_id = $user_id, video_id = $video_id, start_time='$watching_start_time', end_time = '" . date('Y-m-d H:i:s', time()) . "', difficulty = '$difficulty'";
+$watched_videos_query = "REPLACE INTO watched_videos SET user_id = $user_id, video_id = $video_id, start_time='$watching_start_time', end_time = '" . date('Y-m-d H:i:s', time()) . "', difficulty = '$difficulty'";
 $watched_videos_result = attempt_query_with_ping($watched_videos_query, $wildlife_db);
 if (!$watched_videos_result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $watched_videos_query\n");
@@ -55,6 +55,15 @@ if (!$video_result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
     die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
 }
+
+$initial_obs_query = "REPLACE INTO initial_observations(id, event_id, user_id, start_time, end_time, comments, video_id, species_id, tags, location_id, expert, start_time_s, end_time_s, completed, status, auto_generated, report_status, report_comments, response_comments, reporter_id, responder_id, reporter_name, responder_name) SELECT id, event_id, user_id, start_time, end_time, comments, video_id, species_id, tags, location_id, expert, start_time_s, end_time_s, completed, status, auto_generated, report_status, report_comments, response_comments, reporter_id, responder_id, reporter_name, responder_name FROM timed_observations WHERE timed_observations.video_id = $video_id AND timed_observations.user_id = $user_id";
+$initial_obs_result = attempt_query_with_ping($initial_obs_query, $wildlife_db);
+if (!$initial_obs_result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $initial_obs_query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $initial_obs_query\n");
+}
+
+
 
 /**
  * Give the user a random video in case they dismiss the modal.
