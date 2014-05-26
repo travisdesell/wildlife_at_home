@@ -25,10 +25,8 @@
 
     <div class='span6' style="display:table-cell; float:none; padding-left:5px;">
         <div class='row-fluid'>
-            {{^regular_user}}
-                <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
-                <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
-            {{/regular_user}}
+            <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
+            <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
 
             {{#regular_user}}
                 <div class='report-comments-div hidden' id='report-comments-div-{{video_id}}'>
