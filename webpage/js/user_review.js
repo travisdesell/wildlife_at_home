@@ -39,6 +39,8 @@ function enable_user_review() {
 
         if ($(this).hasClass('active')) {
             $("#report-comments-div-" + video_id).addClass("hidden");
+            $("#response-comments-div-" + video_id).addClass("hidden");
+            $("#submit-report-button-" + video_id).addClass("hidden");
             $("#report-comments-" + video_id).val("");
             $("#report-comments-" + video_id).attr("observation_id", -1);
             $("#report-comments-title-" + video_id).text("Reporting observation:");
