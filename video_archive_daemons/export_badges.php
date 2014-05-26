@@ -34,7 +34,7 @@ while ( ($row = mysql_fetch_assoc($result)) != null) {
     fwrite($file, "\t<id>" . $user->id . "</id>\n");
     fwrite($file, "\t<cpid>" . $cpid . "</cpid>\n");
     fwrite($file, "\t<credit>" . $user->total_credit . "</credit>\n");
-    fwrite($file, "\t<bossa_credit>" . $user->bossa_total_credit . "</bossa_credit>\n");
+    fwrite($file, "\t<bossa_credit>" . ($user->bossa_total_credit + $user->bossa_credit_v2) . "</bossa_credit>\n");
 
 
     $credit_badge = get_credit_badge_str($user);

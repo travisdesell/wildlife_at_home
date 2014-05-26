@@ -61,7 +61,7 @@ function get_bossa_badge_str($user) {
     global $bossa_badge_info;
 
     for ($i = 0; $i < count($bossa_badge_info); $i++) {
-        if ($user->bossa_total_credit > $bossa_badge_info[$i]['credit']) {
+        if ($user->bossa_total_credit + $user->bossa_credit_v2 > $bossa_badge_info[$i]['credit']) {
             return $bossa_badge_info[$i]['img_src'];
             break;
         }
@@ -116,7 +116,7 @@ function get_bossa_badge($user) {
 function get_badges($user) {
     $badges = "";
 
-    if ($user->bossa_total_credit > 2 * 60 * 60) {
+    if ($user->bossa_total_credit + $user->bossa_credit_v2 > 2 * 60 * 60) {
         $badges .= "&nbsp;&nbsp;";
         $badges .= get_bossa_badge($user);
     }
