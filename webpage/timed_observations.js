@@ -288,22 +288,22 @@ function enable_observation_table() {
     });
 
     function convert_to_date(video_id, current_time) {
+        console.log("video id: " + video_id + ", current_time: " + current_time);
         var video_start_time = $("#wildlife-video-" + video_id).attr("start_time");
         var time = current_time * 1000;
 
-//            console.log("video start time: " + video_start_time);
+        console.log("video start time: " + video_start_time);
 
         //convert the mysql datetime to a javascript Date object
         var t = video_start_time.split(/[- :]/);
         var video_date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
-        /*
+
         console.log("video_date: " + video_date);
         console.log("time: " + time);
 
         console.log("year:  " + video_date.getFullYear());
         console.log("month: " + video_date.getMonth());
         console.log("date:   " + video_date.getDate());
-        */
 
         var current_time = new Date(video_date.getTime() + time);
 
@@ -321,7 +321,7 @@ function enable_observation_table() {
         var seconds = current_time.getSeconds();
         var result = year + "-" + month + "-" + day + " " + (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds  < 10 ? "0" + seconds : seconds);
 
-//            console.log( "Time: " + result);
+        console.log( "Time: " + result);
         return result;
     }
 
@@ -333,6 +333,8 @@ function enable_observation_table() {
             var result = $("#wildlife-video-" + video_id).get(0).currentTime;
             $(this).attr("time_s", result);
             $(this).attr("time_date", convert_to_date(video_id, result));
+
+            console.log("set time date to: '" + $(this).attr("time_date") + "'");
 
             result_text = pad2(result / 3600) + ":" + pad2((result % 3600) / 60) + ":" + pad2(result % 60);
 
@@ -379,7 +381,7 @@ function enable_observation_table() {
     $('.time-textarea:not(.bound-change)').addClass('bound-change').change(function() {
         var observation_id = $(this).attr("observation_id");
         var video_id = $(this).attr("video_id");
-        //console.log("CHANGE time textarea with id: " + observation_id);
+        console.log("CHANGE time textarea with id: " + observation_id);
         //console.log("this.val(): " + $(this).val());
 
         if ( $(this).val() =='' ) {
@@ -389,6 +391,7 @@ function enable_observation_table() {
             $(this).attr("time_date", '');
         } else {
             var t = $(this).val().split(/[- :]/);
+
             /*
             console.log("t.length: " + t.length);
             console.log("t[0]: " + t[0]);
@@ -401,7 +404,8 @@ function enable_observation_table() {
 
             if (t.length == 3 && !isNaN(t[0]) && !isNaN(t[1]) && !isNaN(t[2])) {
                 var time_in_seconds = Number(t[0] * 3600) + Number(t[1] * 60) + Number(t[2]);
-                    console.log($(this).val() + " to seconds: " + time_in_seconds);
+                console.log($(this).val() + " to seconds: " + time_in_seconds);
+
                 $(this).attr("time_s", time_in_seconds);
                 $(this).attr("time_date", convert_to_date(video_id, time_in_seconds));
 
@@ -530,6 +534,18 @@ function enable_observation_table() {
         console.log("end_time:     " + submission_data['end_time']);
         console.log("start_time_s: " + submission_data['start_time_s']);
         console.log("end_time_s:   " + submission_data['end_time_s']);
+
+//        console.log("closest tr: '" + $(".report-observation-button[observation_id=" + observation_id + "]").closest("tr").html() + "'");
+        var closest_tr = $(".report-observation-button[observation_id=" + observation_id + "]").closest("tr");
+        console.log("td 0: '" + closest_tr.children().eq(0).text() + "'");
+        console.log("td 1: '" + closest_tr.children().eq(1).text() + "'");
+        console.log("td 2: '" + closest_tr.children().eq(2).text() + "'");
+
+        //closest_tr.children().eq(1).text(new_event_text);
+        closest_tr.children().eq(2).text(submission_data['start_time']);
+        closest_tr.children().eq(3).text(submission_data['end_time']);
+        closest_tr.children().eq(4).text(submission_data['comments']);
+        closest_tr.children().eq(5).text(submission_data['tags']);
 
         $.ajax({
             type: 'POST',
