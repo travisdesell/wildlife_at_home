@@ -64,8 +64,8 @@ mysql_select_db("wildlife_video", $wildlife_db);
  */
 echo "
     <div class='row-fluid'>
-        <div class='span2' style='z-index:1001;'>
-            <div class='well well-large span2' style='padding-top: 10px; padding-bottom: 10px; margin-top: 5px; margin-bottom: 5px; position:fixed; z-index:1001;'>";
+        <div class='span2' style='z-index:1001;' id='filter-sidebar'>
+        <div class='well well-large span2' style='padding-top: 10px; padding-bottom: 10px; margin-top: 5px; margin-bottom: 5px; position:fixed; z-index:1001;'>";
 
 //echo $mustache_engine->render($filter_list_template, $filter_list);
 
@@ -253,7 +253,7 @@ echo "  </div>";
  *  Prints the list of videos
  */
 
-echo "  <div class='span10' style='margin-left:5px;'>
+echo "  <div class='span10' style='margin-left:5px;' id='video-list-body'>
             <div class='row-fluid'>
                 <div id='video-list-placeholder'></div>
                 <div id='videos-nav-placeholder'></div>
