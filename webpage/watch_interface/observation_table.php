@@ -212,13 +212,14 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
     return $mustache_engine->render($watch_interface_template, $watch_info);
 }
 
-function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $start_time, $user) {
+function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $start_time, $needs_revalidation, $user) {
     global $cwd, $wildlife_db, $boinc_db;
     $watch_info['video_id'] = $video_id;
     $watch_info['video_file'] = $video_file;
     $watch_info['animal_id'] = $animal_id;
     $watch_info['trimmed_filename'] = trim(substr($video_file, strrpos($video_file, '/') + 1));
     $watch_info['start_time'] = $start_time;
+    $watch_info['needs_revalidation'] = $needs_revalidation;
 
     if (is_special_user__fixme($user, false)) {
         $query = "SELECT * FROM expert_observations WHERE video_id = $video_id";
