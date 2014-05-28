@@ -464,6 +464,56 @@ function enable_observation_table() {
                 $(div_id).removeClass("disabled");
 
                 $('#event-list-div-' + video_id).append( response['html'] );
+
+                var observation_id = response['observation_id'];
+
+                var all_obs_body = $(".all-observations-table[video_id=" + video_id + "] tbody");
+
+//                console.log("body html: " + all_obs_body.html());
+
+                var added = false;
+                var i = 0;
+
+                for (; i < all_obs_body.children().length; i++) {
+                    // console.log("comparing '" + user_name + "' to '" + all_obs_body.children().eq(i).children().eq(0).text() + "'");
+                    if (user_name == all_obs_body.children().eq(i).children().eq(0).text()) {
+                        added = true;
+
+                        // console.log("ADDING BEFORE body row[" + i + "]: " + all_obs_body.children().eq(i).children().eq(0).text() );
+
+                        all_obs_body.children().eq(i).before(
+                            "<tr>" +
+                            "<td>" + user_name + "</td> " + //user name
+                            "<td>-</td> " + //event 
+                            "<td>0000-00-00 00:00:00</td> " + //start time
+                            "<td>0000-00-00 00:00:00</td> " + //end time
+                            "<td></td> " + //comments
+                            "<td></td>" + //tags
+                            "<td>UNVALIDATED</td>" + //status
+                            //report button
+                            "<td style='text-align:center;'> <button class='btn btn-small btn-danger pull-center report-observation-button rob-" + video_id + " bound' observation_id='" + observation_id + "' video_id='" + video_id + "' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text='' report_status='UNREPORTED' reporter_name='' response_comments_text='' responder_name=''><i class='icon-question-sign icon-white'></i></button> </td>" +
+                            "</tr>");
+
+                        break;
+                    }
+                }
+
+                if (!added) {
+                    all_obs_body.children().eq(i-1).after(
+                        "<tr>" +
+                        "<td>" + user_name + "</td> " + //user name
+                        "<td>-</td> " + //event 
+                        "<td>0000-00-00 00:00:00</td> " + //start time
+                        "<td>0000-00-00 00:00:00</td> " + //end time
+                        "<td></td> " + //comments
+                        "<td></td>" + //tags
+                        "<td>UNVALIDATED</td>" + //status
+                        //report button
+                        "<td style='text-align:center;'> <button class='btn btn-small btn-danger pull-center report-observation-button rob-" + video_id + " bound' observation_id='" + observation_id + "' video_id='" + video_id + "' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text='' report_status='UNREPORTED' reporter_name='' response_comments_text='' responder_name=''><i class='icon-question-sign icon-white'></i></button> </td>" +
+                        "</tr>");
+
+                }
+
                 enable_observation_table();
             },
             error : function(jqXHR, textStatus, errorThrown) {
@@ -501,6 +551,7 @@ function enable_observation_table() {
                 $(div_id).removeClass("disabled");
 
                 $("#observations-table-div-" + observation_id).remove();
+                $(".report-observation-button[observation_id=" + observation_id + "]").closest("tr").remove();
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
