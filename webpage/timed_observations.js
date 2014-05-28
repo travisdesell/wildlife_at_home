@@ -168,7 +168,9 @@ function enable_observation_table() {
     console.log("allow_add_removal: '" + allow_add_removal + "'");
     if (allow_add_removal == 0) {
         $(".new-observation-button").addClass("disabled");
+        $(".new-observation-button").hide();
         $(".remove-observation-button").addClass("disabled");
+        $(".remove-observation-button").hide();
     }
 
     $('.dropdown-dropup:not(.dropdownup_bound)').addClass('dropdownup_bound').click(function() {
