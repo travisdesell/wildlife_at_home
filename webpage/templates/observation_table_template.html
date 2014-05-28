@@ -34,8 +34,12 @@
                 </div>  <!-- button group -->
             </td>
 
-            <td style='padding:0px; max-width:100px;'><textarea class='time-textarea start-time-textarea' id='start-time-textarea-{{id}}' time_s={{start_time_s}} time_date='{{start_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{start_time_text}}</textarea></td>
-            <td style='padding:0px; max-width:100px;'><textarea class='time-textarea end-time-textarea' id='end-time-textarea-{{id}}' time_s={{end_time_s}} time_date='{{end_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{end_time_text}}</textarea></td>
+            <td style='padding:0px; max-width:100px;'>
+                <input type='text' placeholder='Click for start time.' class='time-textarea start-time-textarea' id='start-time-textarea-{{id}}' time_s={{start_time_s}} time_date='{{start_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{start_time_text}}'>
+            </td>
+            <td style='padding:0px; max-width:100px;'>
+                <input type='text' placeholder='Click for end time.' class='time-textarea end-time-textarea' id='end-time-textarea-{{id}}' time_s={{end_time_s}} time_date='{{end_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{end_time_text}}'>
+            </td>
 
             <td style='padding-top:0px; padding-bottom:0px; width:25px;' rowspan=3>
                 <form id="discuss-video-form-{{id}}" class='hidden' action="forum_post.php?id=8" method="post" target="_blank">
@@ -48,7 +52,7 @@
         </tr> <!-- observation-row-{{id}} -->
 
         <tr id='observation-comments-row-{{id}}'>
-            <td colspan=3 style='vertical-align:middle; padding:0px;'><textarea class='comments-textarea' id='comments-textarea-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{comments}}</textarea></td>
+            <td colspan=3 style='vertical-align:middle; padding:0px;'><input type='text' placeholder='Insert comments and hashtags here.' class='comments-textarea' id='comments-textarea-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{comments}}'></td>
         </tr> <!-- observation-comments-row-{{id}} -->
 
         <tr id='observation-tags-row-{{id}}' observation_id='{{id}}'>

@@ -202,6 +202,21 @@ $(document).ready(function () {
     }
 
     function init_dropdown() {
+        $('#hide-show-sidebar-button').click(function() {
+            console.log("toggling sidebar");
+            if ($(this).text() == "Hide sidebar") {
+                $(this).text("Show sidebar");
+                $("#filter-sidebar").hide();
+                $("#video-list-body").removeClass("span10");
+                $("#video-list-body").addClass("span12");
+            } else {
+                $(this).text("Hide sidebar");
+                $("#filter-sidebar").show();
+                $("#video-list-body").removeClass("span12");
+                $("#video-list-body").addClass("span10");
+            }
+        });
+
         $('.video-nav-list').click(function(ev) {
                 var new_min = $(this).attr("id");
 
