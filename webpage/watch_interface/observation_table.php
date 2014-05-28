@@ -12,7 +12,8 @@ require_once($cwd . '/my_query.php');
 require_once($cwd . '/user.php');
 
 function set_time_text($time_s) {
-    if ($time_s == -1) return -1;
+    if ($time_s == -1) return '';
+    //if ($time_s == -1) return -1;
     else {
         return str_pad(floor($time_s / 3600), 2, '0', STR_PAD_LEFT) . ":" . str_pad(floor(($time_s % 3600) / 60), 2, '0', STR_PAD_LEFT) . ":" . str_pad(($time_s % 60), 2, '0', STR_PAD_LEFT);
     }
