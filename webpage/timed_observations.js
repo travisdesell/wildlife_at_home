@@ -165,6 +165,12 @@ function initialize_event_list() {
 }
 
 function enable_observation_table() {
+    console.log("allow_add_removal: '" + allow_add_removal + "'");
+    if (allow_add_removal == 0) {
+        $(".new-observation-button").addClass("disabled");
+        $(".remove-observation-button").addClass("disabled");
+    }
+
     $('.dropdown-dropup:not(.dropdownup_bound)').addClass('dropdownup_bound').click(function() {
         var distance = ($(window).scrollTop() + $(window).height()) - $(this).offset().top;
         console.log ("distance: " + distance);
@@ -493,6 +499,8 @@ function enable_observation_table() {
 
 
     $('.remove-observation-button:not(.bound)').addClass('bound').click(function() {
+        if ($(this).hasClass("disabled")) return;
+
         var observation_id = $(this).attr('observation_id');
         var video_id = $(this).attr('video_id');
         var div_id = "#remove-observation-button-" + observation_id;
@@ -564,7 +572,7 @@ function enable_observation_table() {
             dataType : 'json',
             success : function(response) {
 
-                $('#new-observation-button-' + video_id).removeClass('disabled');
+//                $('#new-observation-button-' + video_id).removeClass('disabled');
                 $('#remove-observation-button-' + observation_id).removeClass('disabled');
 
                 $("#observations-table-div-" + observation_id).replaceWith( response['html'] );

@@ -215,6 +215,7 @@ echo "<script type='text/javascript'>
     var start_time = $start_time;
     var species_id = $species_id;
     var location_id = $location_id;
+    var allow_add_removal = 1;
 </script>";
 
 echo "
