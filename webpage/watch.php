@@ -18,6 +18,7 @@ $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 $user = get_user();
 $user_id = $user['id'];
+$user_name = $user['name'];
 
 /**
  *  Currently using Bootstrap 2.x, really need to update
@@ -210,6 +211,7 @@ if (array_key_exists("location", $_GET)) {
 //add some of the information about the video to javascript
 echo "<script type='text/javascript'>
     var user_id = $user_id; 
+    var user_name = '$user_name'; 
     var start_time = $start_time;
     var species_id = $species_id;
     var location_id = $location_id;

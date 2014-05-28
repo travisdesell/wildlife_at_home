@@ -7,8 +7,6 @@ function isInt(value) {
     return typeof(value) == "number" && Math.floor(value) == value;
 }
 
-var comments_default = 'Insert comments and hashtags here.';
-
 var tag_dropdowns;
 
 function submit_observations(video_id, random) {
@@ -265,27 +263,6 @@ function enable_observation_table() {
     update_tags();
 
 
-    $('.comments-textarea:not(.bound1)').addClass('bound1').click(function() {
-            if ($(this).val() == comments_default) {
-                $(this).removeClass('default_comments_text');
-                $(this).val('');
-            }
-    });
-
-    $('.comments-textarea:not(.bound2)').addClass('bound2').each(function() {
-            if ($(this).val() == '') {
-                $(this).addClass('default_comments_text');
-                $(this).val(comments_default);
-            }
-    });
-
-    $('.comments-textarea:not(.bound3)').addClass('bound3').blur(function() {
-            if ($(this).val() == '') {
-                $(this).addClass('default_comments_text');
-                $(this).val(comments_default);
-            }
-    });
-
     $('.comments-textarea:not(.bound-change)').addClass('bound-change').change(function() {
         var observation_id = $(this).attr("observation_id");
         var video_id = $(this).attr("video_id");
@@ -338,7 +315,7 @@ function enable_observation_table() {
         var observation_id = $(this).attr("observation_id");
         var video_id = $(this).attr("video_id");
 
-        if ($(this).hasClass('default_time_text')) {
+        if ($(this).val() == '') {
             var result = $("#wildlife-video-" + video_id).get(0).currentTime;
             $(this).attr("time_s", result);
             $(this).attr("time_date", convert_to_date(video_id, result));
@@ -350,41 +327,6 @@ function enable_observation_table() {
             $(this).val( result_text );
             update_observation(observation_id, video_id);
         }
-
-        $(this).removeClass('default_time_text');
-    });
-
-    var start_time_default = "Click for start time.";
-    var end_time_default = "Click for end time.";
-
-    $('.time-textarea:not(.bound2)').addClass('bound2').each(function() {
-            if ($(this).hasClass("start-time-textarea")) {
-                time_default = start_time_default;
-            } else {
-                time_default = end_time_default;
-            }
-
-            if ($(this).val() == '-1') {
-                $(this).addClass('default_time_text');
-                $(this).val(time_default);
-                $(this).attr("time_s", '-1');
-                $(this).attr("time_date", '');
-            }
-    });
-
-    $('.time-textarea:not(.bound3)').addClass('bound3').blur(function() {
-            if ($(this).hasClass("start-time-textarea")) {
-                time_default = start_time_default;
-            } else {
-                time_default = end_time_default;
-            }
-
-            if ($(this).val() == '-1') {
-                $(this).addClass('default_time_text');
-                $(this).val(time_default);
-                $(this).attr("time_s", '-1');
-                $(this).attr("time_date", '');
-            }
     });
 
     $('.time-textarea:not(.bound-change)').addClass('bound-change').change(function() {
@@ -394,7 +336,6 @@ function enable_observation_table() {
         //console.log("this.val(): " + $(this).val());
 
         if ( $(this).val() =='' ) {
-            $(this).val('-1');
             $(this).addClass('default_time_text');
             $(this).attr("time_s", '-1');
             $(this).attr("time_date", '');
@@ -419,7 +360,7 @@ function enable_observation_table() {
                 $(this).attr("time_date", convert_to_date(video_id, time_in_seconds));
 
             } else {
-                $(this).val('-1');
+                $(this).val('');
                 $(this).addClass('default_time_text');
                 $(this).attr("time_s", '-1');
                 $(this).attr("time_date", '');
@@ -562,7 +503,6 @@ function enable_observation_table() {
 
     function update_observation(observation_id, video_id) {
         var comments = $("#comments-textarea-" + observation_id).val();
-        if (comments == comments_default) comments = '';
 
         var tag_str = "";
         var first = true;
@@ -646,8 +586,6 @@ function enable_observation_table() {
         var end_time_text = $("#end-time-textarea-" + observation_id).val();
 
         var comments = $("#comments-textarea-" + observation_id).val();
-
-        if (comments == comments_default) comments = '';
 
         /*
         console.log("start_time_s: " + start_time_s);
