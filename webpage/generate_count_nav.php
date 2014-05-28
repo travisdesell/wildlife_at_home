@@ -11,7 +11,10 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
 
     if ($display_nav_numbers) {
 
-        echo "<div class='pagination span7' style='margin-top:0px; margin-bottom:0px;'><ul>";
+        echo "<div class='pagination span7' style='margin-top:0px; margin-bottom:0px;'>";
+        echo "<button class='pull-left btn btn-small btn-default' id='hide-show-sidebar-button' style='margin-right:5px; height:30px;'>Hide sidebar</button>";
+        echo "<ul>";
+
         if ($video_min > 0) {
             $new_min = $video_min - $video_count;
             if ($new_min < 0) $new_min = 0;
@@ -71,7 +74,7 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
                         <div class='span5'>
 
                             <div class='btn-group pull-right'>
-                                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='sort-by-dropdown'>
+                                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='sort-by-dropdown' style='height:30px;'>
                                 Sort by <span class='caret'></span>
                                 </button>
                                 <ul class='dropdown-menu'>
@@ -81,7 +84,7 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
                             </div>
 
                             <div class='btn-group pull-right'>
-                                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='display-videos-button'>
+                                <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' id='display-videos-button' style='height:30px;'>
                                 Display $video_count videos <span class='caret'></span>
                                 </button>
                                 <ul class='dropdown-menu'>
@@ -92,8 +95,8 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
                                 </ul>
                             </div>
 
-                            <input class='pull-right' style='width:30px; margin-top:0px; padding-bottom:0px; margin-left:2px; margin-right:10px' type='text' id='go-to-textbox' value=''>
-                            <button class='pull-right btn btn-small btn-default' id='go-to-button'>Go to: </button>
+                            <input class='pull-right' style='width:30px; margin-top:0px; padding-bottom:0px; margin-left:2px; margin-right:10px; height:24px;' type='text' id='go-to-textbox' value=''>
+                            <button class='pull-right btn btn-small btn-default' id='go-to-button' style='height:30px;'>Go to: </button>
                         </div>
 
                     </div>
