@@ -19,6 +19,8 @@ $user = get_user();
 $user_id = $user['id'];
 $user_name = $user['name'];
 
+$allow_add_removal = is_special_user__fixme($user, true);
+
 echo "
 <!DOCTYPE html>
 <html>
@@ -39,6 +41,7 @@ echo "
     <script type='text/javascript'>
         var user_id = $user_id; 
         var user_name = '$user_name'; 
+        var allow_add_removal = $allow_add_removal;
     </script>";
 echo "
 </head>
