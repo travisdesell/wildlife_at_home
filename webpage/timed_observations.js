@@ -197,6 +197,13 @@ function enable_observation_table() {
             update_tag_dropdowns();
             update_tags();
         }
+
+//        console.log("removing tag elements");
+        //Remove the tags when changing the event
+        $('#observation-tags-row-' + observation_id).find(".tag-element").remove();
+
+//        console.log("observation tags row before update_observation: " + $("#observation-tags-row-" + observation_id).html());
+
         update_observation(observation_id, video_id);
 
         ev.preventDefault();
@@ -288,22 +295,24 @@ function enable_observation_table() {
     });
 
     function convert_to_date(video_id, current_time) {
-        console.log("video id: " + video_id + ", current_time: " + current_time);
+//        console.log("video id: " + video_id + ", current_time: " + current_time);
         var video_start_time = $("#wildlife-video-" + video_id).attr("start_time");
         var time = current_time * 1000;
 
-        console.log("video start time: " + video_start_time);
+//        console.log("video start time: " + video_start_time);
 
         //convert the mysql datetime to a javascript Date object
         var t = video_start_time.split(/[- :]/);
         var video_date = new Date(t[0], t[1]-1, t[2], t[3], t[4], t[5]);
 
+        /*
         console.log("video_date: " + video_date);
         console.log("time: " + time);
 
         console.log("year:  " + video_date.getFullYear());
         console.log("month: " + video_date.getMonth());
         console.log("date:   " + video_date.getDate());
+        */
 
         var current_time = new Date(video_date.getTime() + time);
 
@@ -516,7 +525,7 @@ function enable_observation_table() {
             console.log("iterated over text: " + $(this).attr("tag_text"));
         });
 
-//            console.log("tag_str: '" + tag_str + "'");
+        console.log("tag_str: '" + tag_str + "'");
 
         var submission_data = {
                                 observation_id : observation_id,
@@ -530,23 +539,6 @@ function enable_observation_table() {
                                 tags : tag_str
                               };
 
-        console.log("start_time:   " + submission_data['start_time']);
-        console.log("end_time:     " + submission_data['end_time']);
-        console.log("start_time_s: " + submission_data['start_time_s']);
-        console.log("end_time_s:   " + submission_data['end_time_s']);
-
-//        console.log("closest tr: '" + $(".report-observation-button[observation_id=" + observation_id + "]").closest("tr").html() + "'");
-        var closest_tr = $(".report-observation-button[observation_id=" + observation_id + "]").closest("tr");
-        console.log("td 0: '" + closest_tr.children().eq(0).text() + "'");
-        console.log("td 1: '" + closest_tr.children().eq(1).text() + "'");
-        console.log("td 2: '" + closest_tr.children().eq(2).text() + "'");
-
-        //closest_tr.children().eq(1).text(new_event_text);
-        closest_tr.children().eq(2).text(submission_data['start_time']);
-        closest_tr.children().eq(3).text(submission_data['end_time']);
-        closest_tr.children().eq(4).text(submission_data['comments']);
-        closest_tr.children().eq(5).text(submission_data['tags']);
-
         $.ajax({
             type: 'POST',
             url: './watch_interface/update_timed_observation.php',
@@ -559,6 +551,28 @@ function enable_observation_table() {
 
                 $("#observations-table-div-" + observation_id).replaceWith( response['html'] );
                 enable_observation_table();
+
+                /*
+                console.log("start_time:   " + submission_data['start_time']);
+                console.log("end_time:     " + submission_data['end_time']);
+                console.log("start_time_s: " + submission_data['start_time_s']);
+                console.log("end_time_s:   " + submission_data['end_time_s']);
+                */
+
+                var closest_tr = $(".report-observation-button[observation_id=" + observation_id + "]").closest("tr");
+                /*
+                console.log("td 0: '" + closest_tr.children().eq(0).text() + "'");
+                console.log("td 1: '" + closest_tr.children().eq(1).text() + "'");
+                console.log("td 2: '" + closest_tr.children().eq(2).text() + "'");
+                console.log("event_id: " + submission_data['event_id'] + ", event text: " + $(".event-dropdown[event_id=" + submission_data['event_id'] + "]").attr("event_text"));
+                */
+
+                closest_tr.children().eq(1).text( $(".event-dropdown[event_id=" + submission_data['event_id'] + "]").attr("event_text") );
+                closest_tr.children().eq(2).text(submission_data['start_time']);
+                closest_tr.children().eq(3).text(submission_data['end_time']);
+                closest_tr.children().eq(4).text(submission_data['comments']);
+                closest_tr.children().eq(5).text( tag_str );
+
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
