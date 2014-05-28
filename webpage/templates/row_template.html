@@ -27,7 +27,7 @@
         <div class='row-fluid'>
             <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
             <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
-            <button class='btn btn-small btn-warning pull-right revalidate-events-button' video_id='{{video_id}}'>Revalidate Events</button>
+            <button class='btn btn-small btn-warning pull-right revalidate-events-button {{#needs_revalidation}}disabled{{/needs_revalidation}}' video_id='{{video_id}}'>{{#needs_revalidation}}Revalidation Pending{{/needs_revalidation}}{{^needs_revalidation}}Revalidate Events{{/needs_revalidation}}</button>
 
             {{#regular_user}}
                 <br>

@@ -370,6 +370,33 @@ function enable_observation_table() {
         update_observation(observation_id, video_id);
     });
 
+    $('.revalidate-events-button:not(.bound)').addClass('bound').click(function() {
+        if ($(this).hasClass("disabled")) return;
+
+        var video_id = $(this).attr("video_id");
+
+        console.log("need to revalidate video: " + video_id);
+
+        var revalidate_button = $(this);
+        revalidate_button.addClass("disabled");
+
+        var submission_data = {
+                                video_id : video_id 
+                              };
+        $.ajax({
+            type: 'POST',
+            url: './watch_interface/revalidate_video.php',
+            data : submission_data,
+            dataType : 'json',
+            success : function(response) {
+                revalidate_button.text("Revalidation Pending");
+            },
+            error : function(jqXHR, textStatus, errorThrown) {
+                alert(errorThrown);
+            },
+            async: true
+        });
+    });
 
 
     $('.new-observation-button:not(.bound)').addClass('bound').click(function() {
