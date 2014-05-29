@@ -357,6 +357,17 @@ int main(int argc, char** argv) {
                     }
                 }
 
+
+                /*
+                 *  If all events match -- award credit, mark video valid
+                 *  If majority of events match:
+                 *      If user with most marked events has invalids, get another view (up to max)
+                 *      If user with most marked events has no invalids, award credit mark video valid
+                 *  If majoriy of events don't match:
+                 *      Get another view 
+                 */
+
+
                 //Handle the easy case first, users which have all events marked as valid
                 bool award_credit = true;
                 for (unsigned int i = 0; i < user_ids.size(); i++) {
@@ -394,20 +405,15 @@ int main(int argc, char** argv) {
                     ostringstream update_video_query;
                     update_video_query << "UPDATE video_2 SET crowd_status = 'VALIDATED' WHERE id = " << video.id;
                     mysql_query_check(wildlife_db_conn, update_video_query.str());
+                } else {
+                    cout << "    EXITING BECAUSE OF NON-AWARDED CREDIT." << endl;
+                    exit(1);
                 }
             }
 
             count++;
         }
         cout << "processed " << count << " videos." << endl;
-
-        /**
-         *  Update the progess table with new amounts of validated video
-         */
-
-        /**
-         *  Update the progress table with new available video times.
-         */
 
         log_messages.printf(MSG_DEBUG, "Sleeping...\n"); 
         sleep(300);
