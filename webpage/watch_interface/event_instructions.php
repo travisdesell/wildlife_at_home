@@ -13,7 +13,7 @@ require_once($cwd . '/my_query.php');
 //$species_id = mysql_real_escape_string($_POST['species_id']);
 //$expert_only = mysql_real_escape_string($_POST['expert_only']);
 
-function get_event_instructions_html($species_id, $expert_only) {
+function get_event_instructions_html($species_id, $expert_only, $modal = 1) {
     global $wildlife_user, $wildlife_passwd, $wildlife_db, $cwd;
 
     if ($species_id > 3)  {
@@ -29,18 +29,22 @@ function get_event_instructions_html($species_id, $expert_only) {
         mysql_select_db("wildlife_video", $wildlife_db);
     }
 
-
-    $query = "SELECT id, category, name, instructions FROM observation_types WHERE expert_only = $expert_only AND ";
-    if ($species_id == 1) { //sharptailed grouse
-        $query .= "sharptailed_grouse = 1";
-    } else if ($species_id == 2) { //least tern
-        $query .= "least_tern = 1";
-    } else if ($species_id == 3) { //piping plover
-        $query .= "piping_plover = 1";
+    $query ="";
+    if ($species_id < 1) {
+        $query = "SELECT id, category, name, instructions FROM observation_types WHERE expert_only = $expert_only ORDER BY category, id";
     } else {
-        return;
+        $query = "SELECT id, category, name, instructions FROM observation_types WHERE expert_only = $expert_only AND ";
+        if ($species_id == 1) { //sharptailed grouse
+            $query .= "sharptailed_grouse = 1";
+        } else if ($species_id == 2) { //least tern
+            $query .= "least_tern = 1";
+        } else if ($species_id == 3) { //piping plover
+            $query .= "piping_plover = 1";
+        } else {
+            return;
+        }
+        $query .= " ORDER BY category, id";
     }
-    $query .= " ORDER BY category, id";
 
     $result = attempt_query_with_ping($query, $wildlife_db);
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
@@ -80,6 +84,8 @@ function get_event_instructions_html($species_id, $expert_only) {
     }
     $event_list['event_list'][$prev_category_key]['event_count'] = $event_count;
     $event_list['event_list'][$prev_category_key]['new_category'] = true;
+
+    $event_list['modal'] = $modal;
 
     $instructions_template = file_get_contents($cwd . "/templates/event_instructions_template.html");
     $mustache_engine = new Mustache_Engine;
