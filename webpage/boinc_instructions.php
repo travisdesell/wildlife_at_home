@@ -8,8 +8,13 @@ require_once($cwd . '/navbar.php');
 require_once($cwd . '/footer.php');
 require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/my_query.php');
+require_once($cwd . '/watch_interface/event_instructions.php');
+
+require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
+Mustache_Autoloader::register();
 
 $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
+
 
 echo "
 <!DOCTYPE html>
@@ -110,7 +115,7 @@ echo "
     <div class='well well-large' style='padding-top:5px'>
         <div class='row-fluid'>
             <div class='span12'>
-                <h3>Instructions</h3>
+                <h3>Volunteer Computing (BOINC) Instructions</h3>
                 <ul>
                 <li>  If you're already running BOINC, select Attach to Project. If not, <a target='_new' href='http://boinc.berkeley.edu/download.php'>download, install and run BOINC</a>. </li>
                 <li> When prompted, enter <b>http://volunteer.cs.und.edu/wildlife/</b></li>
@@ -121,6 +126,18 @@ echo "
             </div>
         </div>
     </div>
+
+    <div class='well well-large' style='padding-top:5px'>
+        <div class='row-fluid'>
+        <div class='span12'>";
+
+echo get_event_instructions_html(-1, 0, 0);
+
+echo "
+            </div>
+        </div>
+    </div>
+
 
     <div class='well well-large' style='padding-top:5px'>
         <div class='row-fluid'>
