@@ -15,7 +15,7 @@ ini_set("default_socket_timeout", 300);
 $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
 mysql_select_db("wildlife", $boinc_db);
 
-$result = attempt_query_with_ping("SELECT id, name, email_addr, total_credit, bossa_total_credit, cross_project_id FROM user WHERE total_credit > 0 OR bossa_total_credit > 0", $boinc_db);
+$result = attempt_query_with_ping("SELECT id, name, email_addr, total_credit, bossa_total_credit, bossa_credit_v2, cross_project_id FROM user WHERE total_credit > 0 OR bossa_total_credit > 0 OR bossa_credit_v2 > 0", $boinc_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
 
 $file = fopen("/projects/wildlife/download/badges.xml", "w");
@@ -24,6 +24,7 @@ fwrite($file, "<users>\n");
 while ( ($row = mysql_fetch_assoc($result)) != null) {
     $user->id = $row['id'];
     $user->bossa_total_credit = $row['bossa_total_credit'];
+    $user->bossa_credit_v2 = $row['bossa_credit_v2'];
     $user->total_credit = $row['total_credit'];
     $user->cross_project_id = $row['cross_project_id'];
     $user->email_addr= $row['email_addr'];
