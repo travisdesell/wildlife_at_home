@@ -35,7 +35,6 @@ require_once("/projects/wildlife/html/inc/sanitize_html.inc");
 require_once("/projects/wildlife/html/inc/translation.inc");
 require_once("/projects/wildlife/html/inc/text_transform.inc");
 
-//set_include_path("/projects/wildlife/html/project");
 require_once("/projects/wildlife/html/project/project.inc");
 
 require_once($cwd . "/navbar.php");
@@ -134,7 +133,7 @@ echo "
                 <p>
                 Wildlife@Home is <i>citizen science project</i>, developed in a joint effort by <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>
                 
-                <p>We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse, and better understand the behaviors of least terns and piping plovers to aid in their conservation, as well as provide some interesting video for everyone to watch and discuss. Feel free to scroll through our image gallery on the right to get a better idea of what's going on with the project and see the field biologists in action, or talk to us on the <a href='./forum_index.php'>message boards</a>.
+                <p>We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse, and better understand the behaviors of least terns and piping plovers to aid in their conservation, as well as provide some interesting video for everyone to watch and discuss. Feel free to scroll through our image gallery on the right to get a better idea of what is going on with the project and see the field biologists in action, talk to us on the <a href='./forum_index.php'>message boards</a>, or watch videos about the project on our <a href='https://plus.google.com/118091968152392210151' rel='publisher'>Google+ YouTube Channel</a>.
                 </p>
 
                 <div class='row-fluid'>
@@ -368,6 +367,23 @@ echo"
 
             <div class='span6'>
                     <section id='contact'>
+                        <div class='page-header'><h2>Active Projects</h2></div>
+                        <ul>
+                            <li>Alicia Andes - <a href='alicia_project.php'>Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li>
+                            <li>Paul Burr - <a href='paul_project.php'>Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li>
+                            <li>Rebecca Eckroad - <a href='becca_grouse_project.php'>Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li>
+                        </ul>
+
+                    </section>
+
+                    <section id='contact'>
+                        <div class='page-header'><h2>Publications</h2></div>
+                        <p>
+                            All publications, talks and posters about Wildlife@Home can be viewed on our <a href='publications.php'>publications page</a>.
+                        </p>
+                    </section>
+
+                    <section id='contact'>
                         <div class='page-header'><h2>Contact Information</h2></div>
                         <p>Please email any questions or suggestions to <a href='mailto:tdesell@cs.und.edu'>Travis Desell</a>, or feel free to post a message in our <a href='forum_index.php'>forums</a>.
                         <p>
@@ -379,6 +395,10 @@ echo"
 
                         <li>
                         <a href='http://arts-sciences.und.edu/biology/faculty/susan-felege.cfm'>Susan Ellis-Felege</a>, Assistant Professor of Biology, University of North Dakota 
+                        </li>
+
+                        <li>
+                        <a href='http://arts-sciences.und.edu/biology/faculty/chris-felege.cfm'>Chris Felege</a>, Educational Outreach Coordinator, Instructor of Biology, University of North Dakota 
                         </li>
 
                         <li>
@@ -398,12 +418,17 @@ echo"
                         </li>
 
                         <li>
-                        Julia Johnson, Undergraduate Research Assistant in Biology, University of North Dakota
-                        </li>
-                        <li>
                         Leila Mohsenian, Undergraduate Research Assistant in Biology, University of North Dakota
                         </li>
 
+                        <li>
+                        Rebecca VanderClute, Undergraduate Research Assistant in Computer Science, University of North Dakota
+                        </li>
+                        </ul>
+
+                        With agency support from:
+
+                        <ul>
                         <li>
                         Aaron Robinson, North Dakota Game and Fish.
                         </li>
@@ -411,14 +436,12 @@ echo"
                         <li>
                         Terry Shaffer, U.S.G.S. Northern Prairie Wildlife Research Center.
                         </li>
+
                         <li>
                         Mark Sherfy, U.S.G.S. Northern Prairie Wildlife Research Center.
                         </li>
-
-                        <li>
-                        Rebecca VanderClute, Undergraduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
                         </ul>
+
 
                         With previous support from:
                         <ul>
@@ -428,6 +451,10 @@ echo"
 
                         <li>
                         Adam Pachl, Undergraduate Research Assistant in Biology, University of North Dakota
+                        </li>
+
+                        <li>
+                        Julia Johnson, Undergraduate Research Assistant in Biology, University of North Dakota
                         </li>
 
                         <li>
