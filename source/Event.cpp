@@ -42,15 +42,25 @@ void Event::addDescriptors(cv::Mat descriptors) {
     this->type->addDescriptors(descriptors);
 }
 
-void Event::addKeypoints(vector<cv::KeyPoint> keypoints) {
+void Event::addKeypoints(vector<cv::Point2f> keypoints) {
     this->type->addKeypoints(keypoints);
+}
+
+void Event::addKeypoints(vector<cv::KeyPoint> keypoints, cv::Size image_size) {
+    vector<cv::Point2f> points;
+    for(int i=0; i < keypoints.size(); i++) {
+        float x = keypoints[i].pt.x / image_size.width;
+        float y = keypoints[i].pt.y / image_size.height;
+        points.push_back(cv::Point2f(x, y));
+    }
+    this->type->addKeypoints(points);
 }
 
 cv::Mat Event::getDescriptors() {
     return this->type->getDescriptors();
 }
 
-vector<cv::KeyPoint> Event::getKeypoints() {
+vector<cv::Point2f> Event::getKeypoints() {
     return this->type->getKeypoints();
 }
 

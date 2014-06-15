@@ -4,6 +4,9 @@ $cwd = __FILE__;
 if (is_link($cwd)) $cwd = dirname(readlink($cwd));
 else $cwd = dirname($cwd);
 
+//error_log("CWD: " . $cwd);
+//error_log("REQUEST URI: " . $_SERVER['REQUEST_URI']);
+
 require_once($cwd . '/boinc_db.php');
 require_once($cwd . '/my_query.php');
 
@@ -62,9 +65,11 @@ function get_user($must_be_logged_in = true) {
                 $next_url = substr($next_url, $n+1);
             }
         }
+//        error_log("request uri: " .$_SERVER['REQUEST_URI']);
+//        error_log("next url: " .$next_url);
 
         $next_url = urlencode($next_url);
-        Header("Location: login_form.php?next_url=$next_url");
+        Header("Location: http://volunteer.cs.und.edu/wildlife/login_form.php?next_url=$next_url");
         exit;
     }
 

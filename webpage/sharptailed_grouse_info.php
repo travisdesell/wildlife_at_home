@@ -54,6 +54,10 @@ echo "
     <div class='row-fluid'>
         <div class='span12'>
             <section id='identification' class='well'>
+                <h2>Sharp-Tailed Grouse Ecology and Information <small>by Adam Pach</small></h2>
+            </section>
+
+            <section id='identification' class='well'>
                 <div class='page-header'>
                     <h2>Identification</h2>
                 </div>
@@ -76,7 +80,7 @@ echo "
 
             <section id='distribution' class='well'>
                 <div class='row-fluid'>
-                    <img class='span4' src='BirdsOfNorthAmericaOnline_Distribution.png'></img>
+                    <img class='span4' src='images/BirdsOfNorthAmericaOnline_Distribution.png'></img>
 
                     <div class='span8'>
                         <div class='page-header'>

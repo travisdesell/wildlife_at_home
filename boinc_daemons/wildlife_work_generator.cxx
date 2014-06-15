@@ -136,9 +136,10 @@ bool config_is_good(string fileName, int duration_s) {
     vector<Event*> events;
 
     int video_start_time;
-    string line, event_id, start_time, end_time;
+    string line, species, event_id, start_time, end_time;
     ifstream infile;
     infile.open(fileName.c_str());
+    getline(infile, species);
     getline(infile, line);
     video_start_time = time_to_seconds(line.c_str());
     while(getline(infile, event_id, ',')) {
@@ -181,7 +182,7 @@ bool config_is_good(string fileName, int duration_s) {
             int minutes = time / 60;
             time = time % 60;
             int seconds = time;
-            cout << "Invalid at time: " << hours << " : " << minutes << " : " << seconds << endl;
+            cout << "Config file is invalid at time: " << hours << " : " << minutes << " : " << seconds << endl;
             return false;
         }
     }
@@ -189,7 +190,7 @@ bool config_is_good(string fileName, int duration_s) {
 }
 
 // create one new job
-int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, string md5_hash, string features_file, string tag) {
+int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, int min_hessian, string md5_hash, string features_file, string tag) {
     DB_WORKUNIT wu;
 
     char name[256], path[256];
@@ -263,8 +264,28 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
         infiles[1] = video_filename.c_str();
 
-        config_filename = video_filename + ".config";
+        config_filename = video_filename + "." + name + ".config";
         ofstream config_file(config_filename.c_str());
+
+        ostringstream video_species_query;
+        video_species_query << "SELECT name"
+            << " FROM species s"
+            << " JOIN video_2 v"
+            << " ON s.id = v.species_id"
+            << " WHERE v.id = "
+            << video_id;
+        mysql_query_check(wildlife_db_conn, video_species_query.str());
+        MYSQL_RES *species_result = mysql_store_result(wildlife_db_conn);
+
+        MYSQL_ROW species_row;
+        string video_species = "";
+        while ((species_row = mysql_fetch_row(species_result)) != NULL) {
+            video_species = species_row[0];
+        }
+        config_file << video_species << endl;
+        cout << "Video Species: " << video_species << endl;
+
+        mysql_free_result(species_result);
 
         ostringstream video_start_query;
         video_start_query << "SELECT start_time"
@@ -307,7 +328,9 @@ int make_job(int video_id, int species_id, int location_id, string video_address
 
         config_file.close();
         if (config_is_good(config_filename, duration_s)) {
+            cout << "Copy file to download dir: '" << config_filename << "'" << endl;
             copy_file_to_download_dir(config_filename);
+            cout << "Delete file: '" << config_filename << "'" << endl;
             remove(config_filename.c_str()); // delete the config file from the local directory.
         } else {
             remove(config_filename.c_str());
@@ -321,7 +344,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         cout << "\tinfile[1]: " << infiles[1] << endl;
         n_files = 2;
 
-        sprintf(command_line, " --c input.config --v video.mp4");
+        sprintf(command_line, " -c input.config -v video.mp4 -h %d", min_hessian);
     } else {
         video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
         infiles[0] = video_filename.c_str();
@@ -454,6 +477,7 @@ void main_loop(const vector<string> &arguments) {
     int species_id = 0;
     int location_id = 0;
     int number_jobs = 100;  //jobs to generate when under the cushion
+    int min_hessian = 500;
 
     if (!get_argument(arguments, "--species_id", false, species_id)) {
         cout << "generating workunits for all species." << endl;
@@ -470,12 +494,18 @@ void main_loop(const vector<string> &arguments) {
     if (!get_argument(arguments, "--number_jobs", false, number_jobs)) {
         cout << "generating a max of " << number_jobs << " workunits, to run for all videos set number_jobs <= 0." << endl;
     } else {
-
         if (number_jobs <= 0) {
             cout << "generating workunits for all videos.." << endl;
         } else {
             cout << "generating a max of " << number_jobs << " workunits, to run for all videos set number_jobs <= 0." << endl;
         }
+    }
+
+    if (0 == strcmp(app_name, "wildlife_surf_collect")) {
+        if(!get_argument(arguments, "--min_hessian", false, min_hessian)) {
+            min_hessian = 500;
+        }
+        cout << "Generateing jobs with hessian value of " << min_hessian << "." << endl;
     }
 
     string tag;
@@ -576,7 +606,7 @@ void main_loop(const vector<string> &arguments) {
         int filesize = atoi(video_row[5]);
         string md5_hash = video_row[6];
 
-        int job_id = make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash, features_file, tag); 
+        int job_id = make_job(video_id, species_id, location_id, video_address, duration_s, filesize, min_hessian, md5_hash, features_file, tag); 
         if (job_id == -1) {
             total_errors++;
         } else {
