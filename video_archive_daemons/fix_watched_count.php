@@ -13,7 +13,7 @@ mysql_select_db("wildlife_video", $wildlife_db);
 //mysql_select_db("wildlife", $boinc_db);
 
 
-$query = "SELECT id, required_views, watch_count FROM video_2";
+$query = "SELECT id, required_views, watch_count, crowd_status FROM video_2 WHERE id = 241";
 $results = mysql_query($query, $wildlife_db);
 if (!$results) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
@@ -21,8 +21,9 @@ while ($row = mysql_fetch_assoc($results)) {
     $video_id = $row['id'];
     $required_views = $row['required_views'];
     $watch_count = $row['watch_count'];
+    $crowd_status = $row['crowd_status'];
 
-    echo "id: $video_id - required_views: $required_views, watch_count: $watch_count\n";
+    echo "id: $video_id - required_views: $required_views, watch_count: $watch_count, crowd_status: $crowd_status\n";
 
     $to_query = "SELECT id, event_id, user_id, start_time_s, end_time_s, completed, status FROM timed_observations WHERE video_id = $video_id";
     $to_results = mysql_query($to_query, $wildlife_db);
@@ -48,10 +49,19 @@ while ($row = mysql_fetch_assoc($results)) {
     }
 
 
-    if (count($users) != $watch_count) {
+    if ( count($users) != $watch_count || 
+        ($watch_count > 0 && $watch_count < 5 && $required_views != $watch_count + 1)) {
         echo "    watch_count: $watch_count != count(\$users): " . count($users) . "\n";
 
-        $update_query = "UPDATE video_2 SET required_views = " . min(max(count($users) + 1, 2), 5) . ", watch_count = " . count($users) . " WHERE id = $video_id";
+        $new_required_views = count($users) + 1;
+        if ($crowd_status === 'VALIDATED' || $crowd_status === 'NO_CONSENSUS') {
+            $new_required_views--;
+        }
+
+        if ($new_required_views < 2) $new_required_views = 2;
+        if ($new_required_views > 5) $new_required_views = 5;
+
+        $update_query = "UPDATE video_2 SET required_views = " . $new_required_views . ", watch_count = " . count($users) . " WHERE id = $video_id";
         echo $update_query . "\n";
         $update_results = mysql_query($update_query, $wildlife_db);
         if (!$update_results) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $update_query\n");

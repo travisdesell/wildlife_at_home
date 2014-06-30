@@ -491,6 +491,13 @@ function enable_observation_table() {
                 }
 
                 enable_observation_table();
+
+                var observations_count = $(".observations-table[video_id=" + video_id + "]").length;
+                //console.log("observations count: " + observations_count);
+                if (observations_count > 0) {
+                    $(".finished-video-button").removeClass("disabled");
+                }
+
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -530,6 +537,12 @@ function enable_observation_table() {
 
                 $("#observations-table-div-" + observation_id).remove();
                 $(".report-observation-button[observation_id=" + observation_id + "]").closest("tr").remove();
+
+                var observations_count = $(".observations-table[video_id=" + video_id + "]").length;
+                //console.log("observations count: " + observations_count);
+                if (observations_count == 0) {
+                    $(".finished-video-button").addClass("disabled");
+                }
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -729,6 +742,8 @@ $(document).ready(function () {
     });
 
     $('.finished-video-button:not(.bound)').addClass('bound').click(function() {
+        if ($(this).hasClass("disabled")) return;
+
         $('.skip-video-button').addClass("disabled");
         $('.finished-video-button').addClass("disabled");
 
