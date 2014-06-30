@@ -1,15 +1,21 @@
 <?php
 
+//git push origin master (sends changes to server proper)
+//git commit -a [filename] ('saves' files)
+
+//chdir("/projects/wildlife/html/user"); //Only for testing
+
 require_once('/../../../home/tdesell/wildlife_at_home/webpage/navbar.php');
 require_once('/../../../home/tdesell/wildlife_at_home/webpage/footer.php');
 require_once('/../../../home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
 require_once('/../../../home/tdesell/wildlife_at_home/webpage/my_query.php');
 require_once('/../../../home/tdesell/wildlife_at_home/webpage/user.php');
 require_once('/../../../home/tdesell/wildlife_at_home/webpage/boinc_db.php');
-require_once("../inc/bossa.inc");
-require_once("../inc/bossa_impl.inc");
+//require_once("../inc/bossa.inc");
+//require_once("../inc/bossa_impl.inc");
 
-require_once('/projects/wildlife/html/inc/cache.inc');
+
+//require_once('/projects/wildlife/html/inc/cache.inc');
 
 require ('/../../../home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php');
 Mustache_Autoloader::register();
@@ -31,7 +37,7 @@ echo "
 <html>
 <head>
         <meta charset='utf-8'>
-        <title>Wildlife@Home: Video Selection</title>
+        <title>Wildlife@Home: Expert Observations Statistics</title>
 
         <link rel='alternate' type='application/rss+xml' title='Wildlife@Home RSS 2.0' href='/rss_main.php'>
         <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
@@ -42,7 +48,12 @@ echo "
 			#nestbuttons {margin-top: 10px; text-align: center;}
 			.container {margin-top: 30px;}
 			#perdaystats, #durationstats, #timestats {margin: 10px; padding: 5px 20px 20px 20px;}
-			#perdaygraph {display: inline-block;}
+			.datatable {display: table;}
+				#perdaydtcol1 {display: table-column;}
+				#perdaydtcol2 {display: table-column;}
+					#perdaydata {display: table-cell; width: 50%; vertical-align: top;}
+					#perdaygraphcon {display: table-cell; width: 50%; vertical-align: top;}
+						#perdaygraph {border: 1px solid #000000; float: right;}
 		</style>
 		
 		<script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>
@@ -126,7 +137,8 @@ print_navbar($active_items);
 
 if(is_special_user__fixme($user['id']) || intval($user['id']) == 197 || intval($user['id']) == 1)
 {
-	require_once("statback.php");
+	//require_once("statback.php"); For final version
+	require_once("/../../../home/rvanderclute/wildlife_at_home/webpage/statback.php");
 	
 	echo "<div class=\"row-fluid\" id=\"statbuttons\">View statistics for: <div class=\"btn-group\" style=\"display: inline;\"><button class=\"btn\" name=\"one\" id=\"one\" onclick=\"fetchStats(1, 0); return false;\">Sharp-Tailed Grouse</button><button class=\"btn\" name=\"two\" id=\"two\" onclick=\"fetchStats(2, 0); return false;\">Least Tern</button><button class=\"btn\" name=\"three\" id=\"three\" onclick=\"fetchStats(3, 0); return false;\">Piping Plover</button></div></div>";
 	
@@ -138,7 +150,7 @@ if(is_special_user__fixme($user['id']) || intval($user['id']) == 197 || intval($
 	//Default species is Sharp-Tailed Grouse
 	$species = 1;
 
-	runRoutine($species);
+	runRoutine($species, 0);
 
 	echo "</div>";
 }
