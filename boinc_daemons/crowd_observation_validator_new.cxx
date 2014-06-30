@@ -173,12 +173,16 @@ class DBVideo {
         int duration_s;
         int species_id;
         int location_id;
+        int watch_count;
+        int required_views;
 
         DBVideo(MYSQL_ROW &video_row) {
             id = atoi(video_row[0]);
             duration_s = atoi(video_row[1]);
             species_id = atoi(video_row[2]);
             location_id = atoi(video_row[3]);
+            watch_count = atoi(video_row[4]);
+            required_views = atoi(video_row[5]);
         }
 
         string to_string() {
@@ -186,7 +190,9 @@ class DBVideo {
             oss << "[VIDEO - video_id: " << setw(8) << id
                 << ", duration_s: " << setw(6) << duration_s
                 << ", species_id: " << setw(3) << species_id
-                << ", location_id: " << setw(3) << location_id << "]";
+                << ", location_id: " << setw(3) << location_id
+                << ", watch_count: " << setw(3) << watch_count 
+                << ", required_views: " << setw(3) << required_views << "]";
             return oss.str();
         }
 };
@@ -340,7 +346,7 @@ int main(int argc, char** argv) {
         check_stop_daemons();
 
         ostringstream unvalidated_video_query;
-        unvalidated_video_query << "SELECT id, duration_s, species_id, location_id FROM video_2 WHERE (watch_count >= required_views) AND crowd_status = 'WATCHED'";
+        unvalidated_video_query << "SELECT id, duration_s, species_id, location_id, watch_count, required_views FROM video_2 WHERE (watch_count >= required_views) AND crowd_status = 'WATCHED'";
 
         mysql_query_check(wildlife_db_conn, unvalidated_video_query.str());
         MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
@@ -471,42 +477,32 @@ int main(int argc, char** argv) {
              *          MARK VIDEO AS NO CONSENSUS
              */
 
-            switch (user_observations_map.size()) {
-                case 1: //1 view is a problem (shouldn't happen), print info about the video and observations then exit.
-                        //should be handled manually.
-                        cout << "    Insufficent users (" << user_observations_map.size() << ")." << endl;
-                        cout << "    There was only one user id in the user observations map, this means it was only viewed by one user." << endl;
-                        cout << "    This needs to be handled manually." << endl;
-                        exit(1);
-                    break;
+            int n_user_observations = user_observations_map.size();
 
-                case 2:
-                    if (!has_invalid && total_observations > 0) {
-                        award_credit(video, user_ids, user_valid_count, user_observations);
-                    } else {
-                        require_another_view(video.id, user_ids.size());
-                    }
-                    break;
-
-                case 3:
-                case 4:
-                case 5:
-                    if (!has_invalid && total_observations > 0) {   //no invalid observations
-                        award_credit(video, user_ids, user_valid_count, user_observations);
-                    } else if (user_valid_count[max_events_user] == user_total_count[max_events_user]) {    //user with most observations has all valid ones
-                        award_credit(video, user_ids, user_valid_count, user_observations);
-                    } else {
-                        if (user_observations_map.size() == 5) award_credit(video, user_ids, user_valid_count, user_observations);
-                        require_another_view(video.id, user_ids.size());    // will set to NO_CONSENSUS for case 5
-                        //award credit for what we have if we've hit the max views views
-                    }
-
-                    break;
-                default: //should never have more than MAX_REQUIRED_VIEWS(5), so this is a problem. print info and exit.
-                        cout << "    There were more user observations (" << user_observations_map.size() << " than MAX_REQUIRED_VIEWS (" << MAX_REQUIRED_VIEWS << "), this shouldn't happen." << endl;
-                        cout << "    This needs to be handled manually." << endl;
-                        exit(1);
-                    break;
+            if (n_user_observations <= 1) {
+                //0 or 1 views is a problem (shouldn't happen), print info about the video and observations then exit.
+                //should be handled manually.
+                cout << "    Insufficent users (" << user_observations_map.size() << ")." << endl;
+                cout << "    There was only one user id in the user observations map, this means it was only viewed by one user." << endl;
+                cout << "    This needs to be handled manually." << endl;
+//                require_another_view(video.id, user_ids.size());
+                exit(1);
+            } else if (n_user_observations == 2) {
+                if (!has_invalid && total_observations > 0) {
+                    award_credit(video, user_ids, user_valid_count, user_observations);
+                } else {
+                    require_another_view(video.id, user_ids.size());
+                }
+            } else {
+                if (!has_invalid && total_observations > 0) {   //no invalid observations
+                    award_credit(video, user_ids, user_valid_count, user_observations);
+                } else if (user_valid_count[max_events_user] == user_total_count[max_events_user]) {    //user with most observations has all valid ones
+                    award_credit(video, user_ids, user_valid_count, user_observations);
+                } else {
+                    if (user_observations_map.size() == 5) award_credit(video, user_ids, user_valid_count, user_observations);
+                    require_another_view(video.id, user_ids.size());    // will set to NO_CONSENSUS for case 5
+                    //award credit for what we have if we've hit the max views views
+                }
             }
 
             count++;
