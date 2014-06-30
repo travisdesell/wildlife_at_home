@@ -52,7 +52,7 @@ function enable_next_video_buttons() {
 }
 
 function initialize_speed_buttons() {
-    console.log("initializing speed buttons!");
+//    console.log("initializing speed buttons!");
 
     $('.fast-backward-button:not(.bound)').addClass('bound').click(function() {
         var video_id = $(this).attr('video_id');
@@ -165,7 +165,7 @@ function initialize_event_list() {
 }
 
 function enable_observation_table() {
-    console.log("allow_add_removal: '" + allow_add_removal + "'");
+//    console.log("allow_add_removal: '" + allow_add_removal + "'");
     if (allow_add_removal == 0) {
         $(".new-observation-button").addClass("disabled");
         $(".new-observation-button").hide();
@@ -683,17 +683,29 @@ function enable_observation_table() {
                 'title' : '<p align="left">This will add another event for this video. You can enter and modify multiple events at the same time.</p>'
             });
 
+
+    var finished_video_id = $(".finished-video-button").attr("video_id");
+    //console.log("finished_video_id: " + finished_video_id);
+    if (finished_video_id) {
+        var observations_count = $(".observations-table[video_id=" + finished_video_id + "]").length;
+        //console.log("observations count: " + observations_count);
+        if (observations_count == 0) {
+            $(".finished-video-button").addClass("disabled");
+        } else {
+            $(".finished-video-button").removeClass("disabled");
+        }
+    }
+
 }
 
 
 
 
 $(document).ready(function () {
-//    console.log("start_time: " + start_time);
+    //console.log("start_time: " + start_time);
     initialize_event_list();
     initialize_speed_buttons();
     enable_observation_table();
-
 
     /*
     $('.random-video-button:not(.has-tooltip)').addClass('has-tooltip').tooltip({ 
