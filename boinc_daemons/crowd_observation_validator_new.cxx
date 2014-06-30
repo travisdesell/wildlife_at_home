@@ -73,6 +73,7 @@ using namespace std;
 
 unordered_map<int, string> observation_types_map;
 
+bool no_db_update;
 
 
 /**
@@ -81,6 +82,13 @@ unordered_map<int, string> observation_types_map;
 #define mysql_query_check(conn, query) __mysql_check (conn, query, __FILE__, __LINE__)
 
 void __mysql_check(MYSQL *conn, string query, const char *file, const int line) {
+    if (no_db_update && query.substr(0, 6).compare("SELECT") != 0 ) {   //if no_db_update specified don't execute non-select queries
+        cout << "NOT QUERYING DATABASE (no_db_update specfied): '" << query << "'" << endl;
+        return;
+    } else {
+        cout << "QUERY: '" << query << "'" << endl;
+    }
+
     mysql_query(conn, query.c_str());
 
     if (mysql_errno(conn) != 0) {
@@ -247,6 +255,50 @@ class DBObservation {
 };
 
 
+void require_another_view(int video_id, int n_user_ids) {
+    ostringstream update_video_query;
+    update_video_query << "UPDATE video_2 SET required_views = LEAST(" << MAX_REQUIRED_VIEWS << ", required_views + 1)";
+    //if required_views == MAX_REQUIRED_VIEWS then we could not get a consensus
+    if (n_user_ids >= MAX_REQUIRED_VIEWS) {
+        cout << "        Users viewing video (" << n_user_ids << ") >= MAX_REQUIRED_VIEWS(" << MAX_REQUIRED_VIEWS << ")" << endl;
+        cout << "        SOMETHING WEIRD HAS GONE ON." << endl;
+        update_video_query << ", crowd_status = 'NO_CONSENSUS'";
+    }
+    update_video_query << " WHERE id = " << video_id;
+    mysql_query_check(wildlife_db_conn, update_video_query.str());
+}
+
+void award_credit(const DBVideo &video, const vector<int> &user_ids, const vector<int> &user_valid_count, const vector< vector<DBObservation> > &user_observations) {
+    for (unsigned int i = 0; i < user_ids.size(); i++) {
+        ostringstream update_credit_query;
+
+        //only award video credit if there's at least one valid event
+        int video_credit_s = 0;
+        if (user_valid_count[i] > 0) video_credit_s = video.duration_s;
+       
+        update_credit_query << "UPDATE user SET bossa_credit_v2 = bossa_credit_v2 + " << video_credit_s << ", valid_events = valid_events + " << user_valid_count[i] << " WHERE id = " << user_ids[i];
+        cout << update_credit_query.str() << endl;
+
+        mysql_query_check(boinc_db_conn, update_credit_query.str());
+
+        for (unsigned int j = 0; j < user_observations[i].size(); j++) {
+            //set status of timed_observation
+
+            ostringstream update_observation_query;
+            if (user_observations[i][j].valid) {
+                update_observation_query << "UPDATE timed_observations SET status = 'VALID' WHERE user_id = " << user_ids[i] << " AND id = " << user_observations[i][j].id;
+            } else {
+                update_observation_query << "UPDATE timed_observations SET status = 'INVALID' WHERE user_id = " << user_ids[i] << " AND id = " << user_observations[i][j].id;
+            }
+            mysql_query_check(wildlife_db_conn, update_observation_query.str());
+        }
+    }
+
+    //update video_2
+    ostringstream update_video_query;
+    update_video_query << "UPDATE video_2 SET crowd_status = 'VALIDATED' WHERE id = " << video.id;
+    mysql_query_check(wildlife_db_conn, update_video_query.str());
+}
 
 int main(int argc, char** argv) {
     for (int i = 1; i < argc; i++) {
@@ -264,7 +316,7 @@ int main(int argc, char** argv) {
 
     vector<string> arguments(argv, argv + argc);
 
-    bool no_db_update = argument_exists(arguments, "--no_db_update");
+    no_db_update = argument_exists(arguments, "--no_db_update");
 
     initialize_boinc_database();
     initialize_wildlife_database();
@@ -295,8 +347,6 @@ int main(int argc, char** argv) {
 
         int count = 0;
 
-        bool progress_updated = false;
-
         MYSQL_ROW video_row;
         while ((video_row = mysql_fetch_row(video_result)) != NULL) {
             DBVideo video(video_row);
@@ -312,103 +362,151 @@ int main(int argc, char** argv) {
 
             unordered_map<int, vector<DBObservation>> user_observations_map;    //a map from user ids to a list of their observations
 
+            int total_observations = 0;
+            //Create a map of user ids to a vector of their events.
             while ((timed_observations_row = mysql_fetch_row(timed_observations_result)) != NULL) {
                 DBObservation observation(timed_observations_row);
-//                cout << "    " << observation.to_string() << endl;
+                cout << "    " << observation.to_string() << endl;
 
                 user_observations_map[observation.user_id].push_back(observation);
+                total_observations++;
+            }
+            cout << "    total observations: " << total_observations << endl;
+
+            //get a vector of user ids, a vector of observations for each user
+            vector<int> user_ids;
+            vector< vector<DBObservation> > user_observations;
+            for (unordered_map<int, vector<DBObservation> >::iterator it = user_observations_map.begin(); it != user_observations_map.end(); it++) {
+                user_ids.push_back( it->first );
+                user_observations.push_back( it->second );
             }
 
-            if (user_observations_map.size() <= 1) {
-                cout << "    Insufficent users (" << user_observations_map.size() << ")." << endl;
+            //get vectors for the total, valid and invalid event counts, while marking the
+            //observations valid or invalid
+            vector<int> user_valid_count(user_ids.size(), 0);
+            vector<int> user_invalid_count(user_ids.size(), 0);
+            vector<int> user_total_count(user_ids.size(), 0);
+            bool has_invalid = false;
+            int max_events_user = 0;
+            int max_total_count = 0;
 
-                //Users had watched the video but did not enter any events. Increase the required views.
-                ostringstream increment_required_views_query;
-                increment_required_views_query << "UPDATE video_2 SET required_views = LEAST(" << MAX_REQUIRED_VIEWS << ", required_views + 1) WHERE id = " << video.id << endl;
+            for (unsigned int i = 0; i < user_ids.size(); i++) {
+                for (unsigned int j = 0; j < user_observations[i].size(); j++) {
+                    cout << "user_observations[" << i << "][" << j << "]: INITIALIZED TO FALSE" << endl;
+                    user_observations[i][j].valid = false;
 
-                mysql_query_check(wildlife_db_conn, increment_required_views_query.str());
-//                MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
+                    //uncompleted events are invalid
+                    if (user_observations[i][j].event_id == 0 || user_observations[i][j].start_time_s < 0 || user_observations[i][j].end_time_s < 0) {
+                        cout << "       " << user_observations[i][j].to_string() << " INVALID because of unentered values." << endl;
+                        break;
+                    }
 
+                    for (unsigned int k = 0; k < user_ids.size(); k++) {
+                        if (k == i) continue;   //don't compare a user to itself
 
-            } else {
-                vector<int> user_ids;
-                vector< vector<DBObservation> > user_observations;
-                for (unordered_map<int, vector<DBObservation> >::iterator it = user_observations_map.begin(); it != user_observations_map.end(); it++) {
-                    user_ids.push_back( it->first );
-                    user_observations.push_back( it->second );
-                }
+                        for (unsigned int l = 0; l < user_observations[k].size(); l++) {
+                            //an event is valid if at least one other user's event matches it
+                            //within the time cutoff
+                            if (user_observations[i][j].event_id == user_observations[k][l].event_id
+                                    && fabs(user_observations[i][j].start_time_s - user_observations[k][l].start_time_s) < TIME_CUTOFF
+                                    && fabs(user_observations[i][j].end_time_s   - user_observations[k][l].end_time_s)   < TIME_CUTOFF) {
 
-                for (unsigned int i = 0; i < user_ids.size(); i++) {
-                    cout << "    user: " << user_ids.at(i) << endl;
-
-                    for (unsigned int j = 0; j < user_ids.size(); j++) {
-                        if (j == i) continue;
-
-                        for (unsigned int k = 0; k < user_observations[i].size(); k++) {
-                            for (unsigned int l = 0; l < user_observations[j].size(); l++) {
-                                if (user_observations[i][k].event_id == user_observations[j][l].event_id
-                                    && fabs(user_observations[i][k].start_time_s - user_observations[j][l].start_time_s) < TIME_CUTOFF
-                                    && fabs(user_observations[i][k].end_time_s   - user_observations[j][l].end_time_s)   < TIME_CUTOFF) {
-
-                                    user_observations[i][k].valid = true;
-                                }
+                                user_observations[i][j].valid = true;
+                                cout << "       MATCH: " << user_observations[i][j].to_string() << endl;
+                                cout << "          TO: " << user_observations[k][l].to_string() << endl;
+                                break;  //found a match for this event so we can quit comparing it
                             }
                         }
                     }
+
+                    if (user_observations[i][j].valid) user_valid_count[i]++;
+                    else {
+                        user_invalid_count[i]++;
+                        has_invalid = true;
+                    }
                 }
 
+                user_total_count[i] = user_observations[i].size();
+                if (user_total_count[i] > max_total_count) {
+                    max_events_user = i;
+                    max_total_count = user_total_count[i];
+                }
 
-                /*
-                 *  If all events match -- award credit, mark video valid
-                 *  If majority of events match:
-                 *      If user with most marked events has invalids, get another view (up to max)
-                 *      If user with most marked events has no invalids, award credit mark video valid
-                 *  If majoriy of events don't match:
-                 *      Get another view 
-                 */
+                cout << "    user: " << setw(8) << user_ids.at(i) << " - valid: " << setw(3) << user_valid_count[i] << ", invalid: " << setw(3) << user_invalid_count[i] << ", total: " << setw(3) << user_total_count[i] << endl;
+            }
 
+            /*
+             * Given MAX_REQUIRED_VIEWS = 5
+             *
+             * 1 VIEW:
+             *      PROBLEM - EXIT AND REPORT ERROR
 
-                //Handle the easy case first, users which have all events marked as valid
-                bool award_credit = true;
-                for (unsigned int i = 0; i < user_ids.size(); i++) {
-                    bool user_has_invalids = false;
-                    int user_event_count = user_observations[i].size();
-                    for (unsigned int k = 0; k < user_observations[i].size(); k++) {
-                        cout << "        " << user_observations[i][k].to_string() << endl;
-                        if (!user_observations[i][k].valid) user_has_invalids = true;
-                    }
-                    cout << "    " << user_ids[i] << " has invalids: " << user_has_invalids << ", event_count: " << user_event_count << endl;
+             * 2 VIEWS: 
+             *      if ALL OBSERVATIONS VALID
+             *          MARK VALID AND CONTINUE
+             *      else // SOME OBSERVATIONS INVALID
+             *          GET ANOTHER VIEW
 
-                    if (!user_has_invalids && user_event_count > 0) {
-                        cout << "    SHOULD AWARD " << video.duration_s << " CREDIT AND " << user_event_count << " VALID EVENTS TO USER " << user_ids[i] << endl;
+             * 3-4 VIEWS:
+             *      if ALL OBSERVATIONS VALID
+             *          MARK VALID AND CONTINUE
+             *      else if USER WITH MOST EVENTS HAS ALL VALID EVENTS
+             *          MARK VALIDS VALID
+             *          MARK INVALIDS INVALID
+             *          MARK VIDEO FINISHED
+             *      else if USER WITH MOST EVENTS HAS INVALID EVENTS
+             *          //potentially some events missed
+             *          GET ANOTHER VIEW
+
+             * 5 VIEWS:
+             *      if ALL OBSERVATIONS VALID
+             *          MARK VALID AND CONTINUE
+             *      else if USER WITH MOST EVENTS HAS ALL VALID EVENTS
+             *          MARK VALIDS VALID
+             *          MARK INVALIDS INVALID
+             *          MARK VIDEO FINISHED
+             *      else if USER WITH MOST EVENTS HAS INVALID EVENTS
+             *          MARK VALIDS VALID
+             *          MARK INVALIDS INVALID
+             *          MARK VIDEO AS NO CONSENSUS
+             */
+
+            switch (user_observations_map.size()) {
+                case 1: //1 view is a problem (shouldn't happen), print info about the video and observations then exit.
+                        //should be handled manually.
+                        cout << "    Insufficent users (" << user_observations_map.size() << ")." << endl;
+                        cout << "    There was only one user id in the user observations map, this means it was only viewed by one user." << endl;
+                        cout << "    This needs to be handled manually." << endl;
+                        exit(1);
+                    break;
+
+                case 2:
+                    if (!has_invalid && total_observations > 0) {
+                        award_credit(video, user_ids, user_valid_count, user_observations);
                     } else {
-                        award_credit = false;
+                        require_another_view(video.id, user_ids.size());
                     }
-                }
+                    break;
 
-                if (award_credit) {
-                    //update credit to users
-                    for (unsigned int i = 0; i < user_ids.size(); i++) {
-                        ostringstream update_credit_query;
-                        update_credit_query << "UPDATE user SET bossa_credit_v2 = bossa_credit_v2 + " << video.duration_s << ", valid_events = valid_events + " << user_observations[i].size() << " WHERE id = " << user_ids[i];
-                        mysql_query_check(boinc_db_conn, update_credit_query.str());
-
-                        for (unsigned int j = 0; j < user_observations[i].size(); j++) {
-                            //set status of timed_observation
-                            ostringstream update_observation_query;
-                            update_observation_query << "UPDATE timed_observations SET status = 'VALID' WHERE user_id = " << user_ids[i] << " AND id = " << user_observations[i][j].id << endl;
-                            mysql_query_check(wildlife_db_conn, update_observation_query.str());
-                        }
+                case 3:
+                case 4:
+                case 5:
+                    if (!has_invalid && total_observations > 0) {   //no invalid observations
+                        award_credit(video, user_ids, user_valid_count, user_observations);
+                    } else if (user_valid_count[max_events_user] == user_total_count[max_events_user]) {    //user with most observations has all valid ones
+                        award_credit(video, user_ids, user_valid_count, user_observations);
+                    } else {
+                        if (user_observations_map.size() == 5) award_credit(video, user_ids, user_valid_count, user_observations);
+                        require_another_view(video.id, user_ids.size());    // will set to NO_CONSENSUS for case 5
+                        //award credit for what we have if we've hit the max views views
                     }
 
-                    //update video_2
-                    ostringstream update_video_query;
-                    update_video_query << "UPDATE video_2 SET crowd_status = 'VALIDATED' WHERE id = " << video.id;
-                    mysql_query_check(wildlife_db_conn, update_video_query.str());
-                } else {
-                    cout << "    EXITING BECAUSE OF NON-AWARDED CREDIT." << endl;
-                    exit(1);
-                }
+                    break;
+                default: //should never have more than MAX_REQUIRED_VIEWS(5), so this is a problem. print info and exit.
+                        cout << "    There were more user observations (" << user_observations_map.size() << " than MAX_REQUIRED_VIEWS (" << MAX_REQUIRED_VIEWS << "), this shouldn't happen." << endl;
+                        cout << "    This needs to be handled manually." << endl;
+                        exit(1);
+                    break;
             }
 
             count++;
