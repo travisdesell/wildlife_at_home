@@ -112,9 +112,35 @@ function print_navbar($active_items) {
 
                         <ul class='nav pull-right'>";
 
+$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+mysql_select_db("wildlife_video", $wildlife_db);
+
+$query = "SELECT u_id FROM registration WHERE u_id=" . $user['id'];
+$result = mysql_query($query, $wildlife_db);
+mysql_close($connection);
+
+$rows = mysql_num_rows($result);
+
+if($rows == 0) {
+    echo "<li class='active'><a href='./survey.php'>New User Survey</a></li>";
+} else {
+    if (($user['bossa_total_credit'] + $user['bossa_credit_v2']) >= 86400) {
+        $query = "SELECT u_id FROM goldbadge WHERE u_id=" . $user['id'];
+        $result = mysql_query($query, $wildlife_db);
+        mysql_close($connection);
+
+        $rows = mysql_num_rows($result);
+
+        if($rows == 0) {
+            echo "<li class='active'><a href='./survey.php'>Gold Badge Survey</a></li>";
+        }   
+    }   
+}   
+
+
 if ($project_scientist) {
-    $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-    mysql_select_db("wildlife_video", $wildlife_db);
+//    $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+//    mysql_select_db("wildlife_video", $wildlife_db);
 
     $query = "SELECT count(*) FROM timed_observations WHERE report_status = 'REPORTED'";
 
