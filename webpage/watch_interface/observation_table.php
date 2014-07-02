@@ -189,7 +189,7 @@ function get_timed_observation_row($observation_id, $species_id, $expert_only) {
 }
 
 function get_watch_video_interface($species_id, $video_id, $video_file, $animal_id, $user, $start_time, $difficulty) {
-    global $cwd;
+    global $cwd, $wildlife_db;
     $watch_info['video_id'] = $video_id;
     $watch_info['video_file'] = $video_file;
     $watch_info['start_time'] = $start_time;
@@ -206,6 +206,28 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
     else if ($difficulty == 'hard') $watch_info['difficulty_class'] = 'btn-danger';
 
     $watch_info['difficulty_text'] = ucfirst($difficulty);
+
+    $query = "SELECT u_id FROM registration WHERE u_id=" . $user['id'];
+    $result = mysql_query($query, $wildlife_db);
+    mysql_close($connection);
+
+    $rows = mysql_num_rows($result);
+
+    if($rows == 0) {
+        $watch_info['new_user_survey'] = 1;
+    } else {
+        if (($user['bossa_total_credit'] + $user['bossa_credit_v2']) >= 86400) {
+            $query = "SELECT u_id FROM goldbadge WHERE u_id=" . $user['id'];
+            $result = mysql_query($query, $wildlife_db);
+            mysql_close($connection);
+
+            $rows = mysql_num_rows($result);
+
+            if($rows == 0) {
+                $watch_info['gold_user_survey'] = 1;
+            }
+        }
+    }
 
     $watch_interface_template = file_get_contents($cwd . "/templates/watch_template.html");
     $mustache_engine = new Mustache_Engine;

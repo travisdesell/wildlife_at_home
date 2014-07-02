@@ -102,6 +102,23 @@ echo "
            border-radius: 4px 0 4px 0;
         }
 
+        .tab-top-middle {
+           position: absolute;
+           top: -1px;
+           left: 50%;
+           padding: 3px 7px;
+           margin-left: -119px;
+           font-size: 14px;
+           font-weight: bold;
+           background-color: #FFFF33;
+           border: 1px solid #ddd;
+           color: #606060; 
+           -webkit-border-radius: 4px 0 4px 0;
+           -moz-border-radius: 4px 0 4px 0;
+           border-radius: 4px 0 4px 0;
+        }
+
+
         .tab-right {
            position: absolute;
            top: -1px;

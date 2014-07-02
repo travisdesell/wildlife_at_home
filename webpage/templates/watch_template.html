@@ -1,4 +1,12 @@
 <div class='tab'>Video #{{video_id}} - {{trimmed_filename}}</div>
+
+{{#new_user_survey}}
+<div class='tab-top-middle'><a href='./survey.php'>Please take our New User Survey!</a></div>
+{{/new_user_survey}}
+{{#gold_user_survey}}
+<div class='tab-top-middle'><a href='./survey.php'>Please take our Gold Badge Survey!</a></div>
+{{/gold_user_survey}}
+
 <div class='tab-bottom-left'>{{bossa_total_credit}} seconds watched : <span class='total_events'>{{total_events}}</span> events marked ({{valid_events}} valid, {{invalid_events}} invalid, {{missed_events}} missed)</div>
 <div class='tab-right'>
     <button class='btn btn-small btn-info pull-right' id='help-button' style='margin:0px; padding: 2px 4px;' data-toggle='modal'>
