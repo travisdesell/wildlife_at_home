@@ -15,7 +15,10 @@ function print_navbar($active_items) {
     $project_scientist = false;
     $user = get_user(false);
     $user_name = "";
+    $logged_in = false;
+
     if ($user != null) {
+        $logged_in = true;
         $user_id = $user['id'];
         $user_name = $user['name'];
 
@@ -29,6 +32,7 @@ function print_navbar($active_items) {
     } else {
         $user_name = "Your Account";
     }
+    error_log("logged in: $logged_in");
 
     if (!array_key_exists('project_management', $active_items)) $active_items['project_management'] = '';
 
@@ -112,30 +116,30 @@ function print_navbar($active_items) {
 
                         <ul class='nav pull-right'>";
 
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
+    if ($logged_in) {
+        $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+        mysql_select_db("wildlife_video", $wildlife_db);
 
-$query = "SELECT u_id FROM registration WHERE u_id=" . $user['id'];
-$result = mysql_query($query, $wildlife_db);
-mysql_close($connection);
-
-$rows = mysql_num_rows($result);
-
-if($rows == 0) {
-    echo "<li class='active'><a href='./survey.php'>New User Survey</a></li>";
-} else {
-    if (($user['bossa_total_credit'] + $user['bossa_credit_v2']) >= 86400) {
-        $query = "SELECT u_id FROM goldbadge WHERE u_id=" . $user['id'];
+        $query = "SELECT u_id FROM registration WHERE u_id=" . $user['id'];
         $result = mysql_query($query, $wildlife_db);
-        mysql_close($connection);
 
         $rows = mysql_num_rows($result);
 
         if($rows == 0) {
-            echo "<li class='active'><a href='./survey.php'>Gold Badge Survey</a></li>";
+            echo "<li class='active'><a href='./survey.php'>New User Survey</a></li>";
+        } else {
+            if (($user['bossa_total_credit'] + $user['bossa_credit_v2']) >= 86400) {
+                $query = "SELECT u_id FROM goldbadge WHERE u_id=" . $user['id'];
+                $result = mysql_query($query, $wildlife_db);
+
+                $rows = mysql_num_rows($result);
+
+                if($rows == 0) {
+                    echo "<li class='active'><a href='./survey.php'>Gold Badge Survey</a></li>";
+                }   
+            }   
         }   
-    }   
-}   
+    }
 
 
 if ($project_scientist) {

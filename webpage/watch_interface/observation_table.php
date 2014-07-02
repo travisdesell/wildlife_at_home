@@ -209,7 +209,6 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
 
     $query = "SELECT u_id FROM registration WHERE u_id=" . $user['id'];
     $result = mysql_query($query, $wildlife_db);
-    mysql_close($connection);
 
     $rows = mysql_num_rows($result);
 
@@ -219,7 +218,6 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
         if (($user['bossa_total_credit'] + $user['bossa_credit_v2']) >= 86400) {
             $query = "SELECT u_id FROM goldbadge WHERE u_id=" . $user['id'];
             $result = mysql_query($query, $wildlife_db);
-            mysql_close($connection);
 
             $rows = mysql_num_rows($result);
 
