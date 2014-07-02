@@ -15,7 +15,7 @@ $bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 echo "
 <html>
 <head>
-<title>UND Wildlife@Home: ???</title>
+<title>UND Wildlife@Home: Automated Wildlife Detection in Uncontrolled Environments</title>
 
 <link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
 <link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
@@ -55,7 +55,7 @@ echo "
         <div class='span12'>
             <section id='title' class='well'>
                 <div class='page-header'>
-                <h2>???? <small>by Kyle Goehner</small></h2>
+                <h2>Automated Wildlife Detection in Uncontrolled Environments <small>by Kyle Goehner</small></h2>
                 </div>
             </section>
 
