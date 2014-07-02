@@ -372,6 +372,7 @@ echo"
                             <li>Alicia Andes - <a href='alicia_project.php'>Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li>
                             <li>Paul Burr - <a href='paul_project.php'>Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li>
                             <li>Rebecca Eckroad - <a href='becca_grouse_project.php'>Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li>
+                            <li>Kyle Goehner - <a href='kyle_project.php'>Automated Wildlife Detection in Uncontrolled Environments</li>
                         </ul>
 
                     </section>
