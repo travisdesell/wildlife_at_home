@@ -32,7 +32,6 @@ function print_navbar($active_items) {
     } else {
         $user_name = "Your Account";
     }
-    error_log("logged in: $logged_in");
 
     if (!array_key_exists('project_management', $active_items)) $active_items['project_management'] = '';
 
