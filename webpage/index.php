@@ -50,7 +50,7 @@ $stopped = web_stopped();
 $rssname = "Wildlife@Home RSS 2.0" ;
 $rsslink = "http://volunteer.cs.und.edu/wildlife/rss_main.php";
 
-header("Content-type: text/html; charset=utf-8");
+header("Content-type: text/html; charset=ISO-8859-1");
 
 echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
 
@@ -114,6 +114,22 @@ echo "
     </head><body>
 ";
 
+//Let's implement the locale stuff!
+$locale = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+
+//Test line
+//$locale = "de";
+
+if($locale == "de")
+{
+	require("site_de.php");
+}
+else
+{
+	require("site_en.php");
+}
+$content = fetchIndex();
+
 $active_items = array(
                     'home' => 'active',
                     'watch_video' => '',
@@ -129,16 +145,13 @@ echo "
     <div class='container'>
         <div class='row'>
             <div class='span6'>
-                <h3>Welcome to Wildlife@Home</h3>
-                <p>
-                Wildlife@Home is <i>citizen science project</i>, developed in a joint effort by <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i>, performing their mating dances (lekking), and then examining their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>
-                
-                <p>We hope that your participation will help us determine the impact of the oil development on the sharp-tailed grouse, and better understand the behaviors of least terns and piping plovers to aid in their conservation, as well as provide some interesting video for everyone to watch and discuss. Feel free to scroll through our image gallery on the right to get a better idea of what is going on with the project and see the field biologists in action, talk to us on the <a href='./forum_index.php'>message boards</a>, or watch videos about the project on our <a href='https://plus.google.com/118091968152392210151' rel='publisher'>Google+ YouTube Channel</a>.
-                </p>
+                <h3>" . $content["welcome"] . "</h3>
+				<p>" . $content["firstpara"] . "</p>
+                <p>" . $content["secondpara"] . "</p>
 
                 <div class='row-fluid'>
-                    <a class='btn btn-large btn-primary span6' href='video_selector.php'>Watch Videos</a>
-                    <a class='btn btn-large btn-primary span6' href='boinc_instructions.php'>Volunteer Your Computer</a>
+                    <a class='btn btn-large btn-primary span6' href='video_selector.php'>" . $content["vidbutton"] . "</a>
+                    <a class='btn btn-large btn-primary span6' href='boinc_instructions.php'>" . $content["vidbutton2"] . "</a>
                 </div>
             </div>
 
@@ -367,111 +380,34 @@ echo"
 
             <div class='span6'>
                     <section id='contact'>
-                        <div class='page-header'><h2>Active Projects</h2></div>
-                        <ul>
-                            <li>Alicia Andes - <a href='alicia_project.php'>Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li>
-                            <li>Paul Burr - <a href='paul_project.php'>Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li>
-                            <li>Rebecca Eckroad - <a href='becca_grouse_project.php'>Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li>
-                            <li>Kyle Goehner - <a href='kyle_project.php'>Automated Wildlife Detection in Uncontrolled Environments</li>
-                        </ul>
+                      <div class='page-header'><h2>" . $content['activehead'] . "</h2></div>
+                       <ul>" . $content['activecontent'] . "
+                       </ul>
 
                     </section>
 
                     <section id='contact'>
-                        <div class='page-header'><h2>Publications</h2></div>
-                        <p>
-                            All publications, talks and posters about Wildlife@Home can be viewed on our <a href='publications.php'>publications page</a>.
-                        </p>
+                        <div class='page-header'><h2>" . $content['publicationhead'] . "</h2></div>
+                        <p>" . $content['publicationbody'] . "</p>
                     </section>
 
                     <section id='contact'>
-                        <div class='page-header'><h2>Contact Information</h2></div>
-                        <p>Please email any questions or suggestions to <a href='mailto:tdesell@cs.und.edu'>Travis Desell</a>, or feel free to post a message in our <a href='forum_index.php'>forums</a>.
-                        <p>
-                        The Wildlife@Home team includes:
-                        <ul>
-                        <li>
-                        <a href='http://people.cs.und.edu/~tdesell/'>Travis Desell</a>, Assistant Professor of Computer Science, University of North Dakota
-                        </li>
+                        <div class='page-header'><h2>" . $content['contacthead'] . "</h2></div>
+                        <p>" . $content['contactbody1'] . "</p>
+                        <p>" . $content['wildlifeteamhead'] . "</p>
+                        <ul>" . $content['wildlifeteambody'] . "</ul>
 
-                        <li>
-                        <a href='http://arts-sciences.und.edu/biology/faculty/susan-felege.cfm'>Susan Ellis-Felege</a>, Assistant Professor of Biology, University of North Dakota 
-                        </li>
+                        <p>" . $content['agencyhead'] . "</p>
 
-                        <li>
-                        <a href='http://arts-sciences.und.edu/biology/faculty/chris-felege.cfm'>Chris Felege</a>, Educational Outreach Coordinator, Instructor of Biology, University of North Dakota 
-                        </li>
-
-                        <li>
-                        Alicia Andes, Graduate Research Assistant in Biology, University of North Dakota
-                        </li>
-
-                        <li>
-                        Paul Burr, Graduate Research Assistant in Biology, University of North Dakota
-                        </li>
-
-                        <li>
-                        Becca Eckroad, Undergraduate Research Assistant in Biology, University of North Dakota
-                        </li>
-
-                        <li>
-                        Kyle Goehner, Graduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
-
-                        <li>
-                        Leila Mohsenian, Undergraduate Research Assistant in Biology, University of North Dakota
-                        </li>
-
-                        <li>
-                        Rebecca VanderClute, Undergraduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
-                        </ul>
-
-                        With agency support from:
-
-                        <ul>
-                        <li>
-                        Aaron Robinson, North Dakota Game and Fish.
-                        </li>
-
-                        <li>
-                        Terry Shaffer, U.S.G.S. Northern Prairie Wildlife Research Center.
-                        </li>
-
-                        <li>
-                        Mark Sherfy, U.S.G.S. Northern Prairie Wildlife Research Center.
-                        </li>
-                        </ul>
-
-
-                        With previous support from:
-                        <ul>
-                        <li>
-                        Robert Bergman, Graduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
-
-                        <li>
-                        Adam Pachl, Undergraduate Research Assistant in Biology, University of North Dakota
-                        </li>
-
-                        <li>
-                        Julia Johnson, Undergraduate Research Assistant in Biology, University of North Dakota
-                        </li>
-
-                        <li>
-                        Nitin Karodiya, Graduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
-
-                        <li>
-                        Eric Kjeldergaard, Graduate Research Assistant in Computer Science, University of North Dakota
-                        </li>
-                        </ul>
-
-                        </p>
+                        <ul>" . $content['agencybody'] . "</ul>
+						
+						<p>" . $content['prevhead'] . "</p>
+						
+                        <ul>" . $content['prevbody'] . "</ul>
                     </section>
 
                     <section id='support'>
-                        <div class='page-header'><h2>Support</h2></div>
+                        <div class='page-header'><h2>" . $content['supporthead'] . "</h2></div>
 
                         <div class='row-fluid'>
                             <div class='span2'>
@@ -480,9 +416,7 @@ echo"
                                 </p>
                             </div>
                             <div class='span10'>
-                                <p>
-                                    Wildlife@Home is currently being supported by <a href='http://www.nsf.gov/awardsearch/showAward?AWD_ID=1319700&HistoricalAwards=false'>NSF award no. 1319700</a> through the <a href='http://www.nsf.gov/div/index.jsp?div=IIS'>Division of Intelligent Information Systems</a>'s Information Integration and Informatics (III) program.
-                                </p>
+                                <p>" . $content["supportbody1"] . "</p>
                             </div>
                         </div>
 
@@ -493,9 +427,7 @@ echo"
                                 </p>
                             </div>
                             <div class='span10'>
-                            <p>
-                                Wildlife@Home has been generously supported by a collaborative research award and new faculty SEED grant from UND's Office of Research Development and Compliance. The project's video streaming server is hosted by UND's <a href='http://crc.und.edu'>Computational Research Center</a> and the volunteer computing server is hosted by UND's <a href='http://www.aero.und.edu/about/SCC.aspx'>Scientific Computing Center</a>.
-                            </p>
+                            <p>" . $content["supportbody2"] . "</p>
                             </div>
                         </div>
                         <br>
@@ -504,9 +436,7 @@ echo"
                             <div class='span2'>
                                 <a href=\"http://gf.nd.gov\"><img src=\"http://volunteer.cs.und.edu/wildlife/images/ndgf_logo.png\"></a>
                             </div>
-                            <div class='span10'>
-                                North Dakota Game and Fish has provided financial support for field logistics to collect sharp-tailed grouse videos.
-                            </div>
+                            <div class='span10'>" . $content["supportbody3"] . "</div>
                         </div>
                         <br>
 
@@ -514,9 +444,7 @@ echo"
                             <div class='span2'>
                                 <a href=\"http://www.npwrc.usgs.gov\"><img src=\"http://volunteer.cs.und.edu/wildlife/images/usgs_logo.png\"></a>
                             </div>
-                            <div class='span10'>
-                                USGS has provided financial support for camera equipment, video storage, and field assistance to collect data for the piping plover and interior least tern.
-                            </div>
+                            <div class='span10'>" . $content["supportbody4"] . "</div>
                         </div>
                         <br>
 
@@ -524,11 +452,7 @@ echo"
                             <div class='span2'>
                                 <a href=\"http://boinc.berkeley.edu/\" style='display:block; margin-left:auto; margin-right:auto;'><img src=\"http://volunteer.cs.und.edu/wildlife/img/pb_boinc.gif\" alt=\"Powered by BOINC\"></a>
                             </div>
-                            <div class='span10'>
-                                <p>
-                                Wildlife@Home is in part powered by the <a href='http://boinc.berkeley.edu/'>Berkeley Open Infrastructure for Network Computing (BOINC)</a>.
-                                </p>
-                            </div>
+                            <div class='span10'>" . $content["supportbody5"] . "</div>
                         </div>
 
                     </section>
