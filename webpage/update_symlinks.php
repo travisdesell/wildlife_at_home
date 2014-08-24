@@ -39,6 +39,11 @@ foreach (glob("*.css") as $filename) {
 }
 
 
+$command = "ln -s $cwd/css $target/css";
+echo "$command\n";
+shell_exec("rm $target/css");
+shell_exec($command);
+
 $command = "ln -s $cwd/expert_interface $target/expert_interface";
 echo "$command\n";
 shell_exec("rm $target/expert_interface");

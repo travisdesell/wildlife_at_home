@@ -25,7 +25,7 @@ while ( ($row = mysql_fetch_assoc($result)) != null) {
     $user->id = $row['id'];
     $user->bossa_total_credit = $row['bossa_total_credit'];
     $user->bossa_credit_v2 = $row['bossa_credit_v2'];
-    $user->total_credit = $row['total_credit'];
+    $user->wildlife_total_credit = $row['total_credit'];
     $user->cross_project_id = $row['cross_project_id'];
     $user->email_addr= $row['email_addr'];
 
@@ -34,7 +34,7 @@ while ( ($row = mysql_fetch_assoc($result)) != null) {
     fwrite($file, "<user>\n");
     fwrite($file, "\t<id>" . $user->id . "</id>\n");
     fwrite($file, "\t<cpid>" . $cpid . "</cpid>\n");
-    fwrite($file, "\t<credit>" . $user->total_credit . "</credit>\n");
+    fwrite($file, "\t<credit>" . $user->wildlife_total_credit . "</credit>\n");
     fwrite($file, "\t<bossa_credit>" . ($user->bossa_total_credit + $user->bossa_credit_v2) . "</bossa_credit>\n");
 
 
