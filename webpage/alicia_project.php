@@ -1,58 +1,24 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd . "/navbar.php");
-require_once($cwd . "/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
-echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
-
-$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
-
-
-echo "
-<html>
-<head>
-<title>UND Wildlife@Home: Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</title>
-
-<link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-<link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-<link rel='stylesheet' type='text/css' href='style.css'>
-
-$bootstrap_scripts
-
-<style>
-body {
-    padding-top: 60px;
-}
-
-@media (max-width: 979px) {
-    body {
-        padding-top: 0px;
-    }
-}
-</style>
-
-</head>
-";
-
-$active_items = array(
-                'home' => '',
-                'watch_video' => '',
-                'message_boards' => '',
-                'preferences' => '',
-                'about_wildlife' => 'active',
-                'community' => ''
-            );
-
-print_navbar($active_items);
+print_header("Wildlife@Home: Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics", "", "wildlife");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
 
 echo "
-<div class='container'>
-    <div class='row-fluid'>
-        <div class='span12'>
+    <div class='container'>
+        <div class='row'>
+            <div class='col-sm-12'>
+
             <section id='title' class='well'>
                 <div class='page-header'>
                 <h2>Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics <small>by Alicia Andes</small></h2>
@@ -60,18 +26,18 @@ echo "
             </section>
 
             <section id='figures' class='well'>
-                <div class='row-fluid'>
-                    <div class='span4'>
+                <div class='row'>
+                    <div class='col-sm-4'>
                         <img style='width:100%;' src='images/alicia_plover_adult.png'></img>
                         <p>A piping plover adult.</p>
                     </div>
 
-                    <div class='span4'>
+                    <div class='col-sm-4'>
                         <img style='width:100%;' src='images/alicia_plover_tern_habitat.png'></img>
                         <p>A suitable nesting habitat for Least Terns and Piping Plovers on the Upper Missouri River.</p>
                     </div>
 
-                    <div class='span4'>
+                    <div class='col-sm-4'>
                         <img style='width:100%;' src='images/alicia_tern_chicks_eggs.png'></img>
                         <p>Two newly hatched Least Tern chicks and one egg in a nest bowl.</p>
                     </div>
@@ -79,8 +45,8 @@ echo "
             </section>
 
             <section id='text' class='well'>
-                <div class='row-fluid'>
-                    <div class='span12'>
+                <div class='row'>
+                    <div class='col-sm-12'>
                         <p>
                         Interior Least Terns (<i>Sternula antillarum</i>; \"terns\") and Piping Plovers (<i>Charadrius melodus</i>; \"plovers\") are small shorebirds that nest on unvegetated sand habitat, such as temporary sandbars and permanent islands, on the Missouri River during the summer months. The establishment of dams to control water flow on the Missouri River disrupted the natural flood process that created habitat favorable for terns and plovers to successfully create nests, hatch chicks and fledge juveniles. The decline of suitable breeding habitat is the primary cause for the dangerous decrease in population size for terns and plovers.
                         </p>
@@ -103,7 +69,7 @@ echo "
     </div>
 </div>";
 
-print_footer();
+print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 echo "
 </body>

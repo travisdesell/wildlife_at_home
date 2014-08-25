@@ -1,56 +1,18 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd . "/navbar.php");
-require_once($cwd . "/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
-require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
-Mustache_Autoloader::register();
-
-echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
-
-$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
-
-
-echo "
-<html>
-<head>
-<title>UND Wildlife@Home: Sharp-Tailed Grouse Video Monitoring Training</title>
-
-<link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-<link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-
-$bootstrap_scripts
-
-<style>
-body {
-    padding-top: 60px;
-}
-
-@media (max-width: 979px) {
-    body {
-        padding-top: 0px;
-    }
-}
-</style>
-
-</head>
-<body>
-";
-
-$active_items = array(
-                'home' => '',
-                'watch_video' => '',
-                'message_boards' => '',
-                'preferences' => '',
-                'about_wildlife' => 'active',
-                'community' => ''
-            );
-
-print_navbar($active_items);
+print_header("Wildlife@Home: Sharp-Tailed Grouse Training Videos", "", "wildlife");
+print_navbar("Wildlife", "Wildlife@Home");
 
 $videos = array(
                 'page_intro' => "<p>
@@ -103,12 +65,12 @@ $videos = array(
                 'page_end' => "<p>As you watch the videos, we will be interested at what time the event starts.  Please make note of the time from the time stamp in the video when you first notice the activity beginning. If it is already in progress (e.g., skunk sitting at the nest eating eggs), please make note of this in the comments section.  Any other interesting observation or details you wish to include, please include these in the comment section.</p><p>We appreciate your assistance in classifying nesting behaviors and predator interactions at the nest of sharp-tailed grouse!</p><p align=right> - The Wildlife@Home Team</p>"
             );
 
-$training_template = file_get_contents($cwd . "/training_template.html");
+$training_template = file_get_contents($cwd[__FILE__] . "/templates/training_template.html");
 
 $m = new Mustache_Engine;
 echo $m->render($training_template, $videos);
 
-print_footer();
+print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 echo "
 </body>

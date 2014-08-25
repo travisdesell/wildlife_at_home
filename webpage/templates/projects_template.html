@@ -1,75 +1,70 @@
-
 <div class='container'>
-    <div class='row-fluid'>
-        <div class='span12'>
+    <div class='row'>
+        <div class='col-sm-12'>
             {{#thumbnail_list}}
-            <section class='well'>
-                <div class='row-fluid'>
-                    <div class='span4'>
-                        <img src='{{thumbnail_image}}' alt=''></img>
+            <div class='well'>
+                <div class='row'>
+                    <div class='col-sm-4'>
+                        <img class='img-responsive' src='{{thumbnail_image}}' alt=''></img>
 
-                        <div class='row-fluid' style='margin-top:10px;'>
-                                {{#training_webpage}}
-                                    <a class='btn btn-small btn-primary span6' style='line-height:30px; margin-bottom:10px;' href='{{training_webpage}}'>Training Videos</a>
-                                {{/training_webpage}}
-                                {{^training_webpage}}
-                                    <a class='btn btn-mini span6 disabled' style='line-height:30px; margin-bottom:10px;'>Training Videos</a>
-                                {{/training_webpage}}
+                        <div class='btn-group btn-group-justified' style='margin-top:20px;'>
+                            {{#training_webpage}}
+                            <a class='btn btn-sm btn-primary col-sm-6' role='button' style='line-height:30px; margin-bottom:10px;' href='{{training_webpage}}'>Training Videos</a>
+                            {{/training_webpage}}
+                            {{^training_webpage}}
+                            <a class='btn btn-xs btn-primary col-sm-6 disabled' role='button' style='line-height:30px; margin-bottom:10px;'>Training Videos</a>
+                            {{/training_webpage}}
 
-                                {{#info_webpage}}
-                                    <a class='btn btn-small btn-primary span6 pull-right' style='line-height:30px; margin-bottom:10px;' href='{{info_webpage}}'>Species Information</a>
-                                {{/info_webpage}}
-                                {{^info_webpage}}
-                                    <a class='btn btn-mini span6 pull-right disabled' style='line-height:30px; margin-bottom:10px;'>Species Information</a>
-                                {{/info_webpage}}
+                            {{#info_webpage}}
+                            <a class='btn btn-sm btn-primary col-sm-6' role='button' style='line-height:30px; margin-bottom:10px;' href='{{info_webpage}}'>Species Information</a>
+                            {{/info_webpage}}
+                            {{^info_webpage}}
+                            <a class='btn btn-xs btn-primary col-sm-6 disabled' role='button' style='line-height:30px; margin-bottom:10px;'>Species Information</a>
+                            {{/info_webpage}}
                         </div>
                     </div>
 
-                    <div class='span4'>
-                        <div class='row-fluid'>
+                    <div class='col-sm-4'>
                             <h4 style='margin-top:0px;'>{{species_name}} <small>{{species_latin_name}}</small></h4>
                             <p>{{{project_description}}}</p>
-                        </div>
                     </div>
 
-                    <div class='span4'>
+                    <div class='col-sm-4'>
                         {{#site}}
-                            <div class='row-fluid'>
-                                <div class='span9' style='text-align:left;'>
-                                    <b>{{site_name}}</b>
-                                </div>
-                                <div class='span3' style='text-align:right;'>
-                                    <b>{{year}}</b>
-                                </div>
+                        <div class='row'>
+                            <div class='col-sm-8' style='text-align:left;'>
+                                <b>{{site_name}}</b>
                             </div>
+                            <div class='col-sm-4' style='text-align:right;'>
+                                <b>{{year}}</b>
+                            </div>
+                        </div>
 
                         <p>{{site_description}}</p>
 
-                        <div class='row-fluid'>
-                            <div class='span9'>
+                        <div class='row'>
+                            <div class='col-sm-9'>
                                 <div class='progress' id='{{progress_id}}'>
-                                    <div class='bar bar-success' style="width: {{validated_percentage}}%;"></div>
-                                    <div class='bar bar' style="width: {{available_percentage}}%;"></div>
+                                    <div class='progress-bar progress-bar-success' style="width: {{validated_percentage}}%;"></div>
+                                    <div class='progress-bar' style="width: {{available_percentage}}%;"></div>
                                 </div>
                             </div>
 
-                            <div class='span3'>
+                            <div class='col-sm-3'>
                                 {{#enabled}}
-                                <a class='btn btn-mini btn-primary pull-right' style='margin-top:0px;' href='watch.php?location={{site_id}}&species={{species_id}}'>Watch Video</a>
+                                <a class='btn btn-xs btn-primary pull-right' style='margin-top:0px;' href='watch.php?location={{site_id}}&species={{species_id}}'>Watch Video</a>
                                 {{/enabled}}
                                 {{^enabled}}
-                                <a class='btn btn-mini pull-right disabled' style='margin-top:0px;'>Watch Video</a>
+                                <a class='btn btn-xs btn-primary pull-right disabled' style='margin-top:0px;'>Watch Video</a>
                                 {{/enabled}}
                             </div>
                         </div>
                         {{/site}}
 
                     </div>
-                </section>
-                {{/thumbnail_list}}
-            </ul>
+                </div>
+            </div>
+            {{/thumbnail_list}}
         </div>
     </div>
 </div>
-
-
