@@ -1,6 +1,6 @@
 <div class='container'>
-    <div class='row-fluid'>
-        <div class='span12'>
+    <div class='row'>
+        <div class='col-sm-12'>
 
             {{#page_intro}}
             <section id='intro' class='well'>
@@ -11,8 +11,8 @@
             {{#video_explanation}}
             <section id='presence' class='well'>
                 <div class='container'>
-                    <div class='row-fluid'>
-                        <div class='span6'>
+                    <div class='row'>
+                        <div class='col-sm-6'>
                             <video style='width:95%;' id='wildlife_video' controls='controls'>
                                 <source src='{{video_href}}.mp4' type='video/mp4'></source>
                                 <source src='{{video_href}}.ogv' type='video/ogg'></source>
@@ -20,7 +20,7 @@
                             </video> 
                         </div>
 
-                        <div class='span6' style='padding-right:45px'>
+                        <div class='col-sm-6' style='padding-right:45px'>
                             {{{video_description}}}
                         </div>
                     </div>

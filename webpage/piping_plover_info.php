@@ -1,58 +1,23 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd . "/navbar.php");
-require_once($cwd . "/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
-echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
-
-$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
-
-
-echo "
-<html>
-<head>
-<title>UND Wildlife@Home: Piping Plover Ecology and Information</title>
-
-<link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-<link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-<link rel='stylesheet' type='text/css' href='style.css'>
-
-$bootstrap_scripts
-
-<style>
-body {
-    padding-top: 60px;
-}
-
-@media (max-width: 979px) {
-    body {
-        padding-top: 0px;
-    }
-}
-</style>
-
-</head>
-";
-
-$active_items = array(
-                'home' => '',
-                'watch_video' => '',
-                'message_boards' => '',
-                'preferences' => '',
-                'about_wildlife' => 'active',
-                'community' => ''
-            );
-
-print_navbar($active_items);
+print_header("Wildlife@Home: Piping Plover Ecology and Information", "", "wildlife");
+print_navbar("Wildlife", "Wildlife@Home");
 
 echo "
 <div class='container'>
-    <div class='row-fluid'>
-        <div class='span12'>
+    <div class='row'>
+        <div class='col-sm-12'>
             <section id='identification' class='well'>
                     <h2>Piping Plover Ecology and Information <small>by Leila Mohsenian</small></h2>
             </section>
@@ -63,15 +28,15 @@ echo "
                 </div>
 
                 <p>
-                Piping Plovers (<it>Charadrius melodus</it>) are small federally threatened shorebirds that weigh an average of 43-63 g and can range in length from 14-18 cm. The typical wingspan of a Piping Plover is 38cm. In general they are pale grey, similar to beach sand. This coloration allows them to blend into their habitat and surroundings, making it more difficult for predators to identify them. Their underside and chest are white, and they sport a short yellow bill with a contrasting black tip. Along with their body coloration and bill, another distinguishing feature of this shorebird is their bare, orange legs. In the summer there are several coloration changes, which will diminish during the non-breeding season (winter months). Piping Plovers will develop a single black neck band and a black band on their forehead (spanning from one eye to the other). During the non-breeding season their bills will turn completely black. There are several features of the Piping Plover that distinguish males from females. Males are darker in plumage with more prominent neck bands than females. Females are smaller in size and have darker bills. These shorebirds are seen individually or traveling in a small flock.
+                Piping Plovers (<it>Charadrius melodus</it>) are small federally threatened shorebirds that weigh an average of 43-63 g and can range in length from 14-18 cm. The typical wingspan of a Piping Plover is 38cm. In general they are pale grey, similar to beach sand. This coloration allows them to blend into their habitat and surroundings, making it more difficult for predators to identify them. Their underside and chest are white, and they sport a short yellow bill with a contrasting black tip. Along with their body coloration and bill, another distinguishing feature of this shorebird is their bare, orange legs. In the summer there are several coloration changes, which will diminish during the non-breeding season (winter months). Piping Plovers will develop a single black neck band and a black band on their forehead (col-sm-ning from one eye to the other). During the non-breeding season their bills will turn completely black. There are several features of the Piping Plover that distinguish males from females. Males are darker in plumage with more prominent neck bands than females. Females are smaller in size and have darker bills. These shorebirds are seen individually or traveling in a small flock.
                 </p>
             </section>
 
             <section id='distribution' class='well'>
-                <div class='row-fluid'>
-                    <img class='span4' src='http://volunteer.cs.und.edu/wildlife/images/piping_plover_distribution.png'></img>
+                <div class='row'>
+                    <img class='col-sm-4' src='http://volunteer.cs.und.edu/wildlife/images/piping_plover_distribution.png'></img>
 
-                    <div class='span8'>
+                    <div class='col-sm-8'>
                         <div class='page-header'>
                             <h2>Distribution</h2>
                         </div>
@@ -164,7 +129,7 @@ echo "
     </div>
 </div>";
 
-print_footer();
+print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 echo "
 </body>
