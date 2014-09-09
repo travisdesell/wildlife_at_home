@@ -262,8 +262,8 @@ int main(int argc, char **argv) {
 
     FileStorage outfile(output_filename, FileStorage::WRITE);
     if (outfile.isOpened()) {
-        outfile << "common_descriptors" << common_descriptors;
-        outfile << "common_keypoints" << common_keypoints;
+        outfile << "descriptors" << common_descriptors;
+        outfile << "keypoints" << common_keypoints;
         outfile.release();
     } else {
         cout << "Could not open '" << output_filename << "' for writing." << endl;
