@@ -2,30 +2,6 @@
 
 require_once("wildlife_db.php");
 
-$video_table = "video_2";
-$segment_table = "video_segment_2";
-$observation_table = "observation_2";
-$species_table = "species";
-$location_table = "locations";
-
-
-/**
- *  Takes the filename, and returns the substring from $start up to the next 
- *  $separator char.
- *  After that, it updates the value of $start to the position of the separator 
- *  char + 1.
- */
-function parse_next_dir($filename, $separator, &$start) {
-    $prev = $start;
-    $start = strpos($filename, $separator, $prev);
-
-    $value = substr($filename, $prev, ($start - $prev));
-
-    $start = $start + 1;
-
-    return $value;
-}
-
 /**
  * This splits a string based on multiple delimiters
  */
@@ -78,23 +54,24 @@ function get_video_duration($filename) {
     $pattern = "/Duration:\s+([0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9][0-9]?)/";
     $exists = preg_match($pattern, $info, $matches);
     if(!$exists) {
-        die("No duration found.\n");
+        echo("No duration found.\n");
+        throw new Exception('Duration not found by ffmpeg, corrupt video?');
     }
 
     $timetotalarray = multi_explode("/[:\.]/", $matches[1]);
 
-    echo "timetotalarray[0]: " . $timetotalarray[0] . "\n";
-    echo "timetotalarray[1]: " . $timetotalarray[1] . "\n";
-    echo "timetotalarray[2]: " . $timetotalarray[2] . "\n";
-    echo "timetotalarray[3]: " . $timetotalarray[3] . "\n";
+//    echo "timetotalarray[0]: " . $timetotalarray[0] . "\n";
+//    echo "timetotalarray[1]: " . $timetotalarray[1] . "\n";
+//    echo "timetotalarray[2]: " . $timetotalarray[2] . "\n";
+//    echo "timetotalarray[3]: " . $timetotalarray[3] . "\n";
 
-    echo "timetotalarray: " . $timetotalarray[0] . ":" . $timetotalarray[1] . ":" . $timetotalarray[2] . "." . $timetotalarray[3] . "\n";
+//    echo "timetotalarray: " . $timetotalarray[0] . ":" . $timetotalarray[1] . ":" . $timetotalarray[2] . "." . $timetotalarray[3] . "\n";
 
     $total_seconds = ($timetotalarray[0] * 3600) + ($timetotalarray[1] * 60) + $timetotalarray[2];
 
     if ($timetotalarray[3] > 0) $total_seconds += 1;
 
-    echo "total_seconds: " . $total_seconds . "\n";
+//    echo "total_seconds: " . $total_seconds . "\n";
 
 //    if ($total_seconds == 0) die("Duration too low -- this should be a problem.\n");
     return $total_seconds;
@@ -115,54 +92,6 @@ function already_inserted($filename) {
     else return true;
 }
 
-function insert_video($archive_filename, $watermarked_filename, $project_id, $location_id, $species_id, $animal_id, $start_time, $crowd_obs_count, $expert_obs_count, $machine_obs_count, $streaming_segments, $processing_status, $duration_s) {
-
-    $query = "INSERT INTO video_2 SET " .
-                "  archive_filename = '$archive_filename'" .
-                ", watermarked_filename = '$watermarked_filename'" .
-                ", project_id = '$project_id'" .
-                ", location_id = '$location_id'" .
-                ", species_id = '$species_id'" .
-                ", animal_id = '$animal_id'" .
-                ", start_time = '$start_time'" .
-                ", crowd_obs_count = '$crowd_obs_count'" .
-                ", expert_obs_count = '$expert_obs_count'" .
-                ", machine_obs_count = '$machine_obs_count'" .
-                ", streaming_segments = '$streaming_segments'" .
-                ", processing_status = '$processing_status'" .
-                ", duration_s = '$duration_s'";
-
-    $result = mysql_query($query);
-    if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-    $video_id = mysql_insert_id();
-
-    /**
-     *  Insert information for the future video segment pieces to be generated
-     *  by the splitter.
-     */
-    for ($i = 0; $i < $streaming_segments; $i++) {
-        $streaming_filename = str_replace("archive", "streaming_2", $archive_filename);
-        $streaming_filename = str_replace(".avi", "_CHILD$i.mp4", $streaming_filename);
-
-        $query = "INSERT INTO video_segment_2 SET " .
-                    "  video_id = '$video_id'" .
-                    ", number = $i" .
-                    ", species_id = $species_id" .
-                    ", location_id = $location_id" .
-                    ", filename = '$streaming_filename'" .
-                    ", crowd_obs_count = 0" .
-                    ", expert_obs_count = 0" .
-                    ", machine_obs_count = 0" .
-                    ", interesting_count = 0" .
-                    ", processing_status = 'UNWATERMARKED'" .
-                    ", crowd_status = 'UNWATCHED'";
-
-        $result = mysql_query($query);
-        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-    }
-}
-
-
 /**
  * SCRIPT STARTS HERE
  */
@@ -174,8 +103,7 @@ mysql_select_db($wildlife_db);
 $dir = "/share/wildlife/archive";
 
 $count = 0;
-$directory_iterator = new RecursiveIteratorIterator(new 
-    RecursiveDirectoryIterator($dir));
+$directory_iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
 
 foreach($directory_iterator as $filename => $path_object) {
     if (substr($filename, -4) == ".avi") {  //only process movie files
@@ -188,47 +116,47 @@ foreach($directory_iterator as $filename => $path_object) {
          *  their status to UNWATERMARKED
          */
 
-        //name format is : base/species/type_year/site/animal 
-        //id/mm_dd_yy_???/CH00_yyyymmdd_hhmmssMN.avi
-        $start = strlen("/video/wildlife/archive/");
+        //name format is : 
+        //GROUSE:
+        //  /share/wildlife/archive/oil_development/2012/sharptailed_grouse/Belden/149.085_hatch/5-30-12_149085/
+        //  /share/wildlife/archive/oil_development/2013/sharptailed_grouse/Belden/149.783_N1_Hatch/149.783_7.2.13/
+        //
+        //  Directory after site is animal id
+        //
+        //PLOVER/TERN:
+        //  /share/wildlife/archive/missouri_river_project/2012/least_tern/XXXX.X/N1030/7-16-2012_N1030/
+        //  /share/wildlife/archive/missouri_river_project/2013/least_tern/1352.1/410/06252013/
+        //  /share/wildlife/archive/missouri_river_project/2012/piping_plover/XXXX.X/N1031_24LED_cam/7-23-12_N1031/
+        //  /share/wildlife/archive/missouri_river_project/2013/piping_plover/1357.0/506/05252013/
+        //
+        //  Directory after species name is river mile, directory after that is animal id
 
-        $project = parse_next_dir($filename, "/", $start);
+        $parts = split("/", $filename);
+
+        for ($i = 0; $i < count($parts); $i++) {
+            if ($parts[$i] == 'missouri_river_project' || $parts[$i] == 'oil_development' || $parts[$i] == 'lekking') break;
+        }
+
+        $project = $parts[$i];
+
         if ($project == "lekking") continue;
+//        echo "CHECKING: $filename\n";
         if (already_inserted($filename)) continue;
 
-        $directory_year = parse_next_dir($filename, "/", $start);
+        $directory_year = $parts[$i + 1];
+        $species = $parts[$i + 2];
 
-        $species = parse_next_dir($filename, "/", $start);
         if ($project == "missouri_river_project") {
             $site = "Missouri River";
+            $rivermile = $parts[$i + 3];
+            $animal_id = $parts[$i + 4];
         } else {
-            $site = parse_next_dir($filename, "/", $start);
-        }
-        $animal_id = parse_next_dir($filename, "/", $start);
-
-        //if the bird id contains an underscore then there is also a nest id
-        //if there is no specified nest id then the nest id is 1
-        $nest_id = 1;
-        if (strpos($animal_id, "_")) {
-            //the bird id will be everything before the first underscore
-            $animal_id = substr($animal_id, 0, strpos($animal_id, "_"));
-
-            //After the underscore could also be a note like 'hatch' or 
-            //'predation'
-            $test_nest_id = substr($nest_id, strpos($animal_id, "_"));
-            if (strpos($test_nest_id, "_")) {
-                $nest_id_pos = 0;
-                $test_nest_id = parse_next_dir($test_nest_id, "_", 
-                    $nest_id_pos);
-            }
-
-            if (is_numeric($test_nest_id)) {
-                $nest_id = $test_nest_id;
-            }
+            $site = $parts[$i + 3];
+            $animal_id = $parts[$i + 4];
         }
 
-        $date = parse_next_dir($filename, "/", $start);
-        $file = substr($filename, $start);
+        $date = basename($filename);
+        $file = basename($filename);
 
         $year = substr($file, 5, 4);
         $month = substr($file, 9, 2);
@@ -238,10 +166,35 @@ foreach($directory_iterator as $filename => $path_object) {
         $minute = substr($file, 16, 2);
         $second = substr($file, 18, 2);
 
-        $duration_s = get_video_duration($filename);
-        $streaming_segments = ceil($duration_s / 180);  //number of 3 minute segments to be generated
+        if ($year == '0000' || !is_numeric($year)) {
+            echo "filename is: '$filename'\n";
+            echo "year is: '$year'\n";
+            echo "improperly formatted year! file is: '$file'\n";
+            continue;
+            die("improperly formatted year! file is: '$file'\n");
+            $year = '0000';
+            $month = '00';
+            $day = '00';
+            $hour = '00';
+            $minute = '00';
+            $second = '00';
+        }
 
-        $watermarked_filename = "/video/wildlife/watermarked/" . substr($filename, strlen("/video/wildlife/archive/"));
+        try {
+            $duration_s = get_video_duration($filename);
+        } catch (Exception $e) {
+            echo "Problems parsing duration.\n";
+//            die("Problems parsing duration.\n");
+            continue;
+        }
+
+        if ($duration_s == 0) {
+            echo "Duration was 0, skipping: $filename\n";
+            continue;
+        }
+
+
+        $watermarked_filename = "/share/wildlife/watermarked/" . substr($filename, strlen("/share/wildlife/archive/"));
         $watermarked_filename = str_replace(".avi", ".mp4", $watermarked_filename);
 
         $crowd_obs_count = 0;
@@ -249,7 +202,7 @@ foreach($directory_iterator as $filename => $path_object) {
         $machine_obs_count = 0;
         $processing_status = "UNWATERMARKED";
 
-        if ($species == "sharptailed_grouse" || $species == "sharptailed_grouse_2013") {
+        if ($species == "sharptailed_grouse") {
             $species_id = 1;
         } else if ($species == "least_tern") {
             $species_id = 2;
@@ -269,32 +222,20 @@ foreach($directory_iterator as $filename => $path_object) {
             die("Unknown project encountered: '$project'");
         }
 
-        if ($directory_year == 2012) {
-            if ($site == "Belden") {
-                $site_id = 1;
-            } else if ($site == "Blaisdell") {
-                $site_id = 2;
-            } else if ($site == "Lostwood") {
-                $site_id = 3;
-            } else if ($site == "Missouri River") {
-                $site_id = 4;
-            } else {
-                echo "filename: $filename \n";
-                die("Unknown location encountered: '$site' for year '$directory_year'\n");
-            }
-        } else if ($directory_year = 2013) {
-            if ($site == "Belden") {
-                $site_id = 5;
-            } else if ($site == "Blaisdell") {
-                $site_id = 6;
-            } else {
-                echo "filename: $filename \n";
-                die("Unknown location encountered: '$site' for year '$directory_year'\n");
-            }
+        if ($site == "Belden") {
+            $location_id = 1;
+        } else if ($site == "Blaisdell") {
+            $location_id = 2;
+        } else if ($site == "Lostwood") {
+            $location_id = 3;
+        } else if ($site == "Missouri River") {
+            $location_id = 4;
         } else {
-                die("Unknown year encountered: '$directory_year'");
+            echo "filename: $filename \n";
+            die("Unknown location encountered: '$site' for year '$directory_year'\n");
         }
 
+        $archive_filename = $filename;
         echo $filename . "\n";
         echo $watermarked_filename . "\n";
         echo "\tproject: '" . $project . "'\n";
@@ -303,9 +244,9 @@ foreach($directory_iterator as $filename => $path_object) {
         echo "\tspecies: '" . $species . "'\n";
         echo "\tspecies_id: '" . $species_id . "'\n";
         echo "\tlocation: '" . $site . "'\n";
-        echo "\tlocation_id: '" . $site_id . "'\n";
+        echo "\tlocation_id: '" . $location_id . "'\n";
         echo "\tanimal_id: '" . $animal_id . "'\n";
-        echo "\tnest_id: '" . $nest_id . "'\n";
+        echo "\trivermile: '" . $rivermile. "'\n";
         echo "\tstart_time: '" . $date . "'\n";
         echo "\tfile: '" . $file . "'\n";
 
@@ -313,19 +254,46 @@ foreach($directory_iterator as $filename => $path_object) {
         echo "\tstart_time: '" . $start_time . "'\n";
 
         echo "\tduration_s: " . $duration_s . "\n";
-        echo "\tstreaming_segments: " . $streaming_segments . "\n";
         echo "\tprocessing_status: " . $processing_status . "\n";
 
-        if ($duration_s == 0) {
-            echo "Duration was 0, skipping.\n";
-            continue;
+        $query = "INSERT INTO video_2 SET " .
+            "  archive_filename = '$archive_filename'" .
+            ", watermarked_filename = '$watermarked_filename'" .
+            ", project_id = '$project_id'" .
+            ", location_id = '$location_id'" .
+            ", species_id = '$species_id'" .
+            ", animal_id = '$animal_id'";
+
+        if ($species == 2 || $species == 3) {
+            $query .= ", rivermile = '$rivermile'";
         }
 
-        insert_video($filename, $watermarked_filename, $project_id, $site_id, $species_id, $animal_id, $start_time, $crowd_obs_count, $expert_obs_count, $machine_obs_count, $streaming_segments, $processing_status, $duration_s);
+        $query .=
+            ", start_time = '$start_time'" .
+            ", crowd_obs_count = '$crowd_obs_count'" .
+            ", expert_obs_count = '$expert_obs_count'" .
+            ", machine_obs_count = '$machine_obs_count'" .
+            ", streaming_segments = -1" .  //another daemon is going to do this now
+            ", processing_status = '$processing_status'" .
+            ", duration_s = '$duration_s'" .
+            ", release_to_public = false";
+
+        echo $query . "\n";
+//        die();
+
+        $result = mysql_query($query);
+        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
         $count++;
     }
 }
 
 echo $count . " videos in '" . $dir . "'\n";
+
+echo "updating total video progress\n";
+
+$query = "UPDATE progress AS p SET total_video_s = (SELECT SUM(duration_S) FROM video_2 AS v2 WHERE v2.species_id = p.species_id AND v2.location_id = p.location_id)";
+$results = mysql_query($query);
+if (!$results) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+
 ?>

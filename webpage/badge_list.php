@@ -1,14 +1,16 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
 
-require_once('/home/tdesell/wildlife_at_home/webpage/navbar.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/footer.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/display_badges.php');
+require_once($cwd . '/navbar.php');
+require_once($cwd . '/footer.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/display_badges.php');
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
 
 echo "
 <!DOCTYPE html>

@@ -20,6 +20,8 @@ Software Requirements:
     opencv
     BOINC
 
+Note that building BOINC on OSX now requires setting CFLAGS="-mmacosx-version-min=10.8" (Something prior to 10.9) when using make.
+
 
 On Ubuntu you can get all of boost with:
     sudo apt-get install libboost-all-dev

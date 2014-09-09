@@ -1,65 +1,64 @@
 <?php
 
-require_once('/projects/wildlife/html/inc/util.inc');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/generate_count_nav.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/get_video_segment_query.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/generate_count_nav.php');
+require_once($cwd . '/get_video_filter.php');
+require_once($cwd . '/user.php');
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
+$video_filter_text = mysql_real_escape_string($_POST['video_filter_text']);
+$event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
+$showing_all_videos = mysql_real_escape_string($_POST['showing_all_videos']);
+$video_id_filter = mysql_real_escape_string($_POST['video_id_filter']);
 
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
 
-$user = get_logged_in_user();
-$user_id = $user->id;
+ini_set("mysql.connect_timeout", 300);
+ini_set("default_socket_timeout", 300);
 
-$filters = array();
-if (array_key_exists('filters', $_POST)) {
-    $filters = $_POST['filters'];
-}
+$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
+mysql_select_db("wildlife_video", $wildlife_db);
 
-create_filter($filters, $filter, $reported_filter);
+$user = get_user();
+$query = "";
 
-$display_nav_numbers = true;
-if (empty($filters)) {
-    $display_nav_numbers = false;
-    $max_items = 0;
-} else {
-    //error_log("the filter is: " . $filter);
-
-    ini_set("mysql.connect_timeout", 300);
-    ini_set("default_socket_timeout", 300);
-
-    $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-    mysql_select_db("wildlife_video", $wildlife_db);
-
-    $query = "";
-    if ($_POST['all_users'] == 'true') {
-        if (strlen($filter) > 0) {
-            $filter = substr($filter, 4);
-            $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE $filter AND observations.status = 'EXPERT' AND observations.video_segment_id = vs2.id)";
-        } else {
-            $reported_filter = substr($reported_filter, 0, -4);
-            $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter";
-        }
+if ($video_filter_text == '' && $event_filter_text == '' && !is_numeric($video_id_filter)) {
+    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
+        $query = "SELECT count(v2.id) FROM video_2 AS v2";
     } else {
-        $query = "SELECT count(id) FROM video_segment_2 vs2 WHERE vs2.crowd_obs_count > 0 AND $reported_filter EXISTS (SELECT id FROM observations WHERE user_id = $user_id $filter AND observations.video_segment_id = vs2.id)";
+        $query = "SELECT count(v2.id) FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE v2.timed_obs_count > 0";
     }
 
-    //echo "<!-- $query -->\n";
+//    error_log("COUNT NAV QUERY: $query");
+} else {
+    create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query, $video_id_filter);
 
+    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
+        $query = "SELECT count(v2.id) FROM video_2 AS v2 WHERE " . $filter_query;
+    } else {
+        $query = "SELECT count(v2.id) FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE " . $filter_query;
+    }
 
-    $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-
-    $row = mysql_fetch_assoc($result);
-
-    $max_items = $row['count(id)'];
+//    error_log("COUNT NAV QUERY: $query");
 }
 
-generate_count_nav($max_items, $video_min, $video_count, $display_nav_numbers);
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+}
+
+$row = mysql_fetch_assoc($result);
+
+$max_items = $row['count(v2.id)'];
+
+generate_count_nav($max_items, $video_min, $video_count, true);
 
 ?>
