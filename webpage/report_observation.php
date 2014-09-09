@@ -1,12 +1,23 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/award_credit.inc');
-require_once('/home/tdesell/wildlife_at_home/webpage/boinc_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/projects/wildlife/html/inc/util.inc');
-require_once('/projects/wildlife/html/inc/bossa_impl.inc');
+/**
+ *  get the current working directory to include the
+ *  correct php files.
+ */
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
 
+require_once($cwd . '/boinc_db.php');
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/user.php');
+
+
+/**
+ * This takes an array of data (either JSON or from MYSQL) and
+ * converts it into an object.
+ */
 function get_observation_data($data, $from_db = false) {
 
     $res->comments = mysql_real_escape_string($data['comments']);
@@ -34,6 +45,10 @@ function get_observation_data($data, $from_db = false) {
     return $res;
 }
 
+/**
+ *  Get the posted data and convert it into an object so
+ *  we can use it easier
+ */
 $post_observation = get_observation_data($_POST);
 
 $start_time = mysql_real_escape_string($_POST['start_time']);
@@ -44,6 +59,7 @@ $duration_s = mysql_real_escape_string($_POST['duration_s']);
  * Grab the other observations from the database.
  */
 
+//connect to the database.  TODO: have a file for this.
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
 
@@ -69,8 +85,8 @@ while ($row = mysql_fetch_assoc($result)) {
     $observation = get_observation_data($row, true);
     if ($observation->status == 'CANONICAL') $canonical_observation = $observation;
 
-    $user = get_user_from_id($observation->user_id);
-    $observation->user_name = $user->name;
+    $user = get_user_from_id__fixme($observation->user_id);
+    $observation->user_name = $user['name'];
 
     $db_observations[] = $observation;
 }
@@ -126,16 +142,33 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 }
 
-$query = "UPDATE video_segment_2 SET crowd_obs_count = crowd_obs_count + 1, crowd_status = IF(crowd_status = 'UNWATCHED', 'WATCHED', crowd_status) WHERE id = " . $post_observation->video_segment_id;
+/**
+ * update the tables related to the video.
+ */
+$query = "UPDATE video_segment_2 SET crowd_obs_count = crowd_obs_count + 1, crowd_status = 'WATCHED' WHERE id = " . $post_observation->video_segment_id;
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 
-error_log("_POST[reviewing_reported] = " . $_POST['reviewing_reported'] . ", user_id: " . $post_observation->user_id);
+//error_log("_POST[reviewing_reported] = " . $_POST['reviewing_reported'] . ", user_id: " . $post_observation->user_id);
+
+$boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
+mysql_select_db("wildlife", $boinc_db);
+
+$query = "UPDATE user SET total_observations = total_observations + 1 WHERE id = " . $post_observation->user_id;
+$result = attempt_query_with_ping($query, $boinc_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
+
+$query = "UPDATE team SET total_observations = total_observations + 1 WHERE id = (SELECT teamid FROM user WHERE user.id = " . $post_observation->user_id .")";
+$result = attempt_query_with_ping($query, $boinc_db);
+if (!$result) die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $query\n");
+
+
+/**
+ * This is for a different interface, which allows project scientists
+ * to review volunteered observations.
+ */
 
 if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported'] == 'true') {
-    $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
-    mysql_select_db("wildlife", $boinc_db);
-
     $user_id = $post_observation->user_id;
     $query = "SELECT name FROM user WHERE id = $user_id";
     $result = attempt_query_with_ping($query, $boinc_db);
@@ -158,6 +191,10 @@ if (array_key_exists('reviewing_reported', $_POST) && $_POST['reviewing_reported
     error_log(" dying? ");
     if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
     error_log(" UPDATED VIDEO SEGMENT 2 WITH: $query");
+
+    $query = "UPDATE species SET waiting_review = waiting_review - 1 WHERE id = $species_id";
+    $result = attempt_query_with_ping($query, $wildlife_db);
+    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
 }
 
 $result = array( 'post_observation' => $post_observation, 'db_observations' => $db_observations );

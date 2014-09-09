@@ -1,14 +1,16 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/award_credit.inc');
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/projects/wildlife/html/inc/util.inc');
-require_once('/projects/wildlife/html/inc/bossa_impl.inc');
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
 
-$user = get_logged_in_user();
-$reporter_id = $user->id;
-$reporter_name = mysql_real_escape_string($user->name);
+require_once($cwd . '/wildlife_db.php');
+require_once($cwd . '/my_query.php');
+require_once($cwd . '/user.php');
+
+$user = get_user();
+$reporter_id = $user['id'];
+$reporter_name = mysql_real_escape_string($user['name']);
 
 $report_comments = mysql_real_escape_string($_POST['report_comments']);
 $video_segment_id = mysql_real_escape_string($_POST['video_segment_id']);
@@ -33,6 +35,25 @@ if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_e
 $query = "UPDATE video_segment_2 SET report_status = IF(report_status = 'UNREPORTED', 'REPORTED', report_status) WHERE id = $video_segment_id";
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-error_log("query: $query");
+
+
+$query = "SELECT species_id FROM video_segment_2 WHERE id = $video_segment_id";
+error_log($query);
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die();
+}
+$row = mysql_fetch_assoc($result);
+$species_id = $row['species_id'];
+
+
+$query = "UPDATE species SET waiting_review = waiting_review + 1 WHERE id = $species_id";
+error_log($query);
+$result = attempt_query_with_ping($query, $wildlife_db);
+if (!$result) {
+    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    die();
+}
 
 ?>

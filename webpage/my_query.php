@@ -1,5 +1,10 @@
 <?php
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
+
+$cwd = __FILE__;
+if (is_link($cwd)) $cwd = readlink($cwd);
+$cwd = dirname($cwd);
+
+require_once($cwd . '/wildlife_db.php');
 
 function attempt_query_with_ping($sql, &$db) {
     if (!mysql_ping($db)) {
@@ -9,6 +14,7 @@ function attempt_query_with_ping($sql, &$db) {
         }
     }
 
-    return mysql_query($sql, $db);
+    $result = mysql_query($sql, $db);
+    return $result;
 }
 ?>

@@ -1,0 +1,70 @@
+<div class='container'>
+    <div class='row'>
+        <div class='col-sm-12'>
+            {{#thumbnail_list}}
+            <div class='well'>
+                <div class='row'>
+                    <div class='col-sm-4'>
+                        <img class='img-responsive' src='{{thumbnail_image}}' alt=''></img>
+
+                        <div class='btn-group btn-group-justified' style='margin-top:20px;'>
+                            {{#training_webpage}}
+                            <a class='btn btn-sm btn-primary col-sm-6' role='button' style='line-height:30px; margin-bottom:10px;' href='{{training_webpage}}'>Training Videos</a>
+                            {{/training_webpage}}
+                            {{^training_webpage}}
+                            <a class='btn btn-xs btn-primary col-sm-6 disabled' role='button' style='line-height:30px; margin-bottom:10px;'>Training Videos</a>
+                            {{/training_webpage}}
+
+                            {{#info_webpage}}
+                            <a class='btn btn-sm btn-primary col-sm-6' role='button' style='line-height:30px; margin-bottom:10px;' href='{{info_webpage}}'>Species Information</a>
+                            {{/info_webpage}}
+                            {{^info_webpage}}
+                            <a class='btn btn-xs btn-primary col-sm-6 disabled' role='button' style='line-height:30px; margin-bottom:10px;'>Species Information</a>
+                            {{/info_webpage}}
+                        </div>
+                    </div>
+
+                    <div class='col-sm-4'>
+                            <h4 style='margin-top:0px;'>{{species_name}} <small>{{species_latin_name}}</small></h4>
+                            <p>{{{project_description}}}</p>
+                    </div>
+
+                    <div class='col-sm-4'>
+                        {{#site}}
+                        <div class='row'>
+                            <div class='col-sm-8' style='text-align:left;'>
+                                <b>{{site_name}}</b>
+                            </div>
+                            <div class='col-sm-4' style='text-align:right;'>
+                                <b>{{year}}</b>
+                            </div>
+                        </div>
+
+                        <p>{{site_description}}</p>
+
+                        <div class='row'>
+                            <div class='col-sm-9'>
+                                <div class='progress' id='{{progress_id}}'>
+                                    <div class='progress-bar progress-bar-success' style="width: {{validated_percentage}}%;"></div>
+                                    <div class='progress-bar' style="width: {{available_percentage}}%;"></div>
+                                </div>
+                            </div>
+
+                            <div class='col-sm-3'>
+                                {{#enabled}}
+                                <a class='btn btn-xs btn-primary pull-right' style='margin-top:0px;' href='watch.php?location={{site_id}}&species={{species_id}}'>Watch Video</a>
+                                {{/enabled}}
+                                {{^enabled}}
+                                <a class='btn btn-xs btn-primary pull-right disabled' style='margin-top:0px;'>Watch Video</a>
+                                {{/enabled}}
+                            </div>
+                        </div>
+                        {{/site}}
+
+                    </div>
+                </div>
+            </div>
+            {{/thumbnail_list}}
+        </div>
+    </div>
+</div>

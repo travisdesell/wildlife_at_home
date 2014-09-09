@@ -1,0 +1,37 @@
+<div class='modal-header'>
+    <h4>Your observations are queued for validation!</h4>
+</div>
+
+<div class='modal-body' id='finished-modal-body'>
+
+
+    <p>Here is how your observations compare to the other users.</p>
+
+    <table class='table table-bordered table-striped'>
+        <thead>
+            <td>User</td><td>Event</td><td style='width:65px;'>Start Time</td><td style='width:60px;'>End Time</td>
+        </thead>
+        <tbody>
+        {{#observations}}
+            <tr>
+                {{#new_user}}
+                    <td rowspan={{user_event_count}} style='vertical-align:middle;'>{{user_name}}</td>
+                {{/new_user}}
+                <td>{{event_name}}</td> <td>{{start_time}}</td> <td>{{end_time}}</td>
+            </tr>
+            <tr>
+                <td colspan=1>{{comments}}</td> <td colspan=2>{{tags}}</td>
+            </tr>
+        {{/observations}}
+        </tbody>
+    </table>
+</div>
+
+<div class='modal-footer'>
+    <form id='discuss-video-form' action='forum_post.php?id=8' method='post'>
+        <input type='hidden' name='content' value=\"$discuss_video_content\">
+    </form>
+
+    <button class ='btn btn-primary pull-right' data-dismiss='modal' aria-hidden='true' video_id={{video_id}} id='random-video-button'>Random</button>
+    <button class ='btn btn-primary pull-right' data-dismiss='modal' aria-hidden='true' video_id={{video_id}} id='next-video-button' style='margin-right:10px;'>Next</button>
+</div>
