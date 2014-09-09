@@ -1,5 +1,5 @@
-#/opt/local/bin/g++-mp-4.7 \
-g++ \
+#/opt/local/bin/g++-mp-4.7 -std=c++11 \
+/usr/bin/llvm-g++ \
     -D_BOINC_APP_ \
 	-I../../ffmpeg \
     -I../../boinc \
@@ -45,8 +45,9 @@ g++ \
     ../../opencv/install/lib/libopencv_imgproc.a \
     ../../opencv/install/lib/libopencv_nonfree.a \
     ../../opencv/install/lib/libopencv_core.a \
-    -L/Users/deselt/Documents/Dropbox/software/boinc/mac_build/build/Deployment \
+    -L/Users/kgoehner/repos/boinc/mac_build/build/Development \
     -lboinc_api \
     -lboinc \
+    -liconv \
     -lbz2 \
     -framework Cocoa -framework VideoDecodeAcceleration -framework QTKit -framework QuartzCore -framework AppKit -lstdc++

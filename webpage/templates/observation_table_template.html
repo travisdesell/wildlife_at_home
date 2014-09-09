@@ -1,0 +1,80 @@
+{{#observations}}
+<table class='table table-bordered table-condensed observations-table' video_id='{{video_id}}' id='observations-table-div-{{id}}' style='margin:0px 0px 5px 0px;'>
+    <tbody>
+        <tr observation_id='{{id}}"' id='observation-row-{{id}}'>
+            <td style='padding:0px;'>
+
+                <div class='btn-group' id='event-dropdown-group-{{id}}'>
+                    <button type='button' class='btn btn-small btn-default dropdown-toggle dropdown-dropup' data-toggle='dropdown' event_id='{{event_id}}' id_num={{id}} id='event-button-{{id}}' style='margin:0px; padding:2px 4px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{{dropdown_text}}}</button>
+
+                    <ul class='dropdown-menu' id='event-dropdown-{{id}}' style='width:525px;'>
+                        <li class='column-menu span4 firstcolumn'>
+                        <ul style='list-style-type: none; margin-left:5px; margin-right:5px;'>
+                            {{#event_list}}
+
+                            {{#new_column}}
+                        </ul>   
+                        </li>
+
+                        <li class='column-menu span4'>
+                        <ul style='list-style-type: none; margin-right:5px; margin-left:5px;'>
+                            {{/new_column}}
+
+                            {{#new_category}}
+                            <li class='nav-header'>{{category}}</li>
+                            {{/new_category}}
+
+                            <li><a href='javascript:;' class='event-dropdown' event_id='{{event_id}}' event_text='{{category}} - {{name}}' observation_id='{{id}}' video_id='{{video_id}}' id='event-{{event_id}}-dropdown-{{id}}'>{{name}}</a></li>
+
+                            {{/event_list}}
+                        </ul>   
+                        </li>
+
+                    </ul>
+                </div>  <!-- button group -->
+            </td>
+
+            <td style='padding:0px; max-width:100px;'>
+                <input type='text' placeholder='Click for start time.' class='time-textarea start-time-textarea' id='start-time-textarea-{{id}}' time_s={{start_time_s}} time_date='{{start_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{start_time_text}}'>
+            </td>
+            <td style='padding:0px; max-width:100px;'>
+                <input type='text' placeholder='Click for end time.' class='time-textarea end-time-textarea' id='end-time-textarea-{{id}}' time_s={{end_time_s}} time_date='{{end_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{end_time_text}}'>
+            </td>
+
+            <td style='padding-top:0px; padding-bottom:0px; width:25px;' rowspan=3>
+                <form id="discuss-video-form-{{id}}" class='hidden' action="forum_post.php?id=8" method="post" target="_blank">
+                    <input type='hidden' id='discuss-video-content-{{id}}' name='content' value="">
+                </form>
+
+                <button class='btn btn-small btn-danger remove-observation-button' id='remove-observation-button-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;'> <i class='icon-remove icon-white'></i> </button>
+                <button class='btn btn-small btn-primary discuss-observation-button' id='discuss-observation-button-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;'> <i class='icon-comment icon-white'></i> </button>
+            </td>
+        </tr> <!-- observation-row-{{id}} -->
+
+        <tr id='observation-comments-row-{{id}}'>
+            <td colspan=3 style='vertical-align:middle; padding:0px;'><input type='text' placeholder='Insert comments and hashtags here.' class='comments-textarea' id='comments-textarea-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{comments}}'></td>
+        </tr> <!-- observation-comments-row-{{id}} -->
+
+        <tr id='observation-tags-row-{{id}}' observation_id='{{id}}'>
+            <td id='tag-div-{{id}}' colspan=3 style='vertical-align:middle; padding:0px;'>
+                {{#has_tags}}
+                <div class='btn-group pull-left'>
+                    <button type='button' class='btn btn-small btn-info dropdown-toggle' data-toggle='dropdown' tag_id='{{event_id}}' id='tag-button-{{id}}' style='margin:0px 4px 0px 0px; padding:2px 4px; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>tag</button>
+
+                    <ul class='dropdown-menu' id='tag-dropdown-{{id}}'>
+                        {{#possible_tags}}
+                        <li><a href='javascript:;' class='tag-dropdown' observation_id='{{id}}' tag_id='{{tag_id}}' tag_text='{{tag_name}}' video_id='{{video_id}}' id='tag-{{tag_id}}-dropdown-{{id}}'>{{tag_name}}</a></li>
+                        {{/possible_tags}}
+
+                    </ul>
+                </div>  <!-- button group -->
+
+                {{#tags}}
+                <span style='margin:3px; height:16px;' class='badge tag-element' tag_text='{{tag_text}}' video_id={{video_id}} observation_id={{id}}>{{tag_text}}</span>
+                {{/tags}}
+                {{/has_tags}}
+            </td>
+        </tr>
+    </tbody>
+</table>
+{{/observations}}
