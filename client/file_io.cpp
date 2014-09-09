@@ -25,8 +25,8 @@ void read_descriptors_and_keypoints(string filename, Mat &descriptors, vector<Ke
     FileStorage infile(filename, FileStorage::READ);
 
     if (infile.isOpened()) {
-        read(infile["unmatched_descriptors"], descriptors);
-        read(infile["unmatched_keypoints"], keypoints);
+        read(infile["descriptors"], descriptors);
+        read(infile["keypoints"], keypoints);
         infile.release();
     } else {
         cout << "Could not open '" << filename << "' for reading." << endl;
