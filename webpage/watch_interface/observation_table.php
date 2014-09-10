@@ -215,7 +215,7 @@ function get_watch_video_interface($species_id, $video_id, $video_file, $animal_
     if($rows == 0) {
         $watch_info['new_user_survey'] = 1;
     } else {
-        if (($user['bossa_total_credit'] + $user['bossa_credit_v2']) >= 86400) {
+        if ($user['bossa_total_credit'] >= 86400) {
             $query = "SELECT u_id FROM goldbadge WHERE u_id=" . $user['id'];
             $result = mysql_query($query, $wildlife_db);
 
