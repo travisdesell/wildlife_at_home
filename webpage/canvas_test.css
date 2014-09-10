@@ -1,9 +1,0 @@
-#canvas {
-    border: 10px solid transparent;
-    background: #FFFFFF;
-}
-
-.rectangle {
-    border: 1px solid #FF0000;
-    position: absolute;
-}

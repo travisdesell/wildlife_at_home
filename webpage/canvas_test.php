@@ -4,12 +4,13 @@ $cwd[__FILE__] = __FILE__;
 if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
 $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd[__FILE__] . "/header.php");
-require_once($cwd[__FILE__] . "/navbar2.php");
-require_once($cwd[__FILE__] . "/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 
-print_header("Travis Desell: Home",  "<link href='./canvas_test.css' rel='stylesheet'> <script type='text/javascript' src='./canvas_test.js'></script>");
-print_navbar("Travis Desell");
+
+print_header("Wildlife@Home: Image Viewer",  "<link href='./css/canvas_test.css' rel='stylesheet'> <script type='text/javascript' src='./js/canvas_test.js'></script>", "wildlife");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
 
 function container_start() {
     echo "
