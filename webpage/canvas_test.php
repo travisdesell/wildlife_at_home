@@ -29,7 +29,7 @@ function container_end() {
     </div> <!-- /container -->";
 }
 
-
+/*
 container_start();
 
 echo "
@@ -49,6 +49,23 @@ echo "
 </div>";
 
 container_end();
+*/
+
+echo "
+<div class='row'>
+    <div class='col-sm-4'>
+        <div id='selection-information'>
+        </div>
+        <button class='btn btn-primary' id='submit-selections-button'>Submit</button>
+    </div>
+
+    <div class='col-sm-8'>
+        <div id='canvas'>
+            <img class='img-responsive' src='./images/nd_pred_coyote.jpg'></img>
+        </div>
+    </div>
+</div>
+";
 
 
 print_footer();
