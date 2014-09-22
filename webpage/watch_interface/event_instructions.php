@@ -1,11 +1,10 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd . '/wildlife_db.php');
-require_once($cwd . '/my_query.php');
+require_once($cwd[__FILE__] . "/../../../citizen_science_grid/my_query.php");
 
 //require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
 //Mustache_Autoloader::register();
@@ -14,19 +13,11 @@ require_once($cwd . '/my_query.php');
 //$expert_only = mysql_real_escape_string($_POST['expert_only']);
 
 function get_event_instructions_html($species_id, $expert_only, $modal = 1) {
-    global $wildlife_user, $wildlife_passwd, $wildlife_db, $cwd;
+    global $cwd;
 
     if ($species_id > 3)  {
         echo "<p>Species unknown for video. No instructions available.</p>";
         die();
-    }
-
-    if ($wildlife_db == null) {
-        ini_set("mysql.connect_timeout", 300);
-        ini_set("default_socket_timeout", 300);
-
-        $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-        mysql_select_db("wildlife_video", $wildlife_db);
     }
 
     $query ="";
@@ -46,12 +37,11 @@ function get_event_instructions_html($species_id, $expert_only, $modal = 1) {
         $query .= " ORDER BY category, id";
     }
 
-    $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+    $result = query_wildlife_video_db($query);
 
     $event_list['event_list'] = array();
     $prev_category = '';
-    while ($row = mysql_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         if ($row['category'] != $prev_category) $row['new_category'] = true;
 
         $event_list['event_list'][] = $row;
@@ -87,7 +77,7 @@ function get_event_instructions_html($species_id, $expert_only, $modal = 1) {
 
     $event_list['modal'] = $modal;
 
-    $instructions_template = file_get_contents($cwd . "/templates/event_instructions_template.html");
+    $instructions_template = file_get_contents($cwd[__FILE__] . "/../templates/event_instructions_template.html");
     $mustache_engine = new Mustache_Engine;
     return $mustache_engine->render($instructions_template, $event_list);
 }
