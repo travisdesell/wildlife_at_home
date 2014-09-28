@@ -24,14 +24,14 @@ $cwd = dirname($cwd);
  * THIS IS REALLY BAD!
  * But the BOINC include suck and use relative paths
  */
-chdir("/projects/wildlife/html/user"); 
+//chdir("/projects/wildlife/html/user"); 
 
-require_once("/projects/wildlife/html/inc/cache.inc");
-require_once("/projects/wildlife/html/inc/util.inc");
-require_once("/projects/wildlife/html/inc/user.inc");
-require_once("/projects/wildlife/html/inc/boinc_db.inc");
+require_once("../inc/cache.inc");
+require_once("../inc/util.inc");
+require_once("../inc/user.inc");
+require_once("../inc/boinc_db.inc");
 
-require_once($cwd . "/display_badges.php");
+require_once("/live_webpage/wildlife_at_home/webpage/display_badges.php");
 
 check_get_args(array("sort_by", "offset"));
 
