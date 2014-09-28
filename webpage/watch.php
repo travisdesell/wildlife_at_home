@@ -6,10 +6,8 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
 require_once($cwd[__FILE__] . "/watch_interface/event_instructions.php");
 require_once($cwd[__FILE__] . "/watch_interface/observation_table.php");
@@ -216,7 +214,7 @@ $extra_javascript = "<script type='text/javascript'>
     var allow_add_removal = 1;
 </script>";
 
-print_header("Wildlife@Home", $extra_stuff . "\n" . $extra_javascript, "wildlife");
+print_header("Wildlife@Home: Watch Wildlife Video", $extra_stuff . "\n" . $extra_javascript, "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
 
 
@@ -349,7 +347,7 @@ if ($user_id == NULL) {
 }
 
 //print the footer of the webpage.
-print_footer();
+print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 echo "
 </body>
