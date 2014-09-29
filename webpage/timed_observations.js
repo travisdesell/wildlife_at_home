@@ -222,7 +222,7 @@ function enable_observation_table() {
             var observation_id = $(this).attr("observation_id");
 
             var video_id = $(this).closest('table').attr("video_id");
-            var badge_html = "<span style='margin:3px; height:16px;' class='badge tag-element' tag_text='" + tag_text + "' video_id=" + video_id + " observation_id=" + observation_id + ">" + tag_text + "</span>";
+            var badge_html = "<span style='margin:3px; height:20px;' class='badge tag-element' tag_text='" + tag_text + "' video_id=" + video_id + " observation_id=" + observation_id + ">" + tag_text + "</span>";
 
             console.log("appending badge html: " + badge_html);
 
@@ -245,7 +245,8 @@ function enable_observation_table() {
 //                console.log("mouse is over: '" + tag_text + "'");
             if ( !$(this).hasClass("has-remove-icon") ) {
                 $(this).addClass("has-remove-icon");
-                $(this).append(" <i class='icon-white icon-remove-sign'></i>");
+                $(this).append(" <span class='glyphicon glyphicon-remove'></span>");
+//                $(this).append(" <i class='icon-white icon-remove-sign'></i>");
             }
         });
 
@@ -658,7 +659,7 @@ function enable_observation_table() {
 
 
     $('#help-button').click(function() {
-        $('#instructions-modal').modal( {keyboard: true} );
+        $('#instructions-modal').modal( {keyboard: true, show: true} );
     });
 
 
@@ -780,7 +781,7 @@ $(document).ready(function () {
                 $('#finished-modal').html( response['html'] );
                 enable_next_video_buttons();
 
-                $('#finished-modal').modal( {keyboard: false} )
+                $('#finished-modal').modal( {keyboard: false, show: true} )
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
