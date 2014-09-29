@@ -9,7 +9,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 
 print_header("Wildlife@Home", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home");

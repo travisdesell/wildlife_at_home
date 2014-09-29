@@ -4,9 +4,6 @@ $cwd[__FILE__] = __FILE__;
 if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
 $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-echo "CWD: " . $cwd[__FILE__] . "<br>";
-
-error_log("calling observation_table.php, cwd: " . $cwd[__FILE__]);
 require_once($cwd[__FILE__] . "/../../../citizen_science_grid/my_query.php");
 
 //require_once($cwd[__FILE__] . '/../../mustache.php/src/Mustache/Autoloader.php');
@@ -26,7 +23,7 @@ function get_observations($row_only, $video_id, $user_id, $observation_id, $spec
     $result = null;
     if ($row_only) {
         $query = "SELECT * FROM timed_observations WHERE id = $observation_id";
-        $result = query_wildlide_video_db($query);
+        $result = query_wildlife_video_db($query);
     } else {
         $query = "SELECT * FROM timed_observations WHERE video_id = $video_id AND user_id = $user_id ORDER BY start_time, end_time";
         $result = query_wildlife_video_db($query);
@@ -226,7 +223,7 @@ function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $
     $watch_info['start_time'] = $start_time;
     $watch_info['needs_revalidation'] = $needs_revalidation;
 
-    if (is_special_user__fixme($user, false)) {
+    if (csg_is_special_user($user, false)) {
         $query = "SELECT * FROM expert_observations WHERE video_id = $video_id";
         $result = query_wildlife_video_db($query);
 
@@ -250,7 +247,7 @@ function get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $
     }
 
     $query = "";
-    if (is_special_user__fixme($user, false)) {
+    if (csg_is_special_user($user, false)) {
         $query = "SELECT timed_observations.*, observation_types.name, observation_types.category FROM timed_observations LEFT JOIN observation_types ON (timed_observations.event_id = observation_types.id) WHERE video_id = $video_id AND user_id != " . $user['id'] . " ORDER BY user_id, start_time";
     } else {
         $query = "SELECT timed_observations.*, observation_types.name, observation_types.category FROM timed_observations LEFT JOIN observation_types ON (timed_observations.event_id = observation_types.id) WHERE video_id = $video_id ORDER BY user_id, start_time";
