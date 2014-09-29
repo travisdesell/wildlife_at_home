@@ -328,7 +328,7 @@ if ($user_id == NULL) {
     echo get_event_instructions_html($species_id, 0);
 
     echo "
-        <div id = 'finished-modal' class='modal hide fade' tabindex='-1' role='dialog' aria-labelledby='finished-modal-label'></div>
+        <div id = 'finished-modal' class='modal fade bs-example-modal-lg' tabindex='-1' role='dialog' aria-labelledby='finished-modal-label'></div>
 
         <div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:40px; padding-bottom:40px;'>
         <div class='container'>
@@ -343,7 +343,8 @@ if ($user_id == NULL) {
     echo "
         </div> <!--row-->
         </div> <!--container-->
-        </div> <!--well-->";
+        </div> <!--well-->
+        ";
 }
 
 //print the footer of the webpage.
