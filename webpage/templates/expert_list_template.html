@@ -1,42 +1,41 @@
-<div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:15px; padding-bottom:15px;'>
-<div class='row-fluid'>
-<div class='span12'>
-<div class='accordion' id='video-accordion'>
+<div class='panel-group'>
 {{#video_list}}
-    <div class='accordion-group'>
-        <div class='accordion-heading'>
+    <div class='panel panel-default' id='video-panel'>
+        <div class='panel-heading' style="padding:2px; height:34px;">
             {{#special_user}}
-            <button class='btn btn-small {{check_button_type}} pull-right tag-video-button' id='tag-video-button-{{id}}' video_id='{{id}}' style='margin-top:5px; margin-right:5px;'>&#x2713;</button>
+            <button class='btn btn-sm {{check_button_type}} pull-right tag-video-button' id='tag-video-button-{{id}}' video_id='{{id}}' style='margin-right:5px;'>&#x2713;</button>
 
             {{#private}}
-            <button class='btn btn-small btn-warning pull-right private-video-button' id='private-video-button-{{id}}' video_id='{{id}}' private='true' style='margin-top:5px; margin-right:5px;'>private</button>
+            <button class='btn btn-sm btn-warning pull-right private-video-button' id='private-video-button-{{id}}' video_id='{{id}}' private='true' style='margin-right:5px;'>private</button>
             {{/private}}
             {{^private}}
-            <button class='btn btn-small btn-success pull-right private-video-button' id='private-video-button-{{id}}' video_id='{{id}}' private='false' style='margin-top:5px; margin-right:5px;'>public</button>
+            <button class='btn btn-sm btn-success pull-right private-video-button' id='private-video-button-{{id}}' video_id='{{id}}' private='false' style='margin-right:5px;'>public</button>
             {{/private}}
             {{/special_user}}
 
             {{#not_ready}}
-            <button class='btn btn-small btn-danger disabled pull-right' style='margin-top:5px; margin-right:5px;'>conversion pending</button>
+            <button class='btn btn-sm btn-danger disabled pull-right' style='margin-right:5px;'>conversion pending</button>
             {{/not_ready}}
-            <button class='btn btn-small disabled pull-right' id ='recorded-event-button-{{id}}' style='margin-top:5px; margin-right:5px;'>{{{timed_obs_count}}}</button>
+            <button class='btn btn-sm disabled pull-right' id ='recorded-event-button-{{id}}' style='margin-right:5px;'>{{{timed_obs_count}}}</button>
 
-            <button class='btn btn-small btn-info disabled pull-left' style='margin-top:5px; margin-left:5px; margin-right:5px; width:105px;'>video: #{{id}}</button>
-            <button class='btn btn-small btn-danger disabled pull-left' style='margin-top:5px; margin-right:5px;'>start_time: {{start_time}}</button>
+            <button class='btn btn-sm btn-info disabled pull-left' style='margin-left:5px; margin-right:5px; width:105px;'>video: #{{id}}</button>
+            <button class='btn btn-sm btn-danger disabled pull-left' style='margin-right:5px;'>start_time: {{start_time}}</button>
             {{#special_user}}
-            <button class='btn btn-small btn-success disabled pull-left' style='margin-top:5px; margin-right:5px; width:130px;'>animal id: {{animal_id}}</button>
+            <button class='btn btn-sm btn-success disabled pull-left' style='margin-right:5px; width:130px;'>animal id: {{animal_id}}</button>
             {{#rivermile}}
-                <button class='btn btn-small btn-default disabled pull-left' style='margin-top:5px; margin-right:5px;'>rivermile: {{rivermile}}</button>
+            <button class='btn btn-sm btn-default disabled pull-left' style='margin-right:5px;'>rivermile: {{rivermile}}</button>
             {{/rivermile}}
             {{/special_user}}
 
-            <a class='accordion-toggle' data-parent='#video-accordion' href='#collapse_{{id}}' style='text-align:center;'>
-            {{cleaned_filename}}
+            <div style='height:30px; padding-top:6px;'>
+            <a class='panel-toggle' data-parent='#video-panel' href='#collapse_{{id}}' style='text-align:center;'>
+                {{cleaned_filename}}
             </a>
+            </div>
         </div>
 
-        <div id ='collapse_{{id}}' video_converted='{{#not_ready}}false{{/not_ready}}{{^not_ready}}true{{/not_ready}}' video_id='{{id}}' video_file='{{watermarked_filename}}' start_time='{{start_time}}' class='accordion-body collapse'>
-            <div class='accordion-inner' id='collapse_{{id}}_inner'>
+        <div id ='collapse_{{id}}' video_converted='{{#not_ready}}false{{/not_ready}}{{^not_ready}}true{{/not_ready}}' video_id='{{id}}' video_file='{{watermarked_filename}}' start_time='{{start_time}}' class='panel-body collapse'>
+            <div class='panel-body' id='collapse_{{id}}_inner'>
                 uninitialized
             </div>
         </div>
@@ -44,6 +43,4 @@
     </div>
 {{/video_list}}
 </div>
-</div>
-</div>
-</div>
+

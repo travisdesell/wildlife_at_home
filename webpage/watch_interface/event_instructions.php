@@ -6,7 +6,7 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 require_once($cwd[__FILE__] . "/../../../citizen_science_grid/my_query.php");
 
-//require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
+//require $cwd[__FILE__] . '/../mustache.php/src/Mustache/Autoloader.php';
 //Mustache_Autoloader::register();
 
 //$species_id = mysql_real_escape_string($_POST['species_id']);
