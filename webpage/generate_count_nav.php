@@ -4,9 +4,9 @@ function generate_count_nav($max_items, $video_min, $video_count, $display_nav_n
     global $user_id;
 
     echo "
-        <div class='well well-large' style='padding-top: 10px; padding-bottom: 5px; margin-top: 3px; margin-bottom: 15px'> 
-            <div class='row-fluid'>
-                    <div class='span12'>";
+        <div class='well' style='padding-top: 10px; padding-bottom: 5px; margin-top: 3px; margin-bottom: 15px'> 
+            <div class='row'>
+                    <div class='col-sm-12'>";
 
 
     if ($display_nav_numbers) {

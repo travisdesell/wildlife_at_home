@@ -5,32 +5,31 @@
             <td style='padding:0px;'>
 
                 <div class='btn-group' id='event-dropdown-group-{{id}}' style='border:-1px;'>
-                    <button type='button' class='btn btn-sm btn-default dropdown-toggle dropdown-dropup' data-toggle='dropdown' event_id='{{event_id}}' id_num={{id}} id='event-button-{{id}}' style='height:27px; margin:0px; padding:0px 4px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{{dropdown_text}}}</button>
+                    <button type='button' class='btn btn-sm btn-default dropdown-toggle dropdown-dropup' data-toggle='dropdown' event_id='{{event_id}}' id_num={{id}} id='event-button-{{id}}' style='height:27px;'>{{{dropdown_text}}}</button>
 
-                    <ul class='dropdown-menu' role='menu' id='event-dropdown-{{id}}' style='width:525px;'>
-                        <li class='column-menu col-sm-4 firstcolumn'>
-                        <ul style='list-style-type: none; margin-left:5px; margin-right:5px;'>
+                    <ul class='dropdown-menu' role='menu' id='event-dropdown-{{id}}'>
+                        <div class='row' style='width:525px;'>
+                            <div class='col-md-4'>
+                                <ul class='list-unstyled'>
                             {{#event_list}}
 
                             {{#new_column}}
-                        </ul>   
-                        </li>
+                                </ul>   
+                            </div> 
 
-                        <li class='column-menu col-sm-4'>
-                        <ul style='list-style-type: none; margin-right:5px; margin-left:5px;'>
+                            <div class='col-md-4'>
+                                <ul class='list-unstyled'>
+                        
                             {{/new_column}}
 
                             {{#new_category}}
-                            <li class='divider'></li>
                             <li class='dropdown-header'>{{category}}</li>
                             {{/new_category}}
 
                             <li><a href='javascript:;' class='event-dropdown' event_id='{{event_id}}' event_text='{{category}} - {{name}}' observation_id='{{id}}' video_id='{{video_id}}' id='event-{{event_id}}-dropdown-{{id}}'>{{name}}</a></li>
 
                             {{/event_list}}
-                        </ul>   
-                        </li>
-
+                        </div>
                     </ul>
                 </div>  <!-- button group -->
             </td>
