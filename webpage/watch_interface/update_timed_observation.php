@@ -8,7 +8,7 @@ require_once($cwd[__FILE__] . '/../../../citizen_science_grid/my_query.php');
 require_once($cwd[__FILE__] . '/../../../citizen_science_grid/user.php');
 require_once($cwd[__FILE__] . '/../watch_interface/observation_table.php');
 
-require $cwd . '/../../../mustache.php/src/Mustache/Autoloader.php';
+require $cwd[__FILE__] . '/../../../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
 $user = csg_get_user();

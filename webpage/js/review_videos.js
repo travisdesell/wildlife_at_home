@@ -36,7 +36,7 @@ $(document).ready(function () {
             success : function(response) {
 //                console.log("the response was:\n" + response);
                 $("#video-list-placeholder").html(response);
-                enable_accordion();
+                enable_panel();
 
                 $(".private-video-button").button();
                 $(".private-video-button").click(function() {
@@ -129,9 +129,9 @@ $(document).ready(function () {
     }
 
 
-    function enable_accordion() {
-        $('.accordion-toggle').click(function(ev) {
-            console.log("clicked an accordion toggle with href: " + $(this).attr('href'));
+    function enable_panel() {
+        $('.panel-toggle').click(function(ev) {
+            console.log("clicked an panel toggle with href: " + $(this).attr('href'));
 
             if ($( $(this).attr('href') + "_inner" ).html().indexOf('uninitialized') != -1) {
                 var target = $(this).attr('href') + "_inner";

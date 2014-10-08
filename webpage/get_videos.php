@@ -101,7 +101,7 @@ if ($found) {
      *  Fix the error message according to what type of video is being looked for.
      */
     echo "<div class='well well-large' style='padding-top:15px'>";
-    echo "<div class='span12'>";
+    echo "<div class='col-sm-12'>";
     echo "<p>Could not find any watched videos that match all the selected types.<p>\n";
     echo "</div>";
     echo "</div>";
