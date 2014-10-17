@@ -57,41 +57,6 @@ body {
 
 .accordion-body.in { overflow:visible; }
 
-.bottom-up {top: auto; bottom: 100%; }
-.dropdown-menu.bottom-up:before { border-bottom: 0px solid transparent !important; border-top: 7px solid rgba(0, 0, 0, 0.2); top: auto !important; bottom: -7px; }
-.dropdown-menu.bottom-up:after  { border-bottom: 0px solid transparent !important; border-top: 6px solid white;              top: auto !important; bottom: -6px; }
-
-.navbar .dropdown-menu [class*='span'] {
-    padding-top: 10px;
-}
-.navbar .dropdown-menu > li.column-menu ul {
-    display: inline-block;
-    list-style: none outside none;
-    list-style-type: none outside none;
-    margin: 0 0 0 0;
-    margin-left: 0;
-    width: 100%;
-}
-.navbar .dropdown-menu > li.column-menu li {
-    display: inline;
-    list-style-type: none outside none;
-    float: left;
-    margin-left: 0;
-    width: 100%;
-}
-.navbar .dropdown-menu > li.column-menu.firstcolumn {
-    margin-left: 16;
-    padding-left: 0;
-}
-
-.default_comments_text {
-    color: rgba(0,0,0,0.25);
-}
-
-.default_time_text {
-    color: rgba(0,0,0,0.25);
-}
-
 .popover {
     max-width: 800px;
     width: auto;
@@ -103,34 +68,25 @@ body {
     overflow-y: auto;
 }
 
-/*
-a.dropdown-toggle {
-    position: relative;
+.list-unstyled li:not(.dropdown-header):hover {
+    background-color: lightblue;
 }
 
-a.dropdown-toggle::before {
-    content: '';
-    display: inline-block;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-bottom: 7px solid #CCC;
-    border-bottom-color: rgba(0, 0, 0, 0.2);
-    position: absolute;
-    bottom: -2px;
-    right: 7px;
-    display: none;
+.list-unstyled li.dropdown-header {
+    font-weight: bold;
+    text-transform: uppercase;
+    padding-left: 10px;
 }
 
-a.dropdown-toggle::after {
-    content: '';
-    display: inline-block;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-bottom: 6px solid white;
-    position: absolute;
-    bottom: -2px;
-    right: 8px;
-    z-index: 1001;
-    display: none;
+.list-unstyled li:not(.dropdown-header) {
+    padding-left: 15px;
 }
-*/
+
+.list-unstyled li:not(.dropdown-header) a {
+    text-decoration: none;
+    clear: both;
+    font-weight: normal;
+    color: #333333;
+}
+
+

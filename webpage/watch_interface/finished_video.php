@@ -1,18 +1,18 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-//require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
-//Mustache_Autoloader::register();
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/my_query.php');
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/user.php');
+require_once($cwd[__FILE__] . '/../watch_interface/observation_table.php');
 
-require_once($cwd . '/wildlife_db.php');
-require_once($cwd . '/my_query.php');
-require_once($cwd . '/user.php');
-require_once($cwd . '/watch_interface/observation_table.php');
+require $cwd[__FILE__] . '/../../../mustache.php/src/Mustache/Autoloader.php';
+Mustache_Autoloader::register();
 
-$user = get_user();
+
+$user = csg_get_user();
 $user_id = $user['id'];
 
 $video_id = mysql_real_escape_string($_POST['video_id']);
@@ -25,78 +25,43 @@ $active_video_id = json_decode( $user['active_video_id'], true );
 $watching_start_time = $active_video_id[$species_location_hash]['start_time'];
 $difficulty = $active_video_id[$species_location_hash]['difficulty'];
 
-
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
 //Add this video to the list of watched videos for this user.
 $watched_videos_query = "REPLACE INTO watched_videos SET user_id = $user_id, video_id = $video_id, start_time='$watching_start_time', end_time = '" . date('Y-m-d H:i:s', time()) . "', difficulty = '$difficulty'";
-$watched_videos_result = attempt_query_with_ping($watched_videos_query, $wildlife_db);
-if (!$watched_videos_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $watched_videos_query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $watched_videos_query\n");
-}
+$watched_videos_result = query_wildlife_video_db($watched_videos_query);
 
 //Also need to increment view count on the video
 $video_query = "UPDATE video_2 SET watch_count = watch_count + 1, crowd_status = 'WATCHED' WHERE id = $video_id";
-$video_result = attempt_query_with_ping($video_query, $wildlife_db);
-if (!$video_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
-}
+$video_result = query_wildlife_video_db($video_query);
 
 //Need to set events to completed
 $video_query = "UPDATE timed_observations SET completed = true WHERE video_id = $video_id AND user_id = $user_id";
-$video_result = attempt_query_with_ping($video_query, $wildlife_db);
-if (!$video_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $video_query\n");
-}
+$video_result = query_wildlife_video_db($video_query);
 
 $initial_obs_query = "REPLACE INTO initial_observations(id, event_id, user_id, start_time, end_time, comments, video_id, species_id, tags, location_id, expert, start_time_s, end_time_s, completed, status, auto_generated, report_status, report_comments, response_comments, reporter_id, responder_id, reporter_name, responder_name) SELECT id, event_id, user_id, start_time, end_time, comments, video_id, species_id, tags, location_id, expert, start_time_s, end_time_s, completed, status, auto_generated, report_status, report_comments, response_comments, reporter_id, responder_id, reporter_name, responder_name FROM timed_observations WHERE timed_observations.video_id = $video_id AND timed_observations.user_id = $user_id";
-$initial_obs_result = attempt_query_with_ping($initial_obs_query, $wildlife_db);
-if (!$initial_obs_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $initial_obs_query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $initial_obs_query\n");
-}
+$initial_obs_result = query_wildlife_video_db($initial_obs_query);
 
 
 
 /**
  * Give the user a random video in case they dismiss the modal.
  */
-
-$boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
-mysql_select_db("wildlife", $boinc_db);
-
 unset( $active_video_id[$species_location_hash] );
 
 $user_query = "UPDATE user SET active_video_id = '" . json_encode($active_video_id) . "' WHERE id = $user_id";
-$user_result = attempt_query_with_ping($user_query, $boinc_db);
-if (!$user_result) {
-    error_log("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-    die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-}
+$user_result = query_boinc_db($user_query);
 
 
 //Get the list of observations for this video so we can display them to the user
 $observations_query = "SELECT timed_observations.*, observation_types.name, observation_types.category FROM timed_observations, observation_types WHERE timed_observations.video_id = $video_id AND observation_types.id = timed_observations.event_id ORDER BY user_id, start_time_s";
 error_log($observations_query);
 
-$observations_result = attempt_query_with_ping($observations_query, $wildlife_db);
-if (!$observations_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $observations_query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $observations_query\n");
-}
+$observations_result = query_wildlife_video_db($observations_query);
 
 $finished_modal_info['observations'] = array();
-while ($row = mysql_fetch_assoc($observations_result)) {
+while ($row = $observations_result->fetch_assoc()) {
     $query = "SELECT name FROM user WHERE id = " . $row['user_id'];
-    $user_result = attempt_query_with_ping($query, $boinc_db);
-    $user_row = mysql_fetch_assoc($user_result);
+    $user_result = query_boinc_db($query);
+    $user_row = $user_result->fetch_assoc();
 
     $row['user_name'] = $user_row['name'];
 
@@ -119,7 +84,7 @@ for ($i = 0; $i < count($finished_modal_info['observations']); $i++) {
 $finished_modal_info['observations'][$last_pos]['user_event_count'] = ($i - $last_pos) * 2;
 $finished_modal_info['video_id'] = $video_id;
 
-$finished_modal_template = file_get_contents($cwd . "/templates/finished_video_modal.html");
+$finished_modal_template = file_get_contents($cwd[__FILE__] . "/../templates/finished_video_modal.html");
 $mustache_engine = new Mustache_Engine;
 
 $response['html'] = $mustache_engine->render($finished_modal_template, $finished_modal_info);
