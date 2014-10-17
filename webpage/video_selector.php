@@ -6,10 +6,8 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
 function get_count($table_name, $where_clause) {
     $results = query_wildlife_video_db("SELECT count(*) FROM $table_name WHERE $where_clause");
