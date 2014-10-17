@@ -16,22 +16,22 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with BOINC.  If not, see <http://www.gnu.org/licenses/>.
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 /*
  * THIS IS REALLY BAD!
  * But the BOINC include suck and use relative paths
  */
-chdir("/projects/wildlife/html/user"); 
+//chdir("/projects/wildlife/html/user"); 
 
-require_once("/projects/wildlife/html/inc/cache.inc");
-require_once("/projects/wildlife/html/inc/util.inc");
-require_once("/projects/wildlife/html/inc/user.inc");
-require_once("/projects/wildlife/html/inc/boinc_db.inc");
+require_once("../inc/cache.inc");
+require_once("../inc/util.inc");
+require_once("../inc/user.inc");
+require_once("../inc/boinc_db.inc");
 
-require_once($cwd . "/display_badges.php");
+require_once($cwd[__FILE__] . "/display_badges.php");
 
 check_get_args(array("sort_by", "offset"));
 
