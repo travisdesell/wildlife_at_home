@@ -168,7 +168,7 @@ $extra_stuff = "
         }
     </style>
         
-    <link rel='stylesheet' type='text/css' href='custom.css'> 
+    <link rel='stylesheet' type='text/css' href='wildlife_css/custom.css'> 
 ";
 
 $user = csg_get_user();
