@@ -69,7 +69,7 @@ function enable_expert_review_comments() {
                 submit_response_button.removeClass("disabled");
                 submit_response_button.text("Submit Response");
 
-                $(".expert-respond-button[observation_id=" + observation_id +"]").html("<i class='icon-ok-sign icon-white'></i>");
+                $(".expert-respond-button[observation_id=" + observation_id +"]").html("<span class='glyphicon glyphicon-remove'></span>");
                 $(".expert-respond-button[observation_id=" + observation_id +"]").addClass("btn-success");
                 $(".expert-respond-button[observation_id=" + observation_id +"]").removeClass("btn-warning");
             },

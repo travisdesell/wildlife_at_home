@@ -1,40 +1,23 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd . '/display_badges.php');
-require_once($cwd . '/navbar.php');
-require_once($cwd . '/footer.php');
-require_once($cwd . '/boinc_db.php');
-require_once($cwd . '/wildlife_db.php');
-require_once($cwd . '/my_query.php');
-require_once($cwd . '/user.php');
-require_once($cwd . '/watch_interface/observation_table.php');
-require_once($cwd . '/watch_interface/event_instructions.php');
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
-$bootstrap_scripts = file_get_contents($cwd . "/bootstrap_scripts.html");
-
-$user = get_user();
-$user_id = $user['id'];
-$user_name = $user['name'];
+require_once($cwd[__FILE__] . "/watch_interface/event_instructions.php");
+require_once($cwd[__FILE__] . "/watch_interface/observation_table.php");
 
 /**
  *  Currently using Bootstrap 2.x, really need to update
  *  this to bootstrap 3.x.
  *  TODO: upgrade to bootstrap 3.x
  */
-echo "
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='utf-8'>
-    <title>Wildlife@Home: Watching Video</title>
-
-    <!-- For bootstrap -->
-    $bootstrap_scripts
-
+$extra_stuff = "
     <script type='text/javascript' src='timed_observations.js'></script>
 
     <style>
@@ -56,7 +39,6 @@ echo "
         height: 80%;
         overflow-y: auto;
     }
-
 
     body {
         padding-top: 60px;
@@ -164,8 +146,6 @@ echo "
            border-radius: 4px 4px 0px 0;
         }
 
-
-
         .title {
             text-align: center;
            position: absolute;
@@ -187,13 +167,13 @@ echo "
             cursor: pointer;
         }
     </style>
+        
+    <link rel='stylesheet' type='text/css' href='custom.css'> 
 ";
 
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
+$user = csg_get_user();
+$user_id = $user['id'];
+$user_name = $user['name'];
 
 //Get the user preferences so we can select an appropriate video
 //for them to watch.
@@ -226,7 +206,7 @@ if (array_key_exists("location", $_GET)) {
 }
 
 //add some of the information about the video to javascript
-echo "<script type='text/javascript'>
+$extra_javascript = "<script type='text/javascript'>
     var user_id = $user_id; 
     var user_name = '$user_name'; 
     var start_time = $start_time;
@@ -235,23 +215,10 @@ echo "<script type='text/javascript'>
     var allow_add_removal = 1;
 </script>";
 
-echo "
-</head>
-<body>
-";
+print_header("Wildlife@Home: Watch Wildlife Video", $extra_stuff . "\n" . $extra_javascript, "wildlife");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
 
-//print the navbar
-$active_items = array(
-                    'home' => '',
-                    'watch_video' => 'active',
-                    'message_boards' => '',
-                    'preferences' => '',
-                    'about_wildlife' => '',
-                    'project_management' => '',
-                    'community' => ''
-                );
 
-print_navbar($active_items);
 
 //echo "<p>Got this for video: $video_id, and file: $video_file</p>";
 
@@ -302,10 +269,8 @@ if ($user_id == NULL) {
     if (array_key_exists($species_location_hash, $active_video_id) && $active_video_id[$species_location_hash] != 'NULL') {
         $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.id = " . $active_video_id[$species_location_hash]['video_id'];
 
-        $result = attempt_query_with_ping($query, $wildlife_db);
-        if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-
-        $row = mysql_fetch_assoc($result);
+        $result = query_wildlife_video_db($query);
+        $row = $result->fetch_assoc();
         $found = true;
         $new_video = false;
 
@@ -314,13 +279,8 @@ if ($user_id == NULL) {
         $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count > 0 AND v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
         error_log("FIRST TRY QUERY: $query\n");
 
-        $result = attempt_query_with_ping($query, $wildlife_db);
-        if (!$result) {
-            error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-            die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-        }
-
-        $row = mysql_fetch_assoc($result);
+        $result = query_wildlife_video_db($query);
+        $row = $result->fetch_assoc();
 
         $found = true;
         if (!$row) {    //try again with any video (not just watched videos)
@@ -330,13 +290,8 @@ if ($user_id == NULL) {
             error_log("SECOND TRY QUERY: $query\n");
             //    echo "<!-- $query -->\n";
 
-            $result = attempt_query_with_ping($query, $wildlife_db);
-            if (!$result) {
-                error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-                die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-            }
-
-            $row = mysql_fetch_assoc($result);
+            $result = query_wildlife_video_db($query);
+            $row = $result->fetch_assoc();
             if (!$row) {
                 $found = false;
                 error_log("did not find a watched video segment 2 on second try");
@@ -349,28 +304,14 @@ if ($user_id == NULL) {
     $start_time = $row['start_time'];
     $animal_id = $row['animal_id'];
 
-    ini_set("mysql.connect_timeout", 300);
-    ini_set("default_socket_timeout", 300);
-
-    $boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
-    mysql_select_db("wildlife", $boinc_db);
-
     if ($found && $new_video) {
-        $is_special_user = is_special_user__fixme($user, true);
+        $is_special_user = csg_is_special_user($user, true);
         $query = "INSERT INTO timed_observations SET user_id = $user_id, start_time = '', end_time = '', event_id ='', comments = '', video_id = '$video_id', species_id = $species_id, location_id = $location_id, expert = $is_special_user";
-        $result = attempt_query_with_ping($query, $wildlife_db);
-        if (!$result) {
-            error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-            die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-        }
+        $result = query_wildlife_video_db($query);
 
         //we added an observation for the user so increment their total events
         $user_query = "UPDATE user SET total_events = total_events + 1 WHERE id = $user_id";
-        $user_result = attempt_query_with_ping($user_query, $boinc_db);
-        if (!$user_result) {
-            error_log("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-            die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-        }
+        $user_result = query_boinc_db($user_query);
     }
 
     if ($found) {
@@ -381,18 +322,14 @@ if ($user_id == NULL) {
         $active_video_id[$species_location_hash]['start_time'] = date('Y-m-d H:i:s', time());
 
         $user_query = "UPDATE user SET active_video_id = '" . json_encode($active_video_id) . "' WHERE id = $user_id";
-        $user_result = attempt_query_with_ping($user_query, $boinc_db);
-        if (!$user_result) {
-            error_log("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-            die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-        }
+        $user_result = query_boinc_db($user_query);
     }
 
     //The help accordion
     echo get_event_instructions_html($species_id, 0);
 
     echo "
-        <div id = 'finished-modal' class='modal hide fade' tabindex='-1' role='dialog' aria-labelledby='finished-modal-label'></div>
+        <div id = 'finished-modal' class='modal fade bs-example-modal-lg' tabindex='-1' role='dialog' aria-labelledby='finished-modal-label'></div>
 
         <div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:40px; padding-bottom:40px;'>
         <div class='container'>
@@ -407,11 +344,12 @@ if ($user_id == NULL) {
     echo "
         </div> <!--row-->
         </div> <!--container-->
-        </div> <!--well-->";
+        </div> <!--well-->
+        ";
 }
 
 //print the footer of the webpage.
-print_footer();
+print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 echo "
 </body>
