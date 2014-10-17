@@ -123,7 +123,7 @@ echo "
             <div class='col-sm-6'>";
 
 show_uotd(2, 10, "style='margin-top:20px;'");
-show_news();
+csg_show_news();
 
 echo "
             </div> <!-- col-sm-6 -->

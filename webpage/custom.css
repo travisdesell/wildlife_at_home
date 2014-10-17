@@ -67,3 +67,26 @@ body {
     overflow: hidden;
     overflow-y: auto;
 }
+
+.list-unstyled li:not(.dropdown-header):hover {
+    background-color: lightblue;
+}
+
+.list-unstyled li.dropdown-header {
+    font-weight: bold;
+    text-transform: uppercase;
+    padding-left: 10px;
+}
+
+.list-unstyled li:not(.dropdown-header) {
+    padding-left: 15px;
+}
+
+.list-unstyled li:not(.dropdown-header) a {
+    text-decoration: none;
+    clear: both;
+    font-weight: normal;
+    color: #333333;
+}
+
+

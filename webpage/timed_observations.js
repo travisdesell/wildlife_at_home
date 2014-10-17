@@ -468,7 +468,7 @@ function enable_observation_table() {
                             "<td></td>" + //tags
                             "<td>UNVALIDATED</td>" + //status
                             //report button
-                            "<td style='text-align:center;'> <button class='btn btn-small btn-danger pull-center report-observation-button rob-" + video_id + " bound' observation_id='" + observation_id + "' video_id='" + video_id + "' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text='' report_status='UNREPORTED' reporter_name='' response_comments_text='' responder_name=''><i class='icon-question-sign icon-white'></i></button> </td>" +
+                            "<td style='text-align:center;'> <button class='btn btn-small btn-danger pull-center report-observation-button rob-" + video_id + " bound' observation_id='" + observation_id + "' video_id='" + video_id + "' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text='' report_status='UNREPORTED' reporter_name='' response_comments_text='' responder_name=''><span class='glyphicon glyphicon-question-sign'</button> </td>" +
                             "</tr>");
 
                         break;
@@ -486,7 +486,7 @@ function enable_observation_table() {
                         "<td></td>" + //tags
                         "<td>UNVALIDATED</td>" + //status
                         //report button
-                        "<td style='text-align:center;'> <button class='btn btn-small btn-danger pull-center report-observation-button rob-" + video_id + " bound' observation_id='" + observation_id + "' video_id='" + video_id + "' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text='' report_status='UNREPORTED' reporter_name='' response_comments_text='' responder_name=''><i class='icon-question-sign icon-white'></i></button> </td>" +
+                        "<td style='text-align:center;'> <button class='btn btn-small btn-danger pull-center report-observation-button rob-" + video_id + " bound' observation_id='" + observation_id + "' video_id='" + video_id + "' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text='' report_status='UNREPORTED' reporter_name='' response_comments_text='' responder_name=''><span class='glyphicon glyphicon-question-sign'</button> </td>" +
                         "</tr>");
 
                 }
