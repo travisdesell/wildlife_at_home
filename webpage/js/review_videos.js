@@ -445,7 +445,7 @@ $(document).ready(function () {
 //                console.log("mouse is over: '" + label_text + "'");
             if ( !$(this).hasClass("has-remove-icon") ) { 
                 $(this).addClass("has-remove-icon");
-                $(this).append(" <i class='icon-white icon-remove-sign'></i>");
+                $(this).append(" <span class='glyphicon glyphicon-ok-sign'></span>");
             }   
         }); 
 

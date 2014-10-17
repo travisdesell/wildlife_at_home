@@ -40,7 +40,6 @@ $extra_stuff = "
         overflow-y: auto;
     }
 
-
     body {
         padding-top: 60px;
     }
@@ -168,6 +167,8 @@ $extra_stuff = "
             cursor: pointer;
         }
     </style>
+        
+    <link rel='stylesheet' type='text/css' href='custom.css'> 
 ";
 
 $user = csg_get_user();
