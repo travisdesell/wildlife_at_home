@@ -24,12 +24,14 @@ $end_time_s = mysql_real_escape_string($_POST['end_time_s']);
 $comments = mysql_real_escape_string($_POST['comments']);
 $tags = mysql_real_escape_string($_POST['tags']);
 
+error_log("comments: '$comments'");
+
 $query = "SELECT species_id FROM video_2 WHERE id = $video_id";
 $result = query_wildlife_video_db($query);
 $row = $result->fetch_assoc();
 $species_id = $row['species_id'];
 
-$query = "UPDATE timed_observations SET start_time = '$start_time', end_time = '$end_time', start_time_s = $start_time_s, end_time_s = $end_time_s, event_id ='$event_id', comments = '$comments', tags = '$tags' WHERE id = $observation_id";
+$query = "UPDATE timed_observations SET start_time = \"$start_time\", end_time = \"$end_time\", start_time_s = $start_time_s, end_time_s = $end_time_s, event_id =\"$event_id\", comments = \"$comments\", tags = \"$tags\" WHERE id = $observation_id";
 $result = query_wildlife_video_db($query);
 
 $response['observation_id'] = $observation_id;
