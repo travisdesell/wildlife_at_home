@@ -24,6 +24,8 @@ $end_time_s = mysql_real_escape_string($_POST['end_time_s']);
 $comments = mysql_real_escape_string($_POST['comments']);
 $tags = mysql_real_escape_string($_POST['tags']);
 
+error_log("comments are: '$comments'");
+
 $query = "SELECT species_id FROM video_2 WHERE id = $video_id";
 $result = query_wildlife_video_db($query);
 $row = $result->fetch_assoc();
