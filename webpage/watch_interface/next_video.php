@@ -56,4 +56,7 @@ if ($random == 'true') {
 $user_query = "UPDATE user SET active_video_id = '" . json_encode($active_video_id) . "' WHERE id = $user_id";
 $user_result = query_boinc_db($user_query);
 
+$response['success'] = true;
+echo json_encode($response);
+
 ?>
