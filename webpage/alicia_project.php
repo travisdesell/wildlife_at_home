@@ -6,10 +6,8 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
 print_header("Wildlife@Home: Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
