@@ -41,7 +41,7 @@ print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
  */
 echo "
     <div class='row' style='margin:0px;'>
-        <div class='col-sm-2' style='position:fixed; padding:5px;' id='filter-sidebar'>
+        <div class='col-sm-2' style='position:fixed; padding:5px; z-index:99999;' id='filter-sidebar'>
         <div class='well' style='padding-top: 10px; padding-bottom: 10px; margin-top: 0px; margin-bottom: 5px;'>";
 
 //echo $mustache_engine->render($filter_list_template, $filter_list);
