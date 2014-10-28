@@ -27,7 +27,7 @@ ini_set("default_socket_timeout", 300);
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$query = "SELECT DISTINCT vid.animal_id, obs.video_id, ot.name AS event_name, obs.start_time, obs.end_time FROM timed_observations AS obs JOIN observation_types AS ot ON obs.event_id = ot.id JOIN video_2 AS vid ON vid.id = obs.video_id WHERE expert = 1 AND (obs.start_time <= 0 OR obs.start_time >= obs.end_time)";
+$query = "SELECT DISTINCT vid.animal_id, vid.watermarked_filename AS video_name, obs.video_id, ot.name AS event_name, obs.start_time, obs.end_time FROM timed_observations AS obs JOIN observation_types AS ot ON obs.event_id = ot.id JOIN video_2 AS vid ON vid.id = obs.video_id WHERE expert = 1 AND (obs.start_time <= 0 OR obs.start_time >= obs.end_time)";
 
 $result = attempt_query_with_ping($query, $wildlife_db);
 if (!$result) {
@@ -58,6 +58,7 @@ echo "
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Animal ID');
             data.addColumn('string', 'Video ID');
+            data.addColumn('string', 'Video Name');
             data.addColumn('string', 'Event Type');
             data.addColumn('date', 'Start');
             data.addColumn('date', 'End');
@@ -67,6 +68,7 @@ echo "
 while ($row = mysql_fetch_assoc($result)) {
     echo "['" . trim($row['animal_id']) . "'";
     echo ",'" . trim($row['video_id']) . "'";
+    echo ",'" . trim(end(explode('/', $row['video_name']))) . "'";
     echo ",'" . trim($row['event_name']) . "'";
     echo ", getDate('" . $row['start_time'] . "')";
     echo ", getDate('" . $row['end_time'] . "')";
@@ -91,6 +93,8 @@ echo "
 
             <div id='chart_div' style='margin: auto; width: auto; height: auto;'></div>
 
+            <h2>Description:</h2>
+            <p>This table is a collection of expert classified events where the event start time is less than 0 or the start time is greater than or equal to the end time.<p>
         </div>
     </div>
 </div>
