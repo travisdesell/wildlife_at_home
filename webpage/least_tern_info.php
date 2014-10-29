@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Interior Least Tern Ecology and Information", "", "wildlife");
-print_navbar("Wildlife", "Wildlife@Home");
+print_navbar("Wildlife", "Wildlife@Home", "..");
 
 echo "
 <div class='container'>
@@ -26,14 +26,14 @@ echo "
                 </div>
 
                 <p>
-                Least Terns (<i>Sterna antillarum</i>) are the smallest member of the terns found in North America with a length of 21-23 cm and a wingcol-sm- of 48-53 cm. Adults usually weigh 30 to 45 g. Sexes are alike in plumage throughout the year. Permanent adult plumage consists of a gray back, rump and upper wings with outer 2-3 black primaries, white underparts and a deeply forked white tail.  During breeding season, adults exhibit a black cap, white triangle on their forehead, white strip through the eye, a yellow black tipped bill and yellow to orange legs.  The black cap reduces to a wide black stripe that connects both eyes and extends to the back, upper part of the head and forehead white with black specks while the beak turns black for the winter adult plumage.  Juveniles are distinguished by U-shaped patterns on gray to yellowish brown back and resemble adults in winter plumage. 
+                Least Terns (<i>Sterna antillarum</i>) are the smallest member of the terns found in North America with a length of 21-23 cm and a wingspan of 48-53 cm. Adults usually weigh 30 to 45 g. Sexes are alike in plumage throughout the year. Permanent adult plumage consists of a gray back, rump and upper wings with outer 2-3 black primaries, white underparts and a deeply forked white tail.  During breeding season, adults exhibit a black cap, white triangle on their forehead, white strip through the eye, a yellow black tipped bill and yellow to orange legs.  The black cap reduces to a wide black stripe that connects both eyes and extends to the back, upper part of the head and forehead white with black specks while the beak turns black for the winter adult plumage.  Juveniles are distinguished by U-shaped patterns on gray to yellowish brown back and resemble adults in winter plumage. 
                 </p>
             </section>
 
             <section id='distribution' class='well'>
                 <div class='row'>
                     <div class='col-sm-4'>
-                        <img src='http://volunteer.cs.und.edu/wildlife/images/least_tern_distribution.png' style='width:100%;'></img>
+                        <img src='./images/least_tern_distribution.png' style='width:100%;'></img>
                         Yearly Distribution of the Least Tern (<a href='http://www.allaboutbirds.org/guide/least_tern/id'><i>Cornell Lab of Ornithology - All About Birds</i></a>)
                     </div>
 

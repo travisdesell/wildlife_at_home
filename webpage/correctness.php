@@ -14,7 +14,7 @@ require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
 require_once($cwd[__FILE__] . "/webpage/my_query.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
 
@@ -135,6 +135,17 @@ echo "
             <h1>Correctness Test</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
+
+            <h2>Parameters: (portion of the URL after a '?')</h2>
+            <dl>
+                <dt>buffer=</dt>
+                <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
+            </dl>
+            
+
+            <h2>Description:</h2>
+            <p>This scatterplot shows the </p>
+            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
 
         </div>
     </div>

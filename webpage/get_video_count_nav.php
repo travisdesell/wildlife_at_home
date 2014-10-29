@@ -1,14 +1,14 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd . '/wildlife_db.php');
-require_once($cwd . '/my_query.php');
-require_once($cwd . '/generate_count_nav.php');
-require_once($cwd . '/get_video_filter.php');
-require_once($cwd . '/user.php');
+require_once($cwd[__FILE__] . '/../../citizen_science_grid/my_query.php');
+require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
+require_once($cwd[__FILE__] . '/get_video_filter.php');
+
+require_once($cwd[__FILE__] . '/generate_count_nav.php');
 
 $video_min = mysql_real_escape_string($_POST['video_min']);
 $video_count = mysql_real_escape_string($_POST['video_count']);
@@ -20,17 +20,11 @@ $video_id_filter = mysql_real_escape_string($_POST['video_id_filter']);
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;
 
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
-$user = get_user();
+$user = csg_get_user();
 $query = "";
 
 if ($video_filter_text == '' && $event_filter_text == '' && !is_numeric($video_id_filter)) {
-    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
+    if (csg_is_special_user($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT count(v2.id) FROM video_2 AS v2";
     } else {
         $query = "SELECT count(v2.id) FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE v2.timed_obs_count > 0";
@@ -40,7 +34,7 @@ if ($video_filter_text == '' && $event_filter_text == '' && !is_numeric($video_i
 } else {
     create_filter($video_filter_text, $event_filter_text, $filter_query, $has_observation_query, $video_id_filter);
 
-    if (is_special_user__fixme($user, true) && $showing_all_videos == 'true') {
+    if (csg_is_special_user($user, true) && $showing_all_videos == 'true') {
         $query = "SELECT count(v2.id) FROM video_2 AS v2 WHERE " . $filter_query;
     } else {
         $query = "SELECT count(v2.id) FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE " . $filter_query;
@@ -49,13 +43,9 @@ if ($video_filter_text == '' && $event_filter_text == '' && !is_numeric($video_i
 //    error_log("COUNT NAV QUERY: $query");
 }
 
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-}
+$result = query_wildlife_video_db($query);
 
-$row = mysql_fetch_assoc($result);
+$row = $result->fetch_assoc();
 
 $max_items = $row['count(v2.id)'];
 

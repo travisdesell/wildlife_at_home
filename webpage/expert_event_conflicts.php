@@ -14,7 +14,7 @@ require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
 require_once($cwd[__FILE__] . "/webpage/my_query.php");
 
 print_header("Wildlife@Home: Expert Event Conflicts Table", "", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
 
@@ -53,7 +53,7 @@ $conflict_map = array(
 $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
 mysql_select_db("wildlife_video", $wildlife_db);
 
-$event_query = "SELECT vid.animal_id, obs.video_id, obs.event_id, e.name AS event_name, obs.start_time, obs.end_time, to_seconds(obs.start_time) AS start_sec, to_seconds(obs.end_time) AS end_sec FROM timed_observations AS obs JOIN observation_types AS e ON e.id = event_id JOIN video_2 AS vid ON vid.id = video_id WHERE obs.expert = 1 AND obs.start_time > 0 AND obs.end_time > obs.start_time";
+$event_query = "SELECT vid.animal_id, vid.watermarked_filename AS video_name, obs.video_id, obs.event_id, e.name AS event_name, obs.start_time, obs.end_time, to_seconds(obs.start_time) AS start_sec, to_seconds(obs.end_time) AS end_sec FROM timed_observations AS obs JOIN observation_types AS e ON e.id = event_id JOIN video_2 AS vid ON vid.id = video_id WHERE obs.expert = 1 AND obs.start_time > 0 AND obs.end_time > obs.start_time";
 $event_result = attempt_query_with_ping($event_query, $wildlife_db);
 if (!$event_result) {
     error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $event_query\n");
@@ -83,6 +83,7 @@ echo "
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Animal ID');
             data.addColumn('string', 'Video ID');
+            data.addColumn('string', 'Video Name');
             data.addColumn('string', 'Event Type');
             data.addColumn('date', 'Start');
             data.addColumn('date', 'End');
@@ -92,6 +93,7 @@ echo "
 while ($event_row = mysql_fetch_assoc($event_result)) {
     $animal_id = $event_row['animal_id'];
     $video_id = $event_row['video_id'];
+    $video_name = end(explode('/', $event_row['video_name']));
     $event_id = $event_row['event_id'];
     $start_sec = $event_row['start_sec'];
     $end_sec = $event_row['end_sec'];
@@ -108,6 +110,7 @@ while ($event_row = mysql_fetch_assoc($event_result)) {
         if ($num_matches >= 1) {
             echo "['" . $animal_id . "'";
             echo ",'" . $video_id . "'";
+            echo ",'" . $video_name . "'";
             echo ",'" . $event_row['event_name'] . "'";
             echo ", getDate('" . $event_row['start_time'] . "')";
             echo ", getDate('" . $event_row['end_time'] . "')";
@@ -134,6 +137,9 @@ echo "
             <p><b>NOTE:</b> All rows in this table are duplicated since both pairs of conflicting events are reported.</p>
 
             <div id='chart_div' style='margin: auto; width: auto; height: auto;'></div>
+
+            <h2>Description:</h2>
+            <p>This table is a collection of expert classified events in which the expert has also specified that a conflicting event is happening simultaneiously (event start time or end time is between the conflicting event start time and end time). This process is done using a 'conflict table' in which each event type has a list of incompatible events associated with it. For example, an 'on nest' event happen at the same time as an 'off nest', 'walking', 'flying', etc. As a consequence of this type of matching this table has a duplicate entry for each conflict.<p>
 
         </div>
     </div>

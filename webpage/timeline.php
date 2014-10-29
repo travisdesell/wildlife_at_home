@@ -14,7 +14,7 @@ require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
 require_once($cwd[__FILE__] . "/webpage/my_query.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
 
@@ -90,7 +90,17 @@ echo "
 
             <h1>Timeline!</h1>
 
-            <div id='chart_div' style='margin: auto; width: 90%; height: 700px;'></div>
+            <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
+
+            <h2>Parameters: (portion of the URL after a '?')</h2>
+            <dl>
+                <dt>video_id=</dt>
+                <dd>The ID of the video in the database.</dd>
+            </dl>
+            
+
+            <h2>Description:</h2>
+            <p>This chart is a timeline of the user events calculated for a specifed video (see parameters section). This provides information at a glance of how user events compared against eachother and the expert(s). If an expert has classified a video it will appear in the top position of the timelime.</p>
 
         </div>
     </div>

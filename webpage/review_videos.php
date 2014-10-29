@@ -34,14 +34,14 @@ $extra_header = "
     </script>";
 
 print_header("Wildlife@Home: Review Watched Videos", $extra_header, "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 /**
  *  Prints the filters on the left side
  */
 echo "
     <div class='row' style='margin:0px;'>
-        <div class='col-sm-2' style='position:fixed; padding:5px;' id='filter-sidebar'>
+        <div class='col-sm-2' style='position:fixed; padding:5px; z-index:1;' id='filter-sidebar'>
         <div class='well' style='padding-top: 10px; padding-bottom: 10px; margin-top: 0px; margin-bottom: 5px;'>";
 
 //echo $mustache_engine->render($filter_list_template, $filter_list);
@@ -91,33 +91,42 @@ if (csg_is_special_user($user, true)) { //per susan, only special users can see 
     <div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
         <button type='button' class='btn btn-sm dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Animal ID Filter <span class='caret'></span> </button>
 
-        <ul class='dropdown-menu scrollable-dropdown-menu' style='width:500px;'>";
+        <ul class='dropdown-menu scrollable-dropdown-menu' roll='menu'>
+                <div class='row' style='width:525px;'>";
 
     $query = "SELECT distinct(animal_id) FROM video_2 ORDER BY animal_id";
     $result = query_wildlife_video_db($query);
 
     echo "
-            <li class='column-menu col-sm-2 firstcolumn' style='margin-left:10px;'>
-                <ul style='list-style-type: none; margin-left:0px; margin-right:5px;'>";
+                    <div class='col-md-2'>
+                        <ul class='list-unstyled'>";
+
+//            <li class='column-menu col-sm-2 firstcolumn' style='margin-left:10px;'>
+//                <ul style='list-style-type: none; margin-left:0px; margin-right:5px;'>";
 
     $num_rows = $result->num_rows;
     $count = 0;
     while ($row = $result->fetch_assoc()) {
         if ($count == floor($num_rows / 6) || $count == floor($num_rows * 2 / 6) || $count == floor($num_rows * 3 / 6) || $count == floor($num_rows * 4 / 6) || $count == floor($num_rows * 5 / 6)) {
             echo "
-                </ul>   
-                </li>
+                        </ul>   
+                    </div>
 
-                <li class='column-menu col-sm-2' style='margin-left:10px;'>
-                <ul style='list-style-type: none; margin-right:5px; margin-left:0px;'>";
+                    <div class='col-md-2'>
+                        <ul class='list-unstyled'>";
+
+
+//                <li class='column-menu col-sm-2' style='margin-left:10px;'>
+//                <ul style='list-style-type: none; margin-right:5px; margin-left:0px;'>";
         }
         echo "  <li style='padding-left:0px; padding-right:0px;'><a href='javascript:;' class='video-filter-dropdown animal-id-filter' animal_id='" . $row['animal_id'] . "' style='padding-left:0px; padding-right:0px;'>" . $row['animal_id'] . "</a></li>";
 
         $prev_row = $row;
         $count++;
     }
-    echo "      </ul>   
-            </li>
+    echo "          </ul>   
+                </div> <!-- col -->
+            </div>   <!-- row -->
         <ul>
     </div>  <!-- button group -->";
 }   //per susan, only special users can see the animal ids
@@ -147,7 +156,8 @@ echo "
 <div class='btn-group' style='width:100%; margin-left:0px; margin-top:5px;'>
     <button type='button' class='btn btn-sm dropdown-toggle' data-toggle='dropdown' style='width:100%; text-align:right;'>Event Type Filter <span class='caret'></span> </button>
 
-    <ul class='dropdown-menu' style='width:525px;'>";
+    <ul class='dropdown-menu' role='menu'>
+        <div class='row' style='width:525px;'>";
 
 $query = "SELECT category, name, id FROM observation_types WHERE sharptailed_grouse + piping_plover + least_tern > 0 ";
 if (!csg_is_special_user($user, true)) { //don't show expert only events
@@ -157,34 +167,41 @@ $query .= " ORDER BY category, name";
 $result = query_wildlife_video_db($query);
 
 echo "
-            <li class='column-menu col-sm-4 firstcolumn'>
-            <ul style='list-style-type: none; margin-left:0px; margin-right:5px;'>";
+            <div class='col-md-4'>
+                <ul class='list-unstyled'>";
+//            <li class='column-menu col-sm-4 firstcolumn'>
+//            <ul style='list-style-type: none; margin-left:0px; margin-right:5px;'>";
 
 $num_rows = $result->num_rows;
 $prev_row = $result->fetch_assoc();
-echo "<li class='nav-header'>" . $prev_row['category'] . "</li>";
+echo "<li class='dropdown-header'>" . $prev_row['category'] . "</li>";
 echo "<li><a href='javascript:;' class='event-filter-dropdown' event_id='" . $prev_row['id'] . "'>" . $prev_row['name'] . "</a></li>";
+
+$num_rows += 3; //add the number of categories
 
 $count = 1;
 while ($row = $result->fetch_assoc()) {
     if ($count == floor($num_rows / 3) || $count == floor($num_rows * 2 / 3)) {
         echo "
-            </ul>   
-            </li>
+                </ul>   
+            </div>
 
-            <li class='column-menu col-sm-4'>
-            <ul style='list-style-type: none; margin-right:5px; margin-left:0px;'>";
+            <div class='col-md-4'>
+                <ul class='list-unstyled'>";
+//            <li class='column-menu col-sm-4'>
+//            <ul style='list-style-type: none; margin-right:5px; margin-left:0px;'>";
     }
 
     if (0 != strcmp($prev_row['category'], $row['category'])) {
-        echo "<li class='nav-header'>" . $row['category'] . "</li>";
+        echo "<li class='dropdown-header'>" . $row['category'] . "</li>";
     }
     echo "  <li><a href='javascript:;' class='event-filter-dropdown event-filter' event_id='" . $row['id'] . "'>" . $row['name'] . "</a></li>";
 
     $prev_row = $row;
     $count++;
 }
-echo "      </ul>   
+echo "          </div>
+            </ul>   
         </li>
     <ul>
 </div>  <!-- button group -->"; //end the button group for events
@@ -230,7 +247,7 @@ echo "  </div>";
  *  Prints the list of videos
  */
 
-echo "  <div class='col-sm-10' style='float:right; padding:5px;' id='video-list-body'>
+echo "  <div class='col-sm-10' style='float:right; padding:5px; z-index:0;' id='video-list-body'>
             <div class='row' style='margin:0px;'>
                 <div id='video-list-placeholder'></div>
                 <div id='videos-nav-placeholder'></div>

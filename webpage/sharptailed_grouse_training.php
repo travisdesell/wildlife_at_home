@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Sharp-Tailed Grouse Training Videos", "", "wildlife");
-print_navbar("Wildlife", "Wildlife@Home");
+print_navbar("Wildlife", "Wildlife@Home", "..");
 
 $videos = array(
                 'page_intro' => "<p>

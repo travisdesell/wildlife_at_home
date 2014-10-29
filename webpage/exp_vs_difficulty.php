@@ -14,7 +14,7 @@ require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
 require_once($cwd[__FILE__] . "/webpage/my_query.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
 
@@ -124,9 +124,14 @@ echo "
         }
     </script>
 
-            <h1>Candlestick Chart!</h1>
+            <h1>User Experience vs Difficulty</h1>
 
             <div id='chart_div' style='width: auto; height: 700px;'></div>
+
+            <h2>Description:</h2>
+            <p>This candlestick chart shows the relation of a user's experience vs their perceived difficulty of a video.</p>
+            <p>Experience is measured as the amount of time a user has spent watching videos in seconds. In other words it is the sum of the durations of all videos they have watched prior to the currently observed video. If this is their first video then their experience is just that of the current video. If this is the last video then it is the total time they have spent watching video. This is not not be confused with the total amount of video-time they have watched.</p>
+            <p>To simplify the calculation of experience we do not add experience collected in case were the user took longer than an hour to finish the classification.</p>
 
         </div>
     </div>

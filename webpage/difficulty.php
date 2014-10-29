@@ -14,7 +14,7 @@ require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
 require_once($cwd[__FILE__] . "/webpage/my_query.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
 
@@ -124,9 +124,13 @@ echo "
         }
     </script>
 
-            <h1>Candlestick Chart!</h1>
+            <h1>Observation Duration vs Perceived Difficulty</h1>
 
             <div id='chart_div' style='width: auto; height: 700px;'></div>
+
+            <h2>Description:</h2>
+            <p>This candlestick chart shows the amount of time a user sepent watching a video against their perceived difficulty of that video. Upper and lower bounds of the 'candle' are the first and third quartile of the data set. The ends of the 'wick' are the minimum and maximum values for the data set.</p>
+            <p>The data set is set a maximim of single hour of observation since some users walk away without finishing a video or step away from the video for an extended period of time.</p>
 
         </div>
     </div>
