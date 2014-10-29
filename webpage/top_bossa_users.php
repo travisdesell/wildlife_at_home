@@ -26,12 +26,12 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
  */
 //chdir("/projects/wildlife/html/user"); 
 
-require_once("../inc/cache.inc");
-require_once("../inc/util.inc");
-require_once("../inc/user.inc");
-require_once("../inc/boinc_db.inc");
+require_once("../../inc/cache.inc");
+require_once("../../inc/util.inc");
+require_once("../../inc/user.inc");
+require_once("../../inc/boinc_db.inc");
 
-require_once($cwd[__FILE__] . "/display_badges.php");
+require_once($cwd[__FILE__] . "../../citizen_science_grid/display_badges.php");
 
 check_get_args(array("sort_by", "offset"));
 

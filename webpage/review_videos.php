@@ -34,7 +34,7 @@ $extra_header = "
     </script>";
 
 print_header("Wildlife@Home: Review Watched Videos", $extra_header, "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 /**
  *  Prints the filters on the left side

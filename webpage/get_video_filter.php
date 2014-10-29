@@ -1,17 +1,17 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd . '/user.php');
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/user.php");
 
 function create_filter($video_filter_text, $event_filter_text, &$query, &$has_observation_filter, $video_id_filter) {
     $query = "";
 
-    $user = get_user();
+    $user = csg_get_user();
     $usr_str = "";
-    if (!is_special_user__fixme($user, true)) {
+    if (!csg_is_special_user($user, true)) {
         $usr_str = "AND obs.user_id = " . $user['id'];
     }
             
