@@ -54,6 +54,8 @@
 #include "undvc_common/arguments.hxx"
 #include "undvc_common/file_io.hxx"
 
+#include "wildlife_surf.hpp"
+
 #define CUSHION 2000
     // maintain at least this many unsent results
 #define REPLICATION_FACTOR  1
@@ -66,6 +68,12 @@ int start_time;
 int seqno;
 
 using namespace std;
+
+struct Event {
+    EventType *type;
+    int start_time;
+    int end_time;
+};
 
 /**
  *  This wrapper makes for much more informative error messages when doing MYSQL queries
@@ -110,10 +118,79 @@ void initialize_database() {
     }
 }
 
+int time_to_seconds(string time) {
+    vector<string> temp;
+    istringstream iss(time);
+    while(getline(iss, time, ':')) {
+        temp.push_back(time);
+    }
+    int seconds = 0;
+    seconds += atoi(temp[0].c_str())*3600;
+    seconds += atoi(temp[1].c_str())*60;
+    seconds += atoi(temp[2].c_str());
+    return seconds;
+}
 
+bool config_is_good(string fileName, int duration_s) {
+    vector<EventType*> event_types;
+    vector<Event*> events;
+
+    int video_start_time;
+    string line, species, event_id, start_time, end_time;
+    ifstream infile;
+    infile.open(fileName.c_str());
+    getline(infile, species);
+    getline(infile, line);
+    video_start_time = time_to_seconds(line.c_str());
+    while(getline(infile, event_id, ',')) {
+        Event *newEvent = new Event();
+        EventType *event_type = NULL;
+        for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
+            if((*it)->id.compare(event_id) == 0) {
+                event_type = *it;
+                break;
+            }
+        }
+        if(event_type == NULL) {
+            event_type = new EventType();
+            event_type->id = event_id;
+            event_types.push_back(event_type);
+        }
+        if(!getline(infile, start_time, ',') || !getline(infile, end_time)) {
+            cout << "Error: Malformed config file!" << endl;
+            return false;
+        }
+        newEvent->type = event_type;
+        newEvent->start_time = time_to_seconds(start_time);
+        newEvent->end_time = time_to_seconds(end_time);
+        events.push_back(newEvent);
+    }
+    infile.close();
+
+    for(int i=0; i<duration_s; i++) {
+        int time = video_start_time + i;
+        bool has_event = false;
+        for(vector<Event*>::iterator it = events.begin(); it != events.end(); ++it) {
+            if((*it)->start_time <= time && (*it)->end_time >= time) {
+                has_event = true;
+                break;
+            }
+        }
+        if(!has_event) {
+            int hours = time / 3600;
+            time = time % 3600;
+            int minutes = time / 60;
+            time = time % 60;
+            int seconds = time;
+            cout << "Config file is invalid at time: " << hours << " : " << minutes << " : " << seconds << endl;
+            return false;
+        }
+    }
+    return true;
+}
 
 // create one new job
-int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, string md5_hash, string features_file, string tag) {
+int make_job(int video_id, int species_id, int location_id, string video_address, double duration_s, int filesize, int min_hessian, string md5_hash, string features_file, string tag) {
     DB_WORKUNIT wu;
 
     char name[256], path[256];
@@ -187,8 +264,28 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
         infiles[1] = video_filename.c_str();
 
-        config_filename = video_filename + ".config";
+        config_filename = video_filename + "." + name + ".config";
         ofstream config_file(config_filename.c_str());
+
+        ostringstream video_species_query;
+        video_species_query << "SELECT name"
+            << " FROM species s"
+            << " JOIN video_2 v"
+            << " ON s.id = v.species_id"
+            << " WHERE v.id = "
+            << video_id;
+        mysql_query_check(wildlife_db_conn, video_species_query.str());
+        MYSQL_RES *species_result = mysql_store_result(wildlife_db_conn);
+
+        MYSQL_ROW species_row;
+        string video_species = "";
+        while ((species_row = mysql_fetch_row(species_result)) != NULL) {
+            video_species = species_row[0];
+        }
+        config_file << video_species << endl;
+        cout << "Video Species: " << video_species << endl;
+
+        mysql_free_result(species_result);
 
         ostringstream video_start_query;
         video_start_query << "SELECT start_time"
@@ -230,8 +327,16 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         mysql_free_result(expert_result);
 
         config_file.close();
-        copy_file_to_download_dir(config_filename);
-        remove(config_filename.c_str()); // delete the config file from the local directory.
+        if (config_is_good(config_filename, duration_s)) {
+            cout << "Copy file to download dir: '" << config_filename << "'" << endl;
+            copy_file_to_download_dir(config_filename);
+            cout << "Delete file: '" << config_filename << "'" << endl;
+            remove(config_filename.c_str()); // delete the config file from the local directory.
+        } else {
+            remove(config_filename.c_str());
+            cout << "Error: Corrupt config file!" << endl;
+            return -1;
+        }
         config_filename = config_filename.substr(config_filename.find_last_of('/') + 1);
         infiles[0] = config_filename.c_str();
 
@@ -239,7 +344,7 @@ int make_job(int video_id, int species_id, int location_id, string video_address
         cout << "\tinfile[1]: " << infiles[1] << endl;
         n_files = 2;
 
-        sprintf(command_line, " --c input.config --v video.mp4");
+        sprintf(command_line, " -c input.config -v video.mp4 -h %d", min_hessian);
     } else {
         video_filename = video_address.substr(video_address.find_last_of("/") + 1, (video_address.length() - video_address.find_last_of("/") + 1));
         infiles[0] = video_filename.c_str();
@@ -367,10 +472,12 @@ void main_loop(const vector<string> &arguments) {
     int unsent_results;
     int retval;
     long total_generated = 0;
+    long total_errors = 0;
 
     int species_id = 0;
     int location_id = 0;
     int number_jobs = 100;  //jobs to generate when under the cushion
+    int min_hessian = 500;
 
     if (!get_argument(arguments, "--species_id", false, species_id)) {
         cout << "generating workunits for all species." << endl;
@@ -387,12 +494,18 @@ void main_loop(const vector<string> &arguments) {
     if (!get_argument(arguments, "--number_jobs", false, number_jobs)) {
         cout << "generating a max of " << number_jobs << " workunits, to run for all videos set number_jobs <= 0." << endl;
     } else {
-
         if (number_jobs <= 0) {
             cout << "generating workunits for all videos.." << endl;
         } else {
             cout << "generating a max of " << number_jobs << " workunits, to run for all videos set number_jobs <= 0." << endl;
         }
+    }
+
+    if (0 == strcmp(app_name, "wildlife_surf_collect")) {
+        if(!get_argument(arguments, "--min_hessian", false, min_hessian)) {
+            min_hessian = 500;
+        }
+        cout << "Generateing jobs with hessian value of " << min_hessian << "." << endl;
     }
 
     string tag;
@@ -493,9 +606,14 @@ void main_loop(const vector<string> &arguments) {
         int filesize = atoi(video_row[5]);
         string md5_hash = video_row[6];
 
-        make_job(video_id, species_id, location_id, video_address, duration_s, filesize, md5_hash, features_file, tag);
-        total_generated++;
+        int job_id = make_job(video_id, species_id, location_id, video_address, duration_s, filesize, min_hessian, md5_hash, features_file, tag); 
+        if (job_id == -1) {
+            total_errors++;
+        } else {
+            total_generated++;
+        }
         cout << "generated " << total_generated << " workunits. " << endl << endl;
+        cout << "generated " << total_errors << " errored workunits. " << endl << endl;
     }
 
     mysql_free_result(video_result);

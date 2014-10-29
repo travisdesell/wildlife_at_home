@@ -360,16 +360,18 @@ void local_average_advance() {
 	av_frame_free(&last);
 }
 
+long start_time = 0;
+
 void display() {
 #ifdef OPENGL
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif
 
-#ifndef _BOINC_APP_
     if (currentFrameNumber % 100 == 0) {
         cout << "Frame: " << currentFrameNumber << endl;
+        cout << "FPS: " << currentFrameNumber / ((double)time(NULL) - double(start_time)) << endl;
     }
-#endif
+
     //end of video reached
     if(currentFrameNumber == frameCount || endOfVideoReached) {
         //account for last fragment
@@ -682,6 +684,9 @@ int main(int argc, char** argv) {
     
     endOfVideoReached = false;
     
+
+    start_time = time(NULL);
+
     if(currentFrameNumber < averageRange)
     	currentFrameNumber = averageRange;
 #ifdef OPENGL 
