@@ -12,7 +12,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 
 print_header("Wildlife@Home", "", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 echo "
     <div class='container'>
@@ -122,7 +122,7 @@ echo "
         <div class='row'>
             <div class='col-sm-6'>";
 
-show_uotd(2, 10, "style='margin-top:20px;'");
+show_uotd(2, 10, "style='margin-top:20px;'", false);
 csg_show_news();
 
 echo "

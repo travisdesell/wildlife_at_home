@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Observations Export", "", "wildlife");
-print_navbar("", "Wildlife@Home");
+print_navbar("", "Wildlife@Home", "..");
 
 $user = csg_get_user(true);
 

@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 
 
 print_header("Wildlife@Home: Image Viewer",  "<link href='./css/canvas_test.css' rel='stylesheet'> <script type='text/javascript' src='./js/canvas_test.js'></script>", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 function container_start() {
     echo "
