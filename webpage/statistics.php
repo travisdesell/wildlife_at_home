@@ -5,24 +5,26 @@
 
 //chdir("/projects/wildlife/html/user"); //Only for testing
 
-require_once('/../../../home/tdesell/wildlife_at_home/webpage/navbar.php');
-require_once('/../../../home/tdesell/wildlife_at_home/webpage/footer.php');
-require_once('/../../../home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/../../../home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/../../../home/tdesell/wildlife_at_home/webpage/user.php');
-require_once('/../../../home/tdesell/wildlife_at_home/webpage/boinc_db.php');
-//require_once("../inc/bossa.inc");
-//require_once("../inc/bossa_impl.inc");
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/user.php");
 
-//require_once('/projects/wildlife/html/inc/cache.inc');
+print_header("Wildlife@Home", "", "wildlife");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
 
-require ('/../../../home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php');
-Mustache_Autoloader::register();
+//require ('/../../../home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php');
+//Mustache_Autoloader::register();
 
 try
 {
-	$user = get_user();
+	$user = csg_get_user();
+	$is_special = csg_is_special_user($user, true);
 	
 }
 catch(Exception $e)
@@ -30,7 +32,7 @@ catch(Exception $e)
 	echo "Error: " . $e->getMessage();
 }
 
-$bootstrap_scripts = file_get_contents("/../../../home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+//$bootstrap_scripts = file_get_contents("/../../../home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
 
 echo "
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
@@ -135,10 +137,9 @@ $active_items = array(
 
 print_navbar($active_items);
 
-if(is_special_user__fixme($user['id']) || intval($user['id']) == 197 || intval($user['id']) == 1)
+if(!empty($user) && $is_special)
 {
-	//require_once("statback.php"); For final version
-	require_once("/../../../home/rvanderclute/wildlife_at_home/webpage/statback.php");
+	require_once("statback.php");
 	
 	echo "<div class=\"row-fluid\" id=\"statbuttons\">View statistics for: <div class=\"btn-group\" style=\"display: inline;\"><button class=\"btn\" name=\"one\" id=\"one\" onclick=\"fetchStats(1, 0); return false;\">Sharp-Tailed Grouse</button><button class=\"btn\" name=\"two\" id=\"two\" onclick=\"fetchStats(2, 0); return false;\">Least Tern</button><button class=\"btn\" name=\"three\" id=\"three\" onclick=\"fetchStats(3, 0); return false;\">Piping Plover</button></div></div>";
 	
