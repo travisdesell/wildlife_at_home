@@ -1,53 +1,25 @@
 <?php
-require_once("/home/tdesell/wildlife_at_home/webpage/navbar.php");
-require_once("/home/tdesell/wildlife_at_home/webpage/footer.php");
 
-echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">";
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-$bootstrap_scripts = file_get_contents("/home/tdesell/wildlife_at_home/webpage/bootstrap_scripts.html");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
-
-echo "
-<html>
-<head>
-<title>UND Wildlife@Home: Sharp-Tailed Grouse Ecology and Information</title>
-
-<link rel='icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-<link rel='shortcut icon' href='wildlife_favicon_grouewjn3.png' type='image/x-icon'>
-<link rel='stylesheet' type='text/css' href='style.css'>
-
-$bootstrap_scripts
-
-<style>
-body {
-    padding-top: 60px;
-}
-
-@media (max-width: 979px) {
-    body {
-        padding-top: 0px;
-    }
-}
-</style>
-
-</head>
-";
-
-$active_items = array(
-                'home' => '',
-                'watch_video' => '',
-                'message_boards' => '',
-                'preferences' => '',
-                'about_wildlife' => 'active',
-                'community' => ''
-            );
-
-print_navbar($active_items);
+print_header("Wildlife@Home: Sharp-Tailed Grouse Ecology and Information", "", "wildlife");
+print_navbar("Wildlife", "Wildlife@Home", "..");
 
 echo "
 <div class='container'>
-    <div class='row-fluid'>
-        <div class='span12'>
+    <div class='row'>
+        <div class='col-sm-12'>
+            <section id='identification' class='well'>
+                <h2>Sharp-Tailed Grouse Ecology and Information <small>by Adam Pach</small></h2>
+            </section>
+
             <section id='identification' class='well'>
                 <div class='page-header'>
                     <h2>Identification</h2>
@@ -55,7 +27,7 @@ echo "
 
                 <p>
                 Sharp-tailed Grouse (<i>Tympanuchus phasianellus</i>) are medium sized, ground-nesting birds that
-                average a length of 43 cm, a 63.5 cm wingspan, and an average weight of 880 g (Sibley 2000).
+                average a length of 43 cm, a 63.5 cm wingcol-sm-, and an average weight of 880 g (Sibley 2000).
                 The coloration is a drab gray-brown mottled with white (Figure 1). Both sexes have horizontal
                 or v-shaped markings on the breast, a slight crest on the head, white spots on the wings, light
                 colored flanks and belly, and feathered legs (Johnson and Knue 1989). Males have purple air
@@ -65,15 +37,15 @@ echo "
                 </p>
 
                 <p>
-                You can also view the training videos for identifying sharp-tailed grouse, their nests, and their predators <a href='http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php'>here</a>.
+                You can also view the training videos for identifying sharp-tailed grouse, their nests, and their predators <a href='./sharptailed_grouse_training.php'>here</a>.
                 </p>
             </section>
 
             <section id='distribution' class='well'>
-                <div class='row-fluid'>
-                    <img class='span4' src='BirdsOfNorthAmericaOnline_Distribution.png'></img>
+                <div class='row'>
+                    <img class='col-sm-4' src='images/BirdsOfNorthAmericaOnline_Distribution.png'></img>
 
-                    <div class='span8'>
+                    <div class='col-sm-8'>
                         <div class='page-header'>
                             <h2>Distribution</h2>
                         </div>
@@ -264,7 +236,7 @@ echo "
     </div>
 </div>";
 
-print_footer();
+print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 echo "
 </body>

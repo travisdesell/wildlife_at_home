@@ -1,32 +1,23 @@
 <?php
 
-require '/home/tdesell/wildlife_at_home/mustache.php/src/Mustache/Autoloader.php';
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
+
+require $cwd[__FILE__] . '/../../../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/my_query.php');
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/user.php');
 
-function get_tag_dropdowns($observation_id) {
-    global $wildlife_user, $wildlife_passwd, $wildlife_db;
-
-    if ($wildlife_db == null) {
-        ini_set("mysql.connect_timeout", 300);
-        ini_set("default_socket_timeout", 300);
-
-        $wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-        mysql_select_db("wildlife_video", $wildlife_db);
-    }
+function get_tag_dropdowns() {
+    global $cwd;
 
     $query = "SELECT id, category, name, possible_tags FROM observation_types WHERE possible_tags IS NOT NULL AND possible_tags != ''";
-    $result = attempt_query_with_ping($query, $wildlife_db);
-    if (!$result) {
-        error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-        die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-    }
+    $result = query_wildlife_video_db($query);
 
     $tag_dropdowns = array();
-    while ( $row = mysql_fetch_assoc($result) ) {
+    while ( $row = $result->fetch_assoc() ) {
         $row['event_id'] = $row['id'];
 
         $row['observation_id'] = -1;
@@ -46,7 +37,7 @@ function get_tag_dropdowns($observation_id) {
 
             $row['possible_tags'] = $tags;
 
-            $watch_interface_template = file_get_contents("/home/tdesell/wildlife_at_home/webpage/templates/tag_row_template.html");
+            $watch_interface_template = file_get_contents($cwd[__FILE__] . "/../templates/tag_row_template.html");
             $mustache_engine = new Mustache_Engine;
             $tag_dropdowns[$row['id']] = $mustache_engine->render($watch_interface_template, $row);
 
@@ -57,6 +48,6 @@ function get_tag_dropdowns($observation_id) {
     return $tag_dropdowns;
 }
 
-echo json_encode( get_tag_dropdowns($observation_id) );
+echo json_encode( get_tag_dropdowns() );
 
 ?>

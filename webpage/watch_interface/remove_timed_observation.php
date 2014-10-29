@@ -1,49 +1,33 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/watch_interface/observation_table.php');
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-$user = get_user();
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/my_query.php');
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/user.php');
+require_once($cwd[__FILE__] . '/../watch_interface/observation_table.php');
+
+$user = csg_get_user();
 $user_id = $user['id'];
 
 $observation_id = mysql_real_escape_string($_POST['observation_id']);
 
-
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$boinc_db = mysql_connect("localhost", $boinc_user, $boinc_passwd);
-mysql_select_db("wildlife", $boinc_db);
-
 $user_query = "UPDATE user SET total_events = total_events - 1 WHERE id = $user_id";
-$user_result = attempt_query_with_ping($user_query, $boinc_db);
-if (!$user_result) {
-    error_log("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-    die ("MYSQL Error (" . mysql_errno($boinc_db) . "): " . mysql_error($boinc_db) . "\nquery: $user_query\n");
-}
-
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
+$user_result = query_boinc_db($user_query);
 
 $query = "SELECT video_id FROM timed_observations WHERE id = $observation_id";
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-}
-$row = mysql_fetch_assoc($result);
+$result = query_wildlife_video_db($query);
+
+$row = $result->fetch_assoc();
 $video_id = $row['video_id'];
 
 $query = "DELETE FROM timed_observations WHERE id = $observation_id";
-error_log("query: " . $query);
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-}
+//error_log("query: " . $query);
+$result = query_wildlife_video_db($query);
+
+$query = "UPDATE video_2 SET timed_obs_count = timed_obs_count - 1 WHERE id = $video_id";
+$result = query_wildlife_video_db($query);
 
 $response['html'] = '';
 //$response['html'] = get_timed_observation_table($video_id, $user_id, $response['observation_count']);

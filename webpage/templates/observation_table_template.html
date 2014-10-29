@@ -4,54 +4,62 @@
         <tr observation_id='{{id}}"' id='observation-row-{{id}}'>
             <td style='padding:0px;'>
 
-                <div class='btn-group'>
-                    <button type='button' class='btn btn-small btn-default dropdown-toggle' data-toggle='dropdown' event_id='{{event_id}}' id='event-button-{{id}}' style='margin:0px; padding:2px 4px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{{dropdown_text}}}</button>
+                <div class='btn-group' id='event-dropdown-group-{{id}}' style='border:-1px;'>
+                    <button type='button' class='btn btn-sm btn-default dropdown-toggle dropdown-dropup' data-toggle='dropdown' event_id='{{event_id}}' id_num={{id}} id='event-button-{{id}}' style='height:27px;'>{{{dropdown_text}}}</button>
 
-                    <ul class='dropdown-menu' id='event-dropdown-{{id}}' style='width:350px;'>
-                        <li class='column-menu span6 firstcolumn'>
-                        <ul style='list-style-type: none; margin-left:10px; margin-right:0px;'>
+                    <ul class='dropdown-menu' role='menu' id='event-dropdown-{{id}}'>
+                        <div class='row' style='width:525px;'>
+                            <div class='col-md-4'>
+                                <ul class='list-unstyled'>
                             {{#event_list}}
 
                             {{#new_column}}
-                        </ul>   
-                        </li>
+                                </ul>   
+                            </div> 
 
-                        <li class='column-menu span6'>
-                        <ul style='list-style-type: none; margin-right:10px; margin-left:0px;'>
+                            <div class='col-md-4'>
+                                <ul class='list-unstyled'>
+                        
                             {{/new_column}}
 
                             {{#new_category}}
-                            <li class='nav-header'>{{category}}</li>
+                            <li class='dropdown-header'>{{category}}</li>
                             {{/new_category}}
 
                             <li><a href='javascript:;' class='event-dropdown' event_id='{{event_id}}' event_text='{{category}} - {{name}}' observation_id='{{id}}' video_id='{{video_id}}' id='event-{{event_id}}-dropdown-{{id}}'>{{name}}</a></li>
 
                             {{/event_list}}
-                        </ul>   
-                        </li>
-
+                        </div>
                     </ul>
                 </div>  <!-- button group -->
             </td>
 
-            <td style='padding:0px; width:150px;'><textarea class='time-textarea start-time-textarea' id='start-time-textarea-{{id}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{start_time}}</textarea></td>
-            <td style='padding:0px; width:150px;'><textarea class='time-textarea end-time-textarea' id='end-time-textarea-{{id}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{end_time}}</textarea></td>
+            <td style='padding:0px; max-width:100px;'>
+                <input type='text' placeholder='Click for start time.' class='time-textarea start-time-textarea' id='start-time-textarea-{{id}}' time_s={{start_time_s}} time_date='{{start_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{start_time_text}}'>
+            </td>
+            <td style='padding:0px; max-width:100px;'>
+                <input type='text' placeholder='Click for end time.' class='time-textarea end-time-textarea' id='end-time-textarea-{{id}}' time_s={{end_time_s}} time_date='{{end_time}}' video_id={{video_id}} observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value='{{end_time_text}}'>
+            </td>
 
             <td style='padding-top:0px; padding-bottom:0px; width:25px;' rowspan=3>
-                <button class='btn btn-small btn-danger remove-observation-button' id='remove-observation-button-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;'> <i class='icon-remove icon-white'></i> </button>
-                <button class='btn btn-small btn-primary discuss-observation-button' id='discuss-observation-button-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;'> <i class='icon-comment icon-white'></i> </button>
+                <form id="discuss-video-form-{{id}}" class='hidden' action="../forum_post.php?id=8" method="post" target="_blank">
+                    <input type='hidden' id='discuss-video-content-{{id}}' name='content' value="">
+                </form>
+
+                <button class='btn btn-sm btn-danger remove-observation-button' id='remove-observation-button-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px; height:22px;'> <span class="glyphicon glyphicon-remove"></span> </button>
+                <button class='btn btn-sm btn-primary discuss-observation-button' id='discuss-observation-button-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px; height:22px;'> <span class="glyphicon glyphicon-comment"></span> </button>
             </td>
         </tr> <!-- observation-row-{{id}} -->
 
         <tr id='observation-comments-row-{{id}}'>
-            <td colspan=3 style='vertical-align:middle; padding:0px;'><textarea class='comments-textarea' id='comments-textarea-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>{{comments}}</textarea></td>
+            <td colspan=3 style='vertical-align:middle; padding:0px;'><input type='text' placeholder='Insert comments and hashtags here.' class='comments-textarea' id='comments-textarea-{{id}}' video_id='{{video_id}}' observation_id='{{id}}' style='border:0px; height:26px; margin:0px; width:100%; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;' value="{{comments}}"></td>
         </tr> <!-- observation-comments-row-{{id}} -->
 
         <tr id='observation-tags-row-{{id}}' observation_id='{{id}}'>
             <td id='tag-div-{{id}}' colspan=3 style='vertical-align:middle; padding:0px;'>
                 {{#has_tags}}
                 <div class='btn-group pull-left'>
-                    <button type='button' class='btn btn-small btn-info dropdown-toggle' data-toggle='dropdown' tag_id='{{event_id}}' id='tag-button-{{id}}' style='margin:0px 4px 0px 0px; padding:2px 4px; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>tag</button>
+                    <button type='button' class='btn btn-sm btn-info dropdown-toggle' data-toggle='dropdown' tag_id='{{event_id}}' id='tag-button-{{id}}' style='margin:0px 4px 0px 0px; padding:2px 4px; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;'>tag <span class="caret"></span></button>
 
                     <ul class='dropdown-menu' id='tag-dropdown-{{id}}'>
                         {{#possible_tags}}
@@ -62,7 +70,7 @@
                 </div>  <!-- button group -->
 
                 {{#tags}}
-                <span style='margin:3px; height:16px;' class='badge tag-element' tag_text='{{tag_text}}' observation_id={{id}}>{{tag_text}}</span>
+                <span style='margin:3px; height:20px;' class='badge tag-element' tag_text='{{tag_text}}' video_id={{video_id}} observation_id={{id}}>{{tag_text}}</span>
                 {{/tags}}
                 {{/has_tags}}
             </td>
