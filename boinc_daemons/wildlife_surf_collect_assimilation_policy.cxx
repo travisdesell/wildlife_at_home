@@ -45,7 +45,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
-#include "wildlife_surf.hpp"
+#include "EventType.hpp"
 
 using namespace std;
 using namespace cv;
@@ -124,7 +124,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     mysql_free_result(my_result);
 
     /*
-     * Now that the workunit xml has been gotten, we can parse it for the appropriate information
+     * Now that the workunit xml has been collected, we can parse it for the appropriate information
      */
     string tag_str;
 
@@ -147,7 +147,8 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
         string temp;
         std::getline(ss, temp, '\n');
         while(std::getline(ss, temp, '\n')) {
-            log_messages.printf(MSG_DEBUG, "Event id: %s\n", temp.c_str());
+            boost::algorithm::trim(temp);
+            log_messages.printf(MSG_DEBUG, "Event id: '%s'\n", temp.c_str());
             event_names.push_back(temp);
         }
 
@@ -158,15 +159,19 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
             return retval;
         }
 
-        FileStorage fs(fi.path.c_str(), FileStorage::READ);
+        FileStorage infile(fi.path.c_str(), FileStorage::READ);
         for (unsigned int i=0; i<event_names.size(); i++) {
-            EventType *temp = new EventType;
-            temp->id = event_names[i];
-            fs[event_names[i]] >> temp->descriptors;
+            EventType *temp = new EventType(event_names[i]);
+            try {
+                temp->read(infile);
+                log_messages.printf(MSG_DEBUG, "wildlife_surf_collect_assimilation_policy: Read in %d, descriptors.\n", temp->getDescriptors().rows);
+            } catch(const exception &ex) {
+                log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy get_data_from_result([RESULT#%d %s) failed with error: %s\n", canonical_result.id, canonical_result.name, ex.what());
+                return 1;
+            }
             event_types.push_back(temp);
         }
-
-        fs.release();
+        infile.release();
     } catch (string error_message) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", canonical_result.id, canonical_result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", canonical_result.stderr_out);
@@ -188,13 +193,17 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
 /*    string result_name = canonical_result.name;     SHOULD BE THIS */
     uint32_t first_pos = result_name.find("_", 0) + 1;
     uint32_t second_pos = result_name.find("_", first_pos);
+    while(!isdigit(result_name[first_pos])) {
+        first_pos = second_pos + 1;
+        second_pos = result_name.find("_", first_pos);
+    }
 
     if (first_pos == string::npos || second_pos == string::npos) {
         log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy assimilate_handler failed with 'malformed result name error', result name: %s\n", result_name.c_str());
         return 1;
     }
 
-    string video_id = result_name.substr( first_pos, (second_pos - first_pos) );
+    string video_id = result_name.substr(first_pos, (second_pos - first_pos) );
 
     cout << "parsed video id: '" << video_id << "'" << endl;
 
@@ -202,7 +211,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     //  SELECT id, species_id, location_id FROM video_segment_2 WHERE video_id = video_id and number = i
 
     ostringstream full_video_query;
-    full_video_query << "SELECT species_id, location_id FROM video_2 WHERE id = " << video_id << endl;
+    full_video_query << "SELECT species_id, location_id FROM video_2 WHERE id = '" << video_id  << "'" << endl;
 
     mysql_query_check(wildlife_db_conn, full_video_query.str());
     MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
@@ -219,7 +228,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     // directory structure.
     for(vector<EventType*>::iterator it = event_types.begin(); it != event_types.end(); ++it) {
         string pathname = "/projects/wildlife/feature_files/" + tag_str + "/" + species_id + "/" + location_id + "/" + video_id + "/";
-        string filename = (*it)->id + ".desc";
+        string filename = (*it)->getId() + ".desc";
 
         boost::filesystem::path path(pathname);
         boost::system::error_code returnedError;
@@ -231,10 +240,17 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
         }
 
         string full_filename = pathname + filename;
-        cerr << "Writing to: " <<  full_filename << endl;
+        cerr << "Writing to: '" <<  full_filename << "'" << endl;
         FileStorage outfile(full_filename, FileStorage::WRITE);
-        cerr << "Write: " << (*it)->id.c_str() << endl;
-        outfile << (*it)->id << (*it)->descriptors;
+        cerr << "Write: '" << (*it)->getId().c_str() << "'" << endl;
+        try {
+            log_messages.printf(MSG_DEBUG, "wildlife_surf_collect_assimilation_policy: Write out %d, descriptors.\n", (*it)->getDescriptors().rows);
+            (*it)->writeDescriptors(outfile);
+            (*it)->writeKeypoints(outfile);
+        } catch(const exception &ex) {
+            log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy write_reslts([RESULT#%d %s) failed with error: %s\n", canonical_result.id, canonical_result.name, ex.what());
+            return 1;
+        }
         outfile.release();
     }
     return 0;

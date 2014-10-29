@@ -1,17 +1,28 @@
 <?php
 
-require_once('/home/tdesell/wildlife_at_home/webpage/wildlife_db.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/my_query.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/user.php');
-require_once('/home/tdesell/wildlife_at_home/webpage/watch_interface/observation_table.php');
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-$user = get_user();
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/my_query.php');
+require_once($cwd[__FILE__] . '/../../../citizen_science_grid/user.php');
+require_once($cwd[__FILE__] . '/../watch_interface/observation_table.php');
+
+require $cwd[__FILE__] . '/../../../mustache.php/src/Mustache/Autoloader.php';
+Mustache_Autoloader::register();
+
+$user = csg_get_user();
 $user_id = $user['id'];
 
 $video_id = mysql_real_escape_string($_POST['video_id']);
-$species_id = mysql_real_escape_string($_POST['species_id']);
+$query = "SELECT species_id FROM video_2 WHERE id = $video_id";
+$result = query_wildlife_video_db($query);
+$row = $result->fetch_assoc();
+$species_id = $row['species_id'];
 
-$response['html'] = get_timed_observation_table($video_id, $user_id, $response['observation_count'], $species_id, 0);
+
+//need to pass in expert_only as the last argument
+$response['html'] = get_timed_observation_table($video_id, $user_id, $response['observation_count'], $species_id, csg_is_special_user($user, false));
 
 echo json_encode($response);
 ?>

@@ -1,0 +1,28 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf190
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww19460\viewh7220\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0 RUN ON ABSENCE VIDEO:\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 ./wildlife_feature_extractor surf tern ~/Documents/data/wildlife_video/tern_absence__CH00_20110711_104341MN_CHILD0.mp4 tern_absence\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+RUN ON PRESENCE VIDEO:\
+\
+./wildlife_feature_extractor surf tern ~/Documents/data/wildlife_video/tern_presence__CH00_20110711_104341MN_CHILD29.mp4 tern_presence\
+\
+\
+REMOVE FEATURES IN ABSENCE THAT ARE IN PRESENCE\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0  ./wildlife_feature_comparison tern_absence tern_presence tern_presence_only\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+TAKE FINAL FEATURE FILE AND RUN ON VIDEO:\
+\
+./wildlife_feature_matcher tern ~/Documents/data/wildlife_video/tern_presence__CH00_20110711_104341MN_CHILD29.mp4 tern_presence_only\
+\
+}

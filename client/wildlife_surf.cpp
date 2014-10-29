@@ -2,18 +2,22 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+
 #include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
-//
-//#include <opencv2/core/types_c.h>
-//#include <opencv2/imgproc/imgproc_c.h>
+#include <opencv2/legacy/legacy.hpp>
+
+#include <opencv2/core/types_c.h>
+#include <opencv2/imgproc/imgproc_c.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/core_c.h>
 #include <opencv2/highgui/highgui_c.h>
-#include <stats.hpp>
+//#include <stats.hpp>
 
 #ifdef _BOINC_APP_
 #ifdef _WIN32
@@ -31,14 +35,14 @@
 using namespace std;
 using namespace cv;
 
-//#define GUI
+#define GUI
 
 void write_checkpoint();
 bool read_checkpoint();
 int skipNFrames(CvCapture* capture, int n);
 void printUsage();
 
-int minHessian = 300;
+int minHessian = 250;
 Scalar color;
 int currentFrame = 0;
 vector<double> percentages;
@@ -49,14 +53,30 @@ string checkpointVidFileName;
 string featFileName;
 string checkpointFeatFileName;
 
+double standardDeviation(vector<int> values, double mean) {
+    double diff;
+    double stddev = 0;
+    for (unsigned int i = 0; i < values.size(); i++) {
+        stddev += (values[i] - mean) * (values[i] - mean);
+    }
+
+    return sqrt(stddev/values.size());
+}
+
+double quickMedian(vector<int> values) {
+    sort(values.begin(), values.end());
+    return values[values.size() / 2];
+}
+
+
 int main(int argc, char **argv) {
     if (argc != 3) {
         printUsage();
         return -1;
     }
 
-    Rect finalRect;
-    vector<Rect> boundingRects;
+    cv::Rect finalRect;
+    vector<cv::Rect> boundingRects;
     vector<Point2f> tlPoints;
     vector<Point2f> brPoints;
 
@@ -112,6 +132,7 @@ int main(int argc, char **argv) {
     cerr << "Frames Per Second: " << fps << endl;
     cerr << "Frame Count: " << total << endl;
     cerr << "Number of Frames in Three Minutes: " << framesInThreeMin << endl;
+//    cerr << "<slice_probabilities>" << endl;
 
     checkpoint_filename = "checkpoint.txt";
 
@@ -129,7 +150,14 @@ int main(int argc, char **argv) {
     framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
     cerr << "Starting at Frame: " << framePos << endl;
 
+    long start_time = time(NULL);
+
     while ((double)framePos/total < 1.0) {
+
+        if (framePos % 10 == 0) {
+            cout << "FPS: " << framePos/((double)time(NULL) - (double)start_time) << endl;
+        }
+
         //cout << framePos/total << endl;
         Mat frame(cvarrToMat(cvQueryFrame(capture)));
         framePos = cvGetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES);
@@ -145,6 +173,18 @@ int main(int argc, char **argv) {
         Mat descriptors_frame;
 
         extractor.compute(frame, keypoints_frame, descriptors_frame);
+
+        cout << "keypoints detected: " << keypoints_frame.size() << endl;
+        for (int i = 0; i < keypoints_frame.size(); i++) {
+            cout << "\t" << keypoints_frame[i].pt.x << ", " << keypoints_frame[i].pt.y << " -- " << keypoints_frame[i].angle << " : " << keypoints_frame[i].size << " -- " << keypoints_frame[i].response << endl;
+            cout << "\t\t(" << descriptors_frame.rows << ", " << descriptors_frame.cols << ") ";
+            for (int j = 0; j < descriptors_frame.cols; j++) {
+                cout << " " << descriptors_frame.at<float>(i,j);
+            }
+            cout << endl;
+        }
+        cout << endl;
+
 
         // Find Matches
         FlannBasedMatcher matcher;
@@ -199,7 +239,7 @@ int main(int argc, char **argv) {
 			tlPoints.push_back(tlFrame);
 			brPoints.push_back(brFrame);
 		} else {
-			Rect boundRect = boundingRect(matching_points);
+            cv::Rect boundRect = boundingRect(matching_points);
 			
 			//Calculate mean.
 			Mat mean;
@@ -220,7 +260,7 @@ int main(int argc, char **argv) {
 			Point2f tlStdPoint(xMean-xStdDev/2, yMean+yStdDev/2);
 			Point2f brStdPoint(xMean+xStdDev/2, yMean-yStdDev/2);
 			
-			Rect stdDevRect(tlStdPoint, brStdPoint);
+            cv::Rect stdDevRect(tlStdPoint, brStdPoint);
 
 #ifdef GUI
 			color = Scalar(0, 0, 255); // Blue, Green, Red
@@ -243,7 +283,7 @@ int main(int argc, char **argv) {
 			Point2f tlPoint(tlMean.at<float>(0,0), tlMean.at<float>(0,1));
 			Point2f brPoint(brMean.at<float>(0,0), brMean.at<float>(0,1));
 			
-			Rect averageRect(tlPoint, brPoint);
+            cv::Rect averageRect(tlPoint, brPoint);
 		
 			// Calculate median rectangle.
 			vector<int> tlxVals;
@@ -269,7 +309,7 @@ int main(int argc, char **argv) {
 			Point2i tlMedianPoint(tlxMedian, tlyMedian);
 			Point2i brMedianPoint(brxMedian, bryMedian);
 
-			Rect medianRect(tlMedianPoint, brMedianPoint);			
+            cv::Rect medianRect(tlMedianPoint, brMedianPoint);			
 
 #ifdef GUI
 			color = Scalar(255, 0, 0); // Blue, Green, Red
@@ -278,20 +318,6 @@ int main(int argc, char **argv) {
 			rectangle(frame_points, medianRect.tl(), medianRect.br(), color, 2, 8, 0);
 #endif
 
-<<<<<<< HEAD
-                finalRect = averageRect;
-            }
-
-            // Check for 1800 frame mark.
-            if (framePos != 0 && framePos % 1800 == 0.0) {
-                double frameDiameter = sqrt(pow((double)frame.cols, 2) * pow((double)frame.rows, 2));
-                double roiDiameter = sqrt(pow((double)finalRect.width, 2) * pow((double)finalRect.height, 2));
-                double probability = 1-(roiDiameter/frameDiameter);
-
-                percentages.push_back(probability);
-#ifndef _BOINC_APP_
-                cerr << framePos << " -- " << probability << endl;
-=======
 			finalRect = averageRect;
 		}
 
@@ -312,7 +338,6 @@ int main(int argc, char **argv) {
 #ifndef _BOINC_APP_
 			cout << "Min Dist: " << min_dist << endl;
             cout << probability << endl;
->>>>>>> 0cdb87747e90d68f12c0956b3be43790f442d002
 #endif
 			boundingRects.clear();
 			tlPoints.clear();
@@ -323,19 +348,11 @@ int main(int argc, char **argv) {
 #ifdef _BOINC_APP_
 		boinc_fraction_done((double)framePos/total);
 
-<<<<<<< HEAD
-            if(boinc_time_to_checkpoint()) {
-                cerr << "checkpointing" << endl;
-                write_checkpoint();
-                boinc_checkpoint_completed();
-            }
-=======
-		if(boinc_time_to_checkpoint() || key == 's') {
+		if(boinc_time_to_checkpoint()) {
 			cerr << "checkpointing" << endl;
 			write_checkpoint();
 			boinc_checkpoint_completed();
 		}
->>>>>>> 0cdb87747e90d68f12c0956b3be43790f442d002
 #endif
 
 #ifdef GUI

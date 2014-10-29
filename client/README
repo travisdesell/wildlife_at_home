@@ -102,5 +102,34 @@ Compile openCV:
 
     had to add (so it could find x264 -- do this at the end of the .a files but before the other stuff):
         /Users/deselt/Documents/Dropbox/software/x264/libx264.a
+        
+    LATEST BUILD:
 
+    For OSX:
+        cmake -DCMAKE_INSTALL_PREFIX=/your/install/location -DFFMPEG_INCLUDE_DIR=/ffmpeg/include/dir -DWITH_CUDA=OFF -DCMAKE_C_FLAGS=-mmacosx-version-min=10.5.8 -DCMAKE_CXX_FLAGS=-mmacosx-verson-min=10.5.8
+        
+    For Linux:
+        cmake -DCMAKE_INSTALL_PREFIX=/your/install/location -DFFMPEG_INCLUDE_DIR=/ffmpeg/include/dir -DWITH_CUDA=OFF
+
+
+*********************************
+*********************************
+Program Execution:
+
+wildife_graphics_app
+    Graphics app for wildlife_surf_collect. Run while wildlife_surf_collect is running to view the video.
+
+wildlife_surf_collect
+    Collects surf features from an input video file. For parameter detials run with -h
+
+wildlife_surf_combine
+    Combines featues collected from client computers into a single directory. For parameter detials run with -h.
+
+wildlife_surf_svm_generate
+    Generates a LIBSVM parameter file for a given directory. For parameter detials run with -h. The generated SVM file will have to be trained with LIBSVM (svm-train).
+    http://www.csie.ntu.edu.tw/~cjlin/libsvm/ (Offical Website)
+    https://github.com/arnaudsj/libsvm (Unofficial GitHub Snapshot)
+
+wildlife_surf_predict
+    Use with a LIBSVM trained model file and an inpu t video to show matches. For parameter detials run with -h.
 
