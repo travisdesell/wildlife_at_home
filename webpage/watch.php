@@ -216,7 +216,7 @@ $extra_javascript = "<script type='text/javascript'>
 </script>";
 
 print_header("Wildlife@Home: Watch Wildlife Video", $extra_stuff . "\n" . $extra_javascript, "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home");
+print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 
 

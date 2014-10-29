@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Piping Plover Ecology and Information", "", "wildlife");
-print_navbar("Wildlife", "Wildlife@Home");
+print_navbar("Wildlife", "Wildlife@Home", "..");
 
 echo "
 <div class='container'>
@@ -32,7 +32,7 @@ echo "
 
             <section id='distribution' class='well'>
                 <div class='row'>
-                    <img class='col-sm-4' src='http://volunteer.cs.und.edu/wildlife/images/piping_plover_distribution.png'></img>
+                    <img class='col-sm-4' src='./images/piping_plover_distribution.png'></img>
 
                     <div class='col-sm-8'>
                         <div class='page-header'>
