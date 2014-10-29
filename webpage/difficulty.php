@@ -7,11 +7,8 @@ $cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
 //echo $cwd[__FILE__];
 require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/uotd.php");
-require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
-require_once($cwd[__FILE__] . "/webpage/my_query.php");
+require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
@@ -21,23 +18,16 @@ print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 ini_set("mysql.connect_timeout", 300);
 ini_set("default_socket_timeout", 300);
 
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
 $easy_query = "SELECT time_to_sec(timediff(end_time, start_time)) AS duration FROM watched_videos WHERE timediff(end_time, start_time) IS NOT NULL AND difficulty = 'easy' HAVING duration < 3600 ORDER BY duration";
 $medium_query = "SELECT time_to_sec(timediff(end_time, start_time)) AS duration FROM watched_videos WHERE timediff(end_time, start_time) IS NOT NULL AND difficulty = 'medium' HAVING duration < 3600 ORDER BY duration";
 $hard_query = "SELECT time_to_sec(timediff(end_time, start_time)) AS duration FROM watched_videos WHERE timediff(end_time, start_time) IS NOT NULL AND difficulty = 'hard' HAVING duration < 3600 ORDER BY duration";
-$easy_result = attempt_query_with_ping($easy_query, $wildlife_db);
-$medium_result = attempt_query_with_ping($medium_query, $wildlife_db);
-$hard_result = attempt_query_with_ping($hard_query, $wildlife_db);
-if (!$easy_result || !$medium_result || !$hard_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $easy_query\n");
-    die("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $easy_query\n");
-}
+$easy_result = query_wildlife_video_db($easy_query);
+$medium_result = query_wildlife_video_db($medium_query);
+$hard_result = query_wildlife_video_db($hard_query);
 
-$easy_rows = mysql_num_rows($easy_result);
-$medium_rows = mysql_num_rows($medium_result);
-$hard_rows = mysql_num_rows($hard_result);
+$easy_rows = $easy_result->num_rows;
+$medium_rows = $medium_result->num_rows;
+$hard_rows = $hard_result->num_rows;
 
 echo "
 <div class='containder'>
@@ -55,7 +45,7 @@ echo "
 echo "['Easy'";
 $index = 0;
 $total = 0;
-while ($row = mysql_fetch_assoc($easy_result)) {
+while ($row = $easy_result->fetch_assoc()) {
     $total += $row['duration'];
     if ($index == 0) {
         echo ", " . $row['duration'];
@@ -74,7 +64,7 @@ echo "],\n";
 echo "['Medium'";
 $index = 0;
 $total = 0;
-while ($row = mysql_fetch_assoc($medium_result)) {
+while ($row = $medium_result->fetch_assoc()) {
     $total += $row['duration'];
     if ($index == 0) {
         echo ", " . $row['duration'];
@@ -93,7 +83,7 @@ echo "],\n";
 echo "['Hard'";
 $index = 0;
 $total = 0;
-while ($row = mysql_fetch_assoc($hard_result)) {
+while ($row = $hard_result->fetch_assoc()) {
     $total += $row['duration'];
     if ($index == 0) {
         echo ", " . $row['duration'];

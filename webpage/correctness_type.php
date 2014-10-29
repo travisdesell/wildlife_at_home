@@ -7,11 +7,8 @@ $cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
 //echo $cwd[__FILE__];
 require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/uotd.php");
-require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
-require_once($cwd[__FILE__] . "/webpage/my_query.php");
+require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
@@ -29,15 +26,8 @@ if (!isset($buffer)) {
     $buffer = 5;
 }
 
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
 $type_query = "SELECT id, name FROM observation_types";
-$type_result = attempt_query_with_ping($type_query, $wildlife_db);
-if (!$type_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $type_query\n");
-    die("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $type_query\n");
-}
+$type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
 echo "
 <div class='containder'>
@@ -65,18 +55,14 @@ echo "
             data.addRows([
 ";
 
-function getExpertMatch($db, $timed_id, $buffer) {
+function getExpertMatch($timed_id, $buffer) {
     $event_query = "SELECT event_id, video_id, to_seconds(start_time) AS start_sec, to_seconds(end_time) AS end_sec FROM timed_observations WHERE id = $timed_id";
-    $event_result = attempt_query_with_ping($event_query, $db);
-    if (!$event_result) {
-        error_log("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $event_query\n");
-        die("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $event_query\n");
-    }
-    $num_events = mysql_num_rows($event_result);
+    $event_result = query_wildlife_video_db($event_query);
+    $num_events = $event_result->num_rows;
     $num_match_events = 0;
 
     if ($num_events > 0) {
-        while ($event_row = mysql_fetch_assoc($event_result)) {
+        while ($event_row = $event_result->fetch_assoc()) {
             $event_id = $event_row['event_id'];
             $video_id = $event_row['video_id'];
             $start_sec = $event_row['start_sec'];
@@ -87,12 +73,8 @@ function getExpertMatch($db, $timed_id, $buffer) {
             $end_sec_top = $end_sec - $buffer;
             $end_sec_bot = $end_sec + $buffer;
             $match_query = "SELECT * FROM timed_observations WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND to_seconds(start_time) BETWEEN $start_sec_top AND $start_sec_bot AND to_seconds(end_time) BETWEEN $end_sec_top AND $end_sec_bot";
-            $match_result = attempt_query_with_ping($match_query, $db);
-            if (!$match_result) {
-                error_log("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $match_query\n");
-                die("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $match_query\n");
-            }
-            $num_matches = mysql_num_rows($match_result);
+            $match_result = query_wildlife_video_db($match_query);
+            $num_matches = $match_result->num_rows;
 
             if ($num_matches >= 1) {
                 $num_match_events += 1;
@@ -105,19 +87,15 @@ function getExpertMatch($db, $timed_id, $buffer) {
     }
 }
 
-while ($type_row = mysql_fetch_assoc($type_result)) {
+while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
     $timed_query = "SELECT id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
-    $timed_result = attempt_query_with_ping($timed_query, $wildlife_db);
-    if (!$timed_result) {
-        error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $timed_query\n");
-        die("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $timed_query\n");
-    }
-    $num_events = mysql_num_rows($timed_result);
+    $timed_result = query_wildlife_video_db($timed_query);
+    $num_events = $timed_result->num_rows;
     $num_match_events = 0;
-    while ($timed_row = mysql_fetch_assoc($timed_result)) {
-        $num_match_events += getExpertMatch($wildlife_db, $timed_row['id'], $buffer);
+    while ($timed_row = $timed_result->fetch_assoc()) {
+        $num_match_events += getExpertMatch($timed_row['id'], $buffer);
     }
 
     if ($num_match_events > 0) {
