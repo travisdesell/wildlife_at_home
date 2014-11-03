@@ -53,11 +53,11 @@ echo "
 ";
 
 while ($row = $result->fetch_assoc()) {
-    if ($row['expert']) {
-        $name = "Expert";
-    } else {
-        $name = $row['user_id'];
-    }
+    $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+    $name_result = query_boinc_db($name_query);
+    $name_row = $name_result->fetch_assoc();
+    $name = $name_row['name'];
+
     echo "['" . $name . "'";
     echo ",'" . $row['event_name'] . "'";
     echo ", getDate('" . $row['start_time'] . "')";
