@@ -113,14 +113,9 @@ if ($modulo > -1) {
             //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
             //use HTML5 to stream it
             $watermark_file = "/video/wildlife/watermark.png";
-            //This was being used to generate the watermarked files
-//          $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i $archive_filename -ar 44100 -vb 400000 -qmax 5 -vcodec libx264 -level 30 -maxrate 10000000 -bufsize 10000000 -vprofile baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" $watermarked_filename";
-
-//          this is used for generating the streaming segments
-//          $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . " -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
 
             //This should generate better sized videos
-            $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i $archive_filename -vcodec libx264 -vpre slow -vpre baseline -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" $watermarked_filename.mp4";
+            $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i $archive_filename -vcodec libx264 -preset slow -g 30 -vf \"movie=$watermark_file [watermark]; [in] [watermark] overlay=10:10 [out]\" $watermarked_filename.mp4";
 
             echo "\n\n$command\n\n";
             shell_exec($command);
@@ -261,7 +256,7 @@ if ($modulo > -1) {
                 if ($d_s < 10) $d_s = "0" . $d_s;
 
                 //Run FFMPEG to create the segment from the watermarked video 
-                $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . ".mp4 -vcodec libx264 -vpre slow -vpre baseline -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
+                $command = "/usr/bin/ffmpeg -y -i " . $watermarked_filename . ".mp4 -vcodec libx264 -preset slow -g 30 -ss " . $s_h . ":" . $s_m . ":" . $s_s . " -t " . $d_h . ":" . $d_m . ":" . $d_s . " " . $segment_filename . ".mp4";
                 echo "command:\n\n" . $command . "\n\n";
                 shell_exec($command);
 
