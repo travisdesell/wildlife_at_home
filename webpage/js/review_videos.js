@@ -33,10 +33,20 @@ $(document).ready(function () {
         }
         return null;
     }
+    
+    function onlyUnique(value, index, self) { 
+            return self.indexOf(value) === index;
+    }
 
     function drawTimeline(video_id, event_data) {
-        console.log(event_data);
         if(canDraw) {
+            var temp = new Array();
+            for (var i = 0; i < event_data.length; i++) {
+                temp.push(event_data[i][0]);
+            }
+            var unique_users = temp.filter(onlyUnique);
+            var num_users = unique_users.length;
+
             var container = document.getElementById(video_id + '_timeline');
             var chart = new google.visualization.Timeline(container);
             var data = new google.visualization.DataTable();
@@ -45,7 +55,10 @@ $(document).ready(function () {
             data.addColumn({type: 'date', id: 'Start'});
             data.addColumn({type: 'date', id: 'End'});
             data.addRows(event_data);
-            chart.draw(data);
+            var options = {
+                height: (num_users) * 50 + 50
+            };
+            chart.draw(data, options);
         }
     }
 
