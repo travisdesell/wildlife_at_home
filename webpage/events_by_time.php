@@ -122,7 +122,7 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Percent of correct events for each type',
+                title: 'Number of event occurrences in each hour of the day',
             };
 
             var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
@@ -131,7 +131,7 @@ echo "
         }
     </script>
 
-            <h1>Correctness Test</h1>
+            <h1>Events by Time of Day</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
