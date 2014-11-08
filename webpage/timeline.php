@@ -7,11 +7,8 @@ $cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
 //echo $cwd[__FILE__];
 require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/uotd.php");
-require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
-require_once($cwd[__FILE__] . "/webpage/my_query.php");
+require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
@@ -24,15 +21,8 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 parse_str($_SERVER['QUERY_STRING']);
 
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
 $query = "SELECT user_id, expert, ot.name AS event_name, start_time, end_time FROM timed_observations JOIN observation_types AS ot ON event_id = ot.id WHERE video_id = $video_id AND start_time > 0 AND end_time > 0 AND start_time < end_time ORDER BY expert DESC";
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $easy_query\n");
-    die("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $easy_query\n");
-}
+$result = query_wildlife_video_db($query);
 
 echo "
 <div class='containder'>
@@ -62,12 +52,12 @@ echo "
             data.addRows([
 ";
 
-while ($row = mysql_fetch_assoc($result)) {
-    if ($row['expert']) {
-        $name = "Expert";
-    } else {
-        $name = $row['user_id'];
-    }
+while ($row = $result->fetch_assoc()) {
+    $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+    $name_result = query_boinc_db($name_query);
+    $name_row = $name_result->fetch_assoc();
+    $name = $name_row['name'];
+
     echo "['" . $name . "'";
     echo ",'" . $row['event_name'] . "'";
     echo ", getDate('" . $row['start_time'] . "')";

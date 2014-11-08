@@ -48,11 +48,7 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Event Type');
-            data.addColumn('number', 'Percent Correct');
-            data.addColumn({type: 'string', role: 'tooltip'});
-            data.addRows([
+            var data = new google.visualization.arrayToDataTable([
 ";
 
 function getExpertMatch($timed_id, $buffer) {
@@ -87,26 +83,37 @@ function getExpertMatch($timed_id, $buffer) {
     }
 }
 
+$events = array();
+echo "['Hour',";
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
+    //$timed_query = "SELECT HOUR(obs.start_time) AS hour, COUNT(*) AS count FROM timed_observations AS obs WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time) GROUP BY hour ORDER BY hour";
+    $timed_query = "SELECT HOUR(obs.start_time) AS hour, COUNT(*) AS count FROM timed_observations AS obs WHERE expert = 1 AND event_id = $type_id AND start_time > 0 AND end_time > start_time GROUP BY hour ORDER BY hour";
     $timed_result = query_wildlife_video_db($timed_query);
-    $num_events = $timed_result->num_rows;
-    $num_match_events = 0;
-    while ($timed_row = $timed_result->fetch_assoc()) {
-        $num_match_events += getExpertMatch($timed_row['id'], $buffer);
-    }
 
-    if ($num_match_events > 0) {
-        echo "[";
-        echo "'$type_name'";
-        echo ",";
-        echo $num_match_events / $num_events;
-        echo ",";
-        echo "'$num_match_events / $num_events'";
-        echo "],";
+    $event_count = array();
+    while ($timed_row = $timed_result->fetch_assoc()) {
+        //$num_match_events += getExpertMatch($timed_row['id'], $buffer);
+        $event_count[$timed_row['hour']]=$timed_row['count'];
     }
+    array_push($events, $event_count);
+
+    echo "'$type_name'";
+    echo ",";
+}
+echo "],";
+
+for($hour=0;$hour<24;$hour++) {
+    echo "[$hour,";
+    for($event=0;$event<count($events);$event++) {
+        $temp_val = 0;
+        if (array_key_exists($hour, $events[$event])) {
+            $temp_val = $events[$event][$hour];
+        }
+        echo "$temp_val,";
+    }
+    echo"],";
 }
 
 echo "
@@ -115,20 +122,16 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Percent of correct events for each type',
-                vAxis: {
-                    title: 'Percent Correct',
-                    maxValue: 1.0,
-                }
+                title: 'Number of event occurrences in each hour of the day',
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
     </script>
 
-            <h1>Correctness Test</h1>
+            <h1>Events by Time of Day</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
