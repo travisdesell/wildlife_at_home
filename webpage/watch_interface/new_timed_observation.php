@@ -24,6 +24,11 @@ $comments = mysql_real_escape_string($_POST['comments']);
 $user_query = "UPDATE user SET total_events = total_events + 1 WHERE id = $user_id";
 $user_result = query_boinc_db($user_query);
 
+if ($user['teamid'] > 0) {
+    $team_query = "UPDATE team SET total_events = total_events + 1 WHERE id = " . $user['teamid'];
+    $team_result = query_boinc_db($team_query);
+}
+
 $query = "SELECT species_id, location_id FROM video_2 WHERE id = $video_id";
 $result = query_wildlife_video_db($query);
 
