@@ -21,13 +21,13 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 parse_str($_SERVER['QUERY_STRING']);
 
-// Set buffer for correctness time (+ or - the buffer value)
-if (!isset($buffer)) {
-    $buffer = 5;
-}
+$duration_query = "SELECT duration_s FROM video_2 WHERE id = $video_id";
+$duration_result = query_wildlife_video_db($duration_query);
+$duration_row = $duration_result->fetch_assoc();
+$video_duration = $duration_row['duration_s'];
 
-$watch_query = "SELECT user_id, video_id, experience FROM watched_videos_stats";
-$watch_result = query_wildlife_video_db($watch_query);
+$query = "SELECT (TIME_TO_SEC(obs.start_time) - TIME_TO_SEC(vid.start_time)) AS start_time, (TIME_TO_SEC(obs.end_time) - TIME_TO_SEC(vid.start_time)) AS end_time, type.name AS type_name, event_id, user_id FROM timed_observations obs JOIN observation_types AS type ON type.id = event_id JOIN video_2 AS vid ON vid.id = video_id WHERE expert = 0 AND video_id = $video_id AND obs.start_time > 0 AND obs.start_time < obs.end_time";
+$result = query_wildlife_video_db($query);
 
 echo "
 <div class='containder'>
@@ -49,49 +49,48 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             var data = new google.visualization.arrayToDataTable([
-                ['Correctness', 'Experience'],
+                ['ID', 'Start Time', 'Citizen Time', 'Type Name', 'Distance'],
 ";
 
-function getCorrectness($db, $user_id, $video_id, $buffer) {
-    $event_query = "SELECT event_id, to_seconds(start_time) AS start_sec, to_seconds(end_time) AS end_sec FROM timed_observations AS t JOIN observation_types AS e ON e.id = event_id WHERE expert = 0 AND user_id = $user_id AND video_id = $video_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
-    $event_result = query_wildlife_video_db($event_query);
-    $num_events = $event_result->num_rows;
-    $num_match_events = 0;
+function distToClosestExpertEvent($video_id, $event_id, $start_time, $end_time) {
+    $query = "SELECT (TIME_TO_SEC(obs.start_time) - TIME_TO_SEC(vid.start_time)) AS start_time, (TIME_TO_SEC(obs.end_time) - TIME_TO_SEC(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND obs.start_time > 0 AND obs.start_time < obs.end_time";
+    $result = query_wildlife_video_db($query);
 
-    if ($num_events > 0) {
-        while ($event_row = $event_result->fetch_assoc()) {
-            $event_id = $event_row['event_id'];
-            $start_sec = $event_row['start_sec'];
-            $end_sec = $event_row['end_sec'];
-
-            $start_sec_top = $start_sec - $buffer;
-            $start_sec_bot = $start_sec + $buffer;
-            $end_sec_top = $end_sec - $buffer;
-            $end_sec_bot = $end_sec + $buffer;
-            $match_query = "SELECT * FROM timed_observations WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND to_seconds(start_time) BETWEEN $start_sec_top AND $start_sec_bot AND to_seconds(end_time) BETWEEN $end_sec_top AND $end_sec_bot";
-            $match_result = query_wildlife_video_db($match_query);
-            $num_matches = $match_result->num_rows;
-
-            if ($num_matches >= 1) {
-                $num_match_events += 1;
-            }
+    $min_dist = -1;
+    while ($row = $result->fetch_assoc()) {
+        $temp_start = $row['start_time'];
+        $temp_end = $row['end_time'];
+        $dist = sqrt((($temp_start - $start_time)*($temp_start - $start_time)) + (($temp_end - $end_time)*($temp_end - $end_time)));
+        if ($min_dist == -1 || $dist < $min_dist) {
+            $min_dist = $dist;
         }
-
-        return $num_match_events / $num_events;
-    } else {
-        return 0;
     }
+
+    return $min_dist;
 }
 
-while ($watch_row = $watch_result->fetch_assoc()) {
-    $user_id = $watch_row['user_id'];
-    $video_id = $watch_row['video_id'];
-    $experience = $watch_row['experience'];
-    $correctness = getCorrectness($wildlife_db, $user_id, $video_id, $buffer);
+while ($row = $result->fetch_assoc()) {
+    $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+    $name_result = query_boinc_db($name_query);
+    $name_row = $name_result->fetch_assoc();
+    $name = $name_row['name'];
+
+    $start_time = $row['start_time'];
+    $end_time = $row['end_time'];
+    $type_id = $row['event_id'];
+    $type_name = $row['type_name'];
+    $distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
+    $value = ($end_time-$start_time)/$video_duration;
     echo "[";
-    echo $experience;
+    echo "''";
     echo ",";
-    echo $correctness;
+    echo $start_time/$video_duration;
+    echo ",";
+    echo $end_time/$video_duration;
+    echo ",";
+    echo "'$type_name'";
+    echo ",";
+    echo $distance/($video_duration*1.41421356237); //Divide by hypotenuse of a square
     echo "],";
 }
 
@@ -101,14 +100,12 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Correctness vs Experience',
-                hAxis: {title: 'Experience'},
-                vAxis: {title: 'Correctness', minValue: 0, maxValue: 1},
-                legend: 'none'
-
+                title: 'Time Interval Plane',
+                hAxis: {title: 'Start Time'},
+                vAxis: {title: 'End Time'}
             };
 
-            var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.BubbleChart(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
