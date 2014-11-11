@@ -7,37 +7,45 @@
 	$iteration = 0;
 	$images_not_found = 0;
 
-	$query = "Select archive_filename, watermarked_filename, watermarked from images where watermarked != 1 limit 1";
-	$result = mysql_query($query);
-	if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+	while(true) {
+		$query = "Select archive_filename, watermarked_filename, watermarked from images where watermarked != 1 limit 1";
+		$result = mysql_query($query);
+		if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 
 
-	$row = mysql_fetch_assoc($result);
+		$row = mysql_fetch_assoc($result);
 
-	if (!$row) {
-		echo("No images left to watermark, attempt: $images_not_found");
-		$images_not_found++;
-		if ($images_not_found >= 5) die("No images left to watermark.");
-	} else $images_not_found = 0;
+		if (!$row) {
+			echo("No images left to watermark, attempt: $images_not_found");
+			$images_not_found++;
+			if ($images_not_found >= 5) die("No images left to watermark.");
+		} else $images_not_found = 0;
 
 
 
-	echo $row['archive_filename']."\n";
-	echo $row['watermarked_filename']."\n";
+		echo $row['archive_filename']."\n";
+		echo $row['watermarked_filename']."\n";
 
-	$archive_filename = $row['archive_filename'];
-	$watermarked_filename = str_replace("/archive/","/watermarked/", $archive_filename);
+		$archive_filename = $row['archive_filename'];
+		$watermarked_filename = str_replace("/archive/","/watermarked/", $archive_filename);
 
-	if ($row['watermarked'] == 0) {
-		$base_directory = substr($watermarked_filename, 0, strrpos($watermarked_filename, "/"));
-		mkdir($base_directory, 0755, true);
+		if ($row['watermarked'] == 0) {
+			$base_directory = substr($watermarked_filename, 0, strrpos($watermarked_filename, "/"));
+			mkdir($base_directory, 0755, true);
 
-		$watermark_file = "/photo/watermarkhudson.png";
+			$watermark_file = "/photo/watermarkhudson.png";
 
-		$command = "convert $archive_filename --resize 1024x768 $watermark_file -composite -quality 100 $watermarked_filename";
+			$command = "convert $archive_filename --resize 1024x768 $watermark_file -composite -quality 100 $watermarked_filename";
 
-		shell_exec($command);
+			echo "\nExecuting $command\n";
+			shell_exec($command);
 
-		$query = "update images set watermarked = 0, watermarked_filename = '$watermark_filename' where id =" . $row['id'];
+			$md5_hash = md5_file($watermarked_filename);
+			$filesize = filesize($watermarked_filename);
+			$query = "update images set watermarked = 1, watermarked_filename = '$watermark_filename', size = $filesize, md5_hash = '$md5_hash' where id =" . $row['id'];
+			$result = mysql_query($query);
+			if(!$result) die("MYSQL Error (". mysql_errno() ."): " . mysql_error() . "\nquery: $query\n");
+		}
+	}
 
 ?>
