@@ -49,7 +49,7 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             var data = new google.visualization.arrayToDataTable([
-                ['Event Duration as a Portion of Video Length', 'Event Correctness as a Portion of Total Observation Correctness'],
+                ['Event Duration as a Portion of Video Length', 'Buffer Correctness', 'Euclidian Correctness'],
 ";
 
 function getBufferCorrectness($obs_id, $buffer) {
@@ -116,6 +116,15 @@ function getEuclidianCorrectness($obs_id) {
     return 0;
 }
 
+function getEventWeight($obs_id) {
+    $weight_query = "SELECT (v.duration_s/(TO_SECONDS(t.end_time) - TO_SECONDS(t.start_time)))/(SELECT SUM(vid.duration_s/(TO_SECONDS(obs.end_time)-TO_SECONDS(obs.start_time))) FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id GROUP BY obs.user_id) AS weight FROM timed_observations AS t JOIN video_2 AS v ON v.id = t.video_id WHERE t.id = $obs_id";
+    $weight_result = query_wildlife_video_db($weight_query);
+        while ($weight_row = $weight_result->fetch_assoc()) {
+            return $weight_row['weight'];
+        }
+    return 0;
+}
+
 while ($watch_row = $watch_result->fetch_assoc()) {
     $user_id = $watch_row['user_id'];
     $video_id = $watch_row['video_id'];
@@ -127,13 +136,15 @@ while ($watch_row = $watch_result->fetch_assoc()) {
         $event_length = $event_row['end_time'] - $event_row['start_time'];
         $video_length = $event_row['duration_s'];
         $event_duration_proportion = $event_length/$video_length;
-        //$correctness = getBufferCorrectness($obs_id, $buffer);
-        $correctness = getEuclidianCorrectness($obs_id);
+        $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
+        $euclidian_correctness = getEuclidianCorrectness($obs_id);
+        $event_weight = getEventWeight($obs_id);
         echo "[";
         echo $event_duration_proportion;
         echo ",";
-        echo $correctness/$num_events;
-        //echo $correctness;
+        echo $buffer_correctness * $event_weight;
+        echo ",";
+        echo $euclidian_correctness * $event_weight;
         echo "],";
     }
 }
@@ -144,10 +155,9 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Correctness vs Experience',
+                title: 'Correctness Contribution vs Proportional Event Length',
                 vAxis: {title: 'Event Correctness as a Portion of Total Observation Correctness'},
                 hAxis: {title: 'Event Duration as a Portion of Video Length'},
-                legend: 'none'
             };
 
             var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
