@@ -30,6 +30,21 @@ $videos = array(
 
                 'video_explanation' => array(
                     array(
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_1_WatchVideoPage',
+                        'video_description' => "<p></p>"
+                    ),
+
+                    array(
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_2_marking_recess_events',
+                        'video_description' => "<p></p>"
+                    ),
+
+                    array(
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_3_chick_behavior',
+                        'video_description' => "<p></p>"
+                    ),
+
+                    array(
                         'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/bird_leaving_nest',
                         'video_description' => "<p>As you will notice, it can be challenging to determine if the bird is on the nest. Her coloration helps her to blend in with her surroundings, and she prefers to nest in areas with plenty of grass to conceal her and the nest.  Use this video where the bird is leaving the nest to see how difficult is to locate her until she moves, and how exposed the eggs become when she leaves the nest.</p>"
                     ),
