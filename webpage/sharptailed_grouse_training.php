@@ -31,17 +31,17 @@ $videos = array(
                 'video_explanation' => array(
                     array(
                         'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_1_WatchVideoPage',
-                        'video_description' => "<p></p>"
+                        'video_description' => "<p>This video walks you through the different buttons on the “Watch Video” page. It also describes the various categories of events along with the purpose of tags. Finally, the video demonstrates how to enter in events on the website.</p>"
                     ),
 
                     array(
                         'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_2_marking_recess_events',
-                        'video_description' => "<p></p>"
+                        'video_description' => "<p>This video provides an overview on what recess events and why we care. We also demonstrate how to mark recess events on the website.</p>"
                     ),
 
                     array(
                         'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_3_chick_behavior',
-                        'video_description' => "<p></p>"
+                        'video_description' => "<p>In this video, we define the “chick behavior” event. We also show how parent and chick events are to be marked within the same video. Finally, we demonstrate how to mark these events with real footage.</p>"
                     ),
 
                     array(
