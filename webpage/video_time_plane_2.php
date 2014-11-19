@@ -69,6 +69,29 @@ function distToClosestExpertEvent($video_id, $event_id, $start_time, $end_time) 
     return $min_dist;
 }
 
+function distToClosestExpertCombinedEvents($video_id, $event_id, $start_time, $end_time) {
+    $query = "SELECT (TIME_TO_SEC(obs.start_time) - TIME_TO_SEC(vid.start_time)) AS start_time, (TIME_TO_SEC(obs.end_time) - TIME_TO_SEC(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND obs.start_time > 0 AND obs.start_time < obs.end_time";
+    $result = query_wildlife_video_db($query);
+    $start_times = array();
+    $end_times = array();
+
+    while ($row = $result->fetch_assoc()) {
+        $start_times[] = $row['start_time'];
+        $end_times[] = $row['end_time'];
+    }
+
+    $min_dist = -1;
+    foreach ($start_times as $temp_start) {
+        foreach ($end_times as $temp_end) {
+            $dist = sqrt((($temp_start - $start_time)*($temp_start - $start_time)) + (($temp_end - $end_time)*($temp_end - $end_time)));
+            if ($min_dist == -1 || $dist < $min_dist) {
+                $min_dist = $dist;
+            }
+        }
+    }
+    return $min_dist;
+}
+
 while ($row = $result->fetch_assoc()) {
     $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
     $name_result = query_boinc_db($name_query);
@@ -79,7 +102,8 @@ while ($row = $result->fetch_assoc()) {
     $end_time = $row['end_time'];
     $type_id = $row['event_id'];
     $type_name = $row['type_name'];
-    $distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
+    //$distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
+    $distance = distToClosestExpertCombinedEvents($video_id, $type_id, $start_time, $end_time);
     $value = ($end_time-$start_time)/$video_duration;
     echo "[";
     echo "''";
