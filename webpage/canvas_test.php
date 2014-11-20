@@ -52,16 +52,27 @@ echo "
 container_end();
 */
 
-//$result = query_wildlife_video_db("SELECT * FROM images WHERE watermarked = 1 ORDER BY RAND() LIMIT 1");
-//$row = $result->fetch_assoc();
 
-//from citizen_science_grid/my_query.php
-//this is supposedly much faster, as per: http://akinas.com/pages/en/blog/mysql_random_row/
-$offset_result = query_wildlife_video_db( " SELECT FLOOR(RAND() * COUNT(*)) AS `offset` FROM images");
-$offset_row = $offset_result->fetch_assoc();
-$offset = $offset_row['offset'];
+$image_id = -1;
 
-$result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked FROM images LIMIT $offset, 1 ");
+$result = NULL;
+if (array_key_exists('image_id', $_GET)) {
+    $image_id = mysql_real_escape_string($_GET['image_id']);
+    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked FROM images WHERE id = $image_id");
+
+} else {
+    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked FROM images WHERE watermarked = 1 ORDER BY RAND() LIMIT 1");
+    //$row = $result->fetch_assoc();
+
+    //from citizen_science_grid/my_query.php
+    //this is supposedly much faster, as per: http://akinas.com/pages/en/blog/mysql_random_row/
+    //$offset_result = query_wildlife_video_db( " SELECT FLOOR(RAND() * COUNT(*)) AS `offset` FROM images");
+    //$offset_row = $offset_result->fetch_assoc();
+    //$image_id = $offset_row['offset'];
+
+    //$result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked FROM images LIMIT $image_id, 1 ");
+}
+
 $row = $result->fetch_assoc();
 
 $image_id = $row['id'];
@@ -78,9 +89,12 @@ echo "
     </div>
 
     <div class='col-sm-8'>
-        <div id='canvas'>
-            <img class='img-responsive' src='http://wildlife.und.edu/$image'></img>
-        </div>
+        <div id='canvas'>";
+
+//echo "            <img class='img-responsive' src='http://wildlife.und.edu/$image'></img>";
+echo "            <img src='http://wildlife.und.edu/$image'></img>";
+
+echo "  </div>
     </div>
 </div>
 ";
