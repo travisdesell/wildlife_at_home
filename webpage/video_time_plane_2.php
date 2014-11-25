@@ -49,7 +49,7 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             var data = new google.visualization.arrayToDataTable([
-                ['ID', 'Start Time', 'Citizen Time', 'Type Name', 'Distance'],
+                ['ID', 'Start Time', 'Citizen End Time', 'Type Name', 'Percent Error'],
 ";
 
 function distToClosestExpertEvent($video_id, $event_id, $start_time, $end_time) {
@@ -104,6 +104,9 @@ while ($row = $result->fetch_assoc()) {
     $type_name = $row['type_name'];
     //$distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
     $distance = distToClosestExpertCombinedEvents($video_id, $type_id, $start_time, $end_time);
+    if ($distance < 0) {
+        $distance = $video_duration * 1.41421356237;
+    }
     $value = ($end_time-$start_time)/$video_duration;
     echo "[";
     echo "''";
@@ -114,7 +117,7 @@ while ($row = $result->fetch_assoc()) {
     echo ",";
     echo "'$type_name'";
     echo ",";
-    echo $distance/($video_duration*1.41421356237); //Divide by hypotenuse of a square
+    echo $distance/($video_duration*1.41421356237) * 100; //Divide by hypotenuse of a square
     echo "],";
 }
 
