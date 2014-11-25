@@ -26,7 +26,15 @@ if (!isset($buffer)) {
     $buffer = 5;
 }
 
-$watch_query = "SELECT DISTINCT w.user_id, w.video_id FROM watched_videos w JOIN timed_observations AS obs ON obs.video_id = w.video_id JOIN video_2 AS vid ON vid.id = w.video_id WHERE obs.expert = 0 AND vid.duration_s >= 30 AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) > TO_SECONDS(i.start_time))";
+if (!isset($scale_factor)) {
+    $scale_factor = 10;
+}
+
+if (!isset($video_id)) {
+    $watch_query = "SELECT DISTINCT w.user_id, w.video_id FROM watched_videos w JOIN timed_observations AS obs ON obs.video_id = w.video_id JOIN video_2 AS vid ON vid.id = w.video_id WHERE obs.expert = 0 AND vid.duration_s >= 30 AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) > TO_SECONDS(i.start_time))";
+} else { 
+    $watch_query = "SELECT DISTINCT w.user_id, w.video_id FROM watched_videos w JOIN timed_observations AS obs ON obs.video_id = w.video_id JOIN video_2 AS vid ON vid.id = w.video_id WHERE w.video_id = $video_id AND obs.expert = 0 AND vid.duration_s >= 30 AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) > TO_SECONDS(i.start_time))";
+}
 $watch_result = query_wildlife_video_db($watch_query);
 
 echo "
@@ -49,7 +57,7 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             var data = new google.visualization.arrayToDataTable([
-                ['Event Duration as a Portion of Video Length', 'Buffer Correctness', 'Euclidian Correctness'],
+                ['Event Duration as a Portion of Video Length', 'Buffer Correctness', 'Euclidian Correctness', 'Scaled Buffer Correctness', 'Scaled Euclidan Correctness'],
 ";
 
 function getBufferCorrectness($obs_id, $buffer) {
@@ -116,8 +124,8 @@ function getEuclidianCorrectness($obs_id) {
     return 0;
 }
 
-function getEventWeight($obs_id) {
-    $weight_query = "SELECT (v.duration_s/(TO_SECONDS(t.end_time) - TO_SECONDS(t.start_time)))/(SELECT SUM(vid.duration_s/(TO_SECONDS(obs.end_time) - TO_SECONDS(obs.start_time))) FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id GROUP BY obs.user_id) AS weight FROM timed_observations AS t JOIN video_2 AS v ON v.id = t.video_id WHERE t.id = $obs_id";
+function getEventWeight($obs_id, $scale_factor) {
+    $weight_query = "SELECT (v.duration_s/(TO_SECONDS(t.end_time) - TO_SECONDS(t.start_time) + v.duration_s/$scale_factor))/(SELECT SUM(vid.duration_s/(TO_SECONDS(obs.end_time) - TO_SECONDS(obs.start_time) + vid.duration_s/$scale_factor)) FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id GROUP BY obs.user_id) AS weight FROM timed_observations AS t JOIN video_2 AS v ON v.id = t.video_id WHERE t.id = $obs_id";
     $weight_result = query_wildlife_video_db($weight_query);
         while ($weight_row = $weight_result->fetch_assoc()) {
             return $weight_row['weight'];
@@ -138,13 +146,18 @@ while ($watch_row = $watch_result->fetch_assoc()) {
         $event_duration_proportion = $event_length/$video_length;
         $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
         $euclidian_correctness = getEuclidianCorrectness($obs_id);
-        $event_weight = getEventWeight($obs_id);
+        $scaled_event_weight = getEventWeight($obs_id, $scale_factor);
+        $event_weight = 1/$num_events;
         echo "[";
         echo $event_duration_proportion;
         echo ",";
         echo $buffer_correctness * $event_weight;
         echo ",";
         echo $euclidian_correctness * $event_weight;
+        echo ",";
+        echo $buffer_correctness * $scaled_event_weight;
+        echo ",";
+        echo $euclidian_correctness * $scaled_event_weight;
         echo "],";
     }
 }
@@ -155,9 +168,25 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Correctness Contribution vs Proportional Event Length',
+                title: 'Event Correctness vs Event Length',
                 vAxis: {title: 'Event Correctness as a Portion of Total Observation Correctness'},
                 hAxis: {title: 'Event Duration as a Portion of Video Length'},
+                series: {
+                    0: { pointSize: 10, pointShape: 'square' },
+                    1: { pointSize: 5, pointShape: 'square' },
+                    2: { pointSize: 10, pointShape: 'triangle' },
+                    3: { pointSize: 5, pointShape: 'triangle' },
+                    4: { pointShape: 'star' },
+                    5: { pointShape: 'diamond' },
+                    6: { pointShape: 'circle' },
+                    7: { pointShape: 'polygon' }
+                },
+                trendlines: {
+                    0: {type: 'exponential'},
+                    1: {type: 'exponential'},
+                    2: {type: 'exponential'},
+                    3: {type: 'exponential'}
+                }
             };
 
             var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
@@ -166,20 +195,24 @@ echo "
         }
     </script>
 
-            <h1>Correctness Test</h1>
+            <h1>Event Correctness VS Event Length (2.0)</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
+                <dt>video_id=</dt>
+                <dd>The ID of the video in the database. If left empty this will load data for all video (slow). Also, if all data is loaded there will be a gernal upward trend since the majority of videos only have one or two events.</dd>
                 <dt>buffer=</dt>
                 <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
+                <dt>scale_factor=</dt>
+                <dd>The skewness input for the scaled correctness algorithms, large values give greater favor to the shorter events and smaller values weight events more evenly. This value must be greater than 0. The default value is 10.</dd>
             </dl>
             
 
             <h2>Description:</h2>
-            <p>This scatterplot shows the </p>
-            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
+            <p>This scatterplot with trendlines shows the events for a given video and shows what percentange of the total user observation an event is worth and how this compares event legth as a portion of video length.</p>
+            <p>Video ID 6511 is a decent example.</p>
 
         </div>
     </div>
