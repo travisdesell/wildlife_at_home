@@ -21,7 +21,7 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 //parse_str($_SERVER['QUERY_STRING']);
 
-$query = "SELECT DISTINCT vid.animal_id, vid.watermarked_filename AS video_name, obs.video_id, ot.name AS event_name, obs.start_time, obs.end_time FROM timed_observations AS obs JOIN observation_types AS ot ON obs.event_id = ot.id JOIN video_2 AS vid ON vid.id = obs.video_id WHERE expert = 1 AND (obs.start_time <= 0 OR obs.start_time >= obs.end_time)";
+$query = "SELECT DISTINCT vid.animal_id, vid.watermarked_filename AS video_name, obs.video_id, ot.name AS event_name, obs.start_time, obs.end_time FROM timed_observations AS obs JOIN observation_types AS ot ON obs.event_id = ot.id JOIN video_2 AS vid ON vid.id = obs.video_id WHERE expert = 1 AND (obs.start_time <= 0 OR obs.start_time > obs.end_time)";
 
 $result = query_wildlife_video_db($query);
 
