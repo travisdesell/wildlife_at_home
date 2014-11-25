@@ -56,7 +56,7 @@ $(document).ready(function () {
             data.addColumn({type: 'date', id: 'End'});
             data.addRows(event_data);
             var options = {
-                height: (num_users) * 50 + 50
+                height: (num_users) * 50 + 110
             };
             chart.draw(data, options);
         }
