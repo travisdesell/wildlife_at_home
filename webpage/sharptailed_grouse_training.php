@@ -30,6 +30,21 @@ $videos = array(
 
                 'video_explanation' => array(
                     array(
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_1_WatchVideoPage',
+                        'video_description' => "<p>This video walks you through the different buttons on the “Watch Video” page. It also describes the various categories of events along with the purpose of tags. Finally, the video demonstrates how to enter in events on the website.</p>"
+                    ),
+
+                    array(
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_2_marking_recess_events',
+                        'video_description' => "<p>This video provides an overview on what recess events and why we care. We also demonstrate how to mark recess events on the website.</p>"
+                    ),
+
+                    array(
+                        'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/tutorial_3_chick_behavior',
+                        'video_description' => "<p>In this video, we define the “chick behavior” event. We also show how parent and chick events are to be marked within the same video. Finally, we demonstrate how to mark these events with real footage.</p>"
+                    ),
+
+                    array(
                         'video_href' => 'http://wildlife.und.edu/share/wildlife/Website_Training/bird_leaving_nest',
                         'video_description' => "<p>As you will notice, it can be challenging to determine if the bird is on the nest. Her coloration helps her to blend in with her surroundings, and she prefers to nest in areas with plenty of grass to conceal her and the nest.  Use this video where the bird is leaving the nest to see how difficult is to locate her until she moves, and how exposed the eggs become when she leaves the nest.</p>"
                     ),
