@@ -36,8 +36,8 @@ function initDraw(canvas) {
         mouse.x += canvas.offsetLeft;
         mouse.y += canvas.offsetTop;
 
-        console.log("mouse.y: " + mouse.y + ", ev.pageY: " + ev.pageY + ", window.pageYOffset: " + window.pageYOffset + ", document.body.scrollTop: " + document.body.scrollTop + ", canvas.offsetTop: " + canvas.offsetTop);
-        console.log("mouse.x: " + mouse.x + ", ev.pageX: " + ev.pageX + ", window.pageXOffset: " + window.pageXOffset + ", document.body.scrollLeft: " + document.body.scrollLeft + ", canvas.offsetLeft: " + canvas.offsetLeft);
+//        console.log("mouse.y: " + mouse.y + ", ev.pageY: " + ev.pageY + ", window.pageYOffset: " + window.pageYOffset + ", document.body.scrollTop: " + document.body.scrollTop + ", canvas.offsetTop: " + canvas.offsetTop);
+//        console.log("mouse.x: " + mouse.x + ", ev.pageX: " + ev.pageX + ", window.pageXOffset: " + window.pageXOffset + ", document.body.scrollLeft: " + document.body.scrollLeft + ", canvas.offsetLeft: " + canvas.offsetLeft);
     };
 
     function getRectanglePosition(element) {
@@ -177,6 +177,10 @@ function initDraw(canvas) {
             } else {
                 console.log("current_action != '" + current_action + "', element_count: " + element_count);
             }
+
+            console.log("i is: " + current_element.id);
+            $("#" + current_element.id).html("x: " + current_element.style.left + ", y: " + current_element.style.top +  ", height: " + current_element.style.height + ", width: " + current_element.style.width);
+
         }
 
         e.preventDefault();
@@ -250,7 +254,7 @@ function initDraw(canvas) {
 
             mouse.startX = mouse.x;
             mouse.startY = mouse.y;
-            console.log("mouse.startY: " + mouse.startY + "mouse.startx: " + mouse.startX);
+//            console.log("mouse.startY: " + mouse.startY + "mouse.startx: " + mouse.startX);
 
             if (current_element != null) {
                 current_element.style.border = '2px solid #FF0000';
@@ -268,10 +272,12 @@ function initDraw(canvas) {
                 current_element.className = 'rectangle';
                 current_element.style.left = mouse.x + 'px';
                 current_element.style.top = mouse.y + 'px';
+                current_element.id = element_count;
+
                 canvas.appendChild(current_element);
                 canvas.style.cursor = "crosshair";
 
-                $('#selection-information').append("<div class='selection' id='" + element_count + "'> Information for selection " + element_count + " goes here.</div>");
+                $('#selection-information').append("<div class='selection' id='" + element_count + "'> Information for selection " + element_count + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + "</div>");
 
                 elements[element_count] = current_element;
                 element_count++;
