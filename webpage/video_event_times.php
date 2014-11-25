@@ -25,6 +25,9 @@ while ($row = $result->fetch_assoc()) {
     $name_result = query_boinc_db($name_query);
     $name_row = $name_result->fetch_assoc();
     $name = $name_row['name'];
+    if ($row['expert'] == 1) {
+        $name = $name . " (expert)";
+    }
 
     array_push($events, array($name, $row['event_name'], $row['start_time'], $row['end_time']));
 }
