@@ -4,6 +4,7 @@
 }
 
 .rectangle {
-    border: 1px solid #FF0000;
+    border: 4px solid #FF0000;
+    background: rgba(255,0,0,0.3);
     position: absolute;
 }
