@@ -77,7 +77,7 @@ echo "
         <button class='btn btn-primary' id='submit-selections-button'>Submit</button>
     </div>
 
-    <div class='col-sm-8'>
+    <div class='col-sm-8' onselectstart='return false' ondragstart='return false'>
         <div id='canvas'>
             <img class='img-responsive' src='http://wildlife.und.edu/$image'></img>
         </div>
