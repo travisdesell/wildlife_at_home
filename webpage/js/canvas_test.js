@@ -181,9 +181,9 @@ function initDraw(canvas) {
 			console.log("current_action != '" + current_action + "', element_count: " + element_count);
 		    }
 		}
-
 		e.preventDefault();
 		e.stopPropagation();
+	     	imag.style.MozUserSelect = "none";
 	}
     }
 
@@ -201,9 +201,11 @@ function initDraw(canvas) {
              canvas.style.cursor = "default";
     }
 
+
     canvas.onmousedown = function(e) {
 	imag.draggable = false;
 	is_dragging = true;
+	//imag.style.MozUserSelect = "auto";
             //get the position of the mouse.
             setMousePosition(e);
 
