@@ -57,6 +57,9 @@ while ($row = $result->fetch_assoc()) {
     $name_result = query_boinc_db($name_query);
     $name_row = $name_result->fetch_assoc();
     $name = $name_row['name'];
+    if ($row['expert'] == 1) {
+        $name = $name . " (expert)";
+    }
 
     echo "['" . $name . "'";
     echo ",'" . $row['event_name'] . "'";

@@ -56,7 +56,7 @@ $(document).ready(function () {
             data.addColumn({type: 'date', id: 'End'});
             data.addRows(event_data);
             var options = {
-                height: (num_users) * 50 + 50
+                height: (num_users) * 50 + 110
             };
             chart.draw(data, options);
         }
@@ -510,7 +510,7 @@ $(document).ready(function () {
 //                console.log("mouse is over: '" + label_text + "'");
             if ( !$(this).hasClass("has-remove-icon") ) { 
                 $(this).addClass("has-remove-icon");
-                $(this).append(" <span class='glyphicon glyphicon-ok-sign'></span>");
+                $(this).append(" <span class='glyphicon glyphicon-remove-sign'></span>");
             }   
         }); 
 
