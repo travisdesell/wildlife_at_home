@@ -58,10 +58,10 @@ $image_id = -1;
 $result = NULL;
 if (array_key_exists('image_id', $_GET)) {
     $image_id = mysql_real_escape_string($_GET['image_id']);
-    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked FROM images WHERE id = $image_id");
+    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
 
 } else {
-    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked FROM images WHERE watermarked = 1 ORDER BY RAND() LIMIT 1");
+    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE watermarked = 1 ORDER BY RAND() LIMIT 1");
     //$row = $result->fetch_assoc();
 
     //from citizen_science_grid/my_query.php
@@ -78,12 +78,23 @@ $row = $result->fetch_assoc();
 $image_id = $row['id'];
 $image_watermarked = $row['watermarked'];
 $image = $row['watermarked_filename'];
+$species_id = $row['species'];
+$year = $row['year'];
+if($species_id == 3)
+{ $species = "predator";}
+else if($species_id == 2)
+{ $species = "lesser snow goose";}
+else if($species_id == 1)
+{ $species = "common eider";}
+else
+{ $species = "other";}
+
 
 echo "
 <div class='row'>
     <div class='col-sm-4'>
         <div id='selection-information'>
-            You are looking at image: $image_id and it is watermarked? $image_watermarked.
+            You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image
         </div>
         <button class='btn btn-primary' id='submit-selections-button'>Submit</button>
     </div>
