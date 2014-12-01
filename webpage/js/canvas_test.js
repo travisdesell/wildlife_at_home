@@ -137,10 +137,15 @@ function initDraw(canvas) {
 			   console.log("startX: " + mouse.startX + ", mouse.x: " + mouse.x + ", startY: " + mouse.startY + ", mouse.y: " + mouse.y);
 			   */
 			canvas.style.cursor = "move";
+		if(   ((original_left+(mouse.x-mouse.startX))>24)   &&   ((original_top+(mouse.y-mouse.startY))>9)  && ((original_left+original_width+(mouse.x-mouse.startX))<1050)    &&   ((original_top+original_height+(mouse.y-mouse.startY))<778))
+			{
+				current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
+				current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
+			}		    
+			}
 
-			current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
-			current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
-		    } else if (current_action == "right resize") {
+
+		      else if (current_action == "right resize") {
 			current_element.style.width = (original_width + (mouse.x - mouse.startX)) + 'px';
 
 		    } else if (current_action == "left resize") {
