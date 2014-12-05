@@ -21,6 +21,10 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 parse_str($_SERVER['QUERY_STRING']);
 
+if (!isset($check_seg)) {
+    $check_seg = 1;
+}
+
 $duration_query = "SELECT duration_s FROM video_2 WHERE id = $video_id";
 $duration_result = query_wildlife_video_db($duration_query);
 $duration_row = $duration_result->fetch_assoc();
@@ -102,8 +106,11 @@ while ($row = $result->fetch_assoc()) {
     $end_time = $row['end_time'];
     $type_id = $row['event_id'];
     $type_name = $row['type_name'];
-    //$distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
-    $distance = distToClosestExpertCombinedEvents($video_id, $type_id, $start_time, $end_time);
+    if ($check_seg) {
+        $distance = distToClosestExpertCombinedEvents($video_id, $type_id, $start_time, $end_time);
+    } else {
+        $distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
+    }
     if ($distance < 0) {
         $distance = $video_duration * 1.41421356237;
     }
@@ -138,7 +145,7 @@ echo "
         }
     </script>
 
-            <h1>Correctness Test</h1>
+            <h1>Video Time Plane</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
 
@@ -146,12 +153,14 @@ echo "
             <dl>
                 <dt>buffer=</dt>
                 <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
+
+                <dt>check_seg=</dt>
+                <dd>Boolean value (0 or 1) to check for segmented events.</dd>
             </dl>
             
 
             <h2>Description:</h2>
-            <p>This scatterplot shows the </p>
-            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
+            <p>This scatterplot shows events plotted with their distance from a matching expert event as size. This means large dots indicate a possible incorrect user event. Color indicates event type and can show which event types users have a difficult time classifying.</p>
 
         </div>
     </div>
