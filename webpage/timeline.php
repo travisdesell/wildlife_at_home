@@ -81,7 +81,7 @@ echo "
         }
     </script>
 
-            <h1>Timeline!</h1>
+            <h1>Video Timeline</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
