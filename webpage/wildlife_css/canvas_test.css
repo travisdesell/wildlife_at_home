@@ -3,7 +3,13 @@
     background: #FFFFFF;
 }
 
+.img-responsive {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select none;
+}
 .rectangle {
-    border: 1px solid #FF0000;
+    border: 4px solid #FF0000;
+    background: rgba(255,0,0,0.3);
     position: absolute;
 }
