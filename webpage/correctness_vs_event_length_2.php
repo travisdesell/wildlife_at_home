@@ -9,6 +9,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/correctness.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
@@ -60,79 +61,6 @@ echo "
                 ['Event Duration as a Portion of Video Length', 'Buffer Correctness', 'Euclidian Correctness', 'Scaled Buffer Correctness', 'Scaled Euclidan Correctness'],
 ";
 
-function getBufferCorrectness($obs_id, $buffer) {
-    $event_query = "SELECT video_id, event_id, TO_SECONDS(start_time) AS start_time, TO_SECONDS(end_time) AS end_time FROM timed_observations AS obs WHERE obs.id = $obs_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) < TO_SECONDS(i.end_time))";
-    $event_result = query_wildlife_video_db($event_query);
-    $num_events = $event_result->num_rows;
-    $num_match_events = 0;
-
-    if ($num_events > 0) {
-        while ($event_row = $event_result->fetch_assoc()) {
-            $video_id = $event_row['video_id'];
-            $event_id = $event_row['event_id'];
-            $start_sec = $event_row['start_time'];
-            $end_sec = $event_row['end_time'];
-
-            $start_sec_top = $start_sec - $buffer;
-            $start_sec_bot = $start_sec + $buffer;
-            $end_sec_top = $end_sec - $buffer;
-            $end_sec_bot = $end_sec + $buffer;
-            $match_query = "SELECT * FROM timed_observations WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND to_seconds(start_time) BETWEEN $start_sec_top AND $start_sec_bot AND TO_SECONDS(end_time) BETWEEN $end_sec_top AND $end_sec_bot";
-            $match_result = query_wildlife_video_db($match_query);
-            $num_matches = $match_result->num_rows;
-
-            if ($num_matches >= 1) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    }
-    return 0;
-}
-
-function getEuclidianCorrectness($obs_id) {
-    $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) < TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) < TO_SECONDS(i.end_time))";
-    $event_result = query_wildlife_video_db($event_query);
-    $num_events = $event_result->num_rows;
-    $num_match_events = 0;
-
-    if ($num_events > 0) {
-        while ($event_row = $event_result->fetch_assoc()) {
-            $video_id = $event_row['video_id'];
-            $event_id = $event_row['event_id'];
-            $video_duration = $event_row['duration_s'];
-            $start_time = $event_row['start_time'];
-            $end_time = $event_row['end_time'];
-            $match_query = "SELECT (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) < TO_SECONDS(obs.end_time)";
-            $match_result = query_wildlife_video_db($match_query);
-
-            $min_dist = -1;
-            $max_dist = ($video_duration*1.41421356237); // Divide by hypotenuse of a square
-            while ($row = $match_result->fetch_assoc()) {
-                $temp_start = $row['start_time'];
-                $temp_end = $row['end_time'];
-                $dist = sqrt((($temp_start - $start_time)*($temp_start - $start_time)) + (($temp_end - $end_time)*($temp_end - $end_time)));
-                if ($dist <= $max_dist && ($min_dist == -1 || $dist < $min_dist)) {
-                    $min_dist = $dist;
-                }
-            }
-
-            return 1-($min_dist/$max_dist);
-        }
-    }
-    return 0;
-}
-
-function getEventWeight($obs_id, $scale_factor) {
-    $weight_query = "SELECT (v.duration_s/(TO_SECONDS(t.end_time) - TO_SECONDS(t.start_time) + v.duration_s/$scale_factor))/(SELECT SUM(vid.duration_s/(TO_SECONDS(obs.end_time) - TO_SECONDS(obs.start_time) + vid.duration_s/$scale_factor)) FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id GROUP BY obs.user_id) AS weight FROM timed_observations AS t JOIN video_2 AS v ON v.id = t.video_id WHERE t.id = $obs_id";
-    $weight_result = query_wildlife_video_db($weight_query);
-        while ($weight_row = $weight_result->fetch_assoc()) {
-            return $weight_row['weight'];
-        }
-    return 0;
-}
-
 while ($watch_row = $watch_result->fetch_assoc()) {
     $user_id = $watch_row['user_id'];
     $video_id = $watch_row['video_id'];
@@ -146,8 +74,8 @@ while ($watch_row = $watch_result->fetch_assoc()) {
         $event_duration_proportion = $event_length/$video_length;
         $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
         $euclidian_correctness = getEuclidianCorrectness($obs_id);
-        $scaled_event_weight = getEventWeight($obs_id, $scale_factor);
-        $event_weight = 1/$num_events;
+        $scaled_event_weight = getEventScaledWeight($obs_id, $scale_factor);
+        $event_weight = getEventWeight($obs_id);
         echo "[";
         echo $event_duration_proportion;
         echo ",";
@@ -195,7 +123,7 @@ echo "
         }
     </script>
 
-            <h1>Event Correctness VS Event Length (2.0)</h1>
+            <h1>Event Weight VS Event Length (2.0)</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
 
