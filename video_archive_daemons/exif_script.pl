@@ -7,7 +7,7 @@ use File::Find;
 use DBI;
 use Cwd 'abs_path'; 
 
-my $dir = "/share/wildlife/archive/hudson_bay_project/2014/LSGO";
+my $dir = "/share/wildlife/archive/nd_predators";
 
 find(\&get_data, $dir);
 
@@ -16,6 +16,8 @@ sub get_data
 	my $file = $_;
 
 	#print $file;
+
+	my ($camera_id, $species, $year);
 	
 
 
@@ -28,31 +30,54 @@ sub get_data
 
 		my $abs_path = abs_path($file);
 
-		#get year from path
-		$abs_path =~ /hudson_bay_project\/(\d\d\d\d)\//;
-		my $year = $1;
+		if($abs_path =~ /hudson_bay_project/)
+		{
 
-		#get species from path
-		$abs_path =~ /hudson_bay_project\/\d\d\d\d\/(\w+)\//;
-		my $species_name = $1;
-		my $species;
+			#get year from path
+			$abs_path =~ /hudson_bay_project\/(\d\d\d\d)\//;
+			$year = $1;
+
+			#get species from path
+			$abs_path =~ /hudson_bay_project\/\d\d\d\d\/(\w+)\//;
+			my $species_name = $1;
+			$species;
 		
-		if($species_name eq "COEI")
-		{
-			$species = 1;
-		}
-		elsif($species_name eq "something else")
-		{
-			$species = 2;
-		}
-		else
-		{
-			$species = 0;
-		}
+			if($species_name eq "COEI")
+			{
+				$species = 1;
+			}
+			elsif($species_name eq "LSGO")
+			{
+				$species = 2;
+			}
+			elsif($species_name eq "LSGO")
+			{
+				$species = 2;
+			}
+			else
+			{
+				$species = 0;
+			}
 
-		#get camera id from path
-		$abs_path =~ /hudson_bay_project\/\d\d\d\d\/\w+\/(\w+-?\w*)\//;
-		my $camera_id = $1;
+			#get camera id from path
+			$abs_path =~ /hudson_bay_project\/\d\d\d\d\/\w+\/(\w+-?\w*)\//;
+			$camera_id = $1;
+		}
+		elsif($abs_path =~ /nd_predators/)
+		{
+			#get year
+			$abs_path =~ /(\d\d\d\d)/;
+			$year = $1;
+
+			#get species (PRED)
+			$species = 3;
+
+			#get camera id
+			$abs_path =~ /Period_\d\/((\w*\d*)*)\//;
+			$camera_id = $1;
+			
+			
+		}
 
 		
 		#connect to database
@@ -80,3 +105,4 @@ sub get_data
 		#	"Path: ", $abs_path, "\n";
 
 	}
+}
