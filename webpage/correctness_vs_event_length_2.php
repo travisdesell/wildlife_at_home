@@ -9,7 +9,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
-require_once($cwd[__FILE__] . "/correctness.php");
+require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
 print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
@@ -22,13 +22,17 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 parse_str($_SERVER['QUERY_STRING']);
 
+if (!isset($video_id)) {
+    $video_id = 6511;
+}
+
 // Set buffer for correctness time (+ or - the buffer value)
 if (!isset($buffer)) {
     $buffer = 5;
 }
 
 if (!isset($scale_factor)) {
-    $scale_factor = 10;
+    $scale_factor = 0.10;
 }
 
 if (!isset($video_id)) {
@@ -73,7 +77,7 @@ while ($watch_row = $watch_result->fetch_assoc()) {
         $video_length = $event_row['duration_s'];
         $event_duration_proportion = $event_length/$video_length;
         $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
-        $euclidian_correctness = getEuclidianCorrectness($obs_id);
+        $euclidian_correctness = getEuclideanCorrectness($obs_id);
         $scaled_event_weight = getEventScaledWeight($obs_id, $scale_factor);
         $event_weight = getEventWeight($obs_id);
         echo "[";

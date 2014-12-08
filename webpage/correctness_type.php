@@ -36,7 +36,7 @@ echo "
         <div class='col-sm-12'>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
-        google.load('visualization', '1', {packages:['corechart']});
+        google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
 
         function getDate(date_string) {
@@ -53,7 +53,7 @@ echo "
             data.addColumn('string', 'Event Type');
             data.addColumn('number', 'Buffer Percent Correct');
             data.addColumn('number', 'Euclidean Percent Correct');
-            data.addColumn('number', 'Combined Euclidean Percent Correct');
+            data.addColumn('number', 'Segment Checking Euclidean Percent Correct');
             data.addRows([
 ";
             //data.addColumn({type: 'string', role: 'tooltip'});
@@ -70,8 +70,8 @@ while ($type_row = $type_result->fetch_assoc()) {
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
         $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
-        $euclidean_correctness = getEuclidianCorrectness($obs_id);
-        $segmented_euclidean_correctness = getSegmentedEuclidianCorrectness($obs_id);
+        $euclidean_correctness = getEuclideanCorrectness($obs_id);
+        $segmented_euclidean_correctness = getSegmentedEuclideanCorrectness($obs_id);
 
         if ($euclidean_correctness > 0.95) {
             $euclidean_match_events += $euclidean_correctness;
@@ -104,6 +104,7 @@ echo "
 echo "
             var options = {
                 title: 'Percent of correct events for each type',
+                hAxis: {title: 'Event Type'},
                 vAxis: {
                     title: 'Percent Correct',
                     maxValue: 1.0,
