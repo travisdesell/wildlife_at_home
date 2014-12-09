@@ -15,7 +15,7 @@ function initDraw(canvas) {
     var current_action = "";
     var current_element = null;
     var element_count = 0;
-    var elements = {};
+    var elements = [];
     var images = document.getElementsByClassName('img-responsive');
     var imag = images[0];
 
@@ -80,9 +80,27 @@ function initDraw(canvas) {
         }
     };
 
+    canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
+	    setMousePosition(e);
+	    console.log("About to delete");
+	    if (current_action == "") {
+		    for (var i = 0; i < element_count;i++) {
+			    var position = getRectanglePosition(elements[i]);
+
+			    if (position == "top right") {
+			    	elements[i].parentNode.removeChild(elements[i]);
+				element_count--;
+				elements.splice(i, 1);
+				break;
+			    }
+		    }
+	    }
+    }
+
+
     canvas.onmousemove = function (e) {
 	setMousePosition(e);
-	if (current_action == "") {
+	if (current_action == "") {//Change the cursor when moused over certain areas
 	    for (var i = 0; i < element_count; i++) {
 		var position = getRectanglePosition(elements[i]);
 
@@ -124,7 +142,7 @@ function initDraw(canvas) {
 	}
 
 
-	if (is_dragging) {
+	if (is_dragging) {//If the mouse is dragging, allow creation of boxes or adjusting
 		    if (current_action == "creating element") {
 			current_element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
 			current_element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
@@ -193,7 +211,7 @@ function initDraw(canvas) {
     }
 
 
-    canvas.onmouseup = function(e) {
+    canvas.onmouseup = function(e) {//Set dragging to false, so that mousemove won't respond to resizing
 	     is_dragging = false;
 	     console.log("dragging is false");
              setMousePosition(e);
