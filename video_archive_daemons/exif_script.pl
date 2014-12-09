@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+#made by Jaeden Lovin
 
 use strict;
 use Image::ExifTool qw(:Public);
@@ -7,29 +8,32 @@ use File::Find;
 use DBI;
 use Cwd 'abs_path'; 
 
+#directory to start with
 my $dir = "/share/wildlife/archive/nd_predators";
 
+#this recursively goes through a directory and will do the function on every file it finds
 find(\&get_data, $dir);
 
 sub get_data
 {
 	my $file = $_;
 
-	#print $file;
-
 	my ($camera_id, $species, $year);
 	
 
-
+	#if the file is a jpeg do stuff
 	if($file =~ /\w*\.JPG/)
 	{
+		#get info from image
 		my $info = ImageInfo($file);
 
+		#get temp as an integer
 		my $temp = ($info->{'AmbientTemperature'});
 		$temp =~ s/\D+//g;
 
 		my $abs_path = abs_path($file);
 
+		#if it is from the hudson bay directory do this stuff
 		if($abs_path =~ /hudson_bay_project/)
 		{
 
@@ -41,7 +45,8 @@ sub get_data
 			$abs_path =~ /hudson_bay_project\/\d\d\d\d\/(\w+)\//;
 			my $species_name = $1;
 			$species;
-		
+
+			#set species based on which directory file was in		
 			if($species_name eq "COEI")
 			{
 				$species = 1;
@@ -63,6 +68,7 @@ sub get_data
 			$abs_path =~ /hudson_bay_project\/\d\d\d\d\/\w+\/(\w+-?\w*)\//;
 			$camera_id = $1;
 		}
+		#if it is from the nd predators directory do this stuff
 		elsif($abs_path =~ /nd_predators/)
 		{
 			#get year
@@ -96,9 +102,9 @@ sub get_data
                        ('$temp', '$info->{'DateTimeOriginal'}', '$abs_path', '$camera_id', '$species', '$year')");
 		$sth->execute();    # or print $DBI::errstr;
 		$sth->finish();
-		#$dbh->commit or die $DBI::errstr;
+		#$dbh->commit or die $DBI::errstr; #this was not working
 
-		#for now it just prints the data
+		#this just prints some data to test
 		#print "\n$file: \n";
 		#print "Date and time: ", $info->{'CreateDate'}, "\n",
 		#	"Temperature: ", $temp, "\n",
