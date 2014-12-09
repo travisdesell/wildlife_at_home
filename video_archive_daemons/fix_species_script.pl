@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+#made by Jaeden Lovin
 
 use strict;
 use DBI;
@@ -17,6 +18,7 @@ my $sth = $dbh->prepare(q{SELECT * FROM images where species=0});
 
 $sth->execute();
 
+#this will go through every row from the select statment and add the row to a hash called $field_hash
 while( my $field_hash = $sth->fetchrow_hashref() )
 {
 	my $id = $field_hash->{'id'};
@@ -50,4 +52,4 @@ while( my $field_hash = $sth->fetchrow_hashref() )
 	
 }
 
-#sth->finish();
+#sth->finish(); #didn't need this I think
