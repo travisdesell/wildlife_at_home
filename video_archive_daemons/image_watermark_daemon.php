@@ -62,7 +62,7 @@
 				$command = "convert '$archive_filename' -resize 1024x768 $watermark_file -composite -quality 100 '$watermarked_filename'"; //Shell command for image conversion
 
 				echo "\nExecuting $command\n";
-				$return = shell_exec($command);
+				$return = shell_exec($command); //TODO Find better way of dealing with conversion failing
 				if ($return) die("Convert failed on image: ". $archive_filename."\n"); //If conversion failed, quit and print error
 
 				//Get MD5 and filesize for boinc
