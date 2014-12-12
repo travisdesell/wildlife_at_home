@@ -79,7 +79,8 @@ function initDraw(canvas) {
             return "";
         }
     };
-
+    
+    //Ben
     canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
 	    setMousePosition(e);
 	    console.log("About to delete");
@@ -87,7 +88,7 @@ function initDraw(canvas) {
 		    for (var i = 0; i < element_count;i++) {
 			    var position = getRectanglePosition(elements[i]);
 
-			    if (position == "top right") {
+			    if (position == "top right") { //TODO Don't delete when resizing from top right corner
 			    	elements[i].parentNode.removeChild(elements[i]);
 				element_count--;
 				elements.splice(i, 1);
@@ -210,7 +211,7 @@ function initDraw(canvas) {
 	     	imag.style.MozUserSelect = "none";
     }
 
-
+    //Ben
     canvas.onmouseup = function(e) {//Set dragging to false, so that mousemove won't respond to resizing
 	     is_dragging = false;
 	     console.log("dragging is false");
@@ -224,7 +225,7 @@ function initDraw(canvas) {
     }
 
 
-    canvas.onmousedown = function(e) {
+    canvas.onmousedown = function(e) {//Adjustment to use dragging, Ben
 	imag.draggable = false;
 	is_dragging = true;
 	//imag.style.MozUserSelect = "auto";
