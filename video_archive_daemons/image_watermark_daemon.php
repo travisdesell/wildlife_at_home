@@ -59,7 +59,7 @@
 					$watermark_file = "/photo/watermarkhudson.png";
 				else $watermark_file = "/photo/undwatermark.png"; //For everthing else, there's this one (for now)
 
-				$command = "convert $archive_filename -resize 1024x768 $watermark_file -composite -quality 100 $watermarked_filename"; //Shell command for image conversion
+				$command = "convert '$archive_filename' -resize 1024x768 $watermark_file -composite -quality 100 '$watermarked_filename'"; //Shell command for image conversion
 
 				echo "\nExecuting $command\n";
 				$return = shell_exec($command);
