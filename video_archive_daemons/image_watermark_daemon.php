@@ -62,8 +62,16 @@
 				$command = "convert '$archive_filename' -resize 1024x768 $watermark_file -composite -quality 100 '$watermarked_filename'"; //Shell command for image conversion
 
 				echo "\nExecuting $command\n";
-				$return = shell_exec($command); //TODO Find better way of dealing with conversion failing
-				if ($return) die("Convert failed on image: ". $archive_filename."\n"); //If conversion failed, quit and print error
+				exec($command, $o, $return);
+				if ($return) {
+						echo "Convert failed on image: ". $archive_filename."\n"; //If conversion failed, remove from database and print error
+						$result = mysql_query("delete from images where archive_filename='$archive_filename'");
+						if(!$result) die("MYSQL Error (". mysql_errno() ."): " . mysql_error() . "\nquery: $query\n");
+						
+						$result = mysql_query("insert into corrupted_images (archive_filename) values ('$archive_filename')"); //Add corrupted filenames to different table to keep track
+						if(!$result) die("MYSQL Error (". mysql_errno() ."): " . mysql_error() . "\nquery: $query\n");
+						continue;
+				}
 
 				//Get MD5 and filesize for boinc
 				$md5_hash = md5_file($watermarked_filename);
