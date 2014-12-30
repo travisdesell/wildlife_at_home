@@ -6,7 +6,7 @@ function initDraw(canvas) {
         startX: 0,
         startY: 0
     };
-
+	//TODO make image not resizable (Jaeden)
     var buffer = 4;
     var original_top = 0;
     var original_left = 0;
@@ -156,7 +156,8 @@ function initDraw(canvas) {
 			   console.log("startX: " + mouse.startX + ", mouse.x: " + mouse.x + ", startY: " + mouse.startY + ", mouse.y: " + mouse.y);
 			   */
 			canvas.style.cursor = "move";
-		if(   ((original_left+(mouse.x-mouse.startX))>24)   &&   ((original_top+(mouse.y-mouse.startY))>9)  && ((original_left+original_width+(mouse.x-mouse.startX))<1050)    &&   ((original_top+original_height+(mouse.y-mouse.startY))<778))
+		
+		if(   ((original_left+(mouse.x-mouse.startX))>24)   &&   ((original_top+(mouse.y-mouse.startY))>9)  && ((original_left+original_width+(mouse.x-mouse.startX))<1050)    &&   ((original_top+original_height+(mouse.y-mouse.startY))<778))   //fixed dragging outside image, Jaeden
 			{
 				current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
 				current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
