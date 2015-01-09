@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
+print_header("Wildlife@Home: Correctness vs Difficulty", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -159,7 +159,6 @@ echo "
 
             <h2>Description:</h2>
             <p>This candlestick chart shows the distribution of user correctness vs their perceived difficulty of a video. Correctness in this case is determined by the number of events in their observation that matched an expert event divided by the total number of events they observed for that video.
-            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
 
         </div>
     </div>
