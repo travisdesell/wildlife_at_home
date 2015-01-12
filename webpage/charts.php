@@ -90,14 +90,53 @@ echo "
 
             <section id='correctness-type' class='well'>
                 <div class='page-header'>
-                    <h2>Event Types vs Correctness</h2>
+                    <h2>Event Correctness by Type</h2>
                     <p>This bar chart shows the percentage of user events that have a matching expert observed event. Each bar group represents the event types and the colors represent the algorithm used to determine the event correctness.</p>
-                    <p>The buffer parameters sets the leniency of the buffer match algorithm.</p>
+                    <p>The buffer parameter sets the leniency of the buffer match algorithm and the threshold paramater sets the leniency of the euclidean matching algorithms.</p>
                 </div>
 
                 <form role='form' action='correctness_type.php'>
                     <div class='form-group col-sm-2'>
                         <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='threshold' placeholder='Threshold' step='0.01'>
+                    </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
+            <section id='correctness-type-table' class='well'>
+                <div class='page-header'>
+                    <h2>Event Correctness by Type as a Table</h2>
+                    <p>This table shows the number of true positives and false positives for each event type and algorithm.</p>
+                    <p>The buffer parameter sets the leniency of the buffer match algorithm and the threshold paramater sets the leniency of the euclidean matching algorithms.</p>
+                </div>
+
+                <form role='form' action='correctness_type_table.php'>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='threshold' placeholder='Threshold' step='0.01'>
+                    </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
+            <section id='correctness-species-type' class='well'>
+                <div class='page-header'>
+                    <h2>Event Correctness by Type and Species</h2>
+                    <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represens the percent of events that match an expert observation. The legent shows the breakdown for each species.</p>
+                    <p>The buffer parameter sets the leniency of the buffer match algorithm and the threshold paramater sets the leniency of the euclidean matching algorithms.</p>
+                </div>
+
+                <form role='form' action='correctness_species_type.php'>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='threshold' placeholder='Threshold' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
