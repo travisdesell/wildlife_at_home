@@ -46,15 +46,18 @@ function initDraw(canvas) {
         startX: 0,
         startY: 0
     };
-
+	//TODO make image not resizable (Jaeden)
     var buffer = 4;
     var original_top = 0;
     var original_left = 0;
+    var is_dragging = false;
 
     var current_action = "";
     var current_element = null;
     var element_count = 0;
-    var elements = {};
+    var elements = [];
+    var images = document.getElementsByClassName('img-responsive');
+    var imag = images[0];
 
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
@@ -116,223 +119,250 @@ function initDraw(canvas) {
             return "";
         }
     };
+    
+    //Ben
+    canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
+	    setMousePosition(e);
+	    console.log("About to delete");
+	    if (current_action == "") {
+		    for (var i = 0; i < element_count;i++) {
+			    var position = getRectanglePosition(elements[i]);
 
-    canvas.onmousemove = function (e) {
-        setMousePosition(e);
-
-        if (current_action == "") {
-            for (var i = 0; i < element_count; i++) {
-                var position = getRectanglePosition(elements[i]);
-
-                if (position == "") {
-                    elements[i].style.border = '1px solid #FF0000';
-                    canvas.style.cursor = "default";
-                } else {
-                    elements[i].style.border = '2px solid #FF0000';
-                }
-
-                if (position == "top left") {
-                    canvas.style.cursor = "nwse-resize";
-
-                }  else if (position == "top right") {
-                    canvas.style.cursor = "nesw-resize";
-
-                }  else if (position == "bottom left") {
-                    canvas.style.cursor = "nesw-resize";
-
-                }  else if (position == "bottom right") {
-                    canvas.style.cursor = "nwse-resize";
-
-                } else if (position == "left") {
-                    canvas.style.cursor = "ew-resize";
-
-                } else if (position == "right") {
-                    canvas.style.cursor = "ew-resize";
-
-                } else if (position == "top") {
-                    canvas.style.cursor = "ns-resize";
-
-                } else if (position == "bottom") {
-                    canvas.style.cursor = "ns-resize";
-
-                } else if (position == "move") {
-                    canvas.style.cursor = "move";
-                }
-            }
-
-        } else {
-            if (current_action == "creating element") {
-                current_element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
-                current_element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
-                current_element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
-                current_element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
-
-            } else if (current_action == "move element") {
-                /*
-                   console.log("current_action != '" + current_action + "', element_count: " + element_count);
-                   console.log("startX: " + mouse.startX + ", mouse.x: " + mouse.x + ", startY: " + mouse.startY + ", mouse.y: " + mouse.y);
-                   */
-                canvas.style.cursor = "move";
-
-                current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
-                current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
-            } else if (current_action == "right resize") {
-                current_element.style.width = (original_width + (mouse.x - mouse.startX)) + 'px';
-
-            } else if (current_action == "left resize") {
-                current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
-                current_element.style.width = (original_width - (mouse.x - mouse.startX)) + 'px';
-
-            } else if (current_action == "bottom resize") {
-                current_element.style.height = (original_height + (mouse.y - mouse.startY)) + 'px';
-
-            } else if (current_action == "top resize") {
-                current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
-                current_element.style.height = (original_height - (mouse.y - mouse.startY)) + 'px';
-
-            } else if (current_action == "top left resize") {
-                current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
-                current_element.style.height = (original_height - (mouse.y - mouse.startY)) + 'px';
-
-                current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
-                current_element.style.width = (original_width - (mouse.x - mouse.startX)) + 'px';
-
-            } else if (current_action == "top right resize") {
-                current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
-                current_element.style.height = (original_height - (mouse.y - mouse.startY)) + 'px';
-
-                current_element.style.width = (original_width + (mouse.x - mouse.startX)) + 'px';
-
-            } else if (current_action == "bottom left resize") {
-                current_element.style.height = (original_height + (mouse.y - mouse.startY)) + 'px';
-
-                current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
-                current_element.style.width = (original_width - (mouse.x - mouse.startX)) + 'px';
-
-            } else if (current_action == "bottom right resize") {
-                current_element.style.height = (original_height + (mouse.y - mouse.startY)) + 'px';
-
-                current_element.style.width = (original_width + (mouse.x - mouse.startX)) + 'px';
-
-            } else {
-                console.log("current_action != '" + current_action + "', element_count: " + element_count);
-            }
-
-            console.log("i is: " + current_element.id);
-            $("#" + current_element.id).html("x: " + current_element.style.left + ", y: " + current_element.style.top +  ", height: " + current_element.style.height + ", width: " + current_element.style.width);
-
-        }
-
-        e.preventDefault();
-        e.stopPropagation();
+			    if (position == "top right") { //TODO Don't delete when resizing from top right corner
+			    	elements[i].parentNode.removeChild(elements[i]);
+				element_count--;
+				elements.splice(i, 1);
+				break;
+			    }
+		    }
+	    }
     }
 
-    var click1 = true;
 
-    canvas.onclick = function(e) {
-        if (click1 == true) {
-            //get the position of the mouse.
-            setMousePosition(e);
+    canvas.onmousemove = function (e) {
+	setMousePosition(e);
+	if (current_action == "") {//Change the cursor when moused over certain areas
+	    for (var i = 0; i < element_count; i++) {
+		var position = getRectanglePosition(elements[i]);
 
-            //if the mouse is on an element, resize it
-            //if the mouse is not on an element, create one
-            current_element = null;
-            current_action = "";
+		if (position == "") {
+		    elements[i].style.border = '3px solid #FF0000';
+		    canvas.style.cursor = "default";
+		} else {
+		    elements[i].style.border = '5px solid #FF0000';
+		}
 
-            for (var i = 0; i < element_count; i++) {
-                var position = getRectanglePosition(elements[i]);
+		if (position == "top left") {
+		    canvas.style.cursor = "nwse-resize";
 
-                if (position == "top left") {
-                    current_element = elements[i];
-                    current_action = "top left resize";
-                    canvas.style.cursor = "nwse-resize";
+		}  else if (position == "top right") {
+		    canvas.style.cursor = "nesw-resize";
 
-                }  else if (position == "top right") {
-                    current_element = elements[i];
-                    current_action = "top right resize";
-                    canvas.style.cursor = "nesw-resize";
+		}  else if (position == "bottom left") {
+		    canvas.style.cursor = "nesw-resize";
 
-                }  else if (position == "bottom left") {
-                    current_element = elements[i];
-                    current_action = "bottom left resize";
-                    canvas.style.cursor = "nesw-resize";
+		}  else if (position == "bottom right") {
+		    canvas.style.cursor = "nwse-resize";
 
-                }  else if (position == "bottom right") {
-                    current_element = elements[i];
-                    current_action = "bottom right resize";
-                    canvas.style.cursor = "nwse-resize";
+		} else if (position == "left") {
+		    canvas.style.cursor = "ew-resize";
 
-                } else if (position == "left") {
-                    current_element = elements[i];
-                    current_action = "left resize";
-                    canvas.style.cursor = "ew-resize";
+		} else if (position == "right") {
+		    canvas.style.cursor = "ew-resize";
 
-                } else if (position == "right") {
-                    current_element = elements[i];
-                    current_action = "right resize";
-                    canvas.style.cursor = "ew-resize";
+		} else if (position == "top") {
+		    canvas.style.cursor = "ns-resize";
 
-                } else if (position == "top") {
-                    current_element = elements[i];
-                    current_action = "top resize";
-                    canvas.style.cursor = "ns-resize";
+		} else if (position == "bottom") {
+		    canvas.style.cursor = "ns-resize";
 
-                } else if (position == "bottom") {
-                    current_element = elements[i];
-                    current_action = "bottom resize";
-                    canvas.style.cursor = "ns-resize";
+		} else if (position == "move") {
+		    canvas.style.cursor = "move";
+		}
+	   }
+	}
 
-                } else if (position == "move") {
-                    current_element = elements[i];
-                    current_action = "move element";
-                    canvas.style.cursor = "move";
 
-                } else {
-                    elements[i].style.border = '1px solid #FF0000';
-                }
-            }
+	if (is_dragging) {//If the mouse is dragging, allow creation of boxes or adjusting
+		    if (current_action == "creating element") {
+			current_element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
+			current_element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
+			current_element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
+			current_element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
 
-            mouse.startX = mouse.x;
-            mouse.startY = mouse.y;
-//            console.log("mouse.startY: " + mouse.startY + "mouse.startx: " + mouse.startX);
+		    } else if (current_action == "move element") {
+			/*
+			   console.log("current_action != '" + current_action + "', element_count: " + element_count);
+			   console.log("startX: " + mouse.startX + ", mouse.x: " + mouse.x + ", startY: " + mouse.startY + ", mouse.y: " + mouse.y);
+			   */
+			canvas.style.cursor = "move";
+		
+		if(   ((original_left+(mouse.x-mouse.startX))>24)   &&   ((original_top+(mouse.y-mouse.startY))>9)  && ((original_left+original_width+(mouse.x-mouse.startX))<1050)    &&   ((original_top+original_height+(mouse.y-mouse.startY))<778))   //fixed dragging outside image, Jaeden
+			{
+				current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
+				current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
+			}		    
+			}
 
-            if (current_element != null) {
-                current_element.style.border = '2px solid #FF0000';
-                console.log("selected an element, performing action: '" + current_action + "'");
 
-                //initialize the original top corner of the rectangle
-                original_left = parseInt( current_element.style.left.substring(0, current_element.style.left.length - 2) ); 
-                original_top = parseInt( current_element.style.top.substring(0, current_element.style.top.length - 2) ); 
-                original_height = parseInt( current_element.style.height.substring(0, current_element.style.height.length - 2) ); 
-                original_width = parseInt( current_element.style.width.substring(0, current_element.style.width.length - 2) ); 
-            } else {
-                current_action = "creating element";
+		      else if (current_action == "right resize") {
+			current_element.style.width = (original_width + (mouse.x - mouse.startX)) + 'px';
 
-                current_element = document.createElement('div');
-                current_element.className = 'rectangle';
-                current_element.style.left = mouse.x + 'px';
-                current_element.style.top = mouse.y + 'px';
-                current_element.id = element_count;
+		    } else if (current_action == "left resize") {
+			current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
+			current_element.style.width = (original_width - (mouse.x - mouse.startX)) + 'px';
 
-                canvas.appendChild(current_element);
-                canvas.style.cursor = "crosshair";
+		    } else if (current_action == "bottom resize") {
+			current_element.style.height = (original_height + (mouse.y - mouse.startY)) + 'px';
 
-                $('#selection-information').append("<div class='selection' id='" + element_count + "'> Information for selection " + element_count + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + "</div>");
+		    } else if (current_action == "top resize") {
+			current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
+			current_element.style.height = (original_height - (mouse.y - mouse.startY)) + 'px';
 
-                elements[element_count] = current_element;
-                element_count++;
-            }
-            click1 = false;
-        } else {
-            setMousePosition(e);
-            //console.log("click: mouse.x:" + mouse.x + ", mouse.y: " + mouse.y);
-            console.log("finished action: '" + current_action + "'");
+		    } else if (current_action == "top left resize") {
+			current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
+			current_element.style.height = (original_height - (mouse.y - mouse.startY)) + 'px';
 
-            current_element = null;
-            current_action = "";
-            canvas.style.cursor = "default";
-            click1 = true;
-        }
+			current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
+			current_element.style.width = (original_width - (mouse.x - mouse.startX)) + 'px';
+
+		    } else if (current_action == "top right resize") {
+			current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
+			current_element.style.height = (original_height - (mouse.y - mouse.startY)) + 'px';
+
+			current_element.style.width = (original_width + (mouse.x - mouse.startX)) + 'px';
+
+		    } else if (current_action == "bottom left resize") {
+			current_element.style.height = (original_height + (mouse.y - mouse.startY)) + 'px';
+
+			current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
+			current_element.style.width = (original_width - (mouse.x - mouse.startX)) + 'px';
+
+		    } else if (current_action == "bottom right resize") {
+			current_element.style.height = (original_height + (mouse.y - mouse.startY)) + 'px';
+
+			current_element.style.width = (original_width + (mouse.x - mouse.startX)) + 'px';
+
+		    } else {
+			console.log("current_action != '" + current_action + "', element_count: " + element_count);
+		    }
+		}
+		e.preventDefault();
+		e.stopPropagation();
+	     	imag.style.MozUserSelect = "none";
+    }
+
+    //Ben
+    canvas.onmouseup = function(e) {//Set dragging to false, so that mousemove won't respond to resizing
+	     is_dragging = false;
+	     console.log("dragging is false");
+             setMousePosition(e);
+             //console.log("click: mouse.x:" + mouse.x + ", mouse.y: " + mouse.y);
+             console.log("finished action: '" + current_action + "'");
+
+             current_element = null;
+             current_action = "";
+             canvas.style.cursor = "default";
+    }
+
+
+    canvas.onmousedown = function(e) {//Adjustment to use dragging, Ben
+	imag.draggable = false;
+	is_dragging = true;
+	//imag.style.MozUserSelect = "auto";
+	if (e.which == 1) {
+		    //get the position of the mouse.
+		    setMousePosition(e);
+
+		    //if the mouse is on an element, resize it
+		    //if the mouse is not on an element, create one
+		    current_element = null;
+		    current_action = "";
+
+		    for (var i = 0; i < element_count; i++) {
+			var position = getRectanglePosition(elements[i]);
+
+			if (position == "top left") {
+			    current_element = elements[i];
+			    current_action = "top left resize";
+			    canvas.style.cursor = "nwse-resize";
+
+			}  else if (position == "top right") {
+			    current_element = elements[i];
+			    current_action = "top right resize";
+			    canvas.style.cursor = "nesw-resize";
+
+			}  else if (position == "bottom left") {
+			    current_element = elements[i];
+			    current_action = "bottom left resize";
+			    canvas.style.cursor = "nesw-resize";
+
+			}  else if (position == "bottom right") {
+			    current_element = elements[i];
+			    current_action = "bottom right resize";
+			    canvas.style.cursor = "nwse-resize";
+
+			} else if (position == "left") {
+			    current_element = elements[i];
+			    current_action = "left resize";
+			    canvas.style.cursor = "ew-resize";
+
+			} else if (position == "right") {
+			    current_element = elements[i];
+			    current_action = "right resize";
+			    canvas.style.cursor = "ew-resize";
+
+			} else if (position == "top") {
+			    current_element = elements[i];
+			    current_action = "top resize";
+			    canvas.style.cursor = "ns-resize";
+
+			} else if (position == "bottom") {
+			    current_element = elements[i];
+			    current_action = "bottom resize";
+			    canvas.style.cursor = "ns-resize";
+
+			} else if (position == "move") {
+			    current_element = elements[i];
+			    current_action = "move element";
+			    canvas.style.cursor = "move";
+
+			} else {
+			    elements[i].style.border = '1px solid #FF0000';
+			}
+		    }
+
+		    mouse.startX = mouse.x;
+		    mouse.startY = mouse.y;
+	//            console.log("mouse.startY: " + mouse.startY + "mouse.startx: " + mouse.startX);
+
+		    if (current_element != null) {
+			current_element.style.border = '2px solid #FF0000';
+			console.log("selected an element, performing action: '" + current_action + "'");
+
+			//initialize the original top corner of the rectangle
+			original_left = parseInt( current_element.style.left.substring(0, current_element.style.left.length - 2) ); 
+			original_top = parseInt( current_element.style.top.substring(0, current_element.style.top.length - 2) ); 
+			original_height = parseInt( current_element.style.height.substring(0, current_element.style.height.length - 2) ); 
+			original_width = parseInt( current_element.style.width.substring(0, current_element.style.width.length - 2) ); 
+		    } else {
+			current_action = "creating element";
+
+			current_element = document.createElement('div');
+			current_element.className = 'rectangle';
+			current_element.style.left = mouse.x + 'px';
+			current_element.style.top = mouse.y + 'px';
+			current_element.id = element_count;
+
+			canvas.appendChild(current_element);
+			canvas.style.cursor = "crosshair";
+
+			$('#selection-information').append("<div class='selection' id='" + element_count + "'> Information for selection " + element_count + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + "</div>");
+
+			elements[element_count] = current_element;
+			element_count++;
+		    }
+	}
     }
 }
 
