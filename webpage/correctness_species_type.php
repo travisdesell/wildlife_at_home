@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Correctness by Event Type", "", "wildlife");
+print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -30,6 +30,17 @@ if (!isset($buffer)) {
 $type_query = "SELECT id, name FROM observation_types";
 $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
+$species_query = "SELECT id, name FROM species";
+$species_result = query_wildlife_video_db($species_query, $wildlife_db);
+
+$species = array();
+while ($species_row = $species_result->fetch_assoc()) {
+    $species_id = $species_row['id'];
+    $species_name = $species_row['name'];
+    $species[$species_id] = $species_name;
+}
+ksort($species);
+
 echo "
 <div class='containder'>
     <div class='row'>
@@ -39,60 +50,67 @@ echo "
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
 
-        function getDate(date_string) {
-            if (typeof date_string === 'string') {
-                var a = date_string.split(/[- :]/);
-                return new Date(a[0], a[1]-1, a[2], a[3] || 0, a[4] || 0, a[5] || 0);
-            }
-            return null;
-        }
-
         function drawChart() {
             var container = document.getElementById('chart_div');
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
-            data.addColumn('number', 'Buffer Percent Correct');
-            data.addColumn('number', 'Euclidean Percent Correct');
-            data.addColumn('number', 'Segment Checking Euclidean Percent Correct');
+";
+
+foreach($species as $s_id => $s_name) {
+    echo "data.addColumn('number', '$s_name');";
+}
+
+echo "
+            data.addColumn({type: 'string', role: 'tooltip'});
             data.addRows([
 ";
-            //data.addColumn({type: 'string', role: 'tooltip'});
 
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
+    $timed_query = "SELECT id, species_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
     $timed_result = query_wildlife_video_db($timed_query);
-    $num_events = $timed_result->num_rows;
-    $buffer_match_events = 0;
-    $euclidean_match_events = 0;
-    $segmented_euclidean_match_events = 0;
+    $species_num_events = array();
+    $species_match_events = array();
+    foreach($species as $s_id => $s_name) {
+        $species_num_events[$s_id] = 0;
+        $species_match_events[$s_id] = 0;
+    }
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
-        $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
-        $euclidean_correctness = getEuclideanCorrectness($obs_id);
-        $segmented_euclidean_correctness = getSegmentedEuclideanCorrectness($obs_id);
+        $species_id = $timed_row['species_id'];
+        //$correctness = getBufferCorrectness($obs_id, $buffer);
+        $correctness = getEuclideanCorrectness($obs_id);
+        //$correctness = getSegmentedEuclideanCorrectness($obs_id);
 
-        if ($euclidean_correctness > 0.95) {
-            $euclidean_match_events += $euclidean_correctness;
-        }
-        
-        if ($segmented_euclidean_correctness > 0.95) {
-            $segmented_euclidean_match_events += $segmented_euclidean_correctness;
-        }
+        $species_num_events[$species_id] += 1;
 
-        $buffer_match_events += $buffer_correctness;
+        if ($correctness > 0.95) {
+            $species_match_events[$species_id] += $correctness;
+        }
     }
 
-    if ($buffer_match_events > 0 || $euclidean_match_events > 0) {
+    $add_data = false;
+    foreach($species_match_events as $s_id => $s_val) {
+        if ($s_val > 0) {
+            $add_data = true;
+        }
+    }
+
+    if ($add_data) {
         echo "[";
         echo "'$type_name'";
+        $tooltip = "Okay";
+        foreach($species_match_events as $s_id => $s_val) {
+            echo ",";
+            if ($species_num_events[$s_id] > 0) {
+                echo $s_val / $species_num_events[$s_id] * 100;
+            } else {
+                echo "0";
+            }
+        }
         echo ",";
-        echo $buffer_match_events / $num_events * 100;
-        echo ",";
-        echo $euclidean_match_events / $num_events * 100;
-        echo ",";
-        echo $segmented_euclidean_match_events / $num_events * 100;
+        echo "'$tooltip'";
         echo "],";
     }
 }
@@ -117,7 +135,7 @@ echo "
         }
     </script>
 
-            <h1>Correctness by Type</h1>
+            <h1>Correctness Test</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
