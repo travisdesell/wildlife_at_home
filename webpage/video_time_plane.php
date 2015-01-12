@@ -9,8 +9,9 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
+print_header("Wildlife@Home: Video Time Plane", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -21,10 +22,21 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 parse_str($_SERVER['QUERY_STRING']);
 
-$expert_query = "SELECT TIME_TO_SEC(start_time) AS start_time, TIME_TO_SEC(end_time) AS end_time FROM timed_observations WHERE expert = 1 AND video_id = $video_id";
-$citizen_query = "SELECT TIME_TO_SEC(start_time) AS start_time, TIME_TO_SEC(end_time) AS end_time FROM timed_observations WHERE expert = 0 AND video_id = $video_id";
-$expert_result = query_wildlife_video_db($expert_query);
-$citizen_result = query_wildlife_video_db($citizen_query);
+if (!isset($video_id)) {
+    $video_id = 6511;
+}
+
+if (!isset($check_seg)) {
+    $check_seg = 1;
+}
+
+$duration_query = "SELECT duration_s FROM video_2 WHERE id = $video_id";
+$duration_result = query_wildlife_video_db($duration_query);
+$duration_row = $duration_result->fetch_assoc();
+$video_duration = $duration_row['duration_s'];
+
+$query = "SELECT obs.id, (TIME_TO_SEC(obs.start_time) - TIME_TO_SEC(vid.start_time)) AS start_time, (TIME_TO_SEC(obs.end_time) - TIME_TO_SEC(vid.start_time)) AS end_time, type.name AS type_name, event_id, user_id FROM timed_observations obs JOIN observation_types AS type ON type.id = event_id JOIN video_2 AS vid ON vid.id = video_id WHERE expert = 0 AND video_id = $video_id AND obs.start_time > 0 AND obs.start_time < obs.end_time";
+$result = query_wildlife_video_db($query);
 
 echo "
 <div class='containder'>
@@ -46,30 +58,38 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             var data = new google.visualization.arrayToDataTable([
-                ['Start Time', 'Expert Time', 'Citizen Time'],
+                ['ID', 'Start Time', 'Citizen End Time', 'Type Name', 'Percent Error'],
 ";
 
-while ($row = $citizen_result->fetch_assoc()) {
-    $start_time = $row['start_time'];
-    $end_time = $row['end_time'];
-    echo "[";
-    echo $start_time;
-    echo ",";
-    echo "null";
-    echo ",";
-    echo $end_time;
-    echo "],";
-}
+while ($row = $result->fetch_assoc()) {
+    $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+    $name_result = query_boinc_db($name_query);
+    $name_row = $name_result->fetch_assoc();
+    $name = $name_row['name'];
 
-while ($row = $expert_result->fetch_assoc()) {
+    $obs_id = $row['id'];
     $start_time = $row['start_time'];
     $end_time = $row['end_time'];
+    $type_id = $row['event_id'];
+    $type_name = $row['type_name'];
+    if ($check_seg) {
+        $error = 1 - getSegmentedEuclideanCorrectness($obs_id);
+        //$distance = distToClosestExpertCombinedEvents($video_id, $type_id, $start_time, $end_time);
+    } else {
+        $error = 1 - getEuclideanCorrectness($obs_id);
+        //$distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
+    }
+    $value = ($end_time-$start_time)/$video_duration;
     echo "[";
-    echo $start_time;
+    echo "''";
     echo ",";
-    echo $end_time;
+    echo $start_time/$video_duration;
     echo ",";
-    echo "null";
+    echo $end_time/$video_duration;
+    echo ",";
+    echo "'$type_name'";
+    echo ",";
+    echo $error * 100;
     echo "],";
 }
 
@@ -84,13 +104,13 @@ echo "
                 vAxis: {title: 'End Time'}
             };
 
-            var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.BubbleChart(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
     </script>
 
-            <h1>Correctness Test</h1>
+            <h1>Video Time Plane</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
 
@@ -98,12 +118,14 @@ echo "
             <dl>
                 <dt>buffer=</dt>
                 <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
+
+                <dt>check_seg=</dt>
+                <dd>Boolean value (0 or 1) to check for segmented events.</dd>
             </dl>
             
 
             <h2>Description:</h2>
-            <p>This scatterplot shows the </p>
-            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
+            <p>This scatterplot shows events plotted with their distance from a matching expert event as size. This means large dots indicate a possible incorrect user event. Color indicates event type and can show which event types users have a difficult time classifying.</p>
 
         </div>
     </div>
