@@ -31,6 +31,11 @@ if (!isset($threshold)) {
     $threshold = 95;
 }
 
+if (!isset($view)) {
+    $view = 'all';
+}
+
+
 $type_query = "SELECT id, name FROM observation_types";
 $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
@@ -125,8 +130,19 @@ echo "
             };
 
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var view = new google.visualization.DataView(data);
 
-            chart.draw(data, options);
+            if ('$view' == 'all') {
+                view.setColumns([0,1,2,3]); // All
+            } else if ('$view' == 'buffer') {
+                view.setColumns([0,1]); // Buffer Percent Correct
+            } else if ('$view' == 'euclidean') {
+                view.setColumns([0,2]); // Euclidean Percent Correct
+            } else if ('$view' == 'segment') {
+                view.setColumns([0,3]); // Segment Checking Euclidean Percent Correct
+            }
+
+            chart.draw(view, options);
         }
     </script>
 
@@ -139,7 +155,6 @@ echo "
                 <dt>buffer=</dt>
                 <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
             </dl>
-            
 
             <h2>Description:</h2>
             <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represents the event types.</p>
