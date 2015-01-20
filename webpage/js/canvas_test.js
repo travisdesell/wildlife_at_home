@@ -81,22 +81,19 @@ function initDraw(canvas) {
     };
     
     //Ben
-    canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
-	    setMousePosition(e);
-	    console.log("About to delete");
-	    if (current_action == "") {
-		    for (var i = 0; i < element_count;i++) {
-			    var position = getRectanglePosition(elements[i]);
+    $('.close-btn').click(function(e) {
+		console.log(e.className);
+		e.parentNode.removeChild(e.parentNode);
+		element_count--;
+		elements.splice(i, 1);
+	    e.stopPropagation();
+	    console.log("Close button was clicked");
+    });
 
-			    if (position == "top right") { //TODO Don't delete when resizing from top right corner
-			    	elements[i].parentNode.removeChild(elements[i]);
-				element_count--;
-				elements.splice(i, 1);
-				break;
-			    }
-		    }
-	    }
-    }
+    /*canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
+	    console.log("About to delete");
+	    console.log(e.className);
+    }*/
 
 
     canvas.onmousemove = function (e) {
@@ -149,6 +146,8 @@ function initDraw(canvas) {
 			current_element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
 			current_element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
 			current_element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
+			close_button = current_element.firstChild;
+			close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 17 + 'px';
 
 		    } else if (current_action == "move element") {
 			/*
@@ -312,6 +311,14 @@ function initDraw(canvas) {
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
 			current_element.id = element_count;
+			
+			close_button = document.createElement('span');
+			close_button.className = 'close-btn';
+			close_button.style.left = current_element.style.width + 'px';
+			closex = document.createElement('a');
+			closex.innerHTML = 'X'
+			close_button.appendChild(closex);
+			current_element.appendChild(close_button);
 
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";

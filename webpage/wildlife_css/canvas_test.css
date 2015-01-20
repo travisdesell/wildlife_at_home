@@ -6,10 +6,26 @@
 .img-responsive {
 	-moz-user-select: none;
 	-webkit-user-select: none;
-	user-select none;
+	user-select: none;
 }
 .rectangle { /*TODO Add border image to make 'x' in corner -Ben*/
     border: 4px solid #FF0000;
     background: rgba(255,0,0,0.3);
     position: absolute;
+}
+
+.close-btn { 
+    border: 2px solid #c2c2c2;
+    position: relative;
+    padding: 1px 5px;
+    top: -14px;
+    background-color: #FF0000; 
+    border-radius: 20px;
+}
+
+.close-btn a {
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
 }
