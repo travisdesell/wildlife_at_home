@@ -70,7 +70,7 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
+    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(end_time) >= TO_SECONDS(start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
     $timed_result = query_wildlife_video_db($timed_query);
     $num_events = $timed_result->num_rows;
     $buffer_match_events = 0;
@@ -79,13 +79,7 @@ while ($type_row = $type_result->fetch_assoc()) {
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
         $video_id = $timed_row['video_id'];
-
-        $expert_query = "SELECT user_id FROM timed_observations WHERE video_id = $video_id AND expert = 1 LIMIT 1";
-        $expert_result = query_wildlife_video_db($expert_query);
-        $expert_id = -1;
-        while ($expert_row = $expert_result->fetch_assoc()) {
-            $expert_id = $expert_row['user_id'];
-        }
+        $expert_id = getExpert($video_id);
 
         list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
         list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id, $threshold);
