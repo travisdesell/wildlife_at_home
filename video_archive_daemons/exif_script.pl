@@ -8,6 +8,8 @@ use File::Find;
 use DBI;
 use Cwd 'abs_path'; 
 
+#TODO add command line argument for path specified
+
 #directory to start with
 my $dir = "/share/wildlife/archive/nd_predators";
 
@@ -22,6 +24,7 @@ sub get_data
 	
 
 	#if the file is a jpeg do stuff
+	#TODO check for corrupt images
 	if($file =~ /\w*\.JPG/)
 	{
 		#get info from image
