@@ -157,7 +157,7 @@ function initDraw(canvas) {
 			   */
 			canvas.style.cursor = "move";
 		
-		if(   ((original_left+(mouse.x-mouse.startX))>24)   &&   ((original_top+(mouse.y-mouse.startY))>9)  && ((original_left+original_width+(mouse.x-mouse.startX))<1050)    &&   ((original_top+original_height+(mouse.y-mouse.startY))<778))   //fixed dragging outside image, Jaeden
+		if(   ((original_left+(mouse.x-mouse.startX))>15)   &&   ((original_top+(mouse.y-mouse.startY))>0)  && ((original_left+original_width+(mouse.x-mouse.startX))<1040)    &&   ((original_top+original_height+(mouse.y-mouse.startY))<768))   //fixed dragging outside image, Jaeden
 			{
 				current_element.style.left = (original_left + (mouse.x - mouse.startX)) + 'px';
 				current_element.style.top = (original_top + (mouse.y - mouse.startY)) + 'px';
