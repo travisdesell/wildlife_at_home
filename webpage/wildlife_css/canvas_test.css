@@ -1,12 +1,17 @@
 #canvas {
-    border: 10px solid transparent;
+    /*border: 10px solid transparent;*/
     background: #FFFFFF;
+
 }
 
 .img-responsive {
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	user-select: none;
+	min-height: 768px;
+        min-width: 1024px;
+	max-height: 768px;
+        maX-width: 1024px;	
 }
 .rectangle { /*TODO Add border image to make 'x' in corner -Ben*/
     border: 4px solid #FF0000;

@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
+print_header("Wildlife@Home: Event Weight vs Length", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -100,19 +100,9 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Event Correctness vs Event Length',
+                title: 'Event Weight vs Event Length',
                 vAxis: {title: 'Event Correctness as a Portion of Total Observation Correctness'},
                 hAxis: {title: 'Event Duration as a Portion of Video Length'},
-                series: {
-                    0: { pointSize: 10, pointShape: 'square' },
-                    1: { pointSize: 5, pointShape: 'square' },
-                    2: { pointSize: 10, pointShape: 'triangle' },
-                    3: { pointSize: 5, pointShape: 'triangle' },
-                    4: { pointShape: 'star' },
-                    5: { pointShape: 'diamond' },
-                    6: { pointShape: 'circle' },
-                    7: { pointShape: 'polygon' }
-                },
                 trendlines: {
                     0: {type: 'exponential'},
                     1: {type: 'exponential'},
@@ -127,7 +117,7 @@ echo "
         }
     </script>
 
-            <h1>Event Weight VS Event Length (2.0)</h1>
+            <h1>Event Weight vs Event Length</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
 
