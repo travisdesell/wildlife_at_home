@@ -81,15 +81,12 @@ function initDraw(canvas) {
     };
     
     //Ben
-    $('.close-btn').click(function(e) {
-		console.log(e.className);
-		e.parentNode.removeChild(e.parentNode);
+    $('#canvas').on('click', '.close-btn', function() {
 		element_count--;
-		elements.splice(i, 1);
-	    e.stopPropagation();
+		elements.splice(elements.indexOf($(this).parent()), 1);
+		$(this).parent().remove()
 	    console.log("Close button was clicked");
     });
-
     /*canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
 	    console.log("About to delete");
 	    console.log(e.className);
@@ -104,8 +101,10 @@ function initDraw(canvas) {
 
 		if (position == "") {
 		    elements[i].style.border = '3px solid #FF0000';
+		    elements[i].firstChild.style.visibility = "hidden";
 		    canvas.style.cursor = "default";
 		} else {
+		    elements[i].firstChild.style.visibility = "visible";
 		    elements[i].style.border = '5px solid #FF0000';
 		}
 
@@ -113,7 +112,7 @@ function initDraw(canvas) {
 		    canvas.style.cursor = "nwse-resize";
 
 		}  else if (position == "top right") {
-		    canvas.style.cursor = "nesw-resize";
+		    //canvas.style.cursor = "nesw-resize";
 
 		}  else if (position == "bottom left") {
 		    canvas.style.cursor = "nesw-resize";
@@ -207,7 +206,7 @@ function initDraw(canvas) {
 		    }
 		}
 		e.preventDefault();
-		e.stopPropagation();
+		//e.stopPropagation();
 	     	imag.style.MozUserSelect = "none";
     }
 
@@ -248,8 +247,8 @@ function initDraw(canvas) {
 
 			}  else if (position == "top right") {
 			    current_element = elements[i];
-			    current_action = "top right resize";
-			    canvas.style.cursor = "nesw-resize";
+			    //current_action = "top right resize";
+			    //canvas.style.cursor = "nesw-resize";
 
 			}  else if (position == "bottom left") {
 			    current_element = elements[i];
@@ -317,7 +316,7 @@ function initDraw(canvas) {
 			close_button.className = 'close-btn';
 			close_button.style.left = current_element.style.width + 'px';
 			closex = document.createElement('a');
-			closex.innerHTML = 'X'
+			closex.innerHTML = 'X';
 			close_button.appendChild(closex);
 			current_element.appendChild(close_button);
 
@@ -336,4 +335,6 @@ function initDraw(canvas) {
 
 $(document).ready(function() {
     initDraw(document.getElementById('canvas'));
+
+
 });
