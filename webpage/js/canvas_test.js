@@ -6,7 +6,7 @@ function initDraw(canvas) {
         startX: 0,
         startY: 0
     };
-	//TODO make image not resizable (Jaeden)
+
     var buffer = 4;
     var original_top = 0;
     var original_left = 0;
@@ -15,6 +15,7 @@ function initDraw(canvas) {
     var current_action = "";
     var current_element = null;
     var element_count = 0;
+    var element_id = 0;
     var elements = [];
     var images = document.getElementsByClassName('img-responsive');
     var imag = images[0];
@@ -82,15 +83,21 @@ function initDraw(canvas) {
     
     //Ben
     $('#canvas').on('click', '.close-btn', function() {
+		var id = $(this).parent().attr("id");
 		element_count--;
 		elements.splice(elements.indexOf($(this).parent()), 1);
 		$(this).parent().remove()
+		var elem = document.getElementById('S'+id); //Jaeden
+		elem.remove(); //Jaeden
+
+
 	    console.log("Close button was clicked");
     });
     /*canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
 	    console.log("About to delete");
 	    console.log(e.className);
     }*/
+	        
 
 
     canvas.onmousemove = function (e) {
@@ -319,14 +326,29 @@ function initDraw(canvas) {
 			closex.innerHTML = 'X';
 			close_button.appendChild(closex);
 			current_element.appendChild(close_button);
+			current_element.id = element_id;
 
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
 
-			$('#selection-information').append("<div class='selection' id='" + element_count + "'> Information for selection " + element_count + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + "</div>");
+			$('#selection-information').append("<div class='selection" + element_id + "' id='S" + element_id + "'> <br>Information for selection " + element_id + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + 
+				"<br>Species:<br><select name='speciesDropdown"+element_id+"'>"+
+					"<option value='Eider'>Eider</option>"+
+					"<option value='Lesser Snow Goose'>LesserSnowGoose</option>"+
+					"<option value='Predator'>Predator</option>"+
+					"<option value='Other'>Other</option>"+
+					"</select>" + 
+				"<br>Type of event:<br><select name='eventDropdown"+element_id+"'>"+
+					"<option value='event1'>event1</option>"+
+					"<option value='event2'>event2</option>"+
+					"<option value='event3'>event3</option>"+
+					"</select>" + 
+				"<br>Other Comments:<br><textarea type='text' name='comment"+element_id+"' rows='1' cols='50'></textarea>" + 
+				"</div>"); //Jaeden
 
 			elements[element_count] = current_element;
 			element_count++;
+			element_id++;
 		    }
 	}
     }
