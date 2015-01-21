@@ -1,7 +1,17 @@
 <?php
 
+function getExpert($video_id) {
+    $expert_query = "SELECT user_id FROM timed_observations WHERE video_id = $video_id AND expert = 1 LIMIT 1";
+    $expert_result = query_wildlife_video_db($expert_query);
+    $expert_id = -1;
+    while ($expert_row = $expert_result->fetch_assoc()) {
+        $expert_id = $expert_row['user_id'];
+    }
+    return $expert_id;
+}
+
 function getBufferCorrectness($obs_id, $expert_id, $buffer) {
-    $event_query = "SELECT video_id, event_id, TO_SECONDS(start_time) AS start_time, TO_SECONDS(end_time) AS end_time FROM timed_observations AS obs WHERE obs.id = $obs_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) < TO_SECONDS(i.end_time))";
+    $event_query = "SELECT video_id, event_id, TO_SECONDS(start_time) AS start_time, TO_SECONDS(end_time) AS end_time FROM timed_observations AS obs WHERE obs.id = $obs_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) <= TO_SECONDS(end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) <= TO_SECONDS(i.end_time))";
     $event_result = query_wildlife_video_db($event_query);
 
     $num_match_events = 0;
@@ -29,12 +39,12 @@ function getBufferCorrectness($obs_id, $expert_id, $buffer) {
             return array(0, false);
         }
     }
-    // Error on database retrieval
+    // Error on database retrieval (Probably undefined expert id)
     assert(false);
 }
 
 function getEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
-    $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) < TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) < TO_SECONDS(i.end_time))";
+    $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) <= TO_SECONDS(i.end_time))";
     $event_result = query_wildlife_video_db($event_query);
 
     $num_match_events = 0;
@@ -45,7 +55,7 @@ function getEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
         $video_duration = $event_row['duration_s'];
         $start_time = $event_row['start_time'];
         $end_time = $event_row['end_time'];
-        $match_query = "SELECT (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) < TO_SECONDS(obs.end_time)";
+        $match_query = "SELECT (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time)";
         $match_result = query_wildlife_video_db($match_query);
 
         $min_dist = -1;
@@ -77,7 +87,7 @@ function getEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
 }
 
 function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold) {
-    $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) < TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) < TO_SECONDS(i.end_time))";
+    $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) <= TO_SECONDS(i.end_time))";
     $event_result = query_wildlife_video_db($event_query);
 
     $num_match_events = 0;
@@ -88,7 +98,7 @@ function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold) {
         $video_duration = $event_row['duration_s'];
         $start_time = $event_row['start_time'];
         $end_time = $event_row['end_time'];
-        $match_query = "SELECT (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) < TO_SECONDS(obs.end_time)";
+        $match_query = "SELECT (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time)";
         $match_result = query_wildlife_video_db($match_query);
         $start_times = array();
         $end_times = array();
