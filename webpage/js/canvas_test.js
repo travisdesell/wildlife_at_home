@@ -15,6 +15,7 @@ function initDraw(canvas) {
     var current_action = "";
     var current_element = null;
     var element_count = 0;
+    var element_id = 0;
     var elements = [];
     var images = document.getElementsByClassName('img-responsive');
     var imag = images[0];
@@ -89,12 +90,14 @@ function initDraw(canvas) {
 			    var position = getRectanglePosition(elements[i]);
 
 			    if (position == "top right") { //TODO Don't delete when resizing from top right corner
+				var id = elements[i].id;
 			    	elements[i].parentNode.removeChild(elements[i]);
 				element_count--;
 				elements.splice(i, 1);
 
 				//remove selection information when rectangle is removed
-				var elem = document.getElementById(element_count); //Jaeden
+				var elem = document.getElementById('S'+id); //Jaeden
+				console.log(elem);
 				elem.remove(); //Jaeden
 
 				break;
@@ -319,28 +322,29 @@ function initDraw(canvas) {
 			current_element.className = 'rectangle';
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
-			current_element.id = element_count;
+			current_element.id = element_id;
 
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
 
-			$('#selection-information').append("<div class='selection" + element_count + "' id='" + element_count + "'> <br>Information for selection " + element_count + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + 
-				"<br>Species:<br><select name='speciesDropdown"+element_count+"'>"+
+			$('#selection-information').append("<div class='selection" + element_id + "' id='S" + element_id + "'> <br>Information for selection " + element_id + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + 
+				"<br>Species:<br><select name='speciesDropdown"+element_id+"'>"+
 					"<option value='Eider'>Eider</option>"+
 					"<option value='Lesser Snow Goose'>LesserSnowGoose</option>"+
 					"<option value='Predator'>Predator</option>"+
 					"<option value='Other'>Other</option>"+
 					"</select>" + 
-				"<br>Type of event:<br><select name='eventDropdown"+element_count+"'>"+
+				"<br>Type of event:<br><select name='eventDropdown"+element_id+"'>"+
 					"<option value='event1'>event1</option>"+
 					"<option value='event2'>event2</option>"+
 					"<option value='event3'>event3</option>"+
 					"</select>" + 
-				"<br>Other Comments:<br><textarea type='text' name='comment"+element_count+"' rows='1' cols='50'></textarea>" + 
+				"<br>Other Comments:<br><textarea type='text' name='comment"+element_id+"' rows='1' cols='50'></textarea>" + 
 				"</div>"); //Jaeden
 
 			elements[element_count] = current_element;
 			element_count++;
+			element_id++;
 		    }
 	}
     }
