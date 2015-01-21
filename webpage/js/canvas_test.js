@@ -6,7 +6,7 @@ function initDraw(canvas) {
         startX: 0,
         startY: 0
     };
-	//TODO make image not resizable (Jaeden)
+
     var buffer = 4;
     var original_top = 0;
     var original_left = 0;
@@ -92,11 +92,18 @@ function initDraw(canvas) {
 			    	elements[i].parentNode.removeChild(elements[i]);
 				element_count--;
 				elements.splice(i, 1);
+
+				//remove selection information when rectangle is removed
+				var elem = document.getElementById(element_count); //Jaeden
+				elem.remove(); //Jaeden
+
 				break;
 			    }
 		    }
 	    }
     }
+
+    
 
 
     canvas.onmousemove = function (e) {
@@ -317,7 +324,20 @@ function initDraw(canvas) {
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
 
-			$('#selection-information').append("<div class='selection' id='" + element_count + "'> Information for selection " + element_count + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + "</div>");
+			$('#selection-information').append("<div class='selection" + element_count + "' id='" + element_count + "'> <br>Information for selection " + element_count + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + 
+				"<br>Species:<br><select name='speciesDropdown"+element_count+"'>"+
+					"<option value='Eider'>Eider</option>"+
+					"<option value='Lesser Snow Goose'>LesserSnowGoose</option>"+
+					"<option value='Predator'>Predator</option>"+
+					"<option value='Other'>Other</option>"+
+					"</select>" + 
+				"<br>Type of event:<br><select name='eventDropdown"+element_count+"'>"+
+					"<option value='event1'>event1</option>"+
+					"<option value='event2'>event2</option>"+
+					"<option value='event3'>event3</option>"+
+					"</select>" + 
+				"<br>Other Comments:<br><textarea type='text' name='comment"+element_count+"' rows='1' cols='50'></textarea>" + 
+				"</div>"); //Jaeden
 
 			elements[element_count] = current_element;
 			element_count++;
