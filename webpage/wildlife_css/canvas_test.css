@@ -7,7 +7,7 @@
 .img-responsive {
 	-moz-user-select: none;
 	-webkit-user-select: none;
-	user-select none;
+	user-select: none;
 	min-height: 768px;
         min-width: 1024px;
 	max-height: 768px;
@@ -19,3 +19,20 @@
     position: absolute;
 }
 
+.close-btn { 
+    border: 2px solid #c2c2c2;
+    position: relative;
+    padding: 1px 5px;
+    top: -14px;
+    visibility: hidden;
+    background-color: #FF0000; 
+    border-radius: 20px;
+}
+
+.close-btn a {
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+    visibility: inherit;
+    text-decoration: none;
+}
