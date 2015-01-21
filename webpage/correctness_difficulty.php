@@ -27,9 +27,9 @@ if (!isset($buffer)) {
     $buffer = 5;
 }
 
-$easy_watch_query = "SELECT id FROM watched_videos AS watch JOIN timed_observations AS obs ON obs.user_id = watch.user_id AND obs.video_id = watch.video_id WHERE difficulty = 'easy'";
-$medium_watch_query = "SELECT id FROM watched_videos AS watch JOIN timed_observations AS obs ON obs.user_id = watch.user_id AND obs.video_id = watch.video_id WHERE difficulty = 'medium'";
-$hard_watch_query = "SELECT id FROM watched_videos AS watch JOIN timed_observations AS obs ON obs.user_id = watch.user_id AND obs.video_id = watch.video_id WHERE difficulty = 'hard'";
+$easy_watch_query = "SELECT id, obs.video_id FROM watched_videos AS watch JOIN timed_observations AS obs ON obs.user_id = watch.user_id AND obs.video_id = watch.video_id WHERE difficulty = 'easy' and TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.end_time) >= TO_SECONDS(obs.start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
+$medium_watch_query = "SELECT id, obs.video_id FROM watched_videos AS watch JOIN timed_observations AS obs ON obs.user_id = watch.user_id AND obs.video_id = watch.video_id WHERE difficulty = 'medium' and TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.end_time) >= TO_SECONDS(obs.start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
+$hard_watch_query = "SELECT id, obs.video_id FROM watched_videos AS watch JOIN timed_observations AS obs ON obs.user_id = watch.user_id AND obs.video_id = watch.video_id WHERE difficulty = 'hard' and TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.end_time) >= TO_SECONDS(obs.start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
 $easy_watch_result = query_wildlife_video_db($easy_watch_query);
 $medium_watch_result = query_wildlife_video_db($medium_watch_query);
 $hard_watch_result = query_wildlife_video_db($hard_watch_query);
@@ -59,14 +59,18 @@ echo "
 function standard_deviation($sample){
     if(is_array($sample)){
         $mean = array_sum($sample) / count($sample);
-        foreach($sample as $key => $num) $devs[$key] = pow($num - $mean, 2);
+        foreach($sample as $key => $num) {
+            $devs[$key] = pow($num - $mean, 2);
+        }
         return sqrt(array_sum($devs) / (count($devs) - 1));
     }
 }
 
 $elements = array();
 while ($easy_watch_row = $easy_watch_result->fetch_assoc()) {
-    array_push($elements, getBufferCorrectness($easy_watch_row['id'], $buffer));
+    $expert_id = getExpert($easy_watch_row['video_id']);
+    list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($easy_watch_row['id'], $expert_id, $buffer);
+    array_push($elements, $buffer_correctness);
 }
 sort($elements);
 $size = sizeof($elements);
@@ -88,7 +92,9 @@ if ($size > 0) {
 
 $elements = array();
 while ($medium_watch_row = $medium_watch_result->fetch_assoc()) {
-    array_push($elements, getBufferCorrectness($medium_watch_row['id'], $buffer));
+    $expert_id = getExpert($medium_watch_row['video_id']);
+    list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($medium_watch_row['id'], $expert_id, $buffer);
+    array_push($elements, $buffer_correctness);
 }
 sort($elements);
 $size = sizeof($elements);
@@ -110,7 +116,9 @@ if ($size > 0) {
 
 $elements = array();
 while ($hard_watch_row = $hard_watch_result->fetch_assoc()) {
-    array_push($elements, getBufferCorrectness($hard_watch_row['id'], $buffer));
+    $expert_id = getExpert($hard_watch_row['video_id']);
+    list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($hard_watch_row['id'], $expert_id, $buffer);
+    array_push($elements, $buffer_correctness);
 }
 sort($elements);
 $size = sizeof($elements);

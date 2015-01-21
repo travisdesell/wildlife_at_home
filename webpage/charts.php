@@ -59,10 +59,10 @@ echo "
                         <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='scale_factor' placeholder='Scale Factor' step='0.01'>
+                        <input type='number' class='form-control' name='scale_factor' value='0.10' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -79,10 +79,10 @@ echo "
                         <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='scale_factor' placeholder='Scale Factor' step='0.01'>
+                        <input type='number' class='form-control' name='scale_factor' value='0.10' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -97,10 +97,18 @@ echo "
 
                 <form role='form' action='correctness_type.php'>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='threshold' placeholder='Threshold' step='0.01'>
+                        <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <select class='form-control' name='view'>
+                            <option>all</option>
+                            <option>buffer</option>
+                            <option>euclidean</option>
+                            <option>segment</option>
+                        </select>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -115,10 +123,10 @@ echo "
 
                 <form role='form' action='correctness_type_table.php'>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='threshold' placeholder='Threshold' step='0.01'>
+                        <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -133,10 +141,10 @@ echo "
 
                 <form role='form' action='correctness_species_type.php'>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='threshold' placeholder='Threshold' step='0.01'>
+                        <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -150,7 +158,7 @@ echo "
 
                 <form role='form' action='correctness_difficulty.php'>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
