@@ -82,32 +82,20 @@ function initDraw(canvas) {
     };
     
     //Ben
-    canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
-	    setMousePosition(e);
-	    console.log("About to delete");
-	    if (current_action == "") {
-		    for (var i = 0; i < element_count;i++) {
-			    var position = getRectanglePosition(elements[i]);
+    $('#canvas').on('click', '.close-btn', function() {
+		var id = $(this).parent().attr("id");
+		element_count--;
+		elements.splice(elements.indexOf($(this).parent()), 1);
+		$(this).parent().remove()
 
-			    if (position == "top right") { //TODO Don't delete when resizing from top right corner
-				var id = elements[i].id;
-			    	elements[i].parentNode.removeChild(elements[i]);
-				element_count--;
-				elements.splice(i, 1);
+		//remove selection information when rectangle is removed
+		var elem = document.getElementById('S'+id); //Jaeden
+		elem.remove(); //Jaeden
 
-				//remove selection information when rectangle is removed
-				var elem = document.getElementById('S'+id); 
-				console.log(elem);
-				elem.remove(); //Jaeden
 
-				break;
-			    }
-		    }
-	    }
-    }
-
+	    console.log("Close button was clicked");
+    });
     
-
 
     canvas.onmousemove = function (e) {
 	setMousePosition(e);
@@ -117,8 +105,10 @@ function initDraw(canvas) {
 
 		if (position == "") {
 		    elements[i].style.border = '3px solid #FF0000';
+		    elements[i].firstChild.style.visibility = "hidden";
 		    canvas.style.cursor = "default";
 		} else {
+		    elements[i].firstChild.style.visibility = "visible";
 		    elements[i].style.border = '5px solid #FF0000';
 		}
 
@@ -126,7 +116,7 @@ function initDraw(canvas) {
 		    canvas.style.cursor = "nwse-resize";
 
 		}  else if (position == "top right") {
-		    canvas.style.cursor = "nesw-resize";
+		    //canvas.style.cursor = "nesw-resize";
 
 		}  else if (position == "bottom left") {
 		    canvas.style.cursor = "nesw-resize";
@@ -159,6 +149,8 @@ function initDraw(canvas) {
 			current_element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
 			current_element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
 			current_element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
+			close_button = current_element.firstChild;
+			close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 17 + 'px';
 
 		    } else if (current_action == "move element") {
 			/*
@@ -218,7 +210,7 @@ function initDraw(canvas) {
 		    }
 		}
 		e.preventDefault();
-		e.stopPropagation();
+		//e.stopPropagation();
 	     	imag.style.MozUserSelect = "none";
     }
 
@@ -259,8 +251,8 @@ function initDraw(canvas) {
 
 			}  else if (position == "top right") {
 			    current_element = elements[i];
-			    current_action = "top right resize";
-			    canvas.style.cursor = "nesw-resize";
+			    //current_action = "top right resize";
+			    //canvas.style.cursor = "nesw-resize";
 
 			}  else if (position == "bottom left") {
 			    current_element = elements[i];
@@ -322,6 +314,15 @@ function initDraw(canvas) {
 			current_element.className = 'rectangle';
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
+			current_element.id = element_count;
+			
+			close_button = document.createElement('span');
+			close_button.className = 'close-btn';
+			close_button.style.left = current_element.style.width + 'px';
+			closex = document.createElement('a');
+			closex.innerHTML = 'X';
+			close_button.appendChild(closex);
+			current_element.appendChild(close_button);
 			current_element.id = element_id;
 
 			canvas.appendChild(current_element);
@@ -356,4 +357,6 @@ function initDraw(canvas) {
 
 $(document).ready(function() {
     initDraw(document.getElementById('canvas'));
+
+
 });
