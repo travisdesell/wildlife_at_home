@@ -96,7 +96,7 @@ function initDraw(canvas) {
 				elements.splice(i, 1);
 
 				//remove selection information when rectangle is removed
-				var elem = document.getElementById('S'+id); //Jaeden
+				var elem = document.getElementById('S'+id); 
 				console.log(elem);
 				elem.remove(); //Jaeden
 
@@ -327,10 +327,13 @@ function initDraw(canvas) {
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
 
-			$('#selection-information').append("<div class='selection" + element_id + "' id='S" + element_id + "'> <br>Information for selection " + element_id + " goes here.<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + 
+			//add selection information when a rectangle is created
+			$('#selection-information').append("<div class='selection" + element_id + "' id='S" + element_id + "'> <br>Selection " + element_id + 
+				
+				"<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + 
 				"<br>Species:<br><select name='speciesDropdown"+element_id+"'>"+
 					"<option value='Eider'>Eider</option>"+
-					"<option value='Lesser Snow Goose'>LesserSnowGoose</option>"+
+					"<option value='LesserSnowGoose'>Lesser Snow Goose</option>"+
 					"<option value='Predator'>Predator</option>"+
 					"<option value='Other'>Other</option>"+
 					"</select>" + 
