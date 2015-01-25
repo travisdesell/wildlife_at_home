@@ -84,8 +84,11 @@ function initDraw(canvas) {
     //Ben
     $('#canvas').on('click', '.close-btn', function() {
 		var id = $(this).parent().attr("id");
+		console.log();
+		console.log(elements+" before");
+		elements.splice(jQuery.inArray($(this).parent()[0], elements), 1);
+		console.log(elements+" after");
 		element_count--;
-		elements.splice(elements.indexOf($(this).parent()), 1);
 		$(this).parent().remove()
 		var elem = document.getElementById('S'+id); //Jaeden
 		elem.remove(); //Jaeden
@@ -93,10 +96,10 @@ function initDraw(canvas) {
 
 	    console.log("Close button was clicked");
     });
-    /*canvas.onclick = function (e) {//Delete the box if the user clicks on the top right corner
-	    console.log("About to delete");
-	    console.log(e.className);
-    }*/
+
+    $('#canvas').on("mousemove", '.close-btn', function() {
+	    canvas.style.cursor = "pointer";
+    });
 	        
 
 
@@ -147,15 +150,15 @@ function initDraw(canvas) {
 
 
 	if (is_dragging) {//If the mouse is dragging, allow creation of boxes or adjusting
+		close_button = current_element.firstChild;
+		close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 17 + 'px';
+
 		    if (current_action == "creating element") {
 			current_element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
 			current_element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
 			current_element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
 			current_element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
-			close_button = current_element.firstChild;
-			close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 17 + 'px';
-
-		    } else if (current_action == "move element") {
+				    } else if (current_action == "move element") {
 			/*
 			   console.log("current_action != '" + current_action + "', element_count: " + element_count);
 			   console.log("startX: " + mouse.startX + ", mouse.x: " + mouse.x + ", startY: " + mouse.startY + ", mouse.y: " + mouse.y);
@@ -317,7 +320,6 @@ function initDraw(canvas) {
 			current_element.className = 'rectangle';
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
-			current_element.id = element_count;
 			
 			close_button = document.createElement('span');
 			close_button.className = 'close-btn';
