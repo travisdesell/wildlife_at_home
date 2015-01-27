@@ -68,15 +68,18 @@ while ($row = $result->fetch_assoc()) {
     $name = $name_row['name'];
 
     $obs_id = $row['id'];
+    $expert_id = getExpert($video_id);
     $start_time = $row['start_time'];
     $end_time = $row['end_time'];
     $type_id = $row['event_id'];
     $type_name = $row['type_name'];
     if ($check_seg) {
-        $error = 1 - getSegmentedEuclideanCorrectness($obs_id);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $error = 1 - $segmented_euclidean_correctness;
         //$distance = distToClosestExpertCombinedEvents($video_id, $type_id, $start_time, $end_time);
     } else {
-        $error = 1 - getEuclideanCorrectness($obs_id);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
+        $error = 1 - $euclidean_correctness;
         //$distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
     }
     $value = ($end_time-$start_time)/$video_duration;

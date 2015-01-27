@@ -68,6 +68,7 @@ echo "
 while ($watch_row = $watch_result->fetch_assoc()) {
     $user_id = $watch_row['user_id'];
     $video_id = $watch_row['video_id'];
+    $expert_id = getExpert($video_id);
     $event_query = "SELECT TO_SECONDS(obs.start_time) AS start_time, TO_SECONDS(obs.end_time) AS end_time, duration_s, obs.id AS obs_id FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE user_id = $user_id AND obs.video_id = $video_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) < TO_SECONDS(obs.end_time) AND TO_SECONDS(obs.end_time) - TO_SECONDS(obs.start_time) <= vid.duration_s";
     $event_result = query_wildlife_video_db($event_query);
     $num_events = $event_result->num_rows;
@@ -76,8 +77,8 @@ while ($watch_row = $watch_result->fetch_assoc()) {
         $event_length = $event_row['end_time'] - $event_row['start_time'];
         $video_length = $event_row['duration_s'];
         $event_duration_proportion = $event_length/$video_length;
-        $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
-        $euclidian_correctness = getEuclideanCorrectness($obs_id);
+        list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
         $scaled_event_weight = getEventScaledWeight($obs_id, $scale_factor);
         $event_weight = getEventWeight($obs_id);
         echo "[";

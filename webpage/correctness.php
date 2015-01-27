@@ -86,7 +86,7 @@ function getEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
     assert(false);
 }
 
-function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold) {
+function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
     $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) <= TO_SECONDS(i.end_time))";
     $event_result = query_wildlife_video_db($event_query);
 
