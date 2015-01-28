@@ -321,12 +321,14 @@ function initDraw(canvas) {
 			current_element.className = 'rectangle';
 			
 			current_element.style.left = mouse.x + 'px';
+			current_element.style.width = "50px"
+			current_element.style.height = "50px";
 			current_element.style.top = mouse.y + 'px';
 			
 
 			close_button = document.createElement('span');
 			close_button.className = 'close-btn';
-			close_button.style.left = current_element.style.width + 'px';
+			close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 17 + 'px';
 			closex = document.createElement('a');
 			closex.innerHTML = 'X';
 			close_button.appendChild(closex);
