@@ -73,7 +73,7 @@ select {
 	width: 100%;
 }
 
-.number {
+/*.number {
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	user-select: none;
@@ -82,4 +82,4 @@ select {
 	position: absolute;
 	left: 0px;
 	top: 0px;
-}
+}*/
