@@ -290,7 +290,7 @@ function initDraw(canvas) {
 			    canvas.style.cursor = "move";
 
 			} else {
-			    elements[i].style.border = '1px solid #FF0000';
+			    elements[i].style.border = '3px solid #FF0000';
 			}
 		    }
 
@@ -322,16 +322,22 @@ function initDraw(canvas) {
 			current_element.style.top = mouse.y + 'px';
 			current_element.style.width = "50px"
 			current_element.style.height = "50px";
-			
 
 			close_button = document.createElement('span');
 			close_button.className = 'close-btn';
-			close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 17 + 'px';
+			close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 12 + 'px';
 			closex = document.createElement('a');
 			closex.innerHTML = 'X';
 			close_button.appendChild(closex);
 			current_element.appendChild(close_button);
 			current_element.id = element_id;
+
+			/*test new element
+			new_element = document.createElement('div');
+			new_element.className = 'number';
+			new_element.innerHTML = "&nbsp;"+(element_id+1);
+			current_element.appendChild(new_element);
+			//test new element*/
 
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
