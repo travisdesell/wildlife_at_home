@@ -13,20 +13,22 @@
 	max-height: 768px;
         maX-width: 1024px;	
 }
-.rectangle { /*TODO Add border image to make 'x' in corner -Ben*/
+.rectangle {  
     border: 4px solid #FF0000;
     background: rgba(255,0,0,0.3);
     position: absolute;
+    height: 50px;
+    width: 50px;
     color: yellow;
     font-weight: bold;
 }
 
 .close-btn { 
     border: 2px solid #c2c2c2;
-    position: relative;
+    position: absolute;
     padding: 1px 5px;
-    top: -14px;
     visibility: hidden;
+    top: -14px;
     background-color: #FF0000; 
     border-radius: 20px;
 }
