@@ -145,7 +145,8 @@ function initDraw(canvas) {
 
 	if (is_dragging) {//If the mouse is dragging, allow creation of boxes or adjusting
 		close_button = current_element.children[0];
-		close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 12 + 'px';
+		close_button.style.left = current_element.offsetWidth - close_button.clientWidth + 'px';
+		close_button.style.top = current_element.clientTop - 14 + 'px';
 
 		    if (current_action == "creating element") {
 			current_element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
@@ -316,18 +317,18 @@ function initDraw(canvas) {
 
 			current_element = document.createElement('div');
 			current_element.className = 'rectangle';
-			current_element.innerHTML = "&nbsp;"+(element_id+1);
 			
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
 			current_element.style.width = "50px"
+			current_element.innerHTML = "&nbsp;"+(element_id+1);
 			current_element.style.height = "50px";
 
 			close_button = document.createElement('span');
 			close_button.className = 'close-btn';
-			close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 12 + 'px';
 			closex = document.createElement('a');
 			closex.innerHTML = 'X';
+			close_button.style.left = '35px';
 			close_button.appendChild(closex);
 			current_element.appendChild(close_button);
 			current_element.id = element_id;
