@@ -147,7 +147,6 @@ function initDraw(canvas) {
 		close_button = current_element.children[0];
 		close_button.style.left = current_element.offsetWidth - close_button.clientWidth + 'px';
 		close_button.style.top = current_element.clientTop - 14 + 'px';
-		//close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 25 - current_element.style.borderWidth.substring(0, current_element.style.borderWidth.length - 2)  + 'px';
 
 		    if (current_action == "creating element") {
 			current_element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
@@ -292,7 +291,7 @@ function initDraw(canvas) {
 			    canvas.style.cursor = "move";
 
 			} else {
-			    elements[i].style.border = '1px solid #FF0000';
+			    elements[i].style.border = '3px solid #FF0000';
 			}
 		    }
 
@@ -320,10 +319,10 @@ function initDraw(canvas) {
 			current_element.className = 'rectangle';
 			
 			current_element.style.left = mouse.x + 'px';
+			current_element.style.top = mouse.y + 'px';
 			current_element.style.width = "50px"
 			current_element.innerHTML = "&nbsp;"+(element_id+1);
 			current_element.style.height = "50px";
-			current_element.style.top = mouse.y + 'px';
 			
 
 			close_button = document.createElement('span');
