@@ -84,10 +84,7 @@ function initDraw(canvas) {
     //Ben
     $('#canvas').on('click', '.close-btn', function() {
 		var id = $(this).parent().attr("id");
-		console.log();
-		console.log(elements+" before");
 		elements.splice(jQuery.inArray($(this).parent()[0], elements), 1);
-		console.log(elements+" after");
 		element_count--;
 		$(this).parent().remove()
 
@@ -108,10 +105,10 @@ function initDraw(canvas) {
 
 		if (position == "") {
 		    elements[i].style.border = '3px solid #FF0000';
-		    elements[i].firstChild.style.visibility = "hidden";
+		    elements[i].children[0].style.visibility = "hidden";
 		    canvas.style.cursor = "default";
 		} else {
-		    elements[i].firstChild.style.visibility = "visible";
+		    elements[i].children[0].style.visibility = "visible";
 		    elements[i].style.border = '5px solid #FF0000';
 		}
 
@@ -147,7 +144,7 @@ function initDraw(canvas) {
 
 
 	if (is_dragging) {//If the mouse is dragging, allow creation of boxes or adjusting
-		close_button = current_element.firstChild;
+		close_button = current_element.children[0];
 		close_button.style.left = current_element.style.width.substring(0, current_element.style.width.length - 2) - 17 + 'px';
 
 		    if (current_action == "creating element") {
@@ -319,6 +316,7 @@ function initDraw(canvas) {
 
 			current_element = document.createElement('div');
 			current_element.className = 'rectangle';
+			current_element.innerHTML = "&nbsp;"+(element_id+1);
 			
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
@@ -342,11 +340,11 @@ function initDraw(canvas) {
 			"<div class='well well-small' id='S" + element_id + "'>"+
 				"<table border='1'>"+
 					"<tr>"+
-						"<td>Selection " + element_id + "</td>" +
-						"<td align='right'><input type='button' id='remove"+element_id+"' class='btn btn-danger' onclick='clearSelection();'></input></td>"+
+						"<td align='center'>Selection " + (element_id+1) + "</td>" +
+						"<td align='right'><button id='remove"+element_id+"' class='btn delete btn-danger' >Remove Selection</button></td>"+
 					"</tr>"+
 					"<tr>"+
-						"<td>Species:</td>"+
+						"<td align='center'>Species:</td>"+
 						"<td> <select name='speciesDropdown"+element_id+"'>"+
 							"<option value='Eider'>Eider</option>"+
 							"<option value='LesserSnowGoose'>Lesser Snow Goose</option>"+
@@ -362,8 +360,8 @@ function initDraw(canvas) {
 						"</td>"+
 					"</tr>"+
 					"<tr>"+
-						"<td>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
-						"<td><input type='text' size='30' value ='' id='comment"+element_id+"' placeholder='comments' width='100%'></textarea></td>" + 
+						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
+						"<td><textarea type='text' size='34' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 					"</tr>"+
 				"</table>"+
 			"</div>"); //Jaeden
@@ -376,10 +374,24 @@ function initDraw(canvas) {
 	}
     }
 
-    function clearSelection()
-    {
-	console.log("poop");
-    }
+    $("body").on("click", ".delete", function() {
+	var btnId = $(this).attr("id");
+	var elemId = btnId.substring(6);
+	var selectId = "S"+elemId;
+
+	var elem1 = document.getElementById(elemId);
+
+	elements.splice(elements.indexOf(elem1), 1);
+	element_count--;
+
+	elem1.remove();
+
+	var elem2 = document.getElementById(selectId);
+	elem2.remove();
+
+	
+
+    }); //Jaeden
 
 }
 
