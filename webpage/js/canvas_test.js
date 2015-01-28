@@ -301,6 +301,10 @@ function initDraw(canvas) {
 		    mouse.startY = mouse.y;
 	//            console.log("mouse.startY: " + mouse.startY + "mouse.startx: " + mouse.startX);
 
+		if( (mouse.x > 15) && (mouse.x < 1040) && (mouse.y > 0) && (mouse.y < 768) ) //this if statement: Jaeden (makes sure you can't make boxes outside image)
+		{
+				
+
 		    if (current_element != null) {
 			current_element.style.border = '2px solid #FF0000';
 			console.log("selected an element, performing action: '" + current_action + "'");
@@ -315,9 +319,11 @@ function initDraw(canvas) {
 
 			current_element = document.createElement('div');
 			current_element.className = 'rectangle';
+			
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
 			
+
 			close_button = document.createElement('span');
 			close_button.className = 'close-btn';
 			close_button.style.left = current_element.style.width + 'px';
@@ -337,7 +343,7 @@ function initDraw(canvas) {
 				"<table border='1'>"+
 					"<tr>"+
 						"<td>Selection " + element_id + "</td>" +
-						"<td align='right'><button id='remove"+element_id+"' class='btn btn-danger' style='width:10px; height:10px;'></button></td>"+
+						"<td align='right'><input type='button' id='remove"+element_id+"' class='btn btn-danger' onclick='clearSelection();'></input></td>"+
 					"</tr>"+
 					"<tr>"+
 						"<td>Species:</td>"+
@@ -366,8 +372,15 @@ function initDraw(canvas) {
 			element_count++;
 			element_id++;
 		    }
+		}
 	}
     }
+
+    function clearSelection()
+    {
+	console.log("poop");
+    }
+
 }
 
 
