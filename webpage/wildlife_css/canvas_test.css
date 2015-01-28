@@ -44,12 +44,15 @@
 .well {
 	max-width: 400px;
 	min-width: 400px;
+	padding-top: 20px;
+	padding-bottom: 20px;
 }
 
 .col-sm-4 {
 	min-width: 420px;
-	max-width: 420px;
+	max-width: 450px;
 	width: 95%;
+	padding-left: 30px;
 
 }
 
@@ -72,5 +75,13 @@ select {
 	width: 100%;
 }
 
-
-
+/*.number {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+	color: yellow;
+	font-weight: bold;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}*/
