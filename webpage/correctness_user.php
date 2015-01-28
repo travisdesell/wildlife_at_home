@@ -70,27 +70,31 @@ while ($row = $result->fetch_assoc()) {
     $name_result = query_boinc_db($name_query);
     $name_row = $name_result->fetch_assoc();
     $name = $name_row['name'];
+    $expert_id = getExpert($video_id);
 
     $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time)";
     $obs_result = query_wildlife_video_db($obs_query);
 
-    $buffer_correctness = 0;
-    $euclidean_correctness = 0;
-    $segmented_euclidean_correctness = 0;
+    $total_buffer_correctness = 0;
+    $total_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
-        $buffer_correctness += getBufferCorrectness($obs_id, $buffer) * getEventScaledWeight($obs_id, $scale_factor);
-        $euclidean_correctness += getEuclideanCorrectness($obs_id) * getEventScaledWeight($obs_id, $scale_factor);
-        $segmented_euclidean_correctness += getSegmentedEuclideanCorrectness($obs_id) * getEventScaledWeight($obs_id, $scale_factor);
+        list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $total_buffer_correctness += $buffer_correctness * getEventScaledWeight($obs_id, $scale_factor);
+        $total_euclidean_correctness += $euclidean_correctness * getEventScaledWeight($obs_id, $scale_factor);
+        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventScaledWeight($obs_id, $scale_factor);
     }
     echo "[";
     echo "'$name'";
     echo ",";
-    echo $buffer_correctness * 100;
+    echo $total_buffer_correctness * 100;
     echo ",";
-    echo $euclidean_correctness * 100;
+    echo $total_euclidean_correctness * 100;
     echo ",";
-    echo $segmented_euclidean_correctness * 100;
+    echo $total_segmented_euclidean_correctness * 100;
     echo "],";
 }
 
@@ -111,23 +115,26 @@ while ($row = $result->fetch_assoc()) {
     $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time)";
     $obs_result = query_wildlife_video_db($obs_query);
 
-    $buffer_correctness = 0;
-    $euclidean_correctness = 0;
-    $segmented_euclidean_correctness = 0;
+    $total_buffer_correctness = 0;
+    $total_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
-        $buffer_correctness += getBufferCorrectness($obs_id, $buffer) * getEventWeight($obs_id);
-        $euclidean_correctness += getEuclideanCorrectness($obs_id) * getEventWeight($obs_id);
-        $segmented_euclidean_correctness += getSegmentedEuclideanCorrectness($obs_id) * getEventWeight($obs_id);
+        list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $total_buffer_correctness += $buffer_correctness * getEventWeight($obs_id, $scale_factor);
+        $total_euclidean_correctness += $euclidean_correctness * getEventWeight($obs_id, $scale_factor);
+        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventWeight($obs_id, $scale_factor);
     }
     echo "[";
     echo "'$name'";
     echo ",";
-    echo $buffer_correctness * 100;
+    echo $total_buffer_correctness * 100;
     echo ",";
-    echo $euclidean_correctness * 100;
+    echo $total_euclidean_correctness * 100;
     echo ",";
-    echo $segmented_euclidean_correctness * 100;
+    echo $total_segmented_euclidean_correctness * 100;
     echo "],";
 }
 
