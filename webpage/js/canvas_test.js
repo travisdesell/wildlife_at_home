@@ -329,22 +329,36 @@ function initDraw(canvas) {
 			canvas.style.cursor = "crosshair";
 
 			//add selection information when a rectangle is created
-			$('#selection-information').append("<div class='selection" + element_id + "' id='S" + element_id + "'> <br>Selection " + element_id + 
-				
-				"<br>mouse x: " + mouse.x + ", mouse y: " + mouse.y + 
-				"<br>Species:<br><select name='speciesDropdown"+element_id+"'>"+
-					"<option value='Eider'>Eider</option>"+
-					"<option value='LesserSnowGoose'>Lesser Snow Goose</option>"+
-					"<option value='Predator'>Predator</option>"+
-					"<option value='Other'>Other</option>"+
-					"</select>" + 
-				"<br>Type of event:<br><select name='eventDropdown"+element_id+"'>"+
-					"<option value='event1'>event1</option>"+
-					"<option value='event2'>event2</option>"+
-					"<option value='event3'>event3</option>"+
-					"</select>" + 
-				"<br>Other Comments:<br><textarea type='text' name='comment"+element_id+"' rows='1' cols='50'></textarea>" + 
-				"</div>"); //Jaeden
+			$('#selection-information').append(
+
+			"<div class='well well-small' id='S" + element_id + "'>"+
+				"<table border='1'>"+
+					"<tr>"+
+						"<td>Selection " + element_id + "</td>" +
+						"<td align='right'><button id='remove"+element_id+"' class='btn btn-danger' style='width:10px; height:10px;'></button></td>"+
+					"</tr>"+
+					"<tr>"+
+						"<td>Species:</td>"+
+						"<td> <select name='speciesDropdown"+element_id+"'>"+
+							"<option value='Eider'>Eider</option>"+
+							"<option value='LesserSnowGoose'>Lesser Snow Goose</option>"+
+							"<option value='ArcticFox'>Arctic Fox</option>"+
+							"<option value='PolarBear'>Polar Bear</option>"+
+							"<option value='Grizzly'>Grizzly</option>"+
+							"<option value='SandhillCrane'>Sandhill Crane</option>"+
+							"<option value='Wolverine'>Wolverine</option>"+
+							"<option value='CrowRaven'>Crow/Raven</option>"+
+							"<option value='Gull'>Gull</option>"+
+							"<option value='Other'>Other (comments)</option>"+
+							"</select>" + 
+						"</td>"+
+					"</tr>"+
+					"<tr>"+
+						"<td>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
+						"<td><input type='text' size='30' value ='' id='comment"+element_id+"' placeholder='comments' width='100%'></textarea></td>" + 
+					"</tr>"+
+				"</table>"+
+			"</div>"); //Jaeden
 
 			elements[element_count] = current_element;
 			element_count++;

@@ -36,3 +36,24 @@
     visibility: inherit;
     text-decoration: none;
 }
+
+.well {
+	max-width: 340px;
+	min-width: 340px;
+
+}
+
+.col-sm-4 {
+	min-width: 340px;
+
+}
+
+table, td {
+    border: 1px outset #D8D8D8;
+    border-collapse: collapse;
+}
+
+select {
+	width: 211px;
+}
+
