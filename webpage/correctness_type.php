@@ -119,7 +119,7 @@ echo "
                 hAxis: {title: 'Event Type'},
                 vAxis: {
                     title: 'Percent Correct',
-                    maxValue: 100,
+                    maxValue: 100
                 }
             };
 

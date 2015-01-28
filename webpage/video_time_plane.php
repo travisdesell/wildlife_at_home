@@ -83,12 +83,22 @@ while ($row = $result->fetch_assoc()) {
         //$distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
     }
     $value = ($end_time-$start_time)/$video_duration;
+    $start_percent = $start_time/$video_duration * 100;
+    $end_percent = $end_time/$video_duration * 100;
+
+    if ($start_percent > 100) {
+        $start_percent = 100;
+    }
+    if ($end_percent > 100) {
+        $end_percent = 100;
+    }
+
     echo "[";
     echo "''";
     echo ",";
-    echo $start_time/$video_duration;
+    echo $start_percent;
     echo ",";
-    echo $end_time/$video_duration;
+    echo $end_percent;
     echo ",";
     echo "'$type_name'";
     echo ",";
@@ -103,8 +113,14 @@ echo "
 echo "
             var options = {
                 title: 'Time Interval Plane',
-                hAxis: {title: 'Start Time'},
-                vAxis: {title: 'End Time'}
+                hAxis: {
+                    title: 'Start Time',
+                    maxValue: 100
+                },
+                vAxis: {
+                    title: 'End Time',
+                    maxValue: 100
+                }
             };
 
             var chart = new google.visualization.BubbleChart(document.getElementById('chart_div'));
