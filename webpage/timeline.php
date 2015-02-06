@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
+print_header("Wildlife@Home: Video Timeline", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -53,11 +53,14 @@ echo "
 ";
 
 while ($row = $result->fetch_assoc()) {
-    if ($row['expert']) {
-        $name = "Expert";
-    } else {
-        $name = $row['user_id'];
+    $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+    $name_result = query_boinc_db($name_query);
+    $name_row = $name_result->fetch_assoc();
+    $name = $name_row['name'];
+    if ($row['expert'] == 1) {
+        $name = $name . " (expert)";
     }
+
     echo "['" . $name . "'";
     echo ",'" . $row['event_name'] . "'";
     echo ", getDate('" . $row['start_time'] . "')";
@@ -78,7 +81,7 @@ echo "
         }
     </script>
 
-            <h1>Timeline!</h1>
+            <h1>Video Timeline</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
@@ -88,9 +91,8 @@ echo "
                 <dd>The ID of the video in the database.</dd>
             </dl>
             
-
             <h2>Description:</h2>
-            <p>This chart is a timeline of the user events calculated for a specifed video (see parameters section). This provides information at a glance of how user events compared against eachother and the expert(s). If an expert has classified a video it will appear in the top position of the timelime.</p>
+            <p>This chart is a timeline of the user events calculated for a specifed video (see parameters section). This provides information at a glance of how user events compared against each other and the expert(s). If an expert has classified a video it will appear in the top position of the timelime.</p>
 
         </div>
     </div>

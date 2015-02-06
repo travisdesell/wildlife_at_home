@@ -7,11 +7,8 @@ $cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
 //echo $cwd[__FILE__];
 require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/uotd.php");
-require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
-require_once($cwd[__FILE__] . "/webpage/my_query.php");
+require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 
 print_header("Wildlife@Home: Expert Event Conflicts Table", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
@@ -50,15 +47,8 @@ $conflict_map = array(
 // Get Parameters
 //parse_str($_SERVER['QUERY_STRING']);
 
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
 $event_query = "SELECT vid.animal_id, vid.watermarked_filename AS video_name, obs.video_id, obs.event_id, e.name AS event_name, obs.start_time, obs.end_time, to_seconds(obs.start_time) AS start_sec, to_seconds(obs.end_time) AS end_sec FROM timed_observations AS obs JOIN observation_types AS e ON e.id = event_id JOIN video_2 AS vid ON vid.id = video_id WHERE obs.expert = 1 AND obs.start_time > 0 AND obs.end_time > obs.start_time";
-$event_result = attempt_query_with_ping($event_query, $wildlife_db);
-if (!$event_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $event_query\n");
-    die("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $event_query\n");
-}
+$event_result = query_wildlife_video_db($event_query);
 
 echo "
 <div class='containder'>
@@ -90,7 +80,7 @@ echo "
             data.addRows([
 ";
 
-while ($event_row = mysql_fetch_assoc($event_result)) {
+while ($event_row = $event_result->fetch_assoc()) {
     $animal_id = $event_row['animal_id'];
     $video_id = $event_row['video_id'];
     $video_name = end(explode('/', $event_row['video_name']));
@@ -101,12 +91,8 @@ while ($event_row = mysql_fetch_assoc($event_result)) {
     $conflicts = join(',', $conflict_map[$event_id]);
     if (!empty($conflicts)) {
         $match_query = "SELECT * FROM timed_observations WHERE expert = 1 AND video_id = $video_id AND event_id IN ($conflicts) AND (to_seconds(start_time) BETWEEN $start_sec AND $end_sec OR to_seconds(end_time) BETWEEN $start_sec AND $end_sec)";
-        $match_result = attempt_query_with_ping($match_query, $wildlife_db);
-        if (!$match_result) {
-            error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $match_query\n");
-            die("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $match_query\n");
-        }
-        $num_matches = mysql_num_rows($match_result);
+        $match_result = query_wildlife_video_db($match_query);
+        $num_matches = $match_result->num_rows;
         if ($num_matches >= 1) {
             echo "['" . $animal_id . "'";
             echo ",'" . $video_id . "'";

@@ -9,8 +9,9 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
+print_header("Wildlife@Home: Correctness by Event Type", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -26,6 +27,15 @@ if (!isset($buffer)) {
     $buffer = 5;
 }
 
+if (!isset($threshold)) {
+    $threshold = 95;
+}
+
+if (!isset($view)) {
+    $view = 'all';
+}
+
+
 $type_query = "SELECT id, name FROM observation_types";
 $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
@@ -35,7 +45,7 @@ echo "
         <div class='col-sm-12'>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
-        google.load('visualization', '1', {packages:['corechart']});
+        google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
 
         function getDate(date_string) {
@@ -50,61 +60,51 @@ echo "
             var container = document.getElementById('chart_div');
             var data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
-            data.addColumn('number', 'Percent Correct');
-            data.addColumn({type: 'string', role: 'tooltip'});
+            data.addColumn('number', 'Buffer Percent Correct');
+            data.addColumn('number', 'Euclidean Percent Correct');
+            data.addColumn('number', 'Segment Checking Euclidean Percent Correct');
             data.addRows([
 ";
-
-function getExpertMatch($timed_id, $buffer) {
-    $event_query = "SELECT event_id, video_id, to_seconds(start_time) AS start_sec, to_seconds(end_time) AS end_sec FROM timed_observations WHERE id = $timed_id";
-    $event_result = query_wildlife_video_db($event_query);
-    $num_events = $event_result->num_rows;
-    $num_match_events = 0;
-
-    if ($num_events > 0) {
-        while ($event_row = $event_result->fetch_assoc()) {
-            $event_id = $event_row['event_id'];
-            $video_id = $event_row['video_id'];
-            $start_sec = $event_row['start_sec'];
-            $end_sec = $event_row['end_sec'];
-
-            $start_sec_top = $start_sec - $buffer;
-            $start_sec_bot = $start_sec + $buffer;
-            $end_sec_top = $end_sec - $buffer;
-            $end_sec_bot = $end_sec + $buffer;
-            $match_query = "SELECT * FROM timed_observations WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND to_seconds(start_time) BETWEEN $start_sec_top AND $start_sec_bot AND to_seconds(end_time) BETWEEN $end_sec_top AND $end_sec_bot";
-            $match_result = query_wildlife_video_db($match_query);
-            $num_matches = $match_result->num_rows;
-
-            if ($num_matches >= 1) {
-                $num_match_events += 1;
-            }
-        }
-
-        return $num_match_events / $num_events;
-    } else {
-        return 0;
-    }
-}
+            //data.addColumn({type: 'string', role: 'tooltip'});
 
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
+    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(end_time) >= TO_SECONDS(start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
     $timed_result = query_wildlife_video_db($timed_query);
     $num_events = $timed_result->num_rows;
-    $num_match_events = 0;
+    $buffer_match_events = 0;
+    $euclidean_match_events = 0;
+    $segmented_euclidean_match_events = 0;
     while ($timed_row = $timed_result->fetch_assoc()) {
-        $num_match_events += getExpertMatch($timed_row['id'], $buffer);
+        $obs_id = $timed_row['id'];
+        $video_id = $timed_row['video_id'];
+        $expert_id = getExpert($video_id);
+
+        list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id, $threshold);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold);
+
+        if ($euclidean_specificity) {
+            $euclidean_match_events += $euclidean_correctness;
+        }
+        
+        if ($segmented_euclidean_specificity) {
+            $segmented_euclidean_match_events += $segmented_euclidean_correctness;
+        }
+
+        $buffer_match_events += $buffer_correctness;
     }
 
-    if ($num_match_events > 0) {
+    if ($buffer_match_events > 0 || $euclidean_match_events > 0) {
         echo "[";
         echo "'$type_name'";
         echo ",";
-        echo $num_match_events / $num_events;
+        echo $buffer_match_events / $num_events * 100;
         echo ",";
-        echo "'$num_match_events / $num_events'";
+        echo $euclidean_match_events / $num_events * 100;
+        echo ",";
+        echo $segmented_euclidean_match_events / $num_events * 100;
         echo "],";
     }
 }
@@ -116,19 +116,31 @@ echo "
 echo "
             var options = {
                 title: 'Percent of correct events for each type',
+                hAxis: {title: 'Event Type'},
                 vAxis: {
                     title: 'Percent Correct',
-                    maxValue: 1.0,
+                    maxValue: 100
                 }
             };
 
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var view = new google.visualization.DataView(data);
 
-            chart.draw(data, options);
+            if ('$view' == 'all') {
+                view.setColumns([0,1,2,3]); // All
+            } else if ('$view' == 'buffer') {
+                view.setColumns([0,1]); // Buffer Percent Correct
+            } else if ('$view' == 'euclidean') {
+                view.setColumns([0,2]); // Euclidean Percent Correct
+            } else if ('$view' == 'segment') {
+                view.setColumns([0,3]); // Segment Checking Euclidean Percent Correct
+            }
+
+            chart.draw(view, options);
         }
     </script>
 
-            <h1>Correctness Test</h1>
+            <h1>Correctness by Type</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
@@ -137,7 +149,6 @@ echo "
                 <dt>buffer=</dt>
                 <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
             </dl>
-            
 
             <h2>Description:</h2>
             <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represents the event types.</p>
