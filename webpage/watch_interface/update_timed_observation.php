@@ -38,6 +38,8 @@ $species_id = $row['species_id'];
 
 //$query = "UPDATE timed_observations SET start_time = \"$start_time\", end_time = \"$end_time\", start_time_s = $start_time_s, end_time_s = $end_time_s, event_id =\"$event_id\", comments = \"$comments\", tags = \"$tags\" WHERE id = $observation_id";
 
+//error_log("start time: '$start_time', end time: '$end_time'");
+
 $query = "UPDATE timed_observations SET start_time = :start_time, end_time = :end_time, start_time_s = :start_time_s, end_time_s = :end_time_s, event_id =:event_id, comments = :comments, tags = :tags WHERE id = :observation_id";
 //$bind_params = array( 'start_time' => $start_time, 'end_time' => $end_time, 'start_time_s' => $start_time_s, 'end_time_s' => $end_time_s, 'event_id' => $event_id, 'comments' => $comments, 'tags' => $tags, 'observation_id' => $observation_id);
 
