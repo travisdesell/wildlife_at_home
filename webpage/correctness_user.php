@@ -60,7 +60,7 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             var old_data = new google.visualization.arrayToDataTable([
-                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segment Checking Euclidean Correctness'],
+                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segment Checking Euclidean Correctness', 'Segment Checking Euclidean Correctness (Recurse)'],
 ";
 
 $result = query_wildlife_video_db($query);
@@ -78,14 +78,17 @@ while ($row = $result->fetch_assoc()) {
     $total_buffer_correctness = 0;
     $total_euclidean_correctness = 0;
     $total_segmented_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness_recurse = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
         list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
         list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
-        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
-        $total_buffer_correctness += $buffer_correctness * getEventScaledWeight($obs_id, $scale_factor);
-        $total_euclidean_correctness += $euclidean_correctness * getEventScaledWeight($obs_id, $scale_factor);
-        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventScaledWeight($obs_id, $scale_factor);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, 95, false);
+        list($segmented_euclidean_correctness_recurse, $segmented_euclidean_specificity_recurse) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $total_buffer_correctness += $buffer_correctness * getEventWeight($obs_id, $expert_id);
+        $total_euclidean_correctness += $euclidean_correctness * getEventWeight($obs_id, $expert_id);
+        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventWeight($obs_id, $expert_id);
+        $total_segmented_euclidean_correctness_recurse += $segmented_euclidean_correctness * getEventWeight($obs_id, $expert_id);
     }
     echo "[";
     echo "'$name'";
@@ -95,13 +98,15 @@ while ($row = $result->fetch_assoc()) {
     echo $total_euclidean_correctness * 100;
     echo ",";
     echo $total_segmented_euclidean_correctness * 100;
+    echo ",";
+    echo $total_segmented_euclidean_correctness_recurse * 100;
     echo "],";
 }
 
 echo "
                 ]);
             var new_data = new google.visualization.arrayToDataTable([
-                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segmented Euclidean Correctness'],
+                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segment Checking Euclidean Correctness', 'Segment Checking Euclidean Correctness (Recurse)'],
 ";
 
 $result = query_wildlife_video_db($query);
@@ -118,14 +123,17 @@ while ($row = $result->fetch_assoc()) {
     $total_buffer_correctness = 0;
     $total_euclidean_correctness = 0;
     $total_segmented_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness_recurse = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
         list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
         list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
-        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
-        $total_buffer_correctness += $buffer_correctness * getEventWeight($obs_id, $scale_factor);
-        $total_euclidean_correctness += $euclidean_correctness * getEventWeight($obs_id, $scale_factor);
-        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventWeight($obs_id, $scale_factor);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, 95, false);
+        list($segmented_euclidean_correctness_recurse, $segmented_euclidean_specificity_recurse) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $total_buffer_correctness += $buffer_correctness * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
+        $total_euclidean_correctness += $euclidean_correctness * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
+        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
+        $total_segmented_euclidean_correctness_recurse += $segmented_euclidean_correctness_recurse * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
     }
     echo "[";
     echo "'$name'";
@@ -135,6 +143,8 @@ while ($row = $result->fetch_assoc()) {
     echo $total_euclidean_correctness * 100;
     echo ",";
     echo $total_segmented_euclidean_correctness * 100;
+    echo ",";
+    echo $total_segmented_euclidean_correctness_recurse * 100;
     echo "],";
 }
 
