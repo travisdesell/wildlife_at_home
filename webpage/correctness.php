@@ -86,30 +86,36 @@ function getEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
     assert(false);
 }
 
-function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
-    $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) <= TO_SECONDS(i.end_time))";
+function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold = 95, $recurse = true) {
+    $event_query = "SELECT obs.user_id, obs.video_id, obs.event_id, vid.duration_s, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.start_time) <= TO_SECONDS(i.end_time))";
     $event_result = query_wildlife_video_db($event_query);
 
     $num_match_events = 0;
 
+    // Check all user events for a combined expert match
     while ($event_row = $event_result->fetch_assoc()) {
+        $user_id = $event_row['user_id'];
         $video_id = $event_row['video_id'];
         $event_id = $event_row['event_id'];
         $video_duration = $event_row['duration_s'];
         $start_time = $event_row['start_time'];
         $end_time = $event_row['end_time'];
-        $match_query = "SELECT (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time)";
+        $match_query = "SELECT (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_time)) AS start_time, (TO_SECONDS(obs.end_time) - TO_SECONDS(vid.start_time)) AS end_time, obs.id FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND TO_SECONDS(obs.start_time) > 0 AND TO_SECONDS(obs.start_time) <= TO_SECONDS(obs.end_time)";
         $match_result = query_wildlife_video_db($match_query);
         $start_times = array();
         $end_times = array();
 
+        $min_dist = -1;
         while ($row = $match_result->fetch_assoc()) {
             $start_times[] = $row['start_time'];
             $end_times[] = $row['end_time'];
+            if ($recurse) {
+                $min_dist = getSegmentedEuclideanCorrectness($row['id'], $user_id, $threshold, false);
+            }
         }
 
-        $min_dist = -1;
         $max_dist = ($video_duration*1.41421356237); // Divide by hypotenuse of a square
+
         foreach ($start_times as $temp_start) {
             foreach ($end_times as $temp_end) {
                 $dist = sqrt((($temp_start - $start_time)*($temp_start - $start_time)) + (($temp_end - $end_time)*($temp_end - $end_time)));
@@ -136,21 +142,36 @@ function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) 
     assert(false);
 }
 
-function getEventWeight($obs_id) {
-    $weight_query = "SELECT 1/(SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id) AS weight FROM timed_observations AS t WHERE t.id = $obs_id";
+function getEventWeight($obs_id, $expert_id) {
+    $weight_query = "SELECT (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = $expert_id) AS expert_count, (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id) AS user_count FROM timed_observations AS t WHERE t.id = $obs_id";
     $weight_result = query_wildlife_video_db($weight_query);
-        while ($weight_row = $weight_result->fetch_assoc()) {
-            return $weight_row['weight'];
-        }
+    while ($weight_row = $weight_result->fetch_assoc()) {
+        $user_count = $weight_row['user_count'];
+        $expert_count = $weight_row['expert_count'];
+        $max_count = max($user_count, $expert_count);
+        return 1/$user_count * ($user_count / $max_count);
+    }
     return 0;
 }
 
-function getEventScaledWeight($obs_id, $scale_factor) {
+function getEventScaledWeight($obs_id, $expert_id, $scale_factor) {
+    $user_count = 0;
+    $expert_count = 0;
+    $max_count = 0;
+
+    $count_query = "SELECT (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = $expert_id) AS expert_count, (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id) AS user_count FROM timed_observations AS t WHERE t.id = $obs_id";
+    $count_result= query_wildlife_video_db($count_query);
+    while ($count_row = $count_result->fetch_assoc()) {
+        $user_count = $count_row['user_count'];
+        $expert_count = $count_row['expert_count'];
+        $max_count = max($user_count, $expert_count);
+    }
+
     $weight_query = "SELECT (v.duration_s/(TO_SECONDS(t.end_time) - TO_SECONDS(t.start_time) + v.duration_s*$scale_factor))/(SELECT SUM(vid.duration_s/(TO_SECONDS(obs.end_time) - TO_SECONDS(obs.start_time) + vid.duration_s*$scale_factor)) FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id GROUP BY obs.user_id) AS weight FROM timed_observations AS t JOIN video_2 AS v ON v.id = t.video_id WHERE t.id = $obs_id";
     $weight_result = query_wildlife_video_db($weight_query);
-        while ($weight_row = $weight_result->fetch_assoc()) {
-            return $weight_row['weight'];
-        }
+    while ($weight_row = $weight_result->fetch_assoc()) {
+        return $weight_row['weight'] * ($user_count / $max_count);
+    }
     return 0;
 }
 
