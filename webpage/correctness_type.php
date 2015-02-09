@@ -63,6 +63,7 @@ echo "
             data.addColumn('number', 'Buffer Percent Correct');
             data.addColumn('number', 'Euclidean Percent Correct');
             data.addColumn('number', 'Segment Checking Euclidean Percent Correct');
+            data.addColumn('number', 'Segment Checking Euclidean Percent Correct (Recursive)');
             data.addRows([
 ";
             //data.addColumn({type: 'string', role: 'tooltip'});
@@ -76,6 +77,7 @@ while ($type_row = $type_result->fetch_assoc()) {
     $buffer_match_events = 0;
     $euclidean_match_events = 0;
     $segmented_euclidean_match_events = 0;
+    $segmented_euclidean_match_events_recurse = 0;
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
         $video_id = $timed_row['video_id'];
@@ -83,7 +85,8 @@ while ($type_row = $type_result->fetch_assoc()) {
 
         list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
         list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id, $threshold);
-        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold, 95, false);
+        list($segmented_euclidean_correctness_recurse, $segmented_euclidean_specificity_recurse) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold);
 
         if ($euclidean_specificity) {
             $euclidean_match_events += $euclidean_correctness;
@@ -91,6 +94,10 @@ while ($type_row = $type_result->fetch_assoc()) {
         
         if ($segmented_euclidean_specificity) {
             $segmented_euclidean_match_events += $segmented_euclidean_correctness;
+        }
+
+        if ($segmented_euclidean_specificity_recurse) {
+            $segmented_euclidean_match_events_recurse += $segmented_euclidean_correctness_recurse;
         }
 
         $buffer_match_events += $buffer_correctness;
@@ -105,6 +112,8 @@ while ($type_row = $type_result->fetch_assoc()) {
         echo $euclidean_match_events / $num_events * 100;
         echo ",";
         echo $segmented_euclidean_match_events / $num_events * 100;
+        echo ",";
+        echo $segmented_euclidean_match_events_recurse / $num_events * 100;
         echo "],";
     }
 }
