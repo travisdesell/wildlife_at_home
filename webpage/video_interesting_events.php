@@ -22,12 +22,19 @@ $query = "SELECT event_id, (TO_SECONDS(obs.start_time) - TO_SECONDS(vid.start_ti
 $result = query_wildlife_video_db($query);
 
 while ($row = $result->fetch_assoc()) {
-    echo $row['event_id'] . " ";
-    echo $row['start_time'] . " ";
-    echo "\n";
-    echo $row['event_id'] . " ";
-    echo $row['end_time'];
-    echo "\n";
+    $event_id = $row['event_id'];
+    $start_time = $row['start_time'];
+    $end_time = $row['end_time'];
+    if ($start_time > 0) {
+        echo $event_id . " ";
+        echo $start_time . " ";
+        echo "\n";
+    }
+    if ($end_time > 0) {
+        echo $event_id . " ";
+        echo $end_time;
+        echo "\n";
+    }
 }
 
 ?>
