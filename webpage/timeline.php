@@ -27,11 +27,19 @@ $result = query_wildlife_video_db($query);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1', {packages:['timeline']});
         google.setOnLoadCallback(drawChart);
+
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -44,11 +52,11 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             var chart = new google.visualization.Timeline(container);
-            var data = new google.visualization.DataTable();
-            data.addColumn({type: 'string', id: 'Name'});
-            data.addColumn({type: 'string', id: 'Event Type'});
-            data.addColumn({type: 'date', id: 'Start' });
-            data.addColumn({type: 'date', id: 'End' });
+            data = new google.visualization.DataTable();
+            data.addColumn('string', 'Name');
+            data.addColumn('string', 'Event Type');
+            data.addColumn('date', 'Start');
+            data.addColumn('date', 'End');
             data.addRows([
 ";
 
@@ -84,6 +92,8 @@ echo "
             <h1>Video Timeline</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>

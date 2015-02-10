@@ -37,11 +37,19 @@ $hard_watch_result = query_wildlife_video_db($hard_watch_query);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
+
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -53,7 +61,13 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.arrayToDataTable([
+            data = new google.visualization.DataTable();
+            data.addColumn('string', 'Difficulty');
+            data.addColumn('number', 'Minimum Correctness');
+            data.addColumn('number', 'Second Quartile');
+            data.addColumn('number', 'Third Quartile');
+            data.addColumn('number', 'Maximum Correctness');
+            data.addRows([
 ";
 
 function standard_deviation($sample){
@@ -157,6 +171,8 @@ echo "
             <h1>Correctness vs Difficulty</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
