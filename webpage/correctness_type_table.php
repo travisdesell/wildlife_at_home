@@ -37,15 +37,23 @@ $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['table']});
         google.setOnLoadCallback(drawChart);
 
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
+
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.DataTable();
+            data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
             data.addColumn('number', 'Total');
             data.addColumn('number', 'Buffer True Positives');
@@ -60,7 +68,7 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(end_time >= TO_SECONDS(start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
+    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(end_time) >= TO_SECONDS(start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
     $timed_result = query_wildlife_video_db($timed_query);
     $num_events = $timed_result->num_rows;
     $buffer_true_positives = 0;
@@ -140,6 +148,8 @@ echo "
             <h1>Correctness by Type as a Table</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: auto;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
