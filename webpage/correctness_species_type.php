@@ -48,15 +48,23 @@ ksort($species);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
 
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
+
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.DataTable();
+            data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
 ";
 
@@ -65,7 +73,6 @@ foreach($species as $s_id => $s_name) {
 }
 
 echo "
-            data.addColumn({type: 'string', role: 'tooltip'});
             data.addRows([
 ";
 
@@ -113,7 +120,6 @@ while ($type_row = $type_result->fetch_assoc()) {
     if ($add_data) {
         echo "[";
         echo "'$type_name'";
-        $tooltip = "Okay";
         foreach($species_match_events as $s_id => $s_val) {
             echo ",";
             if ($species_num_events[$s_id] > 0) {
@@ -122,8 +128,6 @@ while ($type_row = $type_result->fetch_assoc()) {
                 echo "0";
             }
         }
-        echo ",";
-        echo "'$tooltip'";
         echo "],";
     }
 }
@@ -151,6 +155,8 @@ echo "
             <h1>Correctness by Event Type and Species</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>

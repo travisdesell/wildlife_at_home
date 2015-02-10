@@ -43,11 +43,19 @@ $query = "SELECT user_id, video_id FROM watched_videos WHERE video_id = $video_i
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
+
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -59,8 +67,13 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var old_data = new google.visualization.arrayToDataTable([
-                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segment Checking Euclidean Correctness', 'Segment Checking Euclidean Correctness (Recurse)'],
+            data = new google.visualization.DataTable();
+            data.addColumn('string', 'Name');
+            data.addColumn('number', 'Buffer Correctness');
+            data.addColumn('number', 'Euclidean Correctness');
+            data.addColumn('number', 'Segment Checking Euclidean Correctness');
+            data.addColumn('number', 'Segment Checking Euclidean Correctness (Recurse)');
+            data.addRows([
 ";
 
 $result = query_wildlife_video_db($query);
@@ -163,6 +176,8 @@ echo "
                 },
                 diff: {oldData: {title: 'Data'}}
             };
+            
+            data = new_data;
 
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
             var diffData = chart.computeDiff(old_data, new_data);
@@ -174,6 +189,8 @@ echo "
             <h1>User Correctness</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>

@@ -42,11 +42,19 @@ $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
+
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -58,7 +66,7 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.DataTable();
+            data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
             data.addColumn('number', 'Buffer Percent Correct');
             data.addColumn('number', 'Euclidean Percent Correct');
@@ -152,6 +160,8 @@ echo "
             <h1>Correctness by Type</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
+            
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>

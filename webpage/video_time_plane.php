@@ -41,11 +41,19 @@ $result = query_wildlife_video_db($query);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
+
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -57,8 +65,13 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.arrayToDataTable([
-                ['ID', 'Start Time', 'Citizen End Time', 'Type Name', 'Percent Error'],
+            data = new google.visualization.DataTable();
+            data.addColumn('string', 'ID');
+            data.addColumn('number', 'Start Time');
+            data.addColumn('number', 'End Time');
+            data.addColumn('string', 'Type Name');
+            data.addColumn('number', 'Percent Error');
+            data.addRows([
 ";
 
 while ($row = $result->fetch_assoc()) {
@@ -132,6 +145,8 @@ echo "
             <h1>Video Time Plane</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
