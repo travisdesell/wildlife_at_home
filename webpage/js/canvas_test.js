@@ -1,4 +1,43 @@
 function initDraw(canvas) {
+	
+	$('#submit-selections-button:not(.bound)').addClass('bound').click(function() {
+		console.log("the submit button was clicked!");
+
+		var submission_info = {};
+
+		for (var i = 0; i < element_count; i++) {
+		    var current_element = elements[i];
+
+		    var rectangle_info = {
+			width : current_element.style.width,
+			height : current_element.style.height,
+			left : current_element.style.left,
+			top : current_element.style.top
+			};
+
+		    console.log("info for element " + i + " is: '" + JSON.stringify(rectangle_info) + "'");
+
+		    submission_info[i] = rectangle_info;
+		}
+
+		console.log("full info: " + JSON.stringify(submission_info));
+
+		$.ajax({
+		    type: 'POST',
+		    url: './canvas_submission.php',
+		    data: { some_id : 532,
+			    data : JSON.stringify(submission_info) },
+		    dataType : 'text',
+		    success : function(response) {
+			console.log("response from the server was: '" + response + "'");
+		    },
+		    error : function(jqXHR, textStatus, errorThrown) {
+			console.log("error was thrown: '" + errorThrown + "'");
+		    },
+		    async: true
+		});
+
+    });
 
     var mouse = {
         x: 0,
