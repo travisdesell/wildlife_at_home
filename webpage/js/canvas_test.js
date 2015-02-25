@@ -12,7 +12,11 @@ function initDraw(canvas) {
 			width : current_element.style.width,
 			height : current_element.style.height,
 			left : current_element.style.left,
-			top : current_element.style.top
+			top : current_element.style.top,
+			nest : document.getElementById('check'+current_element.id).checked ? true : false,
+			species : document.getElementById('speciesDropdown'+current_element.id).value,
+			comments : document.getElementById('comment'+current_element.id).value,
+			image_id : $(".img-responsive").attr("id")
 			};
 
 		    console.log("info for element " + i + " is: '" + JSON.stringify(rectangle_info) + "'");
@@ -393,7 +397,7 @@ function initDraw(canvas) {
 					"</tr>"+
 					"<tr>"+
 						"<td align='center'>Species:</td>"+
-						"<td> <select name='speciesDropdown"+element_id+"'>"+
+						"<td> <select id='speciesDropdown"+element_id+"'>"+
 							"<option value='Eider'>Eider</option>"+
 							"<option value='LesserSnowGoose'>Lesser Snow Goose</option>"+
 							"<option value='ArcticFox'>Arctic Fox</option>"+
@@ -409,7 +413,7 @@ function initDraw(canvas) {
 					"</tr>"+
 					"<tr>"+
 						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
-						"<td><textarea type='text' size='34' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+						"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 					"</tr>"+
 				"</table>"+
 			"</div>"); //Jaeden
