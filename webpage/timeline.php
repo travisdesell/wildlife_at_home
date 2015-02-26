@@ -21,8 +21,10 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 parse_str($_SERVER['QUERY_STRING']);
 
-$query = "SELECT user_id, expert, ot.name AS event_name, start_time, end_time FROM timed_observations JOIN observation_types AS ot ON event_id = ot.id WHERE video_id = $video_id AND start_time > 0 AND end_time > 0 AND start_time < end_time ORDER BY expert DESC";
-$result = query_wildlife_video_db($query);
+$user_query = "SELECT user_id, expert, ot.name AS event_name, (UNIX_TIMESTAMP(vid.start_time) + start_time_s) AS start_time, (UNIX_TIMESTAMP(vid.start_time) + end_time_s) AS end_time FROM timed_observations JOIN observation_types AS ot ON event_id = ot.id JOIN video_2 as vid ON vid.id = video_id WHERE video_id = $video_id AND start_time_s < end_time_s ORDER BY expert DESC";
+$comp_query = "SELECT alg.name AS algorithm_name, ot.name AS event_name, (UNIX_TIMESTAMP(vid.start_time) + start_time_s) AS start_time, (UNIX_TIMESTAMP(vid.start_time) + end_time_s) AS end_time FROM computed_events JOIN event_algorithms AS alg ON alg.id = algorithm_id JOIN observation_types AS ot ON event_id = ot.id JOIN video_2 AS vid ON vid.id = video_id WHERE video_id = $video_id AND version_id = alg.main_version_id AND start_time_s < end_time_s";
+$user_result = query_wildlife_video_db($user_query);
+$comp_result = query_wildlife_video_db($comp_query);
 
 echo "
 <div class='containder'>
@@ -60,22 +62,34 @@ echo "
             data.addRows([
 ";
 
-while ($row = $result->fetch_assoc()) {
-    $name_query = "SELECT name FROM user WHERE id = " . $row['user_id'];
+while ($user_row = $user_result->fetch_assoc()) {
+    $name_query = "SELECT name FROM user WHERE id = " . $user_row['user_id'];
     $name_result = query_boinc_db($name_query);
     $name_row = $name_result->fetch_assoc();
     $name = $name_row['name'];
-    if ($row['expert'] == 1) {
+    if ($user_row['expert'] == 1) {
         $name = $name . " (expert)";
     }
 
     echo "['" . $name . "'";
-    echo ",'" . $row['event_name'] . "'";
-    echo ", getDate('" . $row['start_time'] . "')";
-    echo ", getDate('" . $row['end_time'] . "')";
+    echo ",'" . $user_row['event_name'] . "'";
+    echo ", new Date(" . ($user_row['start_time'] * 1000) . ")";
+    echo ", new Date(" . ($user_row['end_time'] * 1000) . ")";
     echo "],";
 }
 
+while ($comp_row = $comp_result->fetch_assoc()) {
+    $name = $comp_row['algorithm_name'];
+    if ($comp_row['expert'] == 1) {
+        $name = $name . " (expert)";
+    }
+
+    echo "['" . $name . "'";
+    echo ",'" . $comp_row['event_name'] . "'";
+    echo ", new Date(" . ($comp_row['start_time'] * 1000) . ")";
+    echo ", new Date(" . ($comp_row['end_time'] * 1000) . ")";
+    echo "],";
+}
 echo "
                 ]);
 
