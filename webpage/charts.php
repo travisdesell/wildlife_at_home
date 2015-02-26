@@ -88,6 +88,26 @@ echo "
                 </form>
             </section>
 
+            <section id='comp-correctness' class='well'>
+                <div class='page-header'>
+                    <h2>Computer Correctness</h2>
+                    <p>This barchart shows how each algorithm  was rated with the two different correctness algorithms and how those scores are affected according to the weight of each event. The grey background is a fair weighting (event correctness / total number of events) and the colored foreground is a scaled weight where short events are given a larger portion of the total observational weight.</p>
+                </div>
+
+                <form role='form' action='correctness_computed.php'>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='scale_factor' value='0.10' step='0.01'>
+                    </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
             <section id='correctness-type' class='well'>
                 <div class='page-header'>
                     <h2>Event Correctness by Type</h2>
