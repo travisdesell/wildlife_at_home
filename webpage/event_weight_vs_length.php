@@ -79,8 +79,8 @@ while ($watch_row = $watch_result->fetch_assoc()) {
         $event_duration_proportion = $event_length/$video_length;
         list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
         list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
-        $scaled_event_weight = getEventScaledWeight($obs_id, $scale_factor);
-        $event_weight = getEventWeight($obs_id);
+        $scaled_event_weight = getEventScaledWeight($obs_id, $expert_id, $scale_factor);
+        $event_weight = getEventWeight($obs_id, $expert_id);
         echo "[";
         echo $event_duration_proportion;
         echo ",";
