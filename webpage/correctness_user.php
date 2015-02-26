@@ -50,10 +50,11 @@ echo "
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
 
-        var data;
+        var old_data;
+        var new_data;
 
         function downloadChart() {
-            var csv_data = dataTableToCSV(data);
+            var csv_data = dataTableToCSV(new_data);
             downloadCSV(csv_data);
         }
 
@@ -67,13 +68,13 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            data = new google.visualization.DataTable();
-            data.addColumn('string', 'Name');
-            data.addColumn('number', 'Buffer Correctness');
-            data.addColumn('number', 'Euclidean Correctness');
-            data.addColumn('number', 'Segment Checking Euclidean Correctness');
-            data.addColumn('number', 'Segment Checking Euclidean Correctness (Recurse)');
-            data.addRows([
+            old_data = new google.visualization.DataTable();
+            old_data.addColumn('string', 'Name');
+            old_data.addColumn('number', 'Buffer Correctness');
+            old_data.addColumn('number', 'Euclidean Correctness');
+            old_data.addColumn('number', 'Segment Checking Euclidean Correctness');
+            old_data.addColumn('number', 'Segment Checking Euclidean Correctness (Recurse)');
+            old_data.addRows([
 ";
 
 $result = query_wildlife_video_db($query);
