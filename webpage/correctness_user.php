@@ -86,7 +86,7 @@ while ($row = $result->fetch_assoc()) {
     $name = $name_row['name'];
     $expert_id = getExpert($video_id);
 
-    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time)";
+    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND start_time_s >= 0 AND start_time_s <= end_time_S";
     $obs_result = query_wildlife_video_db($obs_query);
 
     $total_buffer_correctness = 0;
@@ -131,7 +131,7 @@ while ($row = $result->fetch_assoc()) {
     $name_row = $name_result->fetch_assoc();
     $name = $name_row['name'];
 
-    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time)";
+    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND start_time_s >= 0 AND start_time_s <= end_time_s";
     $obs_result = query_wildlife_video_db($obs_query);
 
     $total_buffer_correctness = 0;
