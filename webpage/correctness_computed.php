@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
+print_header("Wildlife@Home: Algorithm Accuracy", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -50,11 +50,10 @@ echo "
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
 
-        var old_data;
-        var new_data;
+        var data;
 
         function downloadChart() {
-            var csv_data = dataTableToCSV(new_data);
+            var csv_data = dataTableToCSV(data);
             downloadCSV(csv_data);
         }
 
@@ -68,11 +67,10 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            old_data = new google.visualization.DataTable();
-            old_data.addColumn('string', 'Name');
-            old_data.addColumn('number', 'Buffer Correctness');
-            old_data.addColumn('number', 'Euclidean Correctness');
-            old_data.addRows([
+            data = new google.visualization.DataTable();
+            data.addColumn('string', 'Name');
+            data.addColumn('number', 'Buffer Correctness');
+            data.addRows([
 ";
 
 $result = query_wildlife_video_db($query);
@@ -81,59 +79,22 @@ while ($row = $result->fetch_assoc()) {
     $algorithm_name = $row['name'];
     $expert_id = getExpert($video_id);
 
-    $comp_query = "SELECT id FROM computed_events WHERE algorithm_id = $algorithm_id AND video_id = $video_id AND start_time_s <= end_time_s";
-    $comp_result = query_wildlife_video_db($comp_query);
+    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $expert_id AND video_id = $video_id AND start_time_s > 0 AND start_time_s <= end_time_s";
+    $obs_result = query_wildlife_video_db($obs_query);
 
+    $total = 0;
     $total_buffer_correctness = 0;
-    $total_euclidean_correctness = 0;
-    while ($comp_row = $comp_result->fetch_assoc()) {
-        $comp_id = $comp_row['id'];
-        list($buffer_correctness, $buffer_specificity) = getComputedBufferCorrectness($comp_id, $expert_id, $buffer);
-        list($euclidean_correctness, $euclidean_specificity) = getComputedEuclideanCorrectness($comp_id, $expert_id);
-        $total_buffer_correctness += $buffer_correctness * getComputedEventWeight($comp_id, $expert_id);
-        $total_euclidean_correctness += $euclidean_correctness * getComputedEventWeight($comp_id, $expert_id);
+    while ($obs_row = $obs_result->fetch_assoc()) {
+        $obs_id = $obs_row['id'];
+        list($buffer_correctness, $buffer_specificity) = getBufferAccuracy($obs_id, $algorithm_id, $buffer);
+        #$total_buffer_correctness += $buffer_correctness * getComputedEventWeight($obs_id, $expert_id);
+        $total_buffer_correctness += $buffer_correctness;
+        $total++;
     }
     echo "[";
     echo "'$algorithm_name'";
     echo ",";
-    echo $total_buffer_correctness * 100;
-    echo ",";
-    echo $total_euclidean_correctness * 100;
-    echo "],";
-}
-
-echo "
-                ]);
-            new_data = new google.visualization.DataTable();
-            new_data.addColumn('string', 'Name');
-            new_data.addColumn('number', 'Buffer Correctness');
-            new_data.addColumn('number', 'Euclidean Correctness');
-            new_data.addRows([
-";
-
-$result = query_wildlife_video_db($query);
-while ($row = $result->fetch_assoc()) {
-    $algorithm_id = $row['id'];
-    $algorithm_name = $row['name'];
-
-    $comp_query = "SELECT id FROM computed_events WHERE algorithm_id = $algorithm_id AND video_id = $video_id AND start_time_s <= end_time_s";
-    $comp_result = query_wildlife_video_db($comp_query);
-
-    $total_buffer_correctness = 0;
-    $total_euclidean_correctness = 0;
-    while ($comp_row = $comp_result->fetch_assoc()) {
-        $comp_id = $comp_row['id'];
-        list($buffer_correctness, $buffer_specificity) = getComputedBufferCorrectness($comp_id, $expert_id, $buffer);
-        list($euclidean_correctness, $euclidean_specificity) = getComputedEuclideanCorrectness($comp_id, $expert_id);
-        $total_buffer_correctness += $buffer_correctness * getComputedEventScaledWeight($comp_id, $expert_id, $scale_factor);
-        $total_euclidean_correctness += $euclidean_correctness * getComputedEventScaledWeight($comp_id, $expert_id, $scale_factor);
-    }
-    echo "[";
-    echo "'$algorithm_name'";
-    echo ",";
-    echo $total_buffer_correctness * 100;
-    echo ",";
-    echo $total_euclidean_correctness * 100;
+    echo $total_buffer_correctness * 100 / $total;
     echo "],";
 }
 
@@ -143,26 +104,22 @@ echo "
 
 echo "
             var options = {
-                title: 'User Correctness',
-                hAxis: {title: 'User'},
+                title: 'Accuracy',
+                hAxis: {title: 'Algorithm'},
                 vAxis: {
-                    title: 'Percent Correct',
+                    title: 'Percent Accuracy',
                     maxValue: 100,
                     minValue: 0,
                 },
-                diff: {oldData: {title: 'Data'}}
             };
             
-            data = new_data;
-
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-            var diffData = chart.computeDiff(old_data, new_data);
 
-            chart.draw(diffData, options);
+            chart.draw(data, options);
         }
     </script>
 
-            <h1>User Correctness</h1>
+            <h1>Algorithm Accuracy</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
 

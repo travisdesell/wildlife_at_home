@@ -79,7 +79,7 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(end_time) >= TO_SECONDS(start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
+    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time_s >= 0 AND end_time_s >= start_time_s AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time_s >= 0 AND i.end_time_s >= i.start_time_s)";
     $timed_result = query_wildlife_video_db($timed_query);
     $num_events = $timed_result->num_rows;
     $buffer_match_events = 0;
