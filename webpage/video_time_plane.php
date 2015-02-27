@@ -41,11 +41,19 @@ $result = query_wildlife_video_db($query);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
+
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -57,8 +65,13 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.arrayToDataTable([
-                ['ID', 'Start Time', 'Citizen End Time', 'Type Name', 'Percent Error'],
+            data = new google.visualization.DataTable();
+            data.addColumn('string', 'ID');
+            data.addColumn('number', 'Start Time');
+            data.addColumn('number', 'End Time');
+            data.addColumn('string', 'Type Name');
+            data.addColumn('number', 'Percent Error');
+            data.addRows([
 ";
 
 while ($row = $result->fetch_assoc()) {
@@ -68,24 +81,37 @@ while ($row = $result->fetch_assoc()) {
     $name = $name_row['name'];
 
     $obs_id = $row['id'];
+    $expert_id = getExpert($video_id);
     $start_time = $row['start_time'];
     $end_time = $row['end_time'];
     $type_id = $row['event_id'];
     $type_name = $row['type_name'];
     if ($check_seg) {
-        $error = 1 - getSegmentedEuclideanCorrectness($obs_id);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $error = 1 - $segmented_euclidean_correctness;
         //$distance = distToClosestExpertCombinedEvents($video_id, $type_id, $start_time, $end_time);
     } else {
-        $error = 1 - getEuclideanCorrectness($obs_id);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
+        $error = 1 - $euclidean_correctness;
         //$distance = distToClosestExpertEvent($video_id, $type_id, $start_time, $end_time);
     }
     $value = ($end_time-$start_time)/$video_duration;
+    $start_percent = $start_time/$video_duration * 100;
+    $end_percent = $end_time/$video_duration * 100;
+
+    if ($start_percent > 100) {
+        $start_percent = 100;
+    }
+    if ($end_percent > 100) {
+        $end_percent = 100;
+    }
+
     echo "[";
     echo "''";
     echo ",";
-    echo $start_time/$video_duration;
+    echo $start_percent;
     echo ",";
-    echo $end_time/$video_duration;
+    echo $end_percent;
     echo ",";
     echo "'$type_name'";
     echo ",";
@@ -100,8 +126,14 @@ echo "
 echo "
             var options = {
                 title: 'Time Interval Plane',
-                hAxis: {title: 'Start Time'},
-                vAxis: {title: 'End Time'}
+                hAxis: {
+                    title: 'Start Time',
+                    maxValue: 100
+                },
+                vAxis: {
+                    title: 'End Time',
+                    maxValue: 100
+                }
             };
 
             var chart = new google.visualization.BubbleChart(document.getElementById('chart_div'));
@@ -113,6 +145,8 @@ echo "
             <h1>Video Time Plane</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
