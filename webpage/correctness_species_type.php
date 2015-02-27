@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
+print_header("Wildlife@Home: Correctness by Event Type and Species", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -25,6 +25,10 @@ parse_str($_SERVER['QUERY_STRING']);
 // Set buffer for correctness time (+ or - the buffer value)
 if (!isset($buffer)) {
     $buffer = 5;
+}
+
+if (!isset($threshold)) {
+    $threshold = 95;
 }
 
 $type_query = "SELECT id, name FROM observation_types";
@@ -44,15 +48,23 @@ ksort($species);
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
 
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
+
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.DataTable();
+            data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
 ";
 
@@ -61,14 +73,13 @@ foreach($species as $s_id => $s_name) {
 }
 
 echo "
-            data.addColumn({type: 'string', role: 'tooltip'});
             data.addRows([
 ";
 
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, species_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
+    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(end_time) >= TO_SECONDS(start_time) AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND TO_SECONDS(i.start_time) > 0 AND TO_SECONDS(i.end_time) >= TO_SECONDS(i.start_time))";
     $timed_result = query_wildlife_video_db($timed_query);
     $species_num_events = array();
     $species_match_events = array();
@@ -78,14 +89,23 @@ while ($type_row = $type_result->fetch_assoc()) {
     }
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
+        $video_id = $timed_row['video_id'];
         $species_id = $timed_row['species_id'];
-        //$correctness = getBufferCorrectness($obs_id, $buffer);
-        $correctness = getEuclideanCorrectness($obs_id);
-        //$correctness = getSegmentedEuclideanCorrectness($obs_id);
+
+        $expert_query = "SELECT user_id FROM timed_observations WHERE video_id = $video_id AND expert = 1 LIMIT 1";
+        $expert_result = query_wildlife_video_db($expert_query);
+        $expert_id = -1;
+        while ($expert_row = $expert_result->fetch_assoc()) {
+            $expert_id = $expert_row['user_id'];
+        }
+
+        //$correctness = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($correctness, $specificity) = getEuclideanCorrectness($obs_id, $expert_id, $threshold);
+        //$correctness = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold);
 
         $species_num_events[$species_id] += 1;
 
-        if ($correctness > 0.95) {
+        if ($specificity) {
             $species_match_events[$species_id] += $correctness;
         }
     }
@@ -100,7 +120,6 @@ while ($type_row = $type_result->fetch_assoc()) {
     if ($add_data) {
         echo "[";
         echo "'$type_name'";
-        $tooltip = "Okay";
         foreach($species_match_events as $s_id => $s_val) {
             echo ",";
             if ($species_num_events[$s_id] > 0) {
@@ -109,8 +128,6 @@ while ($type_row = $type_result->fetch_assoc()) {
                 echo "0";
             }
         }
-        echo ",";
-        echo "'$tooltip'";
         echo "],";
     }
 }
@@ -121,7 +138,7 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Percent of correct events for each type',
+                title: 'Percent of correct events for each type by species',
                 hAxis: {title: 'Event Type'},
                 vAxis: {
                     title: 'Percent Correct',
@@ -135,9 +152,11 @@ echo "
         }
     </script>
 
-            <h1>Correctness Test</h1>
+            <h1>Correctness by Event Type and Species</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
@@ -147,7 +166,7 @@ echo "
             
 
             <h2>Description:</h2>
-            <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represents the event types.</p>
+            <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represens the percent of events that match an expert observation. The legent shows the breakdown for each species.</p>
             <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
 
         </div>
