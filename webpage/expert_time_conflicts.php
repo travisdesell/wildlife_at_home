@@ -21,7 +21,7 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 //parse_str($_SERVER['QUERY_STRING']);
 
-$query = "SELECT DISTINCT vid.animal_id, vid.watermarked_filename AS video_name, obs.video_id, ot.name AS event_name, obs.start_time, obs.end_time FROM timed_observations AS obs JOIN observation_types AS ot ON obs.event_id = ot.id JOIN video_2 AS vid ON vid.id = obs.video_id WHERE expert = 1 AND (obs.start_time <= 0 OR obs.start_time > obs.end_time)";
+$query = "SELECT DISTINCT vid.animal_id, vid.watermarked_filename AS video_name, obs.video_id, ot.name AS event_name, obs.start_time, obs.end_time FROM timed_observations AS obs JOIN observation_types AS ot ON obs.event_id = ot.id JOIN video_2 AS vid ON vid.id = obs.video_id WHERE expert = 1 AND (obs.start_time_s < 0 OR obs.start_time_s > obs.end_time_s)";
 
 $result = query_wildlife_video_db($query);
 
@@ -34,14 +34,6 @@ echo "
         google.load('visualization', '1', {packages:['table']});
         google.setOnLoadCallback(drawChart);
 
-        function getDate(date_string) {
-            if (typeof date_string === 'string') {
-                var a = date_string.split(/[- :]/);
-                return new Date(a[0], a[1]-1, a[2], a[3] || 0, a[4] || 0, a[5] || 0);
-            }
-            return null;
-        }
-
         function drawChart() {
             var container = document.getElementById('chart_div');
             var chart = new google.visualization.Table(container);
@@ -50,8 +42,6 @@ echo "
             data.addColumn('string', 'Video ID');
             data.addColumn('string', 'Video Name');
             data.addColumn('string', 'Event Type');
-            data.addColumn('date', 'Start');
-            data.addColumn('date', 'End');
             data.addRows([
 ";
 
@@ -60,8 +50,6 @@ while ($row = $result->fetch_assoc()) {
     echo ",'" . trim($row['video_id']) . "'";
     echo ",'" . trim(end(explode('/', $row['video_name']))) . "'";
     echo ",'" . trim($row['event_name']) . "'";
-    echo ", getDate('" . $row['start_time'] . "')";
-    echo ", getDate('" . $row['end_time'] . "')";
     echo "],";
 }
 

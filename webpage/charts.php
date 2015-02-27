@@ -59,10 +59,10 @@ echo "
                         <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='scale_factor' placeholder='Scale Factor' step='0.01'>
+                        <input type='number' class='form-control' name='scale_factor' value='0.10' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -79,10 +79,30 @@ echo "
                         <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='scale_factor' placeholder='Scale Factor' step='0.01'>
+                        <input type='number' class='form-control' name='scale_factor' value='0.10' step='0.01'>
+                    </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
+            <section id='comp-correctness' class='well'>
+                <div class='page-header'>
+                    <h2>Computer Correctness</h2>
+                    <p>This barchart shows how each algorithm  was rated with the two different correctness algorithms and how those scores are affected according to the weight of each event. The grey background is a fair weighting (event correctness / total number of events) and the colored foreground is a scaled weight where short events are given a larger portion of the total observational weight.</p>
+                </div>
+
+                <form role='form' action='correctness_computed.php'>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='scale_factor' value='0.10' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -90,14 +110,61 @@ echo "
 
             <section id='correctness-type' class='well'>
                 <div class='page-header'>
-                    <h2>Event Types vs Correctness</h2>
+                    <h2>Event Correctness by Type</h2>
                     <p>This bar chart shows the percentage of user events that have a matching expert observed event. Each bar group represents the event types and the colors represent the algorithm used to determine the event correctness.</p>
-                    <p>The buffer parameters sets the leniency of the buffer match algorithm.</p>
+                    <p>The buffer parameter sets the leniency of the buffer match algorithm and the threshold paramater sets the leniency of the euclidean matching algorithms.</p>
                 </div>
 
                 <form role='form' action='correctness_type.php'>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <select class='form-control' name='view'>
+                            <option>all</option>
+                            <option>buffer</option>
+                            <option>euclidean</option>
+                            <option>segment</option>
+                        </select>
+                    </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
+            <section id='correctness-type-table' class='well'>
+                <div class='page-header'>
+                    <h2>Event Correctness by Type as a Table</h2>
+                    <p>This table shows the number of true positives and false positives for each event type and algorithm.</p>
+                    <p>The buffer parameter sets the leniency of the buffer match algorithm and the threshold paramater sets the leniency of the euclidean matching algorithms.</p>
+                </div>
+
+                <form role='form' action='correctness_type_table.php'>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
+                    </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
+            <section id='correctness-species-type' class='well'>
+                <div class='page-header'>
+                    <h2>Event Correctness by Type and Species</h2>
+                    <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represens the percent of events that match an expert observation. The legent shows the breakdown for each species.</p>
+                    <p>The buffer parameter sets the leniency of the buffer match algorithm and the threshold paramater sets the leniency of the euclidean matching algorithms.</p>
+                </div>
+
+                <form role='form' action='correctness_species_type.php'>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -111,7 +178,7 @@ echo "
 
                 <form role='form' action='correctness_difficulty.php'>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='buffer' placeholder='Buffer'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>

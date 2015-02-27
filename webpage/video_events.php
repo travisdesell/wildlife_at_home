@@ -14,7 +14,14 @@ ini_set("default_socket_timeout", 300);
 // Get Parameters
 parse_str($_SERVER['QUERY_STRING']);
 
-$query = "SELECT event_id, time_to_sec(t.start_time) - time_to_sec(v.start_time) AS start_time, time_to_sec(t.end_time) - time_to_sec(v.start_time) AS end_time FROM timed_observations AS t JOIN video_2 AS v ON v.id = video_id WHERE expert = 1 AND video_id = $video_id AND event_id = 41";
+if (!isset($video_id)) {
+    $video_id = 14515;
+}
+if (!isset($event_id)) {
+    $event_id = 4;
+}
+
+$query = "SELECT event_id, (TO_SECONDS(t.start_time) - TO_SECONDS(v.start_time)) AS start_time, (TO_SECONDS(t.end_time) - TO_SECONDS(v.start_time)) AS end_time FROM timed_observations AS t JOIN video_2 AS v ON v.id = video_id WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id";
 $result = query_wildlife_video_db($query);
 
 while ($row = $result->fetch_assoc()) {

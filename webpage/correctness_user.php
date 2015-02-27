@@ -43,11 +43,20 @@ $query = "SELECT user_id, video_id FROM watched_videos WHERE video_id = $video_i
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
+
+        var old_data;
+        var new_data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(new_data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -59,8 +68,13 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var old_data = new google.visualization.arrayToDataTable([
-                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segment Checking Euclidean Correctness'],
+            old_data = new google.visualization.DataTable();
+            old_data.addColumn('string', 'Name');
+            old_data.addColumn('number', 'Buffer Correctness');
+            old_data.addColumn('number', 'Euclidean Correctness');
+            old_data.addColumn('number', 'Segment Checking Euclidean Correctness');
+            old_data.addColumn('number', 'Segment Checking Euclidean Correctness (Recurse)');
+            old_data.addRows([
 ";
 
 $result = query_wildlife_video_db($query);
@@ -70,34 +84,43 @@ while ($row = $result->fetch_assoc()) {
     $name_result = query_boinc_db($name_query);
     $name_row = $name_result->fetch_assoc();
     $name = $name_row['name'];
+    $expert_id = getExpert($video_id);
 
-    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time)";
+    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND start_time_s >= 0 AND start_time_s <= end_time_S";
     $obs_result = query_wildlife_video_db($obs_query);
 
-    $buffer_correctness = 0;
-    $euclidean_correctness = 0;
-    $segmented_euclidean_correctness = 0;
+    $total_buffer_correctness = 0;
+    $total_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness_recurse = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
-        $buffer_correctness += getBufferCorrectness($obs_id, $buffer) * getEventScaledWeight($obs_id, $scale_factor);
-        $euclidean_correctness += getEuclideanCorrectness($obs_id) * getEventScaledWeight($obs_id, $scale_factor);
-        $segmented_euclidean_correctness += getSegmentedEuclideanCorrectness($obs_id) * getEventScaledWeight($obs_id, $scale_factor);
+        list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, 95, false);
+        list($segmented_euclidean_correctness_recurse, $segmented_euclidean_specificity_recurse) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $total_buffer_correctness += $buffer_correctness * getEventWeight($obs_id, $expert_id);
+        $total_euclidean_correctness += $euclidean_correctness * getEventWeight($obs_id, $expert_id);
+        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventWeight($obs_id, $expert_id);
+        $total_segmented_euclidean_correctness_recurse += $segmented_euclidean_correctness * getEventWeight($obs_id, $expert_id);
     }
     echo "[";
     echo "'$name'";
     echo ",";
-    echo $buffer_correctness * 100;
+    echo $total_buffer_correctness * 100;
     echo ",";
-    echo $euclidean_correctness * 100;
+    echo $total_euclidean_correctness * 100;
     echo ",";
-    echo $segmented_euclidean_correctness * 100;
+    echo $total_segmented_euclidean_correctness * 100;
+    echo ",";
+    echo $total_segmented_euclidean_correctness_recurse * 100;
     echo "],";
 }
 
 echo "
                 ]);
             var new_data = new google.visualization.arrayToDataTable([
-                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segmented Euclidean Correctness'],
+                ['Name', 'Buffer Correctness', 'Euclidean Correctness', 'Segment Checking Euclidean Correctness', 'Segment Checking Euclidean Correctness (Recurse)'],
 ";
 
 $result = query_wildlife_video_db($query);
@@ -108,26 +131,34 @@ while ($row = $result->fetch_assoc()) {
     $name_row = $name_result->fetch_assoc();
     $name = $name_row['name'];
 
-    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND TO_SECONDS(start_time) > 0 AND TO_SECONDS(start_time) < TO_SECONDS(end_time)";
+    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $user_id AND video_id = $video_id AND start_time_s >= 0 AND start_time_s <= end_time_s";
     $obs_result = query_wildlife_video_db($obs_query);
 
-    $buffer_correctness = 0;
-    $euclidean_correctness = 0;
-    $segmented_euclidean_correctness = 0;
+    $total_buffer_correctness = 0;
+    $total_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness = 0;
+    $total_segmented_euclidean_correctness_recurse = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
-        $buffer_correctness += getBufferCorrectness($obs_id, $buffer) * getEventWeight($obs_id);
-        $euclidean_correctness += getEuclideanCorrectness($obs_id) * getEventWeight($obs_id);
-        $segmented_euclidean_correctness += getSegmentedEuclideanCorrectness($obs_id) * getEventWeight($obs_id);
+        list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, 95, false);
+        list($segmented_euclidean_correctness_recurse, $segmented_euclidean_specificity_recurse) = getSegmentedEuclideanCorrectness($obs_id, $expert_id);
+        $total_buffer_correctness += $buffer_correctness * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
+        $total_euclidean_correctness += $euclidean_correctness * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
+        $total_segmented_euclidean_correctness += $segmented_euclidean_correctness * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
+        $total_segmented_euclidean_correctness_recurse += $segmented_euclidean_correctness_recurse * getEventScaledWeight($obs_id, $expert_id, $scale_factor);
     }
     echo "[";
     echo "'$name'";
     echo ",";
-    echo $buffer_correctness * 100;
+    echo $total_buffer_correctness * 100;
     echo ",";
-    echo $euclidean_correctness * 100;
+    echo $total_euclidean_correctness * 100;
     echo ",";
-    echo $segmented_euclidean_correctness * 100;
+    echo $total_segmented_euclidean_correctness * 100;
+    echo ",";
+    echo $total_segmented_euclidean_correctness_recurse * 100;
     echo "],";
 }
 
@@ -146,6 +177,8 @@ echo "
                 },
                 diff: {oldData: {title: 'Data'}}
             };
+            
+            data = new_data;
 
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
             var diffData = chart.computeDiff(old_data, new_data);
@@ -157,6 +190,8 @@ echo "
             <h1>User Correctness</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
+
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>

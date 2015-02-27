@@ -27,17 +27,34 @@ if (!isset($buffer)) {
     $buffer = 5;
 }
 
+if (!isset($threshold)) {
+    $threshold = 95;
+}
+
+if (!isset($view)) {
+    $view = 'all';
+}
+
+
 $type_query = "SELECT id, name FROM observation_types";
 $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
 echo "
 <div class='containder'>
     <div class='row'>
-        <div class='col-sm-12'>
+    <div class='col-sm-12'>
+    <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['corechart']});
         google.setOnLoadCallback(drawChart);
+
+        var data;
+
+        function downloadChart() {
+            var csv_data = dataTableToCSV(data);
+            downloadCSV(csv_data);
+        }
 
         function getDate(date_string) {
             if (typeof date_string === 'string') {
@@ -49,11 +66,12 @@ echo "
 
         function drawChart() {
             var container = document.getElementById('chart_div');
-            var data = new google.visualization.DataTable();
+            data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
             data.addColumn('number', 'Buffer Percent Correct');
             data.addColumn('number', 'Euclidean Percent Correct');
             data.addColumn('number', 'Segment Checking Euclidean Percent Correct');
+            data.addColumn('number', 'Segment Checking Euclidean Percent Correct (Recursive)');
             data.addRows([
 ";
             //data.addColumn({type: 'string', role: 'tooltip'});
@@ -61,24 +79,33 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
+    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND start_time_s >= 0 AND end_time_s >= start_time_s AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time_s >= 0 AND i.end_time_s >= i.start_time_s)";
     $timed_result = query_wildlife_video_db($timed_query);
     $num_events = $timed_result->num_rows;
     $buffer_match_events = 0;
     $euclidean_match_events = 0;
     $segmented_euclidean_match_events = 0;
+    $segmented_euclidean_match_events_recurse = 0;
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
-        $buffer_correctness = getBufferCorrectness($obs_id, $buffer);
-        $euclidean_correctness = getEuclideanCorrectness($obs_id);
-        $segmented_euclidean_correctness = getSegmentedEuclideanCorrectness($obs_id);
+        $video_id = $timed_row['video_id'];
+        $expert_id = getExpert($video_id);
 
-        if ($euclidean_correctness > 0.95) {
+        list($buffer_correctness, $buffer_specificity) = getBufferCorrectness($obs_id, $expert_id, $buffer);
+        list($euclidean_correctness, $euclidean_specificity) = getEuclideanCorrectness($obs_id, $expert_id, $threshold);
+        list($segmented_euclidean_correctness, $segmented_euclidean_specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold, 95, false);
+        list($segmented_euclidean_correctness_recurse, $segmented_euclidean_specificity_recurse) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold);
+
+        if ($euclidean_specificity) {
             $euclidean_match_events += $euclidean_correctness;
         }
         
-        if ($segmented_euclidean_correctness > 0.95) {
+        if ($segmented_euclidean_specificity) {
             $segmented_euclidean_match_events += $segmented_euclidean_correctness;
+        }
+
+        if ($segmented_euclidean_specificity_recurse) {
+            $segmented_euclidean_match_events_recurse += $segmented_euclidean_correctness_recurse;
         }
 
         $buffer_match_events += $buffer_correctness;
@@ -93,6 +120,8 @@ while ($type_row = $type_result->fetch_assoc()) {
         echo $euclidean_match_events / $num_events * 100;
         echo ",";
         echo $segmented_euclidean_match_events / $num_events * 100;
+        echo ",";
+        echo $segmented_euclidean_match_events_recurse / $num_events * 100;
         echo "],";
     }
 }
@@ -107,26 +136,38 @@ echo "
                 hAxis: {title: 'Event Type'},
                 vAxis: {
                     title: 'Percent Correct',
-                    maxValue: 100,
+                    maxValue: 100
                 }
             };
 
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var view = new google.visualization.DataView(data);
 
-            chart.draw(data, options);
+            if ('$view' == 'all') {
+                view.setColumns([0,1,2,3]); // All
+            } else if ('$view' == 'buffer') {
+                view.setColumns([0,1]); // Buffer Percent Correct
+            } else if ('$view' == 'euclidean') {
+                view.setColumns([0,2]); // Euclidean Percent Correct
+            } else if ('$view' == 'segment') {
+                view.setColumns([0,3]); // Segment Checking Euclidean Percent Correct
+            }
+
+            chart.draw(view, options);
         }
     </script>
 
             <h1>Correctness by Type</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
+            
+            <button onclick='downloadChart()'>Download as CSV</button>
 
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
                 <dt>buffer=</dt>
                 <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
             </dl>
-            
 
             <h2>Description:</h2>
             <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represents the event types.</p>
