@@ -216,12 +216,14 @@ function initialize_event_list() {
 
 function check_observations() {
     /**
+     *      if there are no events, disabled the button
      *      If all button dropdown event_ids != 0
      *      and all time-textareas time_s != -1
      *      enable finished button
      */
-
     var input_data_valid = true;
+    if ($(".event-dropdown-button").length == 0) input_data_valid = false;
+
     $('.time-textarea').each(function() {
         //console.log( "time_s: " + $(this).attr("time_s") );
         if ($(this).attr("time_s") == -1) input_data_valid = false;
