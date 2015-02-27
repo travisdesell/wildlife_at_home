@@ -214,6 +214,34 @@ function initialize_event_list() {
 
 }
 
+function check_observations() {
+    /**
+     *      If all button dropdown event_ids != 0
+     *      and all time-textareas time_s != -1
+     *      enable finished button
+     */
+
+    var input_data_valid = true;
+    $('.time-textarea').each(function() {
+        //console.log( "time_s: " + $(this).attr("time_s") );
+        if ($(this).attr("time_s") == -1) input_data_valid = false;
+    });
+
+    $('.event-dropdown-button').each(function() {
+        //console.log( "event id: " + $(this).attr("event_id") );
+        if ($(this).attr("event_id") == 0) input_data_valid = false;
+    });
+
+    //console.log("UPDATING OBSERVATIONS AND INPUT DATA IS: " + input_data_valid);
+
+    if (input_data_valid) {
+        $(".finished-video-button").removeClass("disabled");
+    } else {
+        $(".finished-video-button").addClass("disabled");
+    }
+}
+
+
 function enable_observation_table() {
 //    console.log("allow_add_removal: '" + allow_add_removal + "'");
     if (allow_add_removal == 0) {
@@ -222,6 +250,7 @@ function enable_observation_table() {
         $(".remove-observation-button").addClass("disabled");
         $(".remove-observation-button").hide();
     }
+    check_observations();
 
     $('.dropdown-dropup:not(.dropdownup_bound)').addClass('dropdownup_bound').click(function() {
         var distance = ($(window).scrollTop() + $(window).height()) - $(this).offset().top;
@@ -545,9 +574,6 @@ function enable_observation_table() {
 
                 var observations_count = $(".observations-table[video_id=" + video_id + "]").length;
                 //console.log("observations count: " + observations_count);
-                if (observations_count > 0) {
-                    $(".finished-video-button").removeClass("disabled");
-                }
 
             },
             error : function(jqXHR, textStatus, errorThrown) {
@@ -591,9 +617,7 @@ function enable_observation_table() {
 
                 var observations_count = $(".observations-table[video_id=" + video_id + "]").length;
                 //console.log("observations count: " + observations_count);
-                if (observations_count == 0) {
-                    $(".finished-video-button").addClass("disabled");
-                }
+                check_observations();
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -740,11 +764,6 @@ function enable_observation_table() {
     if (finished_video_id) {
         var observations_count = $(".observations-table[video_id=" + finished_video_id + "]").length;
         //console.log("observations count: " + observations_count);
-        if (observations_count == 0) {
-            $(".finished-video-button").addClass("disabled");
-        } else {
-            $(".finished-video-button").removeClass("disabled");
-        }
     }
 
 }
