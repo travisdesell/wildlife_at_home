@@ -24,8 +24,11 @@ for ($i = 0; $i < count($data); $i++) {
 	", comments: " . $data["$i"]['comments'] . 
 	", image id: " . $data["$i"]['image_id']);
 }
+//TODO Get Picture info from the database as well - BCC
 
 error_log("got data from canvas_test.php: '$data'");
+//TODO Actually add this info to the database
+//Or hire/force someone to manually watch the error log and keep track - BCC
 
 
 ?>
