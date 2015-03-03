@@ -31,6 +31,7 @@
     top: -14px;
     background-color: #FF0000; 
     border-radius: 20px;
+    cursor: normal;
 }
 
 .close-btn a {
@@ -39,6 +40,7 @@
     color: white;
     visibility: inherit;
     text-decoration: none;
+    cursor: normal;
 }
 
 .well {
