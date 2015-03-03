@@ -5,7 +5,7 @@ function initDraw(canvas) {
 
 		var submission_info = {};
 
-		for (var i = 0; i < element_count; i++) {
+		for (var i = 0; i < element_count; i++) { //Get the information from each rectangle
 		    var current_element = elements[i];
 
 		    var rectangle_info = {
@@ -24,9 +24,9 @@ function initDraw(canvas) {
 		    submission_info[i] = rectangle_info;
 		}
 
-		console.log("full info: " + JSON.stringify(submission_info));
+		console.log("full info: " + JSON.stringify(submission_info)); //Turn rectangle info into JSON
 
-		$.ajax({
+		$.ajax({ //Send Rectangle info to submission script
 		    type: 'POST',
 		    url: './canvas_submission.php',
 		    data: { some_id : 532,
@@ -40,46 +40,6 @@ function initDraw(canvas) {
 		    },
 		    async: true
 		});
-
-    });
-
-
-    $('#submit-selections-button:not(.bound)').addClass('bound').click(function() {
-        console.log("the submit button was clicked!");
-
-        var submission_info = {};
-
-        for (var i = 0; i < element_count; i++) {
-            var current_element = elements[i];
-
-            var rectangle_info = {
-                width : current_element.style.width,
-                height : current_element.style.height,
-                left : current_element.style.left,
-                top : current_element.style.top
-                };
-
-            console.log("info for element " + i + " is: '" + JSON.stringify(rectangle_info) + "'");
-
-            submission_info[i] = rectangle_info;
-        }
-
-        console.log("full info: " + JSON.stringify(submission_info));
-
-        $.ajax({
-            type: 'POST',
-            url: './canvas_submission.php',
-            data: { some_id : 532,
-                    data : JSON.stringify(submission_info) },
-            dataType : 'text',
-            success : function(response) {
-                console.log("response from the server was: '" + response + "'");
-            },
-            error : function(jqXHR, textStatus, errorThrown) {
-                console.log("error was thrown: '" + errorThrown + "'");
-            },
-            async: true
-        });
 
     });
 
@@ -166,7 +126,7 @@ function initDraw(canvas) {
     
     //Ben
     $('#canvas').on('click', '.close-btn', function() {
-		var id = $(this).parent().attr("id");
+		var id = $(this).parent().attr("id"); //Find the rectangle that this button belongs to
 		elements.splice(jQuery.inArray($(this).parent()[0], elements), 1);
 		element_count--;
 		$(this).parent().remove()
@@ -401,12 +361,14 @@ function initDraw(canvas) {
 			current_element = document.createElement('div');
 			current_element.className = 'rectangle';
 			
+			//Yellow id number inside box
 			current_element.style.left = mouse.x + 'px';
 			current_element.style.top = mouse.y + 'px';
 			current_element.style.width = "50px"
 			current_element.innerHTML = "&nbsp;"+(element_id+1);
 			current_element.style.height = "50px";
 
+			//Close button
 			close_button = document.createElement('span');
 			close_button.className = 'close-btn';
 			closex = document.createElement('a');
@@ -415,13 +377,6 @@ function initDraw(canvas) {
 			close_button.appendChild(closex);
 			current_element.appendChild(close_button);
 			current_element.id = element_id;
-
-			/*test new element
-			new_element = document.createElement('div');
-			new_element.className = 'number';
-			new_element.innerHTML = "&nbsp;"+(element_id+1);
-			current_element.appendChild(new_element);
-			//test new element*/
 
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
