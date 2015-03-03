@@ -88,21 +88,35 @@ echo "
                 </form>
             </section>
 
-            <section id='comp-correctness' class='well'>
+            <section id='comp-accuracy' class='well'>
                 <div class='page-header'>
-                    <h2>Computer Correctness</h2>
-                    <p>This barchart shows how each algorithm  was rated with the two different correctness algorithms and how those scores are affected according to the weight of each event. The grey background is a fair weighting (event correctness / total number of events) and the colored foreground is a scaled weight where short events are given a larger portion of the total observational weight.</p>
+                    <h2>Computer Accuracy</h2>
+                    <p>This barchart shows how each algorithm's accuracy is rated with the buffer correctness algorithm.</p>
                 </div>
 
-                <form role='form' action='correctness_computed.php'>
+                <form role='form' action='accuracy_computed.php'>
                     <div class='form-group col-sm-2'>
                         <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
                     </div>
                     <div class='form-group col-sm-2'>
                         <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
+            <section id='comp-precision' class='well'>
+                <div class='page-header'>
+                    <h2>Computer Precision</h2>
+                    <p>This barchart shows how each algorithm's precision is rated with the buffer correctness algorithm.</p>
+                </div>
+
+                <form role='form' action='precision_computed.php'>
                     <div class='form-group col-sm-2'>
-                        <input type='number' class='form-control' name='scale_factor' value='0.10' step='0.01'>
+                        <input type='number' class='form-control' name='video_id' placeholder='Video Id'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>
@@ -147,6 +161,32 @@ echo "
                     </div>
                     <div class='form-group col-sm-2'>
                         <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
+                    </div>
+                    <button type='submit' class='btn btn-default' >Submit</button>
+                </form>
+            </section>
+
+            <section id='comp-accuracy-type' class='well'>
+                <div class='page-header'>
+                    <h2>Computer Accuracy by Event Type</h2>
+                    <p>This bar chart shows the percentage of user events that have a matching expert observed event. Each bar group represents the event types and the colors represent the algorithm used to determine the event correctness.</p>
+                    <p>The buffer parameter sets the leniency of the buffer match algorithm and the threshold paramater sets the leniency of the euclidean matching algorithms.</p>
+                </div>
+
+                <form role='form' action='accuracy_computed_type.php'>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='buffer' value='5'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <input type='number' class='form-control' name='threshold' value='95' step='0.01'>
+                    </div>
+                    <div class='form-group col-sm-2'>
+                        <select class='form-control' name='view'>
+                            <option>all</option>
+                            <option>buffer</option>
+                            <option>euclidean</option>
+                            <option>segment</option>
+                        </select>
                     </div>
                     <button type='submit' class='btn btn-default' >Submit</button>
                 </form>

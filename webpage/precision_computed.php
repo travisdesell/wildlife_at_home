@@ -10,7 +10,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Algorithm Accuracy", "", "wildlife");
+print_header("Wildlife@Home: Algorithm Precision", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -79,17 +79,19 @@ while ($row = $result->fetch_assoc()) {
     $algorithm_name = $row['name'];
     $expert_id = getExpert($video_id);
 
-    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $expert_id AND video_id = $video_id AND start_time_s > 0 AND start_time_s <= end_time_s";
+    $obs_query = "SELECT id FROM timed_observations WHERE user_id = $expert_id AND video_id = $video_id AND start_time_s > 10 AND start_time_s <= end_time_s";
     $obs_result = query_wildlife_video_db($obs_query);
 
-    $total = 0;
+    $computed_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE alg.main_version_id = comp.version_id AND comp.video_id = $video_id";
+    $computed_result = query_wildlife_video_db($computed_query);
+
+    $total = $computed_result->num_rows;
     $total_buffer_correctness = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
         list($buffer_correctness, $buffer_specificity) = getBufferAccuracy($obs_id, $algorithm_id, $buffer);
         #$total_buffer_correctness += $buffer_correctness * getComputedEventWeight($obs_id, $expert_id);
         $total_buffer_correctness += $buffer_correctness;
-        $total++;
     }
     echo "[";
     echo "'$algorithm_name'";
@@ -119,7 +121,7 @@ echo "
         }
     </script>
 
-            <h1>Algorithm Accuracy</h1>
+            <h1>Algorithm Precision</h1>
 
             <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
 
@@ -132,14 +134,11 @@ echo "
 
                 <dt>buffer=</dt>
                 <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
-
-                <dt>scale_factor=</dt>
-                <dd>This value adjust the weight given to short events. Values close to 0 heavily favor shorter events and large values (~100) weight events evenly. The default value is 0.1.</dd>
             </dl>
             
 
             <h2>Description:</h2>
-            <p>This barchart shows how each user was rated with the three different correctness algorithms and how those scores are affected according to the weight of each event. The grey background is a fair weighting (event correctness / total number of events) and the colored foreground is a scaled weight where short events are given a larger portion of the total observational weight.</p>
+            <p>This barchart shows how each algorithm's precision is rated with the buffer correctness algorithm.</p>
 
         </div>
     </div>
