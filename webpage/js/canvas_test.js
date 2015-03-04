@@ -402,6 +402,7 @@ function initDraw(canvas) {
 							"<option value='Wolverine'>Wolverine</option>"+
 							"<option value='CrowRaven'>Crow/Raven</option>"+
 							"<option value='Gull'>Gull</option>"+
+							"<option value='Caribou'>Caribou</option>"+
 							"<option value='Other'>Other (comments)</option>"+
 							"</select>" + 
 						"</td>"+
@@ -439,6 +440,8 @@ function initDraw(canvas) {
 	
 
     }); //Jaeden
+
+//TODO add comment box when 'nothing here' button is clicked -Jaeden
 
 }
 
