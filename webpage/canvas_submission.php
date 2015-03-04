@@ -30,5 +30,7 @@ error_log("got data from canvas_test.php: '$data'");
 //TODO Actually add this info to the database
 //Or hire/force someone to manually watch the error log and keep track - BCC
 
+//TODO verify data from users -Jaeden
+
 
 ?>
