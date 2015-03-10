@@ -8,8 +8,8 @@ use DBI;
 my $driver = "mysql"; 
 my $database = "wildlife_video";
 my $dsn = "DBI:$driver:database=$database";
-my $userid = "wildlife_user";
-my $password = "gr0u\$e\$";
+my $userid = get_user();
+my $password = get_password();
 
 my $dbh = DBI->connect($dsn, $userid, $password ) or die "ERROR: Could not connect to database";
 
