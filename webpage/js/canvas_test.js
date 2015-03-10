@@ -437,9 +437,13 @@ function initDraw(canvas) {
 	var elem2 = document.getElementById(selectId);
 	elem2.remove();
 
-	
-
     }); //Jaeden
+
+    $("body").on("click", ".nothing", function() {
+	$('#selection-information').append( "<textarea type='text' size='34' maxlength='512' value ='' id='comments' placeholder='comments' row='1'></textarea>" );
+
+
+    });  //jaeden
 
 //TODO add comment box when 'nothing here' button is clicked -Jaeden
 

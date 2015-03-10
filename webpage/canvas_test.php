@@ -98,7 +98,7 @@ echo "
         <div id='selection-information'>
             <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image --> Image ID: $image_id
         </div>
-	<button class='btn btn-danger' id='submit-selections-button'>There's Nothing Here</button>
+	<button class='btn nothing btn-danger' id='nothing-here-button'>There's Nothing Here</button>
         <button class='btn btn-primary' id='submit-selections-button'>Submit</button>
     </div>
     <div class='col-sm-8' onselectstart='return false' ondragstart='return false'>
