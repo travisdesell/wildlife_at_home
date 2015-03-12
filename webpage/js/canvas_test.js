@@ -1,4 +1,11 @@
 function initDraw(canvas) {
+	$.post("canvas_select.php",
+		function(data) {
+			for (var i = 0; i < data.length; ++i) {
+				species.push(data[i]);
+			}
+	}, "json");
+
 
     var nothing_here = 0;
 	
@@ -77,6 +84,9 @@ function initDraw(canvas) {
 
 			
 
+		alert("Thx for the submission!");
+		location.reload();
+
     });
 
     var mouse = {
@@ -99,6 +109,7 @@ function initDraw(canvas) {
     var elements = [];
     var images = document.getElementsByClassName('img-responsive');
     var imag = images[0];
+    var species = [];
 
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
@@ -418,10 +429,13 @@ function initDraw(canvas) {
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
 
-			//add selection information when a rectangle is created
-			$('#selection-information').append(
+			if (species.length < 1) {
+						}
+					
 
-			"<div class='well well-small' id='S" + element_id + "'>"+
+			//add selection information when a rectangle is created
+
+			var table = "<div class='well well-small' id='S" + element_id + "'>"+
 				"<table border='1'>"+
 					"<tr>"+
 						"<td align='center'>Selection " + (element_id+1) + "</td>" +
@@ -429,27 +443,20 @@ function initDraw(canvas) {
 					"</tr>"+
 					"<tr>"+
 						"<td align='center'>Species:</td>"+
-						"<td> <select id='speciesDropdown"+element_id+"'>"+
-							"<option value='CommonEider'>Common Eider</option>"+
-							"<option value='LesserSnowGoose'>Lesser Snow Goose</option>"+
-							"<option value='ArcticFox'>Arctic Fox</option>"+
-							"<option value='PolarBear'>Polar Bear</option>"+
-							"<option value='GrizzlyBear'>Grizzly Bear</option>"+
-							"<option value='SandhillCrane'>Sandhill Crane</option>"+
-							"<option value='Wolverine'>Wolverine</option>"+
-							"<option value='CrowRaven'>Crow/Raven</option>"+
-							"<option value='Gull'>Gull</option>"+
-							"<option value='Caribou'>Caribou</option>"+
-							"<option value='Other'>Other (comments)</option>"+
-							"</select>" + 
-						"</td>"+
-					"</tr>"+
+							"<td> <select id='speciesDropdown"+element_id+"'>";
+			for (var i = 0; i < species.length; ++i) {
+				table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
+			}//BCC
+			
+			table += "</select></td>"+
+				"</tr>"+
 					"<tr>"+
 						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
 						"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 					"</tr>"+
 				"</table>"+
-			"</div>"); //Jaeden
+			"</div>"; //Jaeden
+			$("#selection-information").append(table);
 
 			elements[element_count] = current_element;
 			element_count++;
@@ -515,7 +522,7 @@ function initDraw(canvas) {
 }
 
 
-$(document).ready(function() {
+$(document).ready(function() {	
     initDraw(document.getElementById('canvas'));
 
 
