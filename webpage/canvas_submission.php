@@ -14,16 +14,30 @@ error_log("id: " . $_POST['some_id']);
 
 $data = json_decode($_POST['data'], true);
 
-for ($i = 0; $i < count($data); $i++) {
-    error_log("data[" . $i . "] height: " . $data["$i"]['height'] . 
-        ",  width: " . $data["$i"]['width'] .
-        ", left: " . $data["$i"]['left'] .
-        ", top: " . $data["$i"]['top'] . 
-	", nest: " . $data["$i"]['nest'] . 
-	", species: " . $data["$i"]['species'] . 
-	", comments: " . $data["$i"]['comments'] . 
-	", image id: " . $data["$i"]['image_id']);
+$nothing_here = $data['nothing_here'];
+
+if(!$nothing_here)
+{
+	for ($i = 0; $i < count($data); $i++) {
+    	error_log("data[" . $i . "] height: " . $data["$i"]['height'] . 
+        	",  width: " . $data["$i"]['width'] .
+        	", left: " . $data["$i"]['left'] .
+        	", top: " . $data["$i"]['top'] . 
+		", nest: " . $data["$i"]['nest'] . 
+		", species: " . $data["$i"]['species'] . 
+		", comments: " . $data["$i"]['comments'] . 
+		", image id: " . $data["$i"]['image_id'] .
+		", nothing_here: " . $data["$i"]['nothing_here']);
+	}
 }
+else
+{
+	error_log(" nothing_here: " . $data['nothing_here'] .
+		", image id: " . $data['image_id'] .
+		", comments: " . $data['comments']);
+}
+
+
 //TODO Get Picture info from the database as well - BCC
 
 error_log("got data from canvas_test.php: '$data'");
