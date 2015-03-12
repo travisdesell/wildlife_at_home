@@ -6,46 +6,83 @@ function initDraw(canvas) {
 			}
 	}, "json");
 
+
+    var nothing_here = 0;
+	
 	$('#submit-selections-button:not(.bound)').addClass('bound').click(function() {
 		console.log("the submit button was clicked!");
 
 		var submission_info = {};
 
-		for (var i = 0; i < element_count; i++) { //Get the information from each rectangle
-		    var current_element = elements[i];
+		if(!nothing_here)
+		{
 
-		    var rectangle_info = {
-			width : current_element.style.width,
-			height : current_element.style.height,
-			left : current_element.style.left,
-			top : current_element.style.top,
-			nest : document.getElementById('check'+current_element.id).checked ? true : false,
-			species : document.getElementById('speciesDropdown'+current_element.id).value,
-			comments : document.getElementById('comment'+current_element.id).value,
-			image_id : $(".img-responsive").attr("id")
+			for (var i = 0; i < element_count; i++) { //Get the information from each rectangle
+		    	var current_element = elements[i];
+
+		  	var rectangle_info = {
+				width : current_element.style.width,
+				height : current_element.style.height,
+				left : current_element.style.left,
+				top : current_element.style.top,
+				nest : document.getElementById('check'+current_element.id).checked ? true : false,
+				species : document.getElementById('speciesDropdown'+current_element.id).value,
+				comments : document.getElementById('comment'+current_element.id).value,
+				image_id : $(".img-responsive").attr("id"),
+				nothing_here : nothing_here
+				};
+
+		    	console.log("info for element " + i + " is: '" + JSON.stringify(rectangle_info) + "'");
+
+		    	submission_info[i] = rectangle_info;
+			}
+
+			console.log("full info: " + JSON.stringify(submission_info)); //Turn rectangle info into JSON
+
+			$.ajax({ //Send Rectangle info to submission script
+		    	type: 'POST',
+		    	url: './canvas_submission.php',
+		    	data: { some_id : 532,
+			    	data : JSON.stringify(submission_info) },
+		    	dataType : 'text',
+		    	success : function(response) {
+				console.log("response from the server was: '" + response + "'");
+		    	},
+		    	error : function(jqXHR, textStatus, errorThrown) {
+				console.log("error was thrown: '" + errorThrown + "'");
+		    	},
+		    	async: true
+			});
+		}
+		else
+		{
+			var nothing = {
+				image_id : $(".img-responsive").attr("id"),
+				nothing_here : nothing_here,
+				comments : document.getElementById('comments').value
 			};
 
-		    console.log("info for element " + i + " is: '" + JSON.stringify(rectangle_info) + "'");
+			//submission_info[0] = nothing;
 
-		    submission_info[i] = rectangle_info;
+			$.ajax({ //Send Rectangle info to submission script
+		    	type: 'POST',
+		    	url: './canvas_submission.php',
+		    	data: { some_id : 532,
+			    	data : JSON.stringify(nothing) },
+		    	dataType : 'text',
+		    	success : function(response) {
+				console.log("response from the server was: '" + response + "'");
+		    	},
+		    	error : function(jqXHR, textStatus, errorThrown) {
+				console.log("error was thrown: '" + errorThrown + "'");
+		    	},
+		    	async: true
+			});
+
+
 		}
 
-		console.log("full info: " + JSON.stringify(submission_info)); //Turn rectangle info into JSON
-
-		$.ajax({ //Send Rectangle info to submission script
-		    type: 'POST',
-		    url: './canvas_submission.php',
-		    data: { some_id : 532,
-			    data : JSON.stringify(submission_info) },
-		    dataType : 'text',
-		    success : function(response) {
-			console.log("response from the server was: '" + response + "'");
-		    },
-		    error : function(jqXHR, textStatus, errorThrown) {
-			console.log("error was thrown: '" + errorThrown + "'");
-		    },
-		    async: true
-		});
+			
 
 		alert("Thx for the submission!");
 		location.reload();
@@ -63,6 +100,7 @@ function initDraw(canvas) {
     var original_top = 0;
     var original_left = 0;
     var is_dragging = false;
+    
 
     var current_action = "";
     var current_element = null;
@@ -286,7 +324,7 @@ function initDraw(canvas) {
 	imag.draggable = false;
 	is_dragging = true;
 	//imag.style.MozUserSelect = "auto";
-	if (e.which == 1) {
+	if (    (e.which == 1)    &&    (nothing_here === 0)    ) {
 		    //get the position of the mouse.
 		    setMousePosition(e);
 
@@ -411,7 +449,7 @@ function initDraw(canvas) {
 			}//BCC
 			
 			table += "</select></td>"+
-					"</tr>"+
+				"</tr>"+
 					"<tr>"+
 						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
 						"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
@@ -446,8 +484,36 @@ function initDraw(canvas) {
     }); //Jaeden
 
     $("body").on("click", ".nothing", function() {
-	$('#selection-information').append( "<textarea type='text' size='34' maxlength='512' value ='' id='comments' placeholder='comments' row='1'></textarea>" );
+	//this changes the visibility of the comments box for an empty image and the visibility of the selections
+	//also toggles ability to draw boxes
+	if(nothing_here === 0) 
+	{
+		nothing_here=1;
+  		document.getElementById("comments").style.display = 'initial';
 
+		var size = document.getElementsByClassName('well').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('well')[i].style.display='none';
+
+		size = document.getElementsByClassName('rectangle').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('rectangle')[i].style.display='none';
+		
+	}
+	else if(nothing_here === 1)
+	{
+		nothing_here =0;
+  		document.getElementById("comments").style.display = 'none';
+
+		var size = document.getElementsByClassName('well').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('well')[i].style.display='';
+
+		size = document.getElementsByClassName('rectangle').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('rectangle')[i].style.display='';
+
+	}
 
     });  //jaeden
 
