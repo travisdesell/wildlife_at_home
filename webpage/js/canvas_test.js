@@ -524,6 +524,7 @@ function initDraw(canvas) {
 
 $(document).ready(function() {	
     initDraw(document.getElementById('canvas'));
+    $("#comments").val('');
 
 
 });
