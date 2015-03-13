@@ -43,7 +43,7 @@ if(!$nothing_here)
 	$left = $data[$i][left];
 	$left = (int)preg_replace('/\D/', '', $left );
 	$species = $data[$i][species];
-	$comments = $data[$i][comments];
+	$comments = mysql_escape_string($data[$i][comments]);
 	$nest = $data[$i][nest];
 	$nothing = $data[$i][nothing_here];
 
@@ -60,10 +60,12 @@ else
 	error_log(" nothing_here: " . $data['nothing_here'] .
 		", image id: " . $data['image_id'] .
 		", comments: " . $data['comments']);
+
+	$comments = mysql_escape_string($data[comments]);
 	
 	query_wildlife_video_db("INSERT INTO test_image_observations " .
 				"(user_id, image_id, comments, nothing_here) " .
-			" VALUES ($user_id, $data[image_id], '$data[comments]', $data[nothing_here]);");
+			" VALUES ($user_id, $data[image_id], '$comments', $data[nothing_here]);");
 }
 
 
