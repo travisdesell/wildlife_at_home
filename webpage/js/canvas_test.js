@@ -1,11 +1,4 @@
 function initDraw(canvas) {
-	$.post("canvas_select.php",
-		function(data) {
-			for (var i = 0; i < data.length; ++i) {
-				species.push(data[i]);
-			}
-	}, "json");
-
 
     var nothing_here = 0;
 	
@@ -429,9 +422,7 @@ function initDraw(canvas) {
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
 
-			if (species.length < 1) {
-						}
-					
+							
 
 			//add selection information when a rectangle is created
 
@@ -444,20 +435,47 @@ function initDraw(canvas) {
 					"<tr>"+
 						"<td align='center'>Species:</td>"+
 							"<td> <select id='speciesDropdown"+element_id+"'>";
-			for (var i = 0; i < species.length; ++i) {
-				table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
-			}//BCC
 			
-			table += "</select></td>"+
-				"</tr>"+
+			if (species.length < 1) {
+				$.post("canvas_select.php",
+				function(data) {
+					for (var i = 0; i < data.length; ++i) {
+						species.push(data[i]);
+					}				
+					for (var i = 0; i < species.length; ++i) {
+						table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
+					}//BCC
+					
+					table += "</select></td>"+
+						"</tr>"+
+						"<tr>"+
+							"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
+							"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+						"</tr>"+
+					"</table>"+
+					"</div>"; //Jaeden
+					$("#selection-information").append(table);
+
+				}, "json");
+				
+			} else {
+				for (var i = 0; i < species.length; ++i) {
+					table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
+				}//BCC
+				table += "</select></td>"+
+					"</tr>"+
 					"<tr>"+
 						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
 						"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 					"</tr>"+
 				"</table>"+
-			"</div>"; //Jaeden
-			$("#selection-information").append(table);
+				"</div>"; //Jaeden
+				$("#selection-information").append(table);
+			}
 
+
+					
+			
 			elements[element_count] = current_element;
 			element_count++;
 			element_id++;
