@@ -92,6 +92,12 @@ add_executable(wildlife_bgsub_validator
     wildlife_bgsub_validation_policy)
 target_link_libraries(wildlife_bgsub_validator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES})
 
+add_executable(wildlife_bgsub_assimilator
+    ${BOINC_INCLUDE_DIR}/sched/assimilator
+    ${BOINC_INCLUDE_DIR}/sched/validate_util
+    wildlife_bgsub_assimilation_policy)
+target_link_libraries(wildlife_bgsub_assimilator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES})
+
 add_executable(wildlife_work_generator wildlife_work_generator)
 target_link_libraries(wildlife_work_generator undvc_common ${BOINC_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
 

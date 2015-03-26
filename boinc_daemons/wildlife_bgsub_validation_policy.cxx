@@ -32,6 +32,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <algorithm>
@@ -57,6 +58,8 @@ static inline std::string &trim(std::string &s) {
 }
 
 int init_result(RESULT& result, void*& data) {
+    OUTPUT_FILE_INFO fi;
+
     try {
         string eventString = parse_xml<string>(result.stderr_out, "error");
         stringstream ss(eventString);
@@ -78,49 +81,39 @@ int init_result(RESULT& result, void*& data) {
         return 1;
     }
 
-    try {
-        string eventString = parse_xml<string>(result.stderr_out, "results");
-        stringstream ss(eventString);
-
-        string video_id;
-        vector<vector<double>*> *alg_vals = new vector<vector<double>*>();
-        vector<double> *vibe_vals = new vector<double>();
-        vector<double> *pbas_vals = new vector<double>();
-        alg_vals->push_back(vibe_vals);
-        alg_vals->push_back(pbas_vals);
-
-        string temp;
-        getline(ss, temp, '\n');
-        while(getline(ss, temp, '\n')) {
-            trim(temp);
-            stringstream iss(temp);
-            string vibe_val, pbas_val;
-            if(!(iss >> video_id >> vibe_val >> pbas_val)) {
-                break;
-            }
-            log_messages.printf(MSG_DEBUG, "Event data: ViBe='%s' PBAS='%s'\n", vibe_val.c_str(), pbas_val.c_str());
-            vibe_vals->push_back(atof(vibe_val.c_str()));
-            pbas_vals->push_back(atof(pbas_val.c_str()));
-        }
-
-        data = (void*)alg_vals;
-    } catch(string error_message) {
-        log_messages.printf(MSG_CRITICAL, "wildlife_bgsub_validation_policy get_data_from_result([RESULT#%d %s]) failed with error: %s\n", result.id, result.name, error_message.c_str());
-        log_messages.printf(MSG_CRITICAL, "XML:\n%s\n", result.stderr_out);
-        result.outcome = RESULT_OUTCOME_VALIDATE_ERROR;
-        result.validate_state = VALIDATE_STATE_INVALID;
-
-        log_messages.printf(MSG_DEBUG, "Returning XML Error for %s\n", result.name);
-        exit(0);
-        return ERR_XML_PARSE;
-    } catch(const exception &ex) {
-        log_messages.printf(MSG_CRITICAL, "wildlife_bsub_validation_policy get_data_from_result([RESULT#%d %s]) failed with error %s\n", result.id, result.name, ex.what());
-        exit(0);
-        return 1;
+    int retval = get_output_file_path(result, fi.path);
+    if (retval) {
+        log_messages.printf(MSG_CRITICAL, "wildlife_bgsub_validation_policy: Failed to get output file path: %d %s\n", result.id, result.name);
+        return retval;
     }
 
+    log_messages.printf(MSG_CRITICAL, "Result file path: '%s'\n", fi.path.c_str());
+
+    ifstream infile(fi.path);
+
+    vector<vector<double>*> *alg_vals = new vector<vector<double>*>();
+    vector<double> *vibe_vals = new vector<double>();
+    vector<double> *pbas_vals = new vector<double>();
+    alg_vals->push_back(vibe_vals);
+    alg_vals->push_back(pbas_vals);
+
+    string temp;
+    while(getline(infile, temp)) {
+        //trim(temp);
+        istringstream iss(temp);
+        string vibe_val, pbas_val;
+        if(!(iss >> vibe_val >> pbas_val)) {
+            break;
+        }
+        log_messages.printf(MSG_DEBUG, "Event data: ViBe='%s' PBAS='%s'\n", vibe_val.c_str(), pbas_val.c_str());
+        vibe_vals->push_back(atof(vibe_val.c_str()));
+        pbas_vals->push_back(atof(pbas_val.c_str()));
+    }
+    infile.close();
+
+    data = (void*)alg_vals;
+
     log_messages.printf(MSG_DEBUG, "Successful.\n");
-    exit(0);
     return 0;
 }
 
@@ -147,7 +140,6 @@ int compare_results(
         if (alg_vals1->at(i)->size() != alg_vals2->at(i)->size()) {
             match = false;
             log_messages.printf(MSG_CRITICAL, "ERROR, number of results is different. %d vs %d\n", (int)alg_vals1->at(i)->size(), (int)alg_vals2->at(i)->size());
-            exit(0);
             return 0;
         }
     }
