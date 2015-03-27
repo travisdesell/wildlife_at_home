@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Computer Accuracy with Consensus", "", "wildlife");
+print_header("Wildlife@Home: Computer Accuracy by Event Type", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -24,7 +24,7 @@ parse_str($_SERVER['QUERY_STRING']);
 
 // Set buffer for correctness time (+ or - the buffer value)
 if (!isset($buffer)) {
-    $buffer = 30;
+    $buffer = 5;
 }
 
 if (!isset($threshold)) {
@@ -65,7 +65,7 @@ echo "
     <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
-        google.load('visualization', '1.1', {packages:['corechart']});
+        google.load('visualization', '1.1', {packages:['table']});
         google.setOnLoadCallback(drawChart);
 
         var data;
@@ -79,9 +79,12 @@ echo "
             var container = document.getElementById('chart_div');
             data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
-            data.addColumn('number', 'Any Algorithm');
-            data.addColumn('number', 'All Algorithms');
+            data.addColumn('number', 'Event Count');
 ";
+
+foreach($algs as $a_id => $a_name) {
+    echo "data.addColumn('number', '$a_name');";
+}
 
 echo "
             data.addRows([
@@ -90,42 +93,47 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 1 AND event_id = $type_id AND species_id <> 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
+    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND species_id = 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
     $timed_result = query_wildlife_video_db($timed_query);
-
-    $consensus_num = 0;
-    $consensus_any_matches = 0;
-    $consensus_all_matches = 0;
-
+    $alg_num_events = array();
+    $alg_match_events = array();
+    foreach($algs as $a_id => $a_name) {
+        $alg_num_events[$a_id] = 0;
+        $alg_match_events[$a_id] = 0;
+    }
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
         $video_id = $timed_row['video_id'];
 
-        $any_match = 0;
-        $all_match = 0;
         foreach($algs as $a_id => $a_name) {
             list($correctness, $specificity) = getBufferAccuracy($obs_id, $a_id, $buffer);
 
-            if($correctness > $any_match) {
-                $any_match = $correctness;
-            }
-            $all_match += $correctness;
+            $alg_num_events[$a_id] += 2;
+
             $alg_match_events[$a_id] += $correctness;
-        }
-        $consensus_num += 2;
-        $consensus_any_matches += $any_match;
-        if($all_match == count($algs) * 2) {
-            $consensus_all_matches += 2;
         }
     }
 
-    if ($consensus_num > 0) {
+    $add_data = false;
+    foreach($alg_match_events as $a_id => $a_val) {
+        if ($a_val > 0) {
+            $add_data = true;
+        }
+    }
+
+    if ($add_data) {
         echo "[";
         echo "'$type_name'";
         echo ",";
-        echo "$consensus_any_matches / $consensus_num * 100";
-        echo ",";
-        echo "$consensus_all_matches / $consensus_num * 100";
+        echo $alg_num_events[$a_id];
+        foreach($alg_match_events as $a_id => $a_val) {
+            echo ",";
+            if ($alg_num_events[$a_id] > 0) {
+                echo $a_val;
+            } else {
+                echo "0";
+            }
+        }
         echo "],";
     }
 }
@@ -136,7 +144,7 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Computer accuracy with consensus vs experts on tern and plover nests',
+                title: 'Computer accuracy for each event type',
                 hAxis: {title: 'Event Type'},
                 vAxis: {
                     title: 'Accuracy',
@@ -145,13 +153,13 @@ echo "
                 }
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.Table(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
     </script>
 
-            <h1>Computer Accuracy with Consensus vs Experts on Tern and Plover Nests</h1>
+            <h1>Computer Accuracy by Event Type</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
@@ -165,7 +173,9 @@ echo "
             
 
             <h2>Description:</h2>
-            <p>This bar chart shows the percentage of expert observations that have a matching computed event for each event type and algorithm type.</p>
+            <p>TOOD: Edit this</p>
+            <p>This bar chart show the percentage of computed events that have a matching user observed event. Each bar represens the percent of computed events that match a user observation. The legent shows the breakdown for each species.</p>
+            <p>In order to collect this data we discard all vidoes that do not have an user observation or the user observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of computed events of that type that have an valid user observation for that video.</p>
 
         </div>
     </div>

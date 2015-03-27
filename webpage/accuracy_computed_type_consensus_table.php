@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Computer Accuracy with Consensus", "", "wildlife");
+print_header("Wildlife@Home: Computer Accuracy by Event Type", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -24,7 +24,7 @@ parse_str($_SERVER['QUERY_STRING']);
 
 // Set buffer for correctness time (+ or - the buffer value)
 if (!isset($buffer)) {
-    $buffer = 30;
+    $buffer = 5;
 }
 
 if (!isset($threshold)) {
@@ -65,7 +65,7 @@ echo "
     <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
-        google.load('visualization', '1.1', {packages:['corechart']});
+        google.load('visualization', '1.1', {packages:['table']});
         google.setOnLoadCallback(drawChart);
 
         var data;
@@ -79,6 +79,7 @@ echo "
             var container = document.getElementById('chart_div');
             data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
+            data.addColumn('number', 'Event Count');
             data.addColumn('number', 'Any Algorithm');
             data.addColumn('number', 'All Algorithms');
 ";
@@ -114,7 +115,7 @@ while ($type_row = $type_result->fetch_assoc()) {
         }
         $consensus_num += 2;
         $consensus_any_matches += $any_match;
-        if($all_match == count($algs) * 2) {
+        if ($all_match == count($algs) * 2) {
             $consensus_all_matches += 2;
         }
     }
@@ -123,9 +124,11 @@ while ($type_row = $type_result->fetch_assoc()) {
         echo "[";
         echo "'$type_name'";
         echo ",";
-        echo "$consensus_any_matches / $consensus_num * 100";
+        echo "$consensus_num";
         echo ",";
-        echo "$consensus_all_matches / $consensus_num * 100";
+        echo "$consensus_any_matches";
+        echo ",";
+        echo "$consensus_all_matches";
         echo "],";
     }
 }
@@ -136,7 +139,7 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Computer accuracy with consensus vs experts on tern and plover nests',
+                title: 'Computer accuracy for each event type',
                 hAxis: {title: 'Event Type'},
                 vAxis: {
                     title: 'Accuracy',
@@ -145,13 +148,13 @@ echo "
                 }
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.Table(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
     </script>
 
-            <h1>Computer Accuracy with Consensus vs Experts on Tern and Plover Nests</h1>
+            <h1>Computer Accuracy by Event Type</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
@@ -165,7 +168,9 @@ echo "
             
 
             <h2>Description:</h2>
-            <p>This bar chart shows the percentage of expert observations that have a matching computed event for each event type and algorithm type.</p>
+            <p>TOOD: Edit this</p>
+            <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represens the percent of events that match an expert observation. The legent shows the breakdown for each species.</p>
+            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
 
         </div>
     </div>
