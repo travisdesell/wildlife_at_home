@@ -84,10 +84,11 @@ int init_result(RESULT& result, void*& data) {
     int retval = get_output_file_path(result, fi.path);
     if (retval) {
         log_messages.printf(MSG_CRITICAL, "wildlife_bgsub_validation_policy: Failed to get output file path: %d %s\n", result.id, result.name);
+        exit(0);
         return retval;
     }
 
-    log_messages.printf(MSG_CRITICAL, "Result file path: '%s'\n", fi.path.c_str());
+    log_messages.printf(MSG_DEBUG, "Result file path: '%s'\n", fi.path.c_str());
 
     ifstream infile(fi.path);
 
@@ -105,7 +106,7 @@ int init_result(RESULT& result, void*& data) {
         if(!(iss >> vibe_val >> pbas_val)) {
             break;
         }
-        log_messages.printf(MSG_DEBUG, "Event data: ViBe='%s' PBAS='%s'\n", vibe_val.c_str(), pbas_val.c_str());
+        //log_messages.printf(MSG_DEBUG, "Event data: ViBe='%s' PBAS='%s'\n", vibe_val.c_str(), pbas_val.c_str());
         vibe_vals->push_back(atof(vibe_val.c_str()));
         pbas_vals->push_back(atof(pbas_val.c_str()));
     }
@@ -122,8 +123,8 @@ int compare_results(
     RESULT const& r2, void *data2,
     bool& match
 ) {
-    float threshold = 0.00006;
-    //float threshold = 0.02;
+    float threshold = 0.015;
+    //double multiplier = 10;
     vector<vector<double>*> *alg_vals1 = (vector<vector<double>*>*)data1;
     vector<vector<double>*> *alg_vals2 = (vector<vector<double>*>*)data2;
 
@@ -131,7 +132,6 @@ int compare_results(
     if(alg_vals1->size() != alg_vals2->size()) {
         match = false;
         log_messages.printf(MSG_CRITICAL, "ERROR, number of algorithms is different. %d vs %d\n", (int)alg_vals1->size(), (int)alg_vals2->size());
-        exit(0);
         return 0;
     }
 
@@ -148,8 +148,17 @@ int compare_results(
         for (unsigned int j = 0; j < alg_vals1->at(i)->size(); j++) {
             double val1 = alg_vals1->at(i)->at(j);
             double val2 = alg_vals2->at(i)->at(j);
-            double dist = sqrt(val1*val1 + val2*val2);
+            /*
+            float similar = false;
+            if (val1 < val2) {
+                if (val1 * multiplier >= val2) similar = true;
+            } else {
+                if (val2 * multiplier <= val1) similar = true;
+            }
+            */
+            double dist = abs(val1 - val2);
             if (dist > threshold) {
+            //if (similar) {
                 match = false;
                 log_messages.printf(MSG_CRITICAL, "ERROR, pixel counts are different. %f vs %f\n", (double)(alg_vals1->at(i)->at(j)), (double)(alg_vals2->at(i)->at(j)));
                 exit(0);

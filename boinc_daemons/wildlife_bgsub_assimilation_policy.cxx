@@ -65,7 +65,6 @@ void __mysql_check(MYSQL *conn, string query, const char *file, const int line) 
         cerr << ex_msg.str() << endl;
         exit(1);
     }
-    cout << "Successfull query: " << query << endl;
 }
 
 MYSQL *wildlife_db_conn = NULL;
@@ -131,7 +130,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     try {
         tag_str = parse_xml<string>(xml_doc, "tag");
     } catch (string error_message) {
-        log_messages.printf(MSG_CRITICAL, "wildlife_surf_collect_assimilation_policy assimilate_handler([RESULT#%d %s]) failed with error: %s\n", canonical_result.id, canonical_result.name, error_message.c_str());
+        log_messages.printf(MSG_CRITICAL, "wildlife_bgsub_assimilation_policy assimilate_handler([RESULT#%d %s]) failed with error: %s\n", canonical_result.id, canonical_result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n'%s'\n", xml_doc.c_str());
         return 1;
         return 0;
@@ -140,7 +139,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     int retval = get_output_file_path(canonical_result, fi.path);
     if (retval) {
         log_messages.printf(MSG_CRITICAL, "wildlife_bgsub_validation_policy: Failed to get output file path: %d %s\n", canonical_result.id, canonical_result.name);
-        return retval;
+        //return retval;
     }
 
     log_messages.printf(MSG_CRITICAL, "Result file path: '%s'\n", fi.path.c_str());
