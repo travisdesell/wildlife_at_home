@@ -1,161 +1,270 @@
 <?php
 
-$cwd[__FILE__] = __FILE__;
-if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
-$cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
-
-//echo $cwd[__FILE__];
-require_once($cwd[__FILE__] . "/../citizen_science_grid/header.php");
-require_once($cwd[__FILE__] . "/../citizen_science_grid/navbar.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/news.php");
-require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
-//require_once($cwd[__FILE__] . "/../citizen_science_grid/uotd.php");
-require_once($cwd[__FILE__] . "/webpage/wildlife_db.php");
-require_once($cwd[__FILE__] . "/webpage/my_query.php");
-
-print_header("Wildlife@Home: Duration vs Difficulty", "", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
-
-//echo "Header:";
-
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-// Get Parameters
-parse_str($_SERVER['QUERY_STRING']);
-
-// Set buffer for correctness time (+ or - the buffer value)
-if (!isset($buffer)) {
-    $buffer = 5;
-}
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
-$watch_query = "SELECT user_id, video_id, experience FROM watched_videos_stats";
-$watch_result = attempt_query_with_ping($watch_query, $wildlife_db);
-if (!$watch_result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $watch_query\n");
-    die("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "/nquery: $watch_query\n");
-}
-
-echo "
-<div class='containder'>
-    <div class='row'>
-        <div class='col-sm-12'>
-    <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
-    <script type = 'text/javascript'>
-        google.load('visualization', '1', {packages:['corechart']});
-        google.setOnLoadCallback(drawChart);
-
-        function getDate(date_string) {
-            if (typeof date_string === 'string') {
-                var a = date_string.split(/[- :]/);
-                return new Date(a[0], a[1]-1, a[2], a[3] || 0, a[4] || 0, a[5] || 0);
-            }
-            return null;
-        }
-
-        function drawChart() {
-            var container = document.getElementById('chart_div');
-            var data = new google.visualization.arrayToDataTable([
-                ['Correctness', 'Experience'],
-";
-
-function getCorrectness($db, $user_id, $video_id, $buffer) {
-    $event_query = "SELECT event_id, to_seconds(start_time) AS start_sec, to_seconds(end_time) AS end_sec FROM timed_observations AS t JOIN observation_types AS e ON e.id = event_id WHERE expert = 0 AND user_id = $user_id AND video_id = $video_id AND start_time > 0 AND end_time > start_time AND EXISTS (SELECT * FROM timed_observations AS i WHERE t.video_id = i.video_id AND i.expert = 1 AND i.start_time > 0 AND i.end_time > i.start_time)";
-    $event_result = attempt_query_with_ping($event_query, $db);
-    if (!$event_result) {
-        error_log("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $event_query\n");
-        die("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $event_query\n");
+function getExpert($video_id) {
+    $query = "SELECT user_id FROM timed_observations WHERE video_id = $video_id AND expert = 1 LIMIT 1";
+    $result = query_wildlife_video_db($query);
+    $user_id = -1;
+    while ($row = $result->fetch_assoc()) {
+        $user_id = $row['user_id'];
     }
-    $num_events = mysql_num_rows($event_result);
+    return $user_id;
+}
+
+function getUsers($video_id) {
+    $query = "SELECT user_id FROM timed_observations WHERE video_id = $video_id AND expert = 0";
+    $result = query_wildlife_video_db($query);
+    $user_ids = array();
+    while ($row = $result->fetch_assoc()) {
+        $user_ids[] = $row['user_id'];
+    }
+    return $user_ids;
+}
+
+/* Queries the user observation table */
+function getBufferCorrectness($obs_id, $expert_id, $buffer) {
+    $event_query = "SELECT video_id, event_id, start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.id = $obs_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND i.start_time_s >= 0 AND i.start_time_s <= i.end_time_s)";
+    $event_result = query_wildlife_video_db($event_query);
+
     $num_match_events = 0;
 
-    if ($num_events > 0) {
-        while ($event_row = mysql_fetch_assoc($event_result)) {
-            $event_id = $event_row['event_id'];
-            $start_sec = $event_row['start_sec'];
-            $end_sec = $event_row['end_sec'];
+    // Get event and find expert match
+    while ($event_row = $event_result->fetch_assoc()) {
+        $video_id = $event_row['video_id'];
+        $event_id = $event_row['event_id'];
+        $start_sec = $event_row['start_time'];
+        $end_sec = $event_row['end_time'];
 
-            $start_sec_top = $start_sec - $buffer;
-            $start_sec_bot = $start_sec + $buffer;
-            $end_sec_top = $end_sec - $buffer;
-            $end_sec_bot = $end_sec + $buffer;
-            $match_query = "SELECT * FROM timed_observations WHERE expert = 1 AND video_id = $video_id AND event_id = $event_id AND to_seconds(start_time) BETWEEN $start_sec_top AND $start_sec_bot AND to_seconds(end_time) BETWEEN $end_sec_top AND $end_sec_bot";
-            $match_result = attempt_query_with_ping($match_query, $db);
-            if (!$match_result) {
-                error_log("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $match_query\n");
-                die("MYSQL Error (" . mysql_errno($db) . "): " . mysql_error($db) . "/nquery: $match_query\n");
-            }
-            $num_matches = mysql_num_rows($match_result);
+        $start_sec_top = $start_sec - $buffer;
+        $start_sec_bot = $start_sec + $buffer;
+        $end_sec_top = $end_sec - $buffer;
+        $end_sec_bot = $end_sec + $buffer;
+        $match_query = "SELECT * FROM timed_observations WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND start_time_s BETWEEN $start_sec_top AND $start_sec_bot AND end_time_s BETWEEN $end_sec_top AND $end_sec_bot";
+        $match_result = query_wildlife_video_db($match_query);
+        $num_matches = $match_result->num_rows;
 
-            if ($num_matches >= 1) {
-                $num_match_events += 1;
-            }
+        if ($num_matches >= 1) {
+            // User and Expert (True Positive)
+            return array(1, true);
+        } else {
+            // User and No Expert (False Positive)
+            return array(0, false);
         }
-
-        return $num_match_events / $num_events;
-    } else {
-        return 0;
     }
+    // Error on database retrieval (Probably undefined expert id)
+    assert(false);
 }
 
-while ($watch_row = mysql_fetch_assoc($watch_result)) {
-    $user_id = $watch_row['user_id'];
-    $video_id = $watch_row['video_id'];
-    $experience = $watch_row['experience'];
-    $correctness = getCorrectness($wildlife_db, $user_id, $video_id, $buffer);
-    echo "[";
-    echo $experience;
-    echo ",";
-    echo $correctness;
-    echo "],";
-}
+/* Queries the computed events table */
+function getBufferAccuracy($obs_id, $algorithm_id, $buffer) {
+    $event_query = "SELECT video_id, event_id, start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.id = $obs_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE obs.video_id = comp.video_id AND comp.algorithm_id = $algorithm_id AND comp.version_id = alg.main_version_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s)";
+    $event_result = query_wildlife_video_db($event_query);
 
-echo "
-                ]);
+    // Get event and find match
+    while ($event_row = $event_result->fetch_assoc()) {
+        $video_id = $event_row['video_id'];
+        $event_id = $event_row['event_id'];
+        $start_sec = $event_row['start_time'];
+        $end_sec = $event_row['end_time'];
 
-";
-echo "
-            var options = {
-                title: 'Correctness vs Experience',
-                hAxis: {title: 'Experience'},
-                vAxis: {title: 'Correctness', minValue: 0, maxValue: 1},
-                legend: 'none'
+        $start_sec_top = $start_sec - $buffer;
+        $start_sec_bot = $start_sec + $buffer;
+        $end_sec_top = $end_sec - $buffer;
+        $end_sec_bot = $end_sec + $buffer;
 
-            };
+        $front_match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_id AND video_id = $video_id AND comp.version_id = alg.main_version_id AND (start_time_s BETWEEN $start_sec_top AND $start_sec_bot OR end_time_s BETWEEN $start_sec_top AND $start_sec_bot)";
+        $front_match_result = query_wildlife_video_db($front_match_query);
+        $num_front_matches = $front_match_result->num_rows;
 
-            var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+        $back_match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_id AND video_id = $video_id AND comp.version_id = alg.main_version_id AND (start_time_s BETWEEN $end_sec_top AND $end_sec_bot OR end_time_s BETWEEN $end_sec_top AND $end_sec_bot)";
+        $back_match_result = query_wildlife_video_db($back_match_query);
+        $num_back_matches = $back_match_result->num_rows;
 
-            chart.draw(data, options);
+        $num_matches = 0;
+        if ($num_front_matches >= 1) {
+            $num_matches += 1;
         }
-    </script>
+        if ($num_back_matches >= 1) {
+            $num_matches += 1;
+        }
 
-            <h1>Correctness Test</h1>
+        if ($num_matches >= 1) {
+            assert($num_matches <= 2);
+            return array($num_matches, true);
+        } else {
+            // No Match (False Positive)
+            return array(0, false);
+        }
+    }
+    assert(false);
+}
 
-            <div id='chart_div' style='margin: auto; width: auto; height: 500px;'></div>
+/* Queries the computed events table */
+function getFalsePositives($video_id, $user_id, $algorithm_id, $buffer) {
+    $not_in_vid_id = 4;
+    $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE obs.video_id = comp.video_id AND comp.algorithm_id = $algorithm_id AND comp.version_id = alg.main_version_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s)";
+    $result = query_wildlife_video_db($not_in_vid_query);
 
-            <h2>Parameters: (portion of the URL after a '?')</h2>
-            <dl>
-                <dt>buffer=</dt>
-                <dd>The error in either direction allowed for two events to be matched. The default value is 5.</dd>
-            </dl>
-            
+    // Get event and find match
+    $num_matches = 0;
+    while ($row = $result->fetch_assoc()) {
+        $start_sec = $row['start_time'] + $buffer;
+        $end_sec = $row['end_time'] - $buffer;
 
-            <h2>Description:</h2>
-            <p>This scatterplot shows the </p>
-            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
+        $match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_id AND video_id = $video_id AND comp.version_id = alg.main_version_id AND start_time_s >= $start_sec AND end_time_s <= $end_sec";
+        $match_result = query_wildlife_video_db($match_query);
+        $num_matches += $match_result->num_rows;
+    }
+    return $num_matches;
+}
 
-        </div>
-    </div>
-</div>
-";
+/* Queries the user observation table */
+function getEuclideanCorrectness($obs_id, $expert_id, $threshold = 95) {
+    $event_query = "SELECT obs.video_id, obs.event_id, vid.duration_s, obs.start_time_s AS start_time, obs.end_time_s AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND obs.start_time_s >= 0 AND obs.start_time_s <= obs.end_time_s AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND i.start_time_s >= 0 AND i.start_time_s <= i.end_time_s)";
+    $event_result = query_wildlife_video_db($event_query);
 
-print_footer("Travis Desell, 'Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team'", "Travis Desell, Susan Ellis-Felege");
+    $num_match_events = 0;
 
-echo "
-    </body>
-</html>
-";
+    while ($event_row = $event_result->fetch_assoc()) {
+        $video_id = $event_row['video_id'];
+        $event_id = $event_row['event_id'];
+        $video_duration = $event_row['duration_s'];
+        $start_time = $event_row['start_time'];
+        $end_time = $event_row['end_time'];
+        $match_query = "SELECT obs.start_time_s AS start_time, obs.end_time_s AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND obs.start_time_s >= 0 AND obs.start_time_s <= obs.end_time_s";
+        $match_result = query_wildlife_video_db($match_query);
+
+        $min_dist = -1;
+        $max_dist = ($video_duration*1.41421356237); // Divide by hypotenuse of a square
+        while ($row = $match_result->fetch_assoc()) {
+            $temp_start = $row['start_time'];
+            $temp_end = $row['end_time'];
+            $dist = sqrt((($temp_start - $start_time)*($temp_start - $start_time)) + (($temp_end - $end_time)*($temp_end - $end_time)));
+            if ($dist <= $max_dist && ($min_dist == -1 || $dist < $min_dist)) {
+                $min_dist = $dist;
+            }
+        }
+
+        if ($min_dist == -1) {
+            // User and No Expert (False Positive)
+            return array(0, false);
+        } else {
+            // User and Expert (True Positive)
+            $correctness = 1-($min_dist/$max_dist);
+            if ($correctness * 100 >= $threshold) {
+                return array($correctness, true);
+            } else {
+                return array($correctness, false);
+            }
+        }
+    }
+    // Error on database retrieval
+    assert(false);
+}
+
+/* Queries the user observation table */
+function getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold = 95, $recurse = true) {
+    $event_query = "SELECT obs.user_id, obs.video_id, obs.event_id, vid.duration_s, obs.start_time_s AS start_time, obs.end_time_s AS end_time FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.id = $obs_id AND obs.start_time_s >= 0 AND obs.start_time_s <= obs.end_time_s AND EXISTS (SELECT * FROM timed_observations AS i WHERE obs.video_id = i.video_id AND i.user_id = $expert_id AND i.start_time_s >= 0 AND i.start_time_s <= i.end_time_s)";
+    $event_result = query_wildlife_video_db($event_query);
+
+    $num_match_events = 0;
+
+    // Check all user events for a combined expert match
+    while ($event_row = $event_result->fetch_assoc()) {
+        $user_id = $event_row['user_id'];
+        $video_id = $event_row['video_id'];
+        $event_id = $event_row['event_id'];
+        $video_duration = $event_row['duration_s'];
+        $start_time = $event_row['start_time'];
+        $end_time = $event_row['end_time'];
+        $match_query = "SELECT obs.start_time_s AS start_time, obs.end_time_s AS end_time, obs.id FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = video_id WHERE user_id = $expert_id AND video_id = $video_id AND event_id = $event_id AND obs.start_time_s >= 0 AND obs.start_time_s <= obs.end_time_s";
+        $match_result = query_wildlife_video_db($match_query);
+        $start_times = array();
+        $end_times = array();
+
+        $min_dist = -1;
+        while ($row = $match_result->fetch_assoc()) {
+            $start_times[] = $row['start_time'];
+            $end_times[] = $row['end_time'];
+            if ($recurse) {
+                $min_dist = getSegmentedEuclideanCorrectness($row['id'], $user_id, $threshold, false);
+            }
+        }
+
+        $max_dist = ($video_duration*1.41421356237); // Divide by hypotenuse of a square
+
+        foreach ($start_times as $temp_start) {
+            foreach ($end_times as $temp_end) {
+                $dist = sqrt((($temp_start - $start_time)*($temp_start - $start_time)) + (($temp_end - $end_time)*($temp_end - $end_time)));
+                if ($min_dist == -1 || $dist < $min_dist) {
+                    $min_dist = $dist;
+                }
+            }
+        }
+
+        if ($min_dist == -1) {
+            // User and No Expert (False Positive)
+            return array(0, false);
+        } else {
+            // User and Expert (True Positive)
+            $correctness = 1-($min_dist/$max_dist);
+            if ($correctness * 100 >= $threshold) {
+                return array($correctness, true);
+            } else {
+                return array($correctness, false);
+            }
+        }
+    }
+    // Error on database retrieval
+    assert(false);
+}
+
+/* Queries the user observation table */
+function getEventWeight($obs_id, $expert_id) {
+    $weight_query = "SELECT (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = $expert_id) AS expert_count, (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id) AS user_count FROM timed_observations AS t WHERE t.id = $obs_id";
+    $weight_result = query_wildlife_video_db($weight_query);
+    while ($weight_row = $weight_result->fetch_assoc()) {
+        $user_count = $weight_row['user_count'];
+        $expert_count = $weight_row['expert_count'];
+        $max_count = max($user_count, $expert_count);
+        return 1/$user_count * ($user_count / $max_count);
+    }
+    return 0;
+}
+
+/* Queries the table computed events table */
+function getComputedEventWeight($comp_id, $expert_id) {
+    $weight_query = "SELECT (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = $expert_id AND obs.start_time_s >= 0 AND obs.start_time_s <= obs.end_time_s) AS expert_count, (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id AND comp.algorithm_id = t.algorithm_id AND comp.version_id = t.version_id) AS user_count FROM computed_events AS t WHERE t.id = $comp_id";
+    $weight_result = query_wildlife_video_db($weight_query);
+    while ($weight_row = $weight_result->fetch_assoc()) {
+        $user_count = $weight_row['user_count'];
+        $expert_count = $weight_row['expert_count'] * 2;
+        $max_count = max($user_count, $expert_count);
+        #return 1/$user_count * ($user_count / $max_count);
+        return 1/$expert_count;
+    }
+    return 0;
+}
+
+/* Queries the user observation table */
+function getEventScaledWeight($obs_id, $expert_id, $scale_factor) {
+    $user_count = 0;
+    $expert_count = 0;
+    $max_count = 0;
+
+    $count_query = "SELECT (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = $expert_id) AS expert_count, (SELECT COUNT(*) FROM timed_observations AS obs WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id) AS user_count FROM timed_observations AS t WHERE t.id = $obs_id";
+    $count_result= query_wildlife_video_db($count_query);
+    while ($count_row = $count_result->fetch_assoc()) {
+        $user_count = $count_row['user_count'];
+        $expert_count = $count_row['expert_count'];
+        $max_count = max($user_count, $expert_count);
+    }
+
+    $weight_query = "SELECT (v.duration_s/(t.end_time_s - t.start_time_s + v.duration_s*$scale_factor))/(SELECT SUM(vid.duration_s/(obs.end_time_s - obs.start_time_s + vid.duration_s*$scale_factor)) FROM timed_observations AS obs JOIN video_2 AS vid ON vid.id = obs.video_id WHERE obs.video_id = t.video_id AND obs.user_id = t.user_id GROUP BY obs.user_id) AS weight FROM timed_observations AS t JOIN video_2 AS v ON v.id = t.video_id WHERE t.id = $obs_id";
+    $weight_result = query_wildlife_video_db($weight_query);
+    while ($weight_row = $weight_result->fetch_assoc()) {
+        return $weight_row['weight'] * ($user_count / $max_count);
+    }
+    return 0;
+}
+
 ?>

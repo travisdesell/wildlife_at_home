@@ -1,3 +1,5 @@
+var canDraw = false;
+
 $(document).ready(function () {
 
     /*
@@ -16,7 +18,49 @@ $(document).ready(function () {
     var video_count = 15;
     var showing_all_videos = true;
 
+    google.setOnLoadCallback(instantiateCharts);
+
     load_videos();
+
+    function instantiateCharts() {
+        canDraw = true;
+    }
+    
+    function getDate(date_string) {
+        if (typeof date_string === 'string') {
+            var a = date_string.split(/[- :]/);
+            return new Date(a[0], a[1]-1, a[2], a[3] || 0, a[4] || 0, a[5] || 0);
+        }
+        return null;
+    }
+    
+    function onlyUnique(value, index, self) { 
+            return self.indexOf(value) === index;
+    }
+
+    function drawTimeline(video_id, event_data) {
+        if(canDraw) {
+            var temp = new Array();
+            for (var i = 0; i < event_data.length; i++) {
+                temp.push(event_data[i][0]);
+            }
+            var unique_users = temp.filter(onlyUnique);
+            var num_users = unique_users.length;
+
+            var container = document.getElementById(video_id + '_timeline');
+            var chart = new google.visualization.Timeline(container);
+            var data = new google.visualization.DataTable();
+            data.addColumn({type: 'string', id: 'Name'});
+            data.addColumn({type: 'string', id: 'Event Type'});
+            data.addColumn({type: 'date', id: 'Start'});
+            data.addColumn({type: 'date', id: 'End'});
+            data.addRows(event_data);
+            var options = {
+                height: (num_users) * 50 + 110
+            };
+            chart.draw(data, options);
+        }
+    }
 
     function load_videos() {
         var submission_data = {
@@ -149,9 +193,10 @@ $(document).ready(function () {
                     type: 'POST',
                     url: './get_video.php',
                     data : submission_data,
-                    dataType : 'text',
+                    dataType : 'html',
                     success : function(response) {
-                        $(target).html(response);
+                        $(target).empty();
+                        $(target).append($(response));
 
                         initialize_event_list();
                         enable_observation_table();
@@ -159,12 +204,32 @@ $(document).ready(function () {
 
                         enable_user_review();
                         enable_expert_review();
+
+                        $.ajax({
+                            type: 'GET',
+                            url: './video_event_times.php',
+                            data : submission_data,
+                            dataType : 'JSON',
+                            success : function(response) {
+                                for (var i in response) {
+                                    response[i][2] = getDate(response[i][2]);
+                                    response[i][3] = getDate(response[i][3]);
+                                }
+                                drawTimeline(submission_data.video_id, response);
+                            },
+                            error : function(jqXHR, textStatus, errorThrown) {
+                                alert(errorThrown);
+                            },
+                            async: true
+                        });
                     },
                     error : function(jqXHR, textStatus, errorThrown) {
                         alert(errorThrown);
                     },
                     async: true
                 });
+
+
             }
 
             if ($( $(this).attr('href') ).hasClass('in')) {
@@ -445,7 +510,7 @@ $(document).ready(function () {
 //                console.log("mouse is over: '" + label_text + "'");
             if ( !$(this).hasClass("has-remove-icon") ) { 
                 $(this).addClass("has-remove-icon");
-                $(this).append(" <span class='glyphicon glyphicon-ok-sign'></span>");
+                $(this).append(" <span class='glyphicon glyphicon-remove-sign'></span>");
             }   
         }); 
 

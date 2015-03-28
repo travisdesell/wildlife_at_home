@@ -1,3 +1,5 @@
+var canDraw = false;
+
 function pad2(value) {
     var s = "00" + parseInt(Math.floor(value), 10);
     return s.substr(-2);
@@ -8,6 +10,54 @@ function isInt(value) {
 }
 
 var tag_dropdowns;
+
+google.setOnLoadCallback(instantiateCharts);
+
+function instantiateCharts() {
+    canDraw = true;
+}
+
+function getDate(date_string) {
+    if (typeof date_string === 'string') {
+        var a = date_string.split(/[- :]/);
+        return new Date(a[0], a[1]-1, a[2], a[3] || 0, a[4] || 0, a[5] || 0);
+    }
+    return null;
+}
+
+function onlyUnique(value, index, self) { 
+        return self.indexOf(value) === index;
+}
+
+function drawTimeline(video_id, event_data) {
+    if(canDraw) {
+        var temp = new Array();
+        for (var i = 0; i < event_data.length; i++) {
+            temp.push(event_data[i][0]);
+        }
+        var unique_users = temp.filter(onlyUnique);
+        var num_users = unique_users.length;
+
+        var container = document.getElementById(video_id + '_timeline');
+        var chart = new google.visualization.Timeline(container);
+        var data = new google.visualization.DataTable();
+        data.addColumn({type: 'string', id: 'Name'});
+        data.addColumn({type: 'string', id: 'Event Type'});
+        data.addColumn({type: 'date', id: 'Start'});
+        data.addColumn({type: 'date', id: 'End'});
+        data.addRows(event_data);
+        var options = {
+            height: (num_users) * 50 + 110
+        };
+
+        // Draw timeline when modal is completely loaded so that it is drawn
+        // correctly
+        $('#finished-modal').on('shown.bs.modal', function() {
+                console.log("Redraw chart!");
+                chart.draw(data, options);
+        });
+    }
+}
 
 function submit_observations(video_id, random) {
     $('.random-video-button').addClass("disabled");
@@ -164,6 +214,36 @@ function initialize_event_list() {
 
 }
 
+function check_observations() {
+    /**
+     *      if there are no events, disabled the button
+     *      If all button dropdown event_ids != 0
+     *      and all time-textareas time_s != -1
+     *      enable finished button
+     */
+    var input_data_valid = true;
+    if ($(".event-dropdown-button").length == 0) input_data_valid = false;
+
+    $('.time-textarea').each(function() {
+        //console.log( "time_s: " + $(this).attr("time_s") );
+        if ($(this).attr("time_s") == -1) input_data_valid = false;
+    });
+
+    $('.event-dropdown-button').each(function() {
+        //console.log( "event id: " + $(this).attr("event_id") );
+        if ($(this).attr("event_id") == 0) input_data_valid = false;
+    });
+
+    //console.log("UPDATING OBSERVATIONS AND INPUT DATA IS: " + input_data_valid);
+
+    if (input_data_valid) {
+        $(".finished-video-button").removeClass("disabled");
+    } else {
+        $(".finished-video-button").addClass("disabled");
+    }
+}
+
+
 function enable_observation_table() {
 //    console.log("allow_add_removal: '" + allow_add_removal + "'");
     if (allow_add_removal == 0) {
@@ -172,6 +252,7 @@ function enable_observation_table() {
         $(".remove-observation-button").addClass("disabled");
         $(".remove-observation-button").hide();
     }
+    check_observations();
 
     $('.dropdown-dropup:not(.dropdownup_bound)').addClass('dropdownup_bound').click(function() {
         var distance = ($(window).scrollTop() + $(window).height()) - $(this).offset().top;
@@ -495,9 +576,6 @@ function enable_observation_table() {
 
                 var observations_count = $(".observations-table[video_id=" + video_id + "]").length;
                 //console.log("observations count: " + observations_count);
-                if (observations_count > 0) {
-                    $(".finished-video-button").removeClass("disabled");
-                }
 
             },
             error : function(jqXHR, textStatus, errorThrown) {
@@ -541,9 +619,7 @@ function enable_observation_table() {
 
                 var observations_count = $(".observations-table[video_id=" + video_id + "]").length;
                 //console.log("observations count: " + observations_count);
-                if (observations_count == 0) {
-                    $(".finished-video-button").addClass("disabled");
-                }
+                check_observations();
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -690,11 +766,6 @@ function enable_observation_table() {
     if (finished_video_id) {
         var observations_count = $(".observations-table[video_id=" + finished_video_id + "]").length;
         //console.log("observations count: " + observations_count);
-        if (observations_count == 0) {
-            $(".finished-video-button").addClass("disabled");
-        } else {
-            $(".finished-video-button").removeClass("disabled");
-        }
     }
 
 }
@@ -776,12 +847,30 @@ $(document).ready(function () {
             data : submission_data,
             dataType : 'json',
             success : function(response) {
-                console.log("GOT RESPONSE!: " + response['html']);
+                //console.log("GOT RESPONSE!: " + response['html']);
 
                 $('#finished-modal').html( response['html'] );
                 enable_next_video_buttons();
 
                 $('#finished-modal').modal( {keyboard: false, show: true} )
+                // Load Google Chart here
+                $.ajax({
+                    type: 'GET',
+                    url: './video_event_times.php',
+                    data : submission_data,
+                    dataType : 'JSON',
+                    success : function(response) {
+                        for (var i in response) {
+                            response[i][2] = getDate(response[i][2]);
+                            response[i][3] = getDate(response[i][3]);
+                        }
+                        drawTimeline(submission_data.video_id, response);
+                    },
+                    error : function(jqXHR, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    },
+                    async: true
+                });
             },
             error : function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);

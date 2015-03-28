@@ -299,7 +299,7 @@ void award_credit(const DBVideo &video, const vector<int> &user_ids, const vecto
 
         if (atoi(team_row[0]) > 0) {
             ostringstream team_credit_query;
-            team_credit_query << "UPDATE team SET bossa_total_credit = bossa_total_credit + " << video_credit_s << " WHERE id = " << team_row[0];
+            team_credit_query << "UPDATE team SET bossa_total_credit = bossa_total_credit + " << video_credit_s << ", valid_events = valid_events + " << user_valid_count[i] << " WHERE id = " << team_row[0];
             cout << team_credit_query.str() << endl;
 
             mysql_query_check(boinc_db_conn, team_credit_query.str());
