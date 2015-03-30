@@ -191,6 +191,8 @@ function initDraw(canvas) {
 		//remove selection information when rectangle is removed
 		var elem = document.getElementById('S'+id); //Jaeden
 		elem.remove(); //Jaeden
+		if (element_count < 1) $('#submit-selections-button').prop('disabled', true);
+ 
 
 
 	    console.log("Close button was clicked");
@@ -503,6 +505,7 @@ function initDraw(canvas) {
 			
 			elements[element_count] = current_element;
 			element_count++;
+			if (element_count === 1) $('#submit-selections-button').prop('disabled', false);
 		    }
 		}
 	}
@@ -517,6 +520,7 @@ function initDraw(canvas) {
 
 	elements.splice(elements.indexOf(elem1), 1);
 	element_count--;
+	if (element_count < 1) $('#submit-selections-button').prop('disabled', true);
 
 	elem1.remove();
 
@@ -531,6 +535,7 @@ function initDraw(canvas) {
 	if(nothing_here === 0) 
 	{
 		nothing_here=1;
+		$('#submit-selections-button').prop('disabled', false);
   		document.getElementById("comments").style.display = 'initial';
 
 		var size = document.getElementsByClassName('well').length;
@@ -546,6 +551,7 @@ function initDraw(canvas) {
 	{
 		nothing_here =0;
   		document.getElementById("comments").style.display = 'none';
+		if(element_count < 1 ) $('#submit-selections-button').prop('disabled', true);
 
 		var size = document.getElementsByClassName('well').length;
 		for(var i=0; i<size; i++)
@@ -567,6 +573,7 @@ function initDraw(canvas) {
 $(document).ready(function() {	
     initDraw(document.getElementById('canvas'));
     $("#comments").val('');
+    $('#submit-selections-button').prop('disabled', true);
 
 
 });
