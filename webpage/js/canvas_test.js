@@ -1,6 +1,19 @@
 function initDraw(canvas) {
 
     var nothing_here = 0;
+    var $_GET = {};
+    if(document.location.toString().indexOf('?') !== -1) {
+		var query = document.location
+			.toString()
+			.replace(/^.*?\?/, '')
+			.replace(/#.*$/, '')
+			.split('&');
+		for(var i=0, l=query.length; i<l; i++) {
+			var aux = decodeURIComponent(query[i]).split('=');
+			$_GET[aux[0]] = aux[1];
+		}
+    }
+    var project = $_GET['p'];
 	
 	$('#submit-selections-button:not(.bound)').addClass('bound').click(function() {
 		console.log("the submit button was clicked!");
@@ -77,8 +90,9 @@ function initDraw(canvas) {
 
 			
 
-		alert("Thx for the submission!");
-		location.reload();
+	//	alert("Thx for the submission!");
+		$('#submitModal').modal('show');
+		//location.reload();
 
     });
 
@@ -103,6 +117,7 @@ function initDraw(canvas) {
     var images = document.getElementsByClassName('img-responsive');
     var imag = images[0];
     var species = [];
+    var species_ids = [];
 
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
@@ -178,6 +193,10 @@ function initDraw(canvas) {
 
 
 	    console.log("Close button was clicked");
+    });
+
+    $('#modalSubButton').on('click', function() {
+	    location.reload();
     });
 
 
@@ -437,10 +456,11 @@ function initDraw(canvas) {
 							"<td> <select id='speciesDropdown"+element_id+"'>";
 			
 			if (species.length < 1) {
-				$.post("canvas_select.php",
+				$.post("canvas_select.php", 'p=' + project,
 				function(data) {
 					for (var i = 0; i < data.length; ++i) {
-						species.push(data[i]);
+						species.push(data[i].name);
+						species_ids.push(data[i].id);
 					}				
 					for (var i = 0; i < species.length; ++i) {
 						table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
@@ -448,9 +468,10 @@ function initDraw(canvas) {
 					
 					table += "</select></td>"+
 						"</tr>"+
-						"<tr>"+
-							"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
-							"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+						"<tr>";
+					if (project == 1) table += "<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>";
+					else table += "<td align='center'></td>";
+					table += "<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 						"</tr>"+
 					"</table>"+
 					"</div>"; //Jaeden
