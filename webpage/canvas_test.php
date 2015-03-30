@@ -106,9 +106,7 @@ echo "
     <div class='col-sm-8' onselectstart='return false' ondragstart='return false'>
         <div id='canvas'>
             <img class='img-responsive' id='$image_id'  src='http://wildlife.und.edu/$image'></img>
-<<<<<<< HEAD
-        </div>";
-=======
+
         </div>
     </div>
 </div>";
@@ -134,7 +132,6 @@ echo "<div id='submitModal' class='modal fade'>
 			</div>
 		</div>
 	<div>";
->>>>>>> 35c9280f5ac9fedeef5b0e8f7957f4b50ac27a73
 
 
 
