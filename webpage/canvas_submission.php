@@ -19,7 +19,7 @@ $data = json_decode($_POST['data'], true);
 
 $nothing_here = $data['nothing_here'];
 
-$image_id = $data[$i][image_id];
+$image_id = $data[0][image_id];
 
 query_wildlife_video_db("UPDATE images SET views = views + 1 WHERE id = '$image_id';");
 

@@ -54,7 +54,8 @@ container_end();
 
 
 $image_id = -1;
-$project_id = 1;
+$project_id = $_GET[(p)];
+if(!$project_id) $project_id=1;
 
 $result = NULL;
 //TODO Update query so user doesn't see verified image - BCC
