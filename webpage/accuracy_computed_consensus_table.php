@@ -80,11 +80,12 @@ echo "
             data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
             data.addColumn('number', 'Event Count');
+            data.addColumn('number', 'Any Algorithm');
+            data.addColumn('number', 'All Algorithms');
+            data.addColumn('number', 'MOG & ViBe Algorithms');
+            data.addColumn('number', 'MOG & PBAS Algorithms');
+            data.addColumn('number', 'ViBe & PBAS Algorithms');
 ";
-
-foreach($algs as $a_id => $a_name) {
-    echo "data.addColumn('number', '$a_name');";
-}
 
 echo "
             data.addRows([
@@ -93,48 +94,109 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND species_id <> 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
+    $timed_query = "SELECT obs.id, obs.video_id, obs.species_id FROM timed_observations AS obs WHERE expert = 1 and obs.event_id = $type_id AND species_id <> 1 AND obs.start_time_s > 10 AND obs.start_time_s <= obs.end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.video_id = obs.video_id AND alg.main_version_id = comp.version_id)";
     $timed_result = query_wildlife_video_db($timed_query);
-    $alg_num_events = array();
-    $alg_match_events = array();
-    foreach($algs as $a_id => $a_name) {
-        $alg_num_events[$a_id] = 0;
-        $alg_match_events[$a_id] = 0;
-    }
+
+    $consensus_num = 0;
+    $consensus_any_matches = 0;
+    $consensus_all_matches = 0;
+    $consensus_mog_vibe_matches = 0;
+    $consensus_mog_pbas_matches = 0;
+    $consensus_vibe_pbas_matches = 0;
+
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
         $video_id = $timed_row['video_id'];
 
+        $any_match_start = FALSE;
+        $any_match_end = FALSE;
+        $mog_match_start = FALSE;
+        $mog_match_end = FALSE;
+        $vibe_match_start = FALSE;
+        $vibe_match_end = FALSE;
+        $pbas_match_start = FALSE;
+        $pbas_match_end = FALSE;
+        $all_match_start = 0;
+        $all_match_end = 0;
         foreach($algs as $a_id => $a_name) {
             list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer);
 
-            $alg_num_events[$a_id] += 2;
+            if($start_match) {
+                $any_match_start = TRUE;
+                $all_match_start += 1;
+                if ($a_id == '1') {
+                    $mog_match_start = TRUE;
+                } elseif ($a_id == '2') {
+                    $vibe_match_start = TRUE;
+                } elseif ($a_id == '3') {
+                    $pbas_match_start = TRUE;
+                }
+            }
+            if($end_match) {
+                $any_match_end = TRUE;
+                $all_match_end += 1;
+                if ($a_id == '1') {
+                    $mog_match_end = TRUE;
+                } elseif ($a_id == '2') {
+                    $vibe_match_end = TRUE;
+                } elseif ($a_id == '3') {
+                    $pbas_match_end = TRUE;
+                }
+            }
+        }
 
-            $alg_match_events[$a_id] += $start_match;
-            $alg_match_events[$a_id] += $end_match;
+        $consensus_num += 2;
+        if ($any_match_start) {
+            $consensus_any_matches += 1;
+        }
+        if ($any_match_end) {
+            $consensus_any_matches += 1;
+        }
+
+        if($all_match_start == count($algs)) {
+            $consensus_all_matches += 1;
+        }
+        if($all_match_end == count($algs)) {
+            $consensus_all_matches += 1;
+        }
+
+        if ($mog_match_start AND $vibe_match_start) {
+            $consensus_mog_vibe_matches += 1;
+        }
+        if ($mog_match_end AND $vibe_match_end) {
+            $consensus_mog_vibe_matches += 1;
+        }
+
+        if ($mog_match_start AND $pbas_match_start) {
+            $consensus_mog_pbas_matches += 1;
+        }
+        if ($mog_match_end AND $pbas_match_end) {
+            $consensus_mog_pbas_matches += 1;
+        }
+
+        if ($vibe_match_start AND $pbas_match_start) {
+            $consensus_vibe_pbas_matches += 1;
+        }
+        if ($vibe_match_end AND $pbas_match_end) {
+            $consensus_vibe_pbas_matches += 1;
         }
     }
 
-    $add_data = false;
-    foreach($alg_match_events as $a_id => $a_val) {
-        if ($a_val > 0) {
-            $add_data = true;
-        }
-    }
-
-    if ($add_data) {
+    if ($consensus_num > 0) {
         echo "[";
         echo "'$type_name'";
         echo ",";
-        echo "$alg_num_events[$a_id]";
-        foreach($alg_match_events as $a_id => $a_val) {
-            echo ",";
-            if ($alg_num_events[$a_id] > 0) {
-                echo $a_val;
-            } else {
-                echo "0";
-            }
-        }
+        echo "$consensus_num";
+        echo ",";
+        echo "$consensus_any_matches";
+        echo ",";
+        echo "$consensus_all_matches";
+        echo ",";
+        echo "$consensus_mog_vibe_matches";
+        echo ",";
+        echo "$consensus_mog_pbas_matches";
+        echo ",";
+        echo "$consensus_vibe_pbas_matches";
         echo "],";
     }
 }
@@ -175,8 +237,8 @@ echo "
 
             <h2>Description:</h2>
             <p>TOOD: Edit this</p>
-            <p>This bar chart show the percentage of computed events that have a matching user observed event. Each bar represens the percent of computed events that match a user observation. The legent shows the breakdown for each species.</p>
-            <p>In order to collect this data we discard all vidoes that do not have an user observation or the user observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of computed events of that type that have an valid user observation for that video.</p>
+            <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represens the percent of events that match an expert observation. The legent shows the breakdown for each species.</p>
+            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
 
         </div>
     </div>

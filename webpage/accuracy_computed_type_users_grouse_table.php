@@ -106,11 +106,12 @@ while ($type_row = $type_result->fetch_assoc()) {
         $video_id = $timed_row['video_id'];
 
         foreach($algs as $a_id => $a_name) {
-            list($correctness, $specificity) = getBufferAccuracy($obs_id, $a_id, $buffer);
+            list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer);
 
             $alg_num_events[$a_id] += 2;
 
-            $alg_match_events[$a_id] += $correctness;
+            $alg_match_events[$a_id] += $start_match;
+            $alg_match_events[$a_id] += $end_match;
         }
     }
 

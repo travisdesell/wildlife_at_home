@@ -86,9 +86,9 @@ while ($row = $result->fetch_assoc()) {
     $total_buffer_correctness = 0;
     while ($obs_row = $obs_result->fetch_assoc()) {
         $obs_id = $obs_row['id'];
-        list($buffer_correctness, $buffer_specificity) = getBufferAccuracy($obs_id, $algorithm_id, $buffer);
-        #$total_buffer_correctness += $buffer_correctness * getComputedEventWeight($obs_id, $expert_id);
-        $total_buffer_correctness += $buffer_correctness;
+        list($start_match, $end_match) = getBufferAccuracy($obs_id, $algorithm_id, $buffer);
+        $total_buffer_correctness += $start_match;
+        $total_buffer_correctness += $end_match;
     }
     echo "[";
     echo "'$algorithm_name'";
