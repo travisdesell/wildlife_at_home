@@ -106,10 +106,36 @@ echo "
     <div class='col-sm-8' onselectstart='return false' ondragstart='return false'>
         <div id='canvas'>
             <img class='img-responsive' id='$image_id'  src='http://wildlife.und.edu/$image'></img>
+<<<<<<< HEAD
         </div>";
-
+=======
+        </div>
+    </div>
+</div>";
+	
 
 print_footer();
+
+echo "<div id='submitModal' class='modal fade'>
+		<div class='modal-dialog' role='dialog'>
+			<div class='modal-content'>
+				<div class='modal-header'>
+					<button type='button' class='close' data-dismiss='modal' aria-hidden='true'>
+						&times;
+					</button>
+					<h4 class='modal-title''>Submission Complete</h4>
+					<div class='modal-body'>
+						<p>Thx!</p>
+					</div>
+					<div class='modal-footer'>
+						<button id='modalSubButton' type='button' class='btn btn-primary' data-dismiss='modal'>Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	<div>";
+>>>>>>> 35c9280f5ac9fedeef5b0e8f7957f4b50ac27a73
+
 
 
 ?>

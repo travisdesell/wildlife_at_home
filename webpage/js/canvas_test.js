@@ -14,6 +14,7 @@ function initDraw(canvas) {
 		}
     }
     var project = $_GET['p'];
+    if (!project) project = 1;
 	
 	$('#submit-selections-button:not(.bound)').addClass('bound').click(function() {
 		console.log("the submit button was clicked!");
@@ -32,7 +33,7 @@ function initDraw(canvas) {
 				left : current_element.style.left,
 				top : current_element.style.top,
 				nest : document.getElementById('check'+current_element.id).checked ? true : false,
-				species : document.getElementById('speciesDropdown'+current_element.id).value,
+				species : species_ids[document.getElementById('speciesDropdown'+current_element.id).selectedIndex],
 				comments : document.getElementById('comment'+current_element.id).value,
 				image_id : $(".img-responsive").attr("id"),
 				nothing_here : nothing_here
@@ -476,6 +477,7 @@ function initDraw(canvas) {
 					"</table>"+
 					"</div>"; //Jaeden
 					$("#selection-information").append(table);
+					element_id++;
 
 				}, "json");
 				
@@ -485,13 +487,15 @@ function initDraw(canvas) {
 				}//BCC
 				table += "</select></td>"+
 					"</tr>"+
-					"<tr>"+
-						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
-						"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+					"<tr>";
+				if (project == 1) table += "<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>";
+				else table += "<td align='center'></td>";
+				table += "<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 					"</tr>"+
 				"</table>"+
 				"</div>"; //Jaeden
 				$("#selection-information").append(table);
+				element_id++;
 			}
 
 
@@ -499,7 +503,6 @@ function initDraw(canvas) {
 			
 			elements[element_count] = current_element;
 			element_count++;
-			element_id++;
 		    }
 		}
 	}
