@@ -114,13 +114,10 @@ echo "
 
 print_footer();
 
-echo "<div id='submitModal' class='modal fade'>
+echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 		<div class='modal-dialog' role='dialog'>
 			<div class='modal-content'>
 				<div class='modal-header'>
-					<button type='button' class='close' data-dismiss='modal' aria-hidden='true'>
-						&times;
-					</button>
 					<h4 class='modal-title''>Submission Complete</h4>
 					<div class='modal-body'>
 						<p>Thx!</p>
