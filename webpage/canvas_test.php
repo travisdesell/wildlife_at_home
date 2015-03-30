@@ -109,8 +109,12 @@ echo "
             <img class='img-responsive' id='$image_id'  src='http://wildlife.und.edu/$image'></img>
         </div>
     </div>
-</div>
-	<div id='submitModal' class='modal fade'>
+</div>";
+	
+
+print_footer();
+
+echo "<div id='submitModal' class='modal fade'>
 		<div class='modal-dialog' role='dialog'>
 			<div class='modal-content'>
 				<div class='modal-header'>
@@ -129,8 +133,6 @@ echo "
 		</div>
 	<div>";
 
-
-print_footer();
 
 
 ?>

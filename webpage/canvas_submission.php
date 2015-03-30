@@ -7,11 +7,11 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 require_once($cwd[__FILE__] . '/../../citizen_science_grid/my_query.php');
 require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 
-//$user = csg_get_user();
-//$user_id = $user['id'];
+$user = csg_get_user();
+$user_id = $user['id'];
 
 //TEMPORARY//
-$user_id = 0;
+//$user_id = 0;
 
 error_log("id: " . $_POST['some_id']);
 
