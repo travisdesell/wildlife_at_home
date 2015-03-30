@@ -63,7 +63,7 @@ if (array_key_exists('image_id', $_GET)) {
     $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
 
 } else {
-    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE watermarked = 1 and project_id=$project_id ORDER BY RAND() LIMIT 1");
+    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE watermarked=1 and needed_views>0 and project_id=$project_id ORDER BY RAND() LIMIT 1");
     //$row = $result->fetch_assoc();
 
     //from citizen_science_grid/my_query.php

@@ -7,17 +7,21 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 require_once($cwd[__FILE__] . '/../../citizen_science_grid/my_query.php');
 require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 
-//$user = csg_get_user();
-//$user_id = $user['id'];
+$user = csg_get_user();
+$user_id = $user['id'];
 
 //TEMPORARY//
-$user_id = 0;
+//$user_id = 0;
 
 error_log("id: " . $_POST['some_id']);
 
 $data = json_decode($_POST['data'], true);
 
 $nothing_here = $data['nothing_here'];
+
+$image_id = $data[$i][image_id];
+
+query_wildlife_video_db("UPDATE images SET views = views + 1 WHERE id = '$image_id';");
 
 if(!$nothing_here)
 {
@@ -33,7 +37,7 @@ if(!$nothing_here)
 		", nothing_here: " . $data["$i"]['nothing_here']);
 	
 
-	$image_id = $data[$i][image_id];
+	//$image_id = $data[$i][image_id];
 	$height = $data[$i][height];
 	$height = (int)preg_replace('/\D/', '', $height);
 	$width = $data[$i][width];
@@ -67,6 +71,8 @@ else
 				"(user_id, image_id, comments, nothing_here) " .
 			" VALUES ($user_id, $data[image_id], '$comments', $data[nothing_here]);");
 }
+
+
 
 
 //TODO Get Picture info from the database as well - BCC
