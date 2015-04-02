@@ -8,6 +8,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 
 
 print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/canvas_test.css' rel='stylesheet'> <script type='text/javascript' src='./js/canvas_test.js'></script>", "wildlife");
@@ -52,10 +53,23 @@ echo "
 container_end();
 */
 
+$user = csg_get_user();
+$user_id = $user['id'];
 
 $image_id = -1;
-$project_id = $_GET[(p)];
+$project_id = $_GET[('p')];
 if(!$project_id) $project_id=1;
+$query = "select id, watermarked_filename, watermarked, species, year from (select id, watermarked_filename, watermarked, species, year from images where watermarked=1 and views < needed_views and project_id=$project_id order by rand() limit 1000) as t1 where id != any (select image_id from test_image_observations where user_id=$user_id) limit 1";
+
+$temp_result = query_wildlife_video_db("select max(id), min(id) from images");
+$row = $temp_result->fetch_assoc();
+$max_int = $row['max(id)'];
+$min_int = $row['min(id)'];
+
+do {
+	$temp_id = mt_rand($min_int, $max_int);
+	$temp_result = query_wildlife_video_db("select id, watermarked_filename, watermarked, species, year from images where watermarked=1 and views < needed_views and project_id=$project_id and id not in (select image_id from test_image_observations where user_id=$user_id) and id=$temp_id");
+} while ($temp_result->num_rows < 1);
 
 $result = NULL;
 //TODO Update query so user doesn't see verified image - BCC
@@ -64,7 +78,8 @@ if (array_key_exists('image_id', $_GET)) {
     $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
 
 } else {
-    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE watermarked=1 and views<needed_views and project_id=$project_id ORDER BY RAND() LIMIT 1");
+    //$result = query_wildlife_video_db($query);
+    $result = $temp_result;
     //$row = $result->fetch_assoc();
 
     //from citizen_science_grid/my_query.php

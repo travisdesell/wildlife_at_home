@@ -26,13 +26,15 @@ function initDraw(canvas) {
 
 			for (var i = 0; i < element_count; i++) { //Get the information from each rectangle
 		    	var current_element = elements[i];
+			if (project === 1) var check = document.getElementById('check'+current_element.id).checked ? true : false;
+			else var check = false;
 
 		  	var rectangle_info = {
 				width : current_element.style.width,
 				height : current_element.style.height,
 				left : current_element.style.left,
 				top : current_element.style.top,
-				nest : document.getElementById('check'+current_element.id).checked ? true : false,
+				nest : check, 
 				species : species_ids[document.getElementById('speciesDropdown'+current_element.id).selectedIndex],
 				comments : document.getElementById('comment'+current_element.id).value,
 				image_id : $(".img-responsive").attr("id"),
