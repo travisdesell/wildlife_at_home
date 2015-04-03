@@ -16,22 +16,22 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with BOINC.  If not, see <http://www.gnu.org/licenses/>.
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname($cwd);
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 /*
  * THIS IS REALLY BAD!
  * But the BOINC include suck and use relative paths
  */
-chdir("/projects/wildlife/html/user"); 
+//chdir("/projects/wildlife/html/user"); 
 
-require_once("/projects/wildlife/html/inc/cache.inc");
-require_once("/projects/wildlife/html/inc/util.inc");
-require_once("/projects/wildlife/html/inc/user.inc");
-require_once("/projects/wildlife/html/inc/boinc_db.inc");
+require_once("../../inc/cache.inc");
+require_once("../../inc/util.inc");
+require_once("../../inc/user.inc");
+require_once("../../inc/boinc_db.inc");
 
-require_once($cwd . "/display_badges.php");
+require_once($cwd[__FILE__] . "../../citizen_science_grid/display_badges.php");
 
 check_get_args(array("sort_by", "offset"));
 
@@ -47,12 +47,8 @@ function get_top_participants($offset, $sort_by) {
     $db = BoincDb::get(true);
     if ($sort_by == "bossa_total_credit") {
         $sort_order = "bossa_total_credit desc";
-    } else if ($sort_by == "bossa_credit_v2") {
-        $sort_order = "bossa_credit_v2 desc";
     } else if ($sort_by == "valid_events") {
         $sort_order = "valid_events desc";
-    } else {
-        $sort_order = "(bossa_accuracy / total_observations) desc";
     }
     return BoincUser::enum(null, "order by $sort_order limit $offset,$users_per_page");
 }
@@ -69,18 +65,6 @@ function user_table_start($sort_by) {
         echo "<th><a href=top_bossa_users.php?sort_by=bossa_total_credit>".tra("Seconds Watched")."</a></th>";
     } else {
         echo "<th>".tra("Seconds Watched")."</th>";
-    }
-
-    if ($sort_by != "bossa_accuracy") {
-        echo "<th><a href=top_bossa_users.php?sort_by=bossa_accuracy>".tra("Accuracy")."</a></th>";
-    } else {
-        echo "<th>".tra("Accuracy")."</th>";
-    }
-
-    if ($sort_by != "bossa_credit_v2") {
-        echo "<th><a href=top_bossa_users.php?sort_by=bossa_credit_v2>".tra("Seconds Watched (New Interface)")."</a></th>";
-    } else {
-        echo "<th>".tra("Seconds Watched (New Interface)")."</th>";
     }
 
     if ($sort_by != "valid_events") {
@@ -103,8 +87,6 @@ function show_user_row($user, $i) {
         <td style='text-align:center;'>" . get_bossa_badge($user) . "</td>
         <td>", user_links($user), "</td>
         <td>", format_credit_large($user->bossa_total_credit), "</td>
-        <td>", round(100 * ($user->bossa_accuracy / $user->total_observations), 2), "</td>
-        <td>", format_credit_large($user->bossa_credit_v2), "</td>
         <td>", format_credit_large($user->valid_events), "</td>
         <td>", $user->country, "</t>
         <td>", time_str($user->create_time),"</td>
@@ -115,12 +97,10 @@ function show_user_row($user, $i) {
 $sort_by = get_str("sort_by", true);
 switch ($sort_by) {
 case "bossa_total_credit":
-case "bossa_credit_v2":
 case "valid_events":
-case "bossa_accuracy":
     break;
 default:
-    $sort_by = "bossa_credit_v2";
+    $sort_by = "bossa_total_credit";
 }
 
 $offset = get_int("offset", true);

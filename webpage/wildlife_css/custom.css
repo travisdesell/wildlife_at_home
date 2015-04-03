@@ -1,0 +1,40 @@
+hr.news-hr {
+    border: 0;
+    border-bottom: 1px solid rgb(200, 200, 200);
+}
+
+h3.project-name {
+    margin-top: 0px;
+}
+
+.well h3 {
+    margin-top: 0px;
+}
+
+blockquote {
+    font-size: 14px;
+}
+
+
+.list-unstyled li:not(.dropdown-header):hover {
+    background-color: lightblue;
+}
+
+.list-unstyled li.dropdown-header {
+    font-weight: bold;
+    text-transform: uppercase;
+    padding-left: 10px;
+}
+
+.list-unstyled li:not(.dropdown-header) {
+    padding-left: 15px;
+}
+
+.list-unstyled li:not(.dropdown-header) a {
+    text-decoration: none;
+    clear: both;
+    font-weight: normal;
+    color: #333333;
+}
+
+

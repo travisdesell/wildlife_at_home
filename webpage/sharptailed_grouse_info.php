@@ -6,13 +6,11 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
 print_header("Wildlife@Home: Sharp-Tailed Grouse Ecology and Information", "", "wildlife");
-print_navbar("Wildlife", "Wildlife@Home");
+print_navbar("Wildlife", "Wildlife@Home", "..");
 
 echo "
 <div class='container'>
@@ -39,7 +37,7 @@ echo "
                 </p>
 
                 <p>
-                You can also view the training videos for identifying sharp-tailed grouse, their nests, and their predators <a href='http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php'>here</a>.
+                You can also view the training videos for identifying sharp-tailed grouse, their nests, and their predators <a href='./sharptailed_grouse_training.php'>here</a>.
                 </p>
             </section>
 

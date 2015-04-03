@@ -6,10 +6,8 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/news.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/uotd.php");
 
 function get_count($table_name, $where_clause) {
     $results = query_wildlife_video_db("SELECT count(*) FROM $table_name WHERE $where_clause");
@@ -64,7 +62,7 @@ $additional_scripts .= "</script>";
 $additional_scripts .= "<script src='video_selector.js'></script>";
 
 print_header("Wildlife@Home: Video Selection", $additional_scripts);
-print_navbar("Watch Video", "Wildlife@Home");
+print_navbar("Watch Video", "Wildlife@Home", "..");
 
 
 echo "
@@ -72,7 +70,7 @@ echo "
         <div class='row'>
             <div class='col-sm-12'>
                 <div class='well'>
-                <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is a list of who has watched the most video <a href='http://volunteer.cs.und.edu/wildlife/top_bossa_users.php'>here</a>, and you can go over the observations for videos you've already watched <a href='http://volunteer.cs.und.edu/wildlife/user_video_list.php'>here</a>. 
+                <p>Select the species and site you want to watch video for, and click the watch video button to get started. You will have to <a href='../create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the training videos for each species first, because telling if the bird is at its nest or not can be challenging! You can also click the progress bars to see how much video is available and how much has been watched already. There is a list of who has watched the most video <a href='./top_bossa_users.php'>here</a>, and you can go over the observations for videos you've already watched <a href='./review_videos.php'>here</a>. 
                 </div>
             </div>
         </div>
@@ -83,10 +81,10 @@ echo "
 
 $thumbnails = array('thumbnail_list' => array(
                         array(
-                            'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_sharptailed_grouse.png',
+                            'thumbnail_image' => './images/thumbnail_sharptailed_grouse.png',
                             'species_name' => 'Sharp-Tailed Grouse',
                             'species_id' => '1',
-                            'training_webpage' => 'http://volunteer.cs.und.edu/wildlife/sharptailed_grouse_training.php',
+                            'training_webpage' => './sharptailed_grouse_training.php',
                             'info_webpage' => 'sharptailed_grouse_info.php',
                             'species_latin_name' => 'Tympanuchus phasianellus',
                             'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p> <p>Active projects include: <ul><li>Rebecca Eckroad - <a href="becca_grouse_project.php">Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li><li>Paul Burr - <a href="paul_project.php">Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li></li><li>Kyle Goehner - <a href="kyle_project.php">Automated Wildlife Detection in Uncontrolled Environments</a></li></ul></p>',
@@ -127,7 +125,7 @@ $thumbnails = array('thumbnail_list' => array(
                         ),
 
                         array(
-                            'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_least_tern.png',
+                            'thumbnail_image' => './images/thumbnail_least_tern.png',
                             'species_name' => 'Interior Least Tern',
                             'species_id' => '2',
                             'species_latin_name' => 'Sternula antillarum',
@@ -148,7 +146,7 @@ $thumbnails = array('thumbnail_list' => array(
                         ),
 
                         array(
-                            'thumbnail_image' => 'http://volunteer.cs.und.edu/wildlife/images/thumbnail_piping_plover.png',
+                            'thumbnail_image' => './images/thumbnail_piping_plover.png',
                             'species_name' => 'Piping Plover',
                             'species_id' => '3',
                             'species_latin_name' => 'Charadrius melodus',

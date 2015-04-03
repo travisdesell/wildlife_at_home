@@ -1,33 +1,33 @@
-<div class='row-fluid' style="display:table;">
-    <div class='span6' style="display:table-cell; vertical-align:bottom; float:none; padding-right:5px;">
-        <div class='row-fluid'>
+<div class='row' style="display:table;">
+    <div class='col-sm-6' style="display:table-cell; vertical-align:bottom; float:none; padding-right:5px;">
+        <div class='row' style='margin-left:0px; margin-right:0px;'>
             <video style='width:100%;' id='wildlife-video-{{video_id}}' start_time='{{start_time}}' controls='controls' preload='auto'>
             <source src='http://wildlife.und.edu/{{video_file}}.ogv' type='video/ogg'>
             <source src='http://wildlife.und.edu/{{video_file}}.mp4' type='video/mp4'>
             This video requires a browser that supports HTML5 video.
             </video>
-        </div> <!--row-fluid-->
+        </div> <!--row-->
 
-        <div class='row-fluid' id='wildlife-video-buttons-{{video_id}}'>
-            <button class='btn btn-primary span5 pull-left fast-backward-button' style='margin-top:0px;' video_id='{{video_id}}'>
-                <i class='icon-backward icon-white'></i>
+        <div class='row' id='wildlife-video-buttons-{{video_id}}' style='margin-left:0px; margin-right:0px;'>
+            <button class='btn btn-primary col-sm-5 pull-left fast-backward-button' style='margin-top:2px;' video_id='{{video_id}}'>
+                <span class="glyphicon glyphicon-fast-backward"></span>
             </button>
 
-            <div class='span2'>
+            <div class='col-sm-2' style='padding:0px;'>
                 <input style='width:100%; padding:3px; margin:1px;' type='text' id='speed-textbox-{{video_id}}' value='speed: 1' readonly='readonly'></input>
             </div>
 
-            <button class='btn btn-primary span5 pull-right fast-forward-button' style='margin-top:0px;' video_id='{{video_id}}'>
-                <i class='icon-forward icon-white'></i>
+            <button class='btn btn-primary col-sm-5 pull-right fast-forward-button' style='margin-top:2px;' video_id='{{video_id}}'>
+                <span class="glyphicon glyphicon-fast-forward"></span>
             </button>
-        </div> <!--row-fluid-->
-    </div> <!--span6-->
+        </div> <!--row-->
+    </div> <!--col-sm-6-->
 
-    <div class='span6' style="display:table-cell; float:none; padding-left:5px;">
-        <div class='row-fluid'>
+    <div class='col-sm-6' style="display:table-cell; float:none; padding-left:5px;">
+        <div class='row' style='margin-left:0px; margin-right:0px;'>
             <div class='event-list-div' video_id='{{video_id}}' id='event-list-div-{{video_id}}' video_filename="{{video_file}}"></div>
-            <button class='btn btn-small btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
-            <button class='btn btn-small btn-warning pull-right revalidate-events-button {{#needs_revalidation}}disabled{{/needs_revalidation}}' video_id='{{video_id}}'>{{#needs_revalidation}}Revalidation Pending{{/needs_revalidation}}{{^needs_revalidation}}Revalidate Events{{/needs_revalidation}}</button>
+            <button class='btn btn-sm btn-primary pull-left new-observation-button' id='new-observation-button-{{video_id}}' video_id='{{video_id}}'>New Event</button>
+            <button class='btn btn-sm btn-warning pull-right revalidate-events-button {{#needs_revalidation}}disabled{{/needs_revalidation}}' video_id='{{video_id}}'>{{#needs_revalidation}}Revalidation Pending{{/needs_revalidation}}{{^needs_revalidation}}Revalidate Events{{/needs_revalidation}}</button>
 
             {{#regular_user}}
                 <br>
@@ -37,7 +37,7 @@
                     <b id='report-comments-title-{{video_id}}'>Observation reported:</b>
                     <textarea style='width:98%;' rows=6 class='report-comments' id='report-comments-{{video_id}}' video_id={{video_id}}> </textarea>
                 </div>
-                <button class='btn btn-small btn-success pull-right submit-report-button disabled hidden' id='submit-report-button-{{video_id}}' video_id='{{video_id}}'>Submit Report</button>
+                <button class='btn btn-sm btn-success pull-right submit-report-button disabled hidden' id='submit-report-button-{{video_id}}' video_id='{{video_id}}'>Submit Report</button>
 
                 <div class='response-comments-div hidden' id='response-comments-div-{{video_id}}'>
                     <b id='response-comments-title-{{video_id}}'>Expert response:</b>
@@ -51,8 +51,10 @@
 
 {{#display_other_observations}}
 <hr>
-<div class='row-fluid' style="display:table;">
-    <div class='span12' style="display:table-cell; vertical-align:top; float:none; padding-right:5px;">
+<div class='row' style="display:table;">
+    <div class='col-sm-12' style="display:table-cell; vertical-align:top; float:none; padding-right:5px;">
+        <h4>Event Timeline:</h4>
+        <div id='{{video_id}}_timeline' style='margin: 0; width: 100%;'></div>
         {{^regular_user}}
             <h4>Events From Other Users:</h4>
         {{/regular_user}}
@@ -88,12 +90,12 @@
 
                     {{#regular_user}}
                     <td style='text-align:center;'>
-                        <button class='btn btn-small {{#unreported}}btn-danger{{/unreported}} {{#reported}}btn-warning{{/reported}} {{#responded}}btn-success{{/responded}} pull-center report-observation-button rob-{{video_id}}' observation_id='{{id}}' video_id='{{video_id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text="{{report_comments}}" report_status="{{report_status}}" reporter_name="{{reporter_name}}" response_comments_text='{{response_comments}}' responder_name='{{responder_name}}'><i class='{{^responded}}icon-question-sign{{/responded}} {{#responded}}icon-ok-sign{{/responded}} icon-white'></i></button>
+                        <button class='btn btn-sm {{#unreported}}btn-danger{{/unreported}} {{#reported}}btn-warning{{/reported}} {{#responded}}btn-success{{/responded}} pull-center report-observation-button rob-{{video_id}}' observation_id='{{id}}' video_id='{{video_id}}' style='margin-top:2px; margin-bottom:2px; padding:1px 0px 3px 0px; width:25px;' report_comments_text="{{report_comments}}" report_status="{{report_status}}" reporter_name="{{reporter_name}}" response_comments_text='{{response_comments}}' responder_name='{{responder_name}}'><span class='glyphicon {{^responded}}glpyhicon-question-sign{{/responded}} {{#responded}}glyphicon-ok-sign{{/responded}}'></span></button>
                     </td>
                     {{/regular_user}}
                     {{^regular_user}}
                     <td style='text-align:center;'>
-                        <button class='btn btn-small {{#unreported}}btn-info{{/unreported}} {{#reported}}btn-warning{{/reported}} {{#responded}}btn-success{{/responded}} pull-center expert-respond-button erb-{{video_id}}' observation_id='{{id}}' video_id='{{video_id}}' style='margin-top:2px; margin-bottom:2px; padding:0px; width:25px;' report_comments_text="{{report_comments}}" report_status="{{report_status}}" reporter_name="{{reporter_name}}" response_comments_text='{{response_comments}}' responder_name='{{responder_name}}'><i class='{{^responded}}icon-question-sign{{/responded}} {{#responded}}icon-ok-sign{{/responded}} icon-white'></i></button>
+                        <button class='btn btn-sm {{#unreported}}btn-info{{/unreported}} {{#reported}}btn-warning{{/reported}} {{#responded}}btn-success{{/responded}} pull-center expert-respond-button erb-{{video_id}}' observation_id='{{id}}' video_id='{{video_id}}' style='margin-top:2px; margin-bottom:2px; padding:1px 0px 3px 0px; width:25px;' report_comments_text="{{report_comments}}" report_status="{{report_status}}" reporter_name="{{reporter_name}}" response_comments_text='{{response_comments}}' responder_name='{{responder_name}}'><span class='glyphicon {{^responded}}glyphicon-question-sign{{/responded}} {{#responded}}glyphicon-ok-sign{{/responded}}'></span></button>
                     </td>
                     {{/regular_user}}
                 </tr>
@@ -106,8 +108,8 @@
 
 {{#display_old_observations}}
 <hr>
-<div class='row-fluid' style="display:table;">
-    <div class='span12' style="display:table-cell; vertical-align:top; float:none; padding-right:5px;">
+<div class='row' style="display:table;">
+    <div class='col-sm-12' style="display:table-cell; vertical-align:top; float:none; padding-right:5px;">
         <h4>Events From Old Interface:</h4>
         <table class='table table-striped table-bordered table-condensed'>
             <thead>
