@@ -92,7 +92,7 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 1 AND event_id = $type_id AND species_id <> 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
+    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 1 AND event_id = $type_id AND species_id = 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
     $timed_result = query_wildlife_video_db($timed_query);
     $alg_num_events = array();
     $alg_match_events = array();

@@ -65,7 +65,7 @@ echo "
     <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
-        google.load('visualization', '1.1', {packages:['corechart']});
+        google.load('visualization', '1.1', {packages:['table']});
         google.setOnLoadCallback(drawChart);
 
         var data;
@@ -79,6 +79,7 @@ echo "
             var container = document.getElementById('chart_div');
             data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
+            data.addColumn('number', 'Event Count');
 ";
 
 foreach($algs as $a_id => $a_name) {
@@ -126,10 +127,12 @@ while ($type_row = $type_result->fetch_assoc()) {
     if ($add_data) {
         echo "[";
         echo "'$type_name'";
+        echo ",";
+        echo "$alg_num_events[$a_id]";
         foreach($alg_match_events as $a_id => $a_val) {
             echo ",";
             if ($alg_num_events[$a_id] > 0) {
-                echo $a_val / $alg_num_events[$a_id] * 100;
+                echo "$a_val";
             } else {
                 echo "0";
             }
@@ -153,13 +156,13 @@ echo "
                 }
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.Table(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
     </script>
 
-            <h1>Computer Accuracy by Event Type</h1>
+            <h1>Computer Accuracy by Event Type as a Table</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 

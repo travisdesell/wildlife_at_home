@@ -2,11 +2,14 @@
 #made by Jaeden Lovin
 
 use strict;
-use Image::ExifTool qw(:Public);
+#use Image::ExifTool qw(:Public);
 use Data::Dumper;
 use File::Find;
 use DBI;
 use Cwd 'abs_path'; 
+
+require "wildlife_db.pl";
+
 
 #TODO add command line argument for path specified
 
@@ -93,8 +96,8 @@ sub get_data
 		my $driver = "mysql"; 
 		my $database = "wildlife_video";
 		my $dsn = "DBI:$driver:database=$database";
-		my $userid = "wildlife_user";
-		my $password = "gr0u\$e\$";
+		my $userid = get_user();
+		my $password = get_password();
 
 		my $dbh = DBI->connect($dsn, $userid, $password ) or die "ERROR: Could not connect to database";
 

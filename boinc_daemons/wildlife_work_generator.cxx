@@ -376,7 +376,20 @@ int make_job(int video_id, int species_id, int location_id, string video_address
      */
 
     ostringstream input_template_stream;
-    if (0 == strcmp(app_name, "wildlife_surf")) {
+    if (0 == strcmp(app_name, "wildlife_bgsub")) {
+        input_template_stream
+            << "<file_info>" << endl
+            << "    <number>0</number>" << endl
+            << "    <url>http://wildlife.und.edu" << video_address.substr(0, video_address.find_last_of("/") + 1)<< "</url>" << endl
+            << "    <nbytes>" << filesize << "</nbytes>" << endl
+            << "    <md5_cksum>" << md5_hash << "</md5_cksum>" << endl
+            << "</file_info>" << endl
+            << "<workunit>" << endl
+            << "    <file_ref>" << endl
+            << "        <file_number>0</file_number>" << endl
+            << "        <open_name>video.mp4</open_name>" << endl
+            << "    </file_ref>" << endl;
+    } else if (0 == strcmp(app_name, "wildlife_surf")) {
         input_template_stream
             << "<file_info>" << endl
             << "    <number>0</number>" << endl
@@ -535,11 +548,13 @@ void main_loop(const vector<string> &arguments) {
 
     log_messages.printf(MSG_DEBUG, "%d results are available, with a cushion of %d\n", unsent_results, CUSHION);
 
+    /*
     retval = count_unsent_results(unsent_results, 0);
     if (retval) {
         log_messages.printf(MSG_CRITICAL, "count_unsent_jobs() failed: %s\n", boincerror(retval) );
         exit(retval);
     }
+    */
 
     /**
      *  Get a set of videos (which haven't been sent out as workunits yet) from the database. We'll need
@@ -588,15 +603,23 @@ void main_loop(const vector<string> &arguments) {
         unclassified_video_query << " LIMIT " << number_jobs;
     }
 
-    if (0 == strcmp(app_name, "wildlife_surf")) {
-        mysql_query_check(wildlife_db_conn, unclassified_video_query.str());
-    } else if (0 == strcmp(app_name, "wildlife_surf_collect"))  {
+    cout << "query built..." << endl;
+
+    if (0 == strcmp(app_name, "wildlife_surf_collect"))  {
         mysql_query_check(wildlife_db_conn, finished_expert_query.str());
+    } else {
+        mysql_query_check(wildlife_db_conn, unclassified_video_query.str());
     }
     MYSQL_RES *video_result = mysql_store_result(wildlife_db_conn);
 
+    if (video_result == NULL) {
+        log_messages.printf(MSG_CRITICAL,"SQL Results was NULL\n");
+    }
+
+    cout << "query made..." << endl;
     MYSQL_ROW video_row;
-    while ((video_row = mysql_fetch_row(video_result)) != NULL) {
+    while ((video_row = mysql_fetch_row(video_result))) {
+        cout << "pulled first results..." << endl;
         int video_id = atoi(video_row[0]);
         string video_address = video_row[1];
         video_address += ".mp4";
@@ -605,7 +628,9 @@ void main_loop(const vector<string> &arguments) {
         int location_id = atoi(video_row[4]);
         int filesize = atoi(video_row[5]);
         string md5_hash = video_row[6];
+        cout << "loaded query resuls..." << endl;
 
+        cout << "generating work unit" << endl << endl;
         int job_id = make_job(video_id, species_id, location_id, video_address, duration_s, filesize, min_hessian, md5_hash, features_file, tag); 
         if (job_id == -1) {
             total_errors++;
@@ -616,6 +641,7 @@ void main_loop(const vector<string> &arguments) {
         cout << "generated " << total_errors << " errored workunits. " << endl << endl;
     }
 
+    cout << "done getting results..." << endl;
     mysql_free_result(video_result);
 
     log_messages.printf(MSG_DEBUG, "workunits generated: %lu\n", total_generated);

@@ -77,6 +77,12 @@ select {
 	width: 100%;
 }
 
+.nothing-here-box {
+	display: none;
+	margin-top: 5%;
+	margin-bottom: 5%;
+}
+
 /*.number {
 	-moz-user-select: none;
 	-webkit-user-select: none;

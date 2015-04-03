@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Computer Accuracy by Event Type", "", "wildlife");
+print_header("Wildlife@Home: Computer False Positives vs Users By Species", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -24,15 +24,12 @@ parse_str($_SERVER['QUERY_STRING']);
 
 // Set buffer for correctness time (+ or - the buffer value)
 if (!isset($buffer)) {
-    $buffer = 5;
+    $buffer = 10;
 }
 
 if (!isset($threshold)) {
     $threshold = 95;
 }
-
-$type_query = "SELECT id, name FROM observation_types";
-$type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
 $species_query = "SELECT id, name FROM species";
 $species_result = query_wildlife_video_db($species_query, $wildlife_db);
@@ -78,7 +75,7 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             data = new google.visualization.DataTable();
-            data.addColumn('string', 'Event Type');
+            data.addColumn('string', 'Species');
 ";
 
 foreach($algs as $a_id => $a_name) {
@@ -89,35 +86,28 @@ echo "
             data.addRows([
 ";
 
-while ($type_row = $type_result->fetch_assoc()) {
-    $type_id = $type_row['id'];
-    $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 1 AND event_id = $type_id AND species_id <> 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
-    $timed_result = query_wildlife_video_db($timed_query);
-    $alg_num_events = array();
-    $alg_match_events = array();
+while ($species_row = $species_result->fetch_assoc()) {
+    $not_in_vid_id = 4;
+    $event_id = $not_in_vid_id;
+    $species_id = $species_row['id'];
+    $species_name = $species_row['name'];
+    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 0 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.main_version_id = comp.version_id";
+    $video_result = query_wildlife_video_db($video_query);
+    $alg_num_false = array();
     foreach($algs as $a_id => $a_name) {
-        $alg_num_events[$a_id] = 0;
-        $alg_match_events[$a_id] = 0;
+        $alg_num_false[$a_id] = 0;
     }
-    while ($timed_row = $timed_result->fetch_assoc()) {
-        $obs_id = $timed_row['id'];
-        $video_id = $timed_row['video_id'];
-        //$species_id = $timed_row['species_id'];
-        $expert_id = getExpert($video_id);
+    while ($video_row = $video_result->fetch_assoc()) {
+        $video_id = $video_row['video_id'];
+        $user_id = $video_row['user_id'];
 
         foreach($algs as $a_id => $a_name) {
-            list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer);
-
-            $alg_num_events[$a_id] += 2;
-
-            $alg_match_events[$a_id] += $start_match;
-            $alg_match_events[$a_id] += $end_match;
+            $alg_num_false[$a_id] += getFalsePositives($video_id, $user_id, $a_id, $buffer);
         }
     }
 
     $add_data = false;
-    foreach($alg_match_events as $a_id => $a_val) {
+    foreach($alg_num_false as $a_id => $a_val) {
         if ($a_val > 0) {
             $add_data = true;
         }
@@ -125,14 +115,10 @@ while ($type_row = $type_result->fetch_assoc()) {
 
     if ($add_data) {
         echo "[";
-        echo "'$type_name'";
-        foreach($alg_match_events as $a_id => $a_val) {
+        echo "'$species_name'";
+        foreach($alg_num_false as $a_id => $a_val) {
             echo ",";
-            if ($alg_num_events[$a_id] > 0) {
-                echo $a_val / $alg_num_events[$a_id] * 100;
-            } else {
-                echo "0";
-            }
+            echo $a_val;
         }
         echo "],";
     }
@@ -144,11 +130,10 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Computer accuracy for each event type',
-                hAxis: {title: 'Event Type'},
+                title: 'Computed False Positives vs Users for each Species',
+                hAxis: {title: 'Species'},
                 vAxis: {
-                    title: 'Accuracy',
-                    maxValue: 100,
+                    title: 'False Positives',
                     minValue: 0,
                 }
             };
@@ -159,7 +144,7 @@ echo "
         }
     </script>
 
-            <h1>Computer Accuracy by Event Type</h1>
+            <h1>Computer False Posities vs Users by Species</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
@@ -168,14 +153,12 @@ echo "
             <h2>Parameters: (portion of the URL after a '?')</h2>
             <dl>
                 <dt>buffer=</dt>
-                <dd>The error (seconds) in either direction allowed for two events to be matched. The default value is 30.</dd>
+                <dd>The time (seconds) after the start and before the end of a 'not in video' event. The default value is 10.</dd>
             </dl>
             
 
             <h2>Description:</h2>
-            <p>TOOD: Edit this</p>
-            <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represens the percent of events that match an expert observation. The legent shows the breakdown for each species.</p>
-            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
+            <p>This bar chart show the number of false positives classifed by each of the different algorithms. A false positive is a computed event that occurs during a 'not in video' event.</p>
 
         </div>
     </div>

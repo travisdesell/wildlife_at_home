@@ -1,45 +1,101 @@
 function initDraw(canvas) {
+
+    var nothing_here = 0;
+    var $_GET = {};
+    if(document.location.toString().indexOf('?') !== -1) {
+		var query = document.location
+			.toString()
+			.replace(/^.*?\?/, '')
+			.replace(/#.*$/, '')
+			.split('&');
+		for(var i=0, l=query.length; i<l; i++) {
+			var aux = decodeURIComponent(query[i]).split('=');
+			$_GET[aux[0]] = aux[1];
+		}
+    }
+    var project = $_GET['p'];
+    if (!project) project = 1;
 	
 	$('#submit-selections-button:not(.bound)').addClass('bound').click(function() {
 		console.log("the submit button was clicked!");
 
 		var submission_info = {};
 
-		for (var i = 0; i < element_count; i++) { //Get the information from each rectangle
-		    var current_element = elements[i];
+		if(!nothing_here)
+		{
 
-		    var rectangle_info = {
-			width : current_element.style.width,
-			height : current_element.style.height,
-			left : current_element.style.left,
-			top : current_element.style.top,
-			nest : document.getElementById('check'+current_element.id).checked ? true : false,
-			species : document.getElementById('speciesDropdown'+current_element.id).value,
-			comments : document.getElementById('comment'+current_element.id).value,
-			image_id : $(".img-responsive").attr("id")
+			for (var i = 0; i < element_count; i++) { //Get the information from each rectangle
+		    	var current_element = elements[i];
+			if (project === 1) var check = document.getElementById('check'+current_element.id).checked ? true : false;
+			else var check = false;
+
+		  	var rectangle_info = {
+				width : current_element.style.width,
+				height : current_element.style.height,
+				left : current_element.style.left,
+				top : current_element.style.top,
+				nest : check, 
+				species : species_ids[document.getElementById('speciesDropdown'+current_element.id).selectedIndex],
+				comments : document.getElementById('comment'+current_element.id).value,
+				image_id : $(".img-responsive").attr("id"),
+				nothing_here : nothing_here
+				};
+
+		    	console.log("info for element " + i + " is: '" + JSON.stringify(rectangle_info) + "'");
+
+		    	submission_info[i] = rectangle_info;
+			}
+
+			console.log("full info: " + JSON.stringify(submission_info)); //Turn rectangle info into JSON
+
+			$.ajax({ //Send Rectangle info to submission script
+		    	type: 'POST',
+		    	url: './canvas_submission.php',
+		    	data: { some_id : 532,
+			    	data : JSON.stringify(submission_info) },
+		    	dataType : 'text',
+		    	success : function(response) {
+				console.log("response from the server was: '" + response + "'");
+		    	},
+		    	error : function(jqXHR, textStatus, errorThrown) {
+				console.log("error was thrown: '" + errorThrown + "'");
+		    	},
+		    	async: true
+			});
+		}
+		else
+		{
+			var nothing = {
+				image_id : $(".img-responsive").attr("id"),
+				nothing_here : nothing_here,
+				comments : document.getElementById('comments').value
 			};
 
-		    console.log("info for element " + i + " is: '" + JSON.stringify(rectangle_info) + "'");
+			//submission_info[0] = nothing;
 
-		    submission_info[i] = rectangle_info;
+			$.ajax({ //Send Rectangle info to submission script
+		    	type: 'POST',
+		    	url: './canvas_submission.php',
+		    	data: { some_id : 532,
+			    	data : JSON.stringify(nothing) },
+		    	dataType : 'text',
+		    	success : function(response) {
+				console.log("response from the server was: '" + response + "'");
+		    	},
+		    	error : function(jqXHR, textStatus, errorThrown) {
+				console.log("error was thrown: '" + errorThrown + "'");
+		    	},
+		    	async: true
+			});
+
+
 		}
 
-		console.log("full info: " + JSON.stringify(submission_info)); //Turn rectangle info into JSON
+			
 
-		$.ajax({ //Send Rectangle info to submission script
-		    type: 'POST',
-		    url: './canvas_submission.php',
-		    data: { some_id : 532,
-			    data : JSON.stringify(submission_info) },
-		    dataType : 'text',
-		    success : function(response) {
-			console.log("response from the server was: '" + response + "'");
-		    },
-		    error : function(jqXHR, textStatus, errorThrown) {
-			console.log("error was thrown: '" + errorThrown + "'");
-		    },
-		    async: true
-		});
+	//	alert("Thx for the submission!");
+		$('#submitModal').modal('show');
+		//location.reload();
 
     });
 
@@ -62,6 +118,8 @@ function initDraw(canvas) {
     var elements = [];
     var images = document.getElementsByClassName('img-responsive');
     var imag = images[0];
+    var species = [];
+    var species_ids = [];
 
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
@@ -134,9 +192,15 @@ function initDraw(canvas) {
 		//remove selection information when rectangle is removed
 		var elem = document.getElementById('S'+id); //Jaeden
 		elem.remove(); //Jaeden
+		if (element_count < 1) $('#submit-selections-button').prop('disabled', true);
+ 
 
 
 	    console.log("Close button was clicked");
+    });
+
+    $('#modalSubButton').on('click', function() {
+	    location.reload();
     });
 
 
@@ -276,7 +340,7 @@ function initDraw(canvas) {
 	imag.draggable = false;
 	is_dragging = true;
 	//imag.style.MozUserSelect = "auto";
-	if (e.which == 1) {
+	if (    (e.which == 1)    &&    (nothing_here === 0)    ) {
 		    //get the position of the mouse.
 		    setMousePosition(e);
 
@@ -381,10 +445,11 @@ function initDraw(canvas) {
 			canvas.appendChild(current_element);
 			canvas.style.cursor = "crosshair";
 
-			//add selection information when a rectangle is created
-			$('#selection-information').append(
+							
 
-			"<div class='well well-small' id='S" + element_id + "'>"+
+			//add selection information when a rectangle is created
+
+			var table = "<div class='well well-small' id='S" + element_id + "'>"+
 				"<table border='1'>"+
 					"<tr>"+
 						"<td align='center'>Selection " + (element_id+1) + "</td>" +
@@ -392,31 +457,56 @@ function initDraw(canvas) {
 					"</tr>"+
 					"<tr>"+
 						"<td align='center'>Species:</td>"+
-						"<td> <select id='speciesDropdown"+element_id+"'>"+
-							"<option value='Eider'>Eider</option>"+
-							"<option value='LesserSnowGoose'>Lesser Snow Goose</option>"+
-							"<option value='ArcticFox'>Arctic Fox</option>"+
-							"<option value='PolarBear'>Polar Bear</option>"+
-							"<option value='Grizzly'>Grizzly</option>"+
-							"<option value='SandhillCrane'>Sandhill Crane</option>"+
-							"<option value='Wolverine'>Wolverine</option>"+
-							"<option value='CrowRaven'>Crow/Raven</option>"+
-							"<option value='Gull'>Gull</option>"+
-							"<option value='Caribou'>Caribou</option>"+
-							"<option value='Other'>Other (comments)</option>"+
-							"</select>" + 
-						"</td>"+
+							"<td> <select id='speciesDropdown"+element_id+"'>";
+			
+			if (species.length < 1) {
+				$.post("canvas_select.php", 'p=' + project,
+				function(data) {
+					for (var i = 0; i < data.length; ++i) {
+						species.push(data[i].name);
+						species_ids.push(data[i].id);
+					}				
+					for (var i = 0; i < species.length; ++i) {
+						table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
+					}//BCC
+					
+					table += "</select></td>"+
+						"</tr>"+
+						"<tr>";
+					if (project == 1) table += "<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>";
+					else table += "<td align='center'></td>";
+					table += "<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+						"</tr>"+
+					"</table>"+
+					"</div>"; //Jaeden
+					$("#selection-information").append(table);
+					element_id++;
+
+				}, "json");
+				
+			} else {
+				for (var i = 0; i < species.length; ++i) {
+					table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
+				}//BCC
+				table += "</select></td>"+
 					"</tr>"+
-					"<tr>"+
-						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
-						"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+					"<tr>";
+				if (project == 1) table += "<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>";
+				else table += "<td align='center'></td>";
+				table += "<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 					"</tr>"+
 				"</table>"+
-			"</div>"); //Jaeden
+				"</div>"; //Jaeden
+				$("#selection-information").append(table);
+				element_id++;
+			}
 
+
+					
+			
 			elements[element_count] = current_element;
 			element_count++;
-			element_id++;
+			if (element_count === 1) $('#submit-selections-button').prop('disabled', false);
 		    }
 		}
 	}
@@ -431,23 +521,59 @@ function initDraw(canvas) {
 
 	elements.splice(elements.indexOf(elem1), 1);
 	element_count--;
+	if (element_count < 1) $('#submit-selections-button').prop('disabled', true);
 
 	elem1.remove();
 
 	var elem2 = document.getElementById(selectId);
 	elem2.remove();
 
-	
-
     }); //Jaeden
+
+    $("body").on("click", ".nothing", function() {
+	//this changes the visibility of the comments box for an empty image and the visibility of the selections
+	//also toggles ability to draw boxes
+	if(nothing_here === 0) 
+	{
+		nothing_here=1;
+		$('#submit-selections-button').prop('disabled', false);
+  		document.getElementById("comments").style.display = 'initial';
+
+		var size = document.getElementsByClassName('well').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('well')[i].style.display='none';
+
+		size = document.getElementsByClassName('rectangle').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('rectangle')[i].style.display='none';
+		
+	}
+	else if(nothing_here === 1)
+	{
+		nothing_here =0;
+  		document.getElementById("comments").style.display = 'none';
+		if(element_count < 1 ) $('#submit-selections-button').prop('disabled', true);
+
+		var size = document.getElementsByClassName('well').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('well')[i].style.display='';
+
+		size = document.getElementsByClassName('rectangle').length;
+		for(var i=0; i<size; i++)
+			document.getElementsByClassName('rectangle')[i].style.display='';
+
+	}
+
+    });  //jaeden
 
 //TODO add comment box when 'nothing here' button is clicked -Jaeden
 
 }
 
 
-$(document).ready(function() {
+$(document).ready(function() {	
     initDraw(document.getElementById('canvas'));
-
+    $("#comments").val('');
+    $('#submit-selections-button').prop('disabled', true);
 
 });

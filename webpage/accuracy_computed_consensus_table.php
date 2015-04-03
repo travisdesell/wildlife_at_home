@@ -65,7 +65,7 @@ echo "
     <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
-        google.load('visualization', '1.1', {packages:['corechart']});
+        google.load('visualization', '1.1', {packages:['table']});
         google.setOnLoadCallback(drawChart);
 
         var data;
@@ -79,11 +79,13 @@ echo "
             var container = document.getElementById('chart_div');
             data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
+            data.addColumn('number', 'Event Count');
+            data.addColumn('number', 'Any Algorithm');
+            data.addColumn('number', 'All Algorithms');
+            data.addColumn('number', 'MOG & ViBe Algorithms');
+            data.addColumn('number', 'MOG & PBAS Algorithms');
+            data.addColumn('number', 'ViBe & PBAS Algorithms');
 ";
-
-foreach($algs as $a_id => $a_name) {
-    echo "data.addColumn('number', '$a_name');";
-}
 
 echo "
             data.addRows([
@@ -92,48 +94,109 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 1 AND event_id = $type_id AND species_id <> 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
+    $timed_query = "SELECT obs.id, obs.video_id, obs.species_id FROM timed_observations AS obs WHERE expert = 1 and obs.event_id = $type_id AND species_id <> 1 AND obs.start_time_s > 10 AND obs.start_time_s <= obs.end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.video_id = obs.video_id AND alg.main_version_id = comp.version_id)";
     $timed_result = query_wildlife_video_db($timed_query);
-    $alg_num_events = array();
-    $alg_match_events = array();
-    foreach($algs as $a_id => $a_name) {
-        $alg_num_events[$a_id] = 0;
-        $alg_match_events[$a_id] = 0;
-    }
+
+    $consensus_num = 0;
+    $consensus_any_matches = 0;
+    $consensus_all_matches = 0;
+    $consensus_mog_vibe_matches = 0;
+    $consensus_mog_pbas_matches = 0;
+    $consensus_vibe_pbas_matches = 0;
+
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
         $video_id = $timed_row['video_id'];
-        //$species_id = $timed_row['species_id'];
-        $expert_id = getExpert($video_id);
 
+        $any_match_start = FALSE;
+        $any_match_end = FALSE;
+        $mog_match_start = FALSE;
+        $mog_match_end = FALSE;
+        $vibe_match_start = FALSE;
+        $vibe_match_end = FALSE;
+        $pbas_match_start = FALSE;
+        $pbas_match_end = FALSE;
+        $all_match_start = 0;
+        $all_match_end = 0;
         foreach($algs as $a_id => $a_name) {
             list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer);
 
-            $alg_num_events[$a_id] += 2;
-
-            $alg_match_events[$a_id] += $start_match;
-            $alg_match_events[$a_id] += $end_match;
-        }
-    }
-
-    $add_data = false;
-    foreach($alg_match_events as $a_id => $a_val) {
-        if ($a_val > 0) {
-            $add_data = true;
-        }
-    }
-
-    if ($add_data) {
-        echo "[";
-        echo "'$type_name'";
-        foreach($alg_match_events as $a_id => $a_val) {
-            echo ",";
-            if ($alg_num_events[$a_id] > 0) {
-                echo $a_val / $alg_num_events[$a_id] * 100;
-            } else {
-                echo "0";
+            if($start_match) {
+                $any_match_start = TRUE;
+                $all_match_start += 1;
+                if ($a_id == '1') {
+                    $mog_match_start = TRUE;
+                } elseif ($a_id == '2') {
+                    $vibe_match_start = TRUE;
+                } elseif ($a_id == '3') {
+                    $pbas_match_start = TRUE;
+                }
+            }
+            if($end_match) {
+                $any_match_end = TRUE;
+                $all_match_end += 1;
+                if ($a_id == '1') {
+                    $mog_match_end = TRUE;
+                } elseif ($a_id == '2') {
+                    $vibe_match_end = TRUE;
+                } elseif ($a_id == '3') {
+                    $pbas_match_end = TRUE;
+                }
             }
         }
+
+        $consensus_num += 2;
+        if ($any_match_start) {
+            $consensus_any_matches += 1;
+        }
+        if ($any_match_end) {
+            $consensus_any_matches += 1;
+        }
+
+        if($all_match_start == count($algs)) {
+            $consensus_all_matches += 1;
+        }
+        if($all_match_end == count($algs)) {
+            $consensus_all_matches += 1;
+        }
+
+        if ($mog_match_start AND $vibe_match_start) {
+            $consensus_mog_vibe_matches += 1;
+        }
+        if ($mog_match_end AND $vibe_match_end) {
+            $consensus_mog_vibe_matches += 1;
+        }
+
+        if ($mog_match_start AND $pbas_match_start) {
+            $consensus_mog_pbas_matches += 1;
+        }
+        if ($mog_match_end AND $pbas_match_end) {
+            $consensus_mog_pbas_matches += 1;
+        }
+
+        if ($vibe_match_start AND $pbas_match_start) {
+            $consensus_vibe_pbas_matches += 1;
+        }
+        if ($vibe_match_end AND $pbas_match_end) {
+            $consensus_vibe_pbas_matches += 1;
+        }
+    }
+
+    if ($consensus_num > 0) {
+        echo "[";
+        echo "'$type_name'";
+        echo ",";
+        echo "$consensus_num";
+        echo ",";
+        echo "$consensus_any_matches";
+        echo ",";
+        echo "$consensus_all_matches";
+        echo ",";
+        echo "$consensus_mog_vibe_matches";
+        echo ",";
+        echo "$consensus_mog_pbas_matches";
+        echo ",";
+        echo "$consensus_vibe_pbas_matches";
         echo "],";
     }
 }
@@ -153,7 +216,7 @@ echo "
                 }
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.Table(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }

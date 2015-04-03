@@ -65,7 +65,7 @@ echo "
     <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
-        google.load('visualization', '1.1', {packages:['corechart']});
+        google.load('visualization', '1.1', {packages:['table']});
         google.setOnLoadCallback(drawChart);
 
         var data;
@@ -79,6 +79,7 @@ echo "
             var container = document.getElementById('chart_div');
             data = new google.visualization.DataTable();
             data.addColumn('string', 'Event Type');
+            data.addColumn('number', 'Event Count');
 ";
 
 foreach($algs as $a_id => $a_name) {
@@ -92,7 +93,7 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 1 AND event_id = $type_id AND species_id <> 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
+    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 0 AND event_id = $type_id AND species_id = 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
     $timed_result = query_wildlife_video_db($timed_query);
     $alg_num_events = array();
     $alg_match_events = array();
@@ -103,8 +104,6 @@ while ($type_row = $type_result->fetch_assoc()) {
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
         $video_id = $timed_row['video_id'];
-        //$species_id = $timed_row['species_id'];
-        $expert_id = getExpert($video_id);
 
         foreach($algs as $a_id => $a_name) {
             list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer);
@@ -126,10 +125,12 @@ while ($type_row = $type_result->fetch_assoc()) {
     if ($add_data) {
         echo "[";
         echo "'$type_name'";
+        echo ",";
+        echo $alg_num_events[$a_id];
         foreach($alg_match_events as $a_id => $a_val) {
             echo ",";
             if ($alg_num_events[$a_id] > 0) {
-                echo $a_val / $alg_num_events[$a_id] * 100;
+                echo $a_val;
             } else {
                 echo "0";
             }
@@ -153,7 +154,7 @@ echo "
                 }
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.Table(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
@@ -174,8 +175,8 @@ echo "
 
             <h2>Description:</h2>
             <p>TOOD: Edit this</p>
-            <p>This bar chart show the percentage of user events that have a matching expert observed event. Each bar represens the percent of events that match an expert observation. The legent shows the breakdown for each species.</p>
-            <p>In order to collect this data we discard all vidoes that do not have an expert observation or the expert observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of user events of that type that have an valid expert observation for that video.</p>
+            <p>This bar chart show the percentage of computed events that have a matching user observed event. Each bar represens the percent of computed events that match a user observation. The legent shows the breakdown for each species.</p>
+            <p>In order to collect this data we discard all vidoes that do not have an user observation or the user observation is invalid. This is done by getting a list of all event types and then counting the total number of user events that have a matchins event and dividing it by the number of computed events of that type that have an valid user observation for that video.</p>
 
         </div>
     </div>
