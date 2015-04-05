@@ -1,6 +1,20 @@
 function initDraw(canvas) {
 
     var nothing_here = 0;
+    var $_GET = {};
+    if(document.location.toString().indexOf('?') !== -1) {
+		var query = document.location
+			.toString()
+			.replace(/^.*?\?/, '')
+			.replace(/#.*$/, '')
+			.split('&');
+		for(var i=0, l=query.length; i<l; i++) {
+			var aux = decodeURIComponent(query[i]).split('=');
+			$_GET[aux[0]] = aux[1];
+		}
+    }
+    var project = $_GET['p'];
+    if (!project) project = 1;
 	
 	$('#submit-selections-button:not(.bound)').addClass('bound').click(function() {
 		console.log("the submit button was clicked!");
@@ -12,14 +26,16 @@ function initDraw(canvas) {
 
 			for (var i = 0; i < element_count; i++) { //Get the information from each rectangle
 		    	var current_element = elements[i];
+			if (project === 1) var check = document.getElementById('check'+current_element.id).checked ? true : false;
+			else var check = false;
 
 		  	var rectangle_info = {
 				width : current_element.style.width,
 				height : current_element.style.height,
 				left : current_element.style.left,
 				top : current_element.style.top,
-				nest : document.getElementById('check'+current_element.id).checked ? true : false,
-				species : document.getElementById('speciesDropdown'+current_element.id).value,
+				nest : check, 
+				species : species_ids[document.getElementById('speciesDropdown'+current_element.id).selectedIndex],
 				comments : document.getElementById('comment'+current_element.id).value,
 				image_id : $(".img-responsive").attr("id"),
 				nothing_here : nothing_here
@@ -77,8 +93,9 @@ function initDraw(canvas) {
 
 			
 
-		alert("Thx for the submission!");
-		location.reload();
+	//	alert("Thx for the submission!");
+		$('#submitModal').modal('show');
+		//location.reload();
 
     });
 
@@ -93,7 +110,6 @@ function initDraw(canvas) {
     var original_top = 0;
     var original_left = 0;
     var is_dragging = false;
-    
 
     var current_action = "";
     var current_element = null;
@@ -103,6 +119,7 @@ function initDraw(canvas) {
     var images = document.getElementsByClassName('img-responsive');
     var imag = images[0];
     var species = [];
+    var species_ids = [];
 
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
@@ -175,9 +192,15 @@ function initDraw(canvas) {
 		//remove selection information when rectangle is removed
 		var elem = document.getElementById('S'+id); //Jaeden
 		elem.remove(); //Jaeden
+		if (element_count < 1) $('#submit-selections-button').prop('disabled', true);
+ 
 
 
 	    console.log("Close button was clicked");
+    });
+
+    $('#modalSubButton').on('click', function() {
+	    location.reload();
     });
 
 
@@ -437,10 +460,11 @@ function initDraw(canvas) {
 							"<td> <select id='speciesDropdown"+element_id+"'>";
 			
 			if (species.length < 1) {
-				$.post("canvas_select.php",
+				$.post("canvas_select.php", 'p=' + project,
 				function(data) {
 					for (var i = 0; i < data.length; ++i) {
-						species.push(data[i]);
+						species.push(data[i].name);
+						species_ids.push(data[i].id);
 					}				
 					for (var i = 0; i < species.length; ++i) {
 						table += "<option value='"+species[i]+"'>"+species[i]+"</option>";
@@ -448,13 +472,15 @@ function initDraw(canvas) {
 					
 					table += "</select></td>"+
 						"</tr>"+
-						"<tr>"+
-							"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
-							"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+						"<tr>";
+					if (project == 1) table += "<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>";
+					else table += "<td align='center'></td>";
+					table += "<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 						"</tr>"+
 					"</table>"+
 					"</div>"; //Jaeden
 					$("#selection-information").append(table);
+					element_id++;
 
 				}, "json");
 				
@@ -464,13 +490,15 @@ function initDraw(canvas) {
 				}//BCC
 				table += "</select></td>"+
 					"</tr>"+
-					"<tr>"+
-						"<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>"+
-						"<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
+					"<tr>";
+				if (project == 1) table += "<td align='center'>On nest?&nbsp;<input type='checkbox' id='check"+element_id+"'>&nbsp;</input> </td>";
+				else table += "<td align='center'></td>";
+				table += "<td><textarea type='text' size='34' maxlength='512' value ='' id='comment"+element_id+"' placeholder='comments' row='1'></textarea></td>" + 
 					"</tr>"+
 				"</table>"+
 				"</div>"; //Jaeden
 				$("#selection-information").append(table);
+				element_id++;
 			}
 
 
@@ -478,7 +506,7 @@ function initDraw(canvas) {
 			
 			elements[element_count] = current_element;
 			element_count++;
-			element_id++;
+			if (element_count === 1) $('#submit-selections-button').prop('disabled', false);
 		    }
 		}
 	}
@@ -493,6 +521,7 @@ function initDraw(canvas) {
 
 	elements.splice(elements.indexOf(elem1), 1);
 	element_count--;
+	if (element_count < 1) $('#submit-selections-button').prop('disabled', true);
 
 	elem1.remove();
 
@@ -507,6 +536,7 @@ function initDraw(canvas) {
 	if(nothing_here === 0) 
 	{
 		nothing_here=1;
+		$('#submit-selections-button').prop('disabled', false);
   		document.getElementById("comments").style.display = 'initial';
 
 		var size = document.getElementsByClassName('well').length;
@@ -522,6 +552,7 @@ function initDraw(canvas) {
 	{
 		nothing_here =0;
   		document.getElementById("comments").style.display = 'none';
+		if(element_count < 1 ) $('#submit-selections-button').prop('disabled', true);
 
 		var size = document.getElementsByClassName('well').length;
 		for(var i=0; i<size; i++)
@@ -543,6 +574,6 @@ function initDraw(canvas) {
 $(document).ready(function() {	
     initDraw(document.getElementById('canvas'));
     $("#comments").val('');
-
+    $('#submit-selections-button').prop('disabled', true);
 
 });

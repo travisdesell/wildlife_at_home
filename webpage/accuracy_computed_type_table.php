@@ -108,15 +108,12 @@ while ($type_row = $type_result->fetch_assoc()) {
         $expert_id = getExpert($video_id);
 
         foreach($algs as $a_id => $a_name) {
-            list($correctness, $specificity) = getBufferAccuracy($obs_id, $a_id, $buffer);
-            //list($correctness, $specificity) = getEuclideanCorrectness($obs_id, $expert_id, $threshold);
-            //list($correctness, $specificity) = getSegmentedEuclideanCorrectness($obs_id, $expert_id, $threshold);
+            list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer);
 
             $alg_num_events[$a_id] += 2;
 
-            //if ($specificity) {
-                $alg_match_events[$a_id] += $correctness;
-            //}
+            $alg_match_events[$a_id] += $start_match;
+            $alg_match_events[$a_id] += $end_match;
         }
     }
 
