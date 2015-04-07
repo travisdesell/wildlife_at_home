@@ -48,14 +48,18 @@ echo "
 		<style type=\"text/css\">
 			#statbuttons {margin-top: 60px; text-align: center;}
 			#nestbuttons {margin-top: 10px; text-align: center;}
-			.container {margin-top: 30px;}
-			#perdaystats, #durationstats, #timestats {margin: 10px; padding: 5px 20px 20px 20px;}
+			.bcontainer {margin-top: 30px;}
+			#perdaystats, #durationstats, #eventstimestats {margin-left: auto; margin-right: auto; margin-bottom: 10px; padding: 20px; width: 75%}
 			.datatable {display: table;}
 				#perdaydtcol1 {display: table-column;}
 				#perdaydtcol2 {display: table-column;}
 					#perdaydata {display: table-cell; width: 50%; vertical-align: top;}
 					#perdaygraphcon {display: table-cell; width: 50%; vertical-align: top;}
 						#perdaygraph {border: 1px solid #000000; float: right;}
+							#perdaygraph div {max-width: 50%;}
+				.tableoutputouter {display: block;}
+			#one, #two, #three, #loczero, #locone, #loctwo, #locthree {width: auto; border: 1px solid #000000;}
+			#one:hover, #two:hover, #three:hover, #loczero:hover, #locone:hover, #loctwo:hover, #locthree:hover {background-color: #f0f0f0; cursor: pointer;}
 		</style>
 		
 		<script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>
@@ -73,10 +77,10 @@ echo "
 			
 			$.ajax({
 				type: 'POST',
-				url: 'statback.php',
+				url: 'statback2.php',
 				data: data,
 				success: function(data){
-					$('.container').html(data);
+					$('.bcontainer').html(data);
 					if(species != 1)
 					{
 						$('#nestbuttons').hide();
@@ -106,7 +110,7 @@ echo "
 			else if(species == 2)
 			{
 				title = title + ' (Least Tern)';
-				width = '1000';
+				width = '600';
 			}
 			else if(species == 3)
 			{
@@ -119,6 +123,23 @@ echo "
 			chart.draw(data, options);
 		}
 		
+		function showTable(number)
+		{
+			var temp = '#tbloutputinner' + number;
+			var temp2 = '#but' + number;
+			
+			if($(temp).is(':visible'))
+			{
+				$(temp).hide();
+				$(temp2).val('Show');
+			}
+			else
+			{
+				$(temp).show();
+				$(temp2).val('Hide');
+			}
+		}
+		
 		</script>
 
         $bootstrap_scripts
@@ -126,7 +147,7 @@ echo "
   
 ";
 echo "</head><body>";
-$active_items = array(
+/*$active_items = array(
                     'home' => '',
                     'watch_video' => 'active',
                     'message_boards' => '',
@@ -135,23 +156,23 @@ $active_items = array(
                     'community' => ''
                 );
 
-print_navbar($active_items);
+print_navbar($active_items);*/
 
-if(!empty($user) && $is_special)
+if(/*!empty($user) && $is_special*/ true)
 {
-	require_once("statback.php");
+	require_once("statback2.php");
 	
-	echo "<div class=\"row-fluid\" id=\"statbuttons\">View statistics for: <div class=\"btn-group\" style=\"display: inline;\"><button class=\"btn\" name=\"one\" id=\"one\" onclick=\"fetchStats(1, 0); return false;\">Sharp-Tailed Grouse</button><button class=\"btn\" name=\"two\" id=\"two\" onclick=\"fetchStats(2, 0); return false;\">Least Tern</button><button class=\"btn\" name=\"three\" id=\"three\" onclick=\"fetchStats(3, 0); return false;\">Piping Plover</button></div></div>";
+	echo "<div id=\"statbuttons\">View statistics for: <br /><button class=\"btn\" name=\"one\" id=\"one\" onclick=\"fetchStats(1, 0); return false;\" style=\"border-radius: 5px 0px 0px 5px; border-right: 0px;\">Sharp-Tailed Grouse</button><button class=\"btn\" name=\"two\" id=\"two\" onclick=\"fetchStats(2, 0); return false;\" style=\"border-right: 0px; border-radius: 0px 0px 0px 0px;\">Least Tern</button><button class=\"btn\" name=\"three\" id=\"three\" onclick=\"fetchStats(3, 0); return false;\" style=\"border-radius: 0px 5px 5px 0px;\">Piping Plover</button></div>";
 	
-	echo "<div class=\"row-fluid\" id=\"nestbuttons\" style=\"display: block;\">Nesting Site: <div class=\"btn-group\" style=\"display: inline;\"><button class=\"btn\" name=\"loczero\" name=\"loczero\" onclick=\"fetchStats(1, 0)\">All</button><button class=\"btn\" name=\"locone\" id=\"locone\" onclick=\"fetchStats(1, 1); return false;\">Belden</button><button class=\"btn\" name=\"loctwo\" id=\"loctwo\" onclick=\"fetchStats(1, 2); return false;\">Blaisdell</button><button class=\"btn\" name=\"locthree\" onclick=\"fetchStats(1, 3); return false;\">Lostwood</button></div></div>";
+	echo "<div id=\"nestbuttons\">Nesting Site: <br /><button class=\"btn\" name=\"loczero\" id=\"loczero\" onclick=\"fetchStats(1, 0)\" style=\"border-radius: 5px 0px 0px 5px; border-right: none;\">All</button><button class=\"btn\" name=\"locone\" id=\"locone\" onclick=\"fetchStats(1, 1); return false;\" style=\"border-radius: 0px 0px 0px 0px; border-right: none;\">Belden</button><button class=\"btn\" name=\"loctwo\" id=\"loctwo\" onclick=\"fetchStats(1, 2); return false;\" style=\"border-radius: 0px 0px 0px 0px; border-right: none;\">Blaisdell</button><button class=\"btn\" name=\"locthree\" id=\"locthree\" onclick=\"fetchStats(1, 3); return false;\" style=\"border-radius: 0px 5px 5px 0px;\">Lostwood</button></div>";
 	
 	echo "<br /><br />";
-	echo "<div class=\"container\">";
+	echo "<div class=\"bcontainer\">";
 	
 	//Default species is Sharp-Tailed Grouse
 	$species = 1;
 
-	runRoutine($species, 0);
+	outputStats($species, 0);
 
 	echo "</div>";
 }

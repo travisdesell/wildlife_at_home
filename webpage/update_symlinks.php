@@ -38,6 +38,13 @@ foreach (glob("*.css") as $filename) {
     shell_exec($command);
 }
 
+foreach (glob("*.docx") as $filename) {
+    //echo $filename . "\n";
+    $command = "ln -s $cwd/$filename $target/$filename";
+    echo "$command\n";
+    shell_exec("rm $target/$filename");
+    shell_exec($command);
+}
 
 $command = "ln -s $cwd/wildlife_css $target/wildlife_css";
 echo "$command\n";
