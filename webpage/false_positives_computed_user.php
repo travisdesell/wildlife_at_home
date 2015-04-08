@@ -91,7 +91,7 @@ while ($species_row = $species_result->fetch_assoc()) {
     $event_id = $not_in_vid_id;
     $species_id = $species_row['id'];
     $species_name = $species_row['name'];
-    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 0 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.main_version_id = comp.version_id";
+    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 0 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.beta_version_id = comp.version_id";
     $video_result = query_wildlife_video_db($video_query);
     $alg_num_false = array();
     foreach($algs as $a_id => $a_name) {

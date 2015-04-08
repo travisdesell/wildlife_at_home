@@ -20,7 +20,6 @@ if (!isset($video_id)) {
 
 //echo "Video ID: $video_id";
 $query = "SELECT ot.name AS event_name, (UNIX_TIMESTAMP(vid.start_time) + start_time_s) AS start_time, (UNIX_TIMESTAMP(vid.start_time) + end_time_s) AS end_time FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id JOIN observation_types AS ot ON event_id = ot.id JOIN video_2 AS vid ON vid.id = comp.video_id WHERE comp.video_id = $video_id AND comp.algorithm_id = 3 AND comp.start_time_s > 0 AND comp.start_time_s <= comp.end_time_s AND comp.version_id = alg.main_version_id";
-//$query = "SELECT ot.name AS event_name, start_time_s * 1000  AS start_time, end_time_s * 1000 AS end_time FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id JOIN observation_types AS ot ON event_id = ot.id JOIN video_2 AS vid ON vid.id = comp.video_id WHERE comp.video_id = $video_id AND comp.algorithm_id = 3 AND comp.start_time_s > 0 AND comp.start_time_s <= comp.end_time_s AND comp.version_id = alg.main_version_id";
 $result = query_wildlife_video_db($query);
 
 $events = array();
