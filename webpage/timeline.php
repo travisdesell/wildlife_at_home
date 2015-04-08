@@ -80,9 +80,6 @@ while ($user_row = $user_result->fetch_assoc()) {
 
 while ($comp_row = $comp_result->fetch_assoc()) {
     $name = $comp_row['algorithm_name'];
-    if ($comp_row['expert'] == 1) {
-        $name = $name . " (expert)";
-    }
 
     echo "['" . $name . "'";
     echo ",'" . $comp_row['event_name'] . "'";

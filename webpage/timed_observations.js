@@ -1,5 +1,3 @@
-var canDraw = false;
-
 function pad2(value) {
     var s = "00" + parseInt(Math.floor(value), 10);
     return s.substr(-2);
@@ -10,54 +8,6 @@ function isInt(value) {
 }
 
 var tag_dropdowns;
-
-google.setOnLoadCallback(instantiateCharts);
-
-function instantiateCharts() {
-    canDraw = true;
-}
-
-function getDate(date_string) {
-    if (typeof date_string === 'string') {
-        var a = date_string.split(/[- :]/);
-        return new Date(a[0], a[1]-1, a[2], a[3] || 0, a[4] || 0, a[5] || 0);
-    }
-    return null;
-}
-
-function onlyUnique(value, index, self) { 
-        return self.indexOf(value) === index;
-}
-
-function drawTimeline(video_id, event_data) {
-    if(canDraw) {
-        var temp = new Array();
-        for (var i = 0; i < event_data.length; i++) {
-            temp.push(event_data[i][0]);
-        }
-        var unique_users = temp.filter(onlyUnique);
-        var num_users = unique_users.length;
-
-        var container = document.getElementById(video_id + '_timeline');
-        var chart = new google.visualization.Timeline(container);
-        var data = new google.visualization.DataTable();
-        data.addColumn({type: 'string', id: 'Name'});
-        data.addColumn({type: 'string', id: 'Event Type'});
-        data.addColumn({type: 'date', id: 'Start'});
-        data.addColumn({type: 'date', id: 'End'});
-        data.addRows(event_data);
-        var options = {
-            height: (num_users) * 50 + 110
-        };
-
-        // Draw timeline when modal is completely loaded so that it is drawn
-        // correctly
-        $('#finished-modal').on('shown.bs.modal', function() {
-                console.log("Redraw chart!");
-                chart.draw(data, options);
-        });
-    }
-}
 
 function submit_observations(video_id, random) {
     $('.random-video-button').addClass("disabled");
@@ -211,7 +161,33 @@ function initialize_event_list() {
             async: true
         });
      });
+}
 
+function initialize_bgsub_timeline() {
+    $('.event-list-div').each(function() {
+        var video_id = $(this).attr("video_id");
+
+        $.ajax({
+            type: 'GET',
+            url: './video_computed_event_times.php',
+            //data : {video_id : 59040},
+            data : {video_id : video_id},
+            dataType : 'json',
+            success : function(response) {
+                if (response.length > 0) {
+                    for (var i in response) {
+                        response[i][1] = new Date(response[i][1] * 1000);
+                        response[i][2] = new Date(response[i][2] * 1000);
+                    }
+                    google.setOnLoadCallback(drawWatchTimeline(video_id, response));
+                }
+            },
+            error : function(jqXHR, textStatus, errorThrown) {
+                alert(errorThrown);
+            },
+            async: true
+        });
+     });
 }
 
 function check_observations() {
@@ -777,6 +753,7 @@ $(document).ready(function () {
     //console.log("start_time: " + start_time);
     initialize_event_list();
     initialize_speed_buttons();
+    initialize_bgsub_timeline();
     enable_observation_table();
 
     /*
@@ -864,7 +841,7 @@ $(document).ready(function () {
                             response[i][2] = getDate(response[i][2]);
                             response[i][3] = getDate(response[i][3]);
                         }
-                        drawTimeline(submission_data.video_id, response);
+                        google.setOnLoadCallback(drawReviewTimeline(submission_data.video_id, response));
                     },
                     error : function(jqXHR, textStatus, errorThrown) {
                         alert(errorThrown);

@@ -1,5 +1,3 @@
-var canDraw = false;
-
 $(document).ready(function () {
 
     /*
@@ -18,50 +16,8 @@ $(document).ready(function () {
     var video_count = 15;
     var showing_all_videos = true;
 
-    google.setOnLoadCallback(instantiateCharts);
-
     load_videos();
-
-    function instantiateCharts() {
-        canDraw = true;
-    }
     
-    function getDate(date_string) {
-        if (typeof date_string === 'string') {
-            var a = date_string.split(/[- :]/);
-            return new Date(a[0], a[1]-1, a[2], a[3] || 0, a[4] || 0, a[5] || 0);
-        }
-        return null;
-    }
-    
-    function onlyUnique(value, index, self) { 
-            return self.indexOf(value) === index;
-    }
-
-    function drawTimeline(video_id, event_data) {
-        if(canDraw) {
-            var temp = new Array();
-            for (var i = 0; i < event_data.length; i++) {
-                temp.push(event_data[i][0]);
-            }
-            var unique_users = temp.filter(onlyUnique);
-            var num_users = unique_users.length;
-
-            var container = document.getElementById(video_id + '_timeline');
-            var chart = new google.visualization.Timeline(container);
-            var data = new google.visualization.DataTable();
-            data.addColumn({type: 'string', id: 'Name'});
-            data.addColumn({type: 'string', id: 'Event Type'});
-            data.addColumn({type: 'date', id: 'Start'});
-            data.addColumn({type: 'date', id: 'End'});
-            data.addRows(event_data);
-            var options = {
-                height: (num_users) * 50 + 110
-            };
-            chart.draw(data, options);
-        }
-    }
-
     function load_videos() {
         var submission_data = {
                                 showing_all_videos : showing_all_videos,
@@ -215,7 +171,7 @@ $(document).ready(function () {
                                     response[i][2] = getDate(response[i][2]);
                                     response[i][3] = getDate(response[i][3]);
                                 }
-                                drawTimeline(submission_data.video_id, response);
+                                google.setOnLoadCallback(drawReviewTimeline(submission_data.video_id, response));
                             },
                             error : function(jqXHR, textStatus, errorThrown) {
                                 alert(errorThrown);
