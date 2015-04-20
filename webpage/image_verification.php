@@ -6,7 +6,7 @@ $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 require_once($cwd[__FILE__] . '/../../citizen_science_grid/my_query.php');
 
-$result = query_wildlife_video_db("select t1.* from test_image_observations as t1 inner join images as t2 on t1.image_id = t2.id where t2.views >= t2.needed_views and t2.verified <> 1;");
+$result = query_wildlife_video_db("select t1.* from test_image_observations as t1 inner join images as t2 on t1.image_id = t2.id where t2.views >= t2.needed_views and t2.verified <> 1 order by t2.id");
 
 $images = array();
 $id = -1;
@@ -14,10 +14,9 @@ $i = array();
 
 while ($row = $result->fetch_assoc()) {
 	$current_id = $row['image_id'];
-	error_log("Current id: " . $current_id);
-	$i[] = $row;
-	if ($id != $current_id  && $id != -1) {
-		$images[] = $i;
+	$i[] = $row; //Add row to array for that image
+	if ($id != $current_id  && $id != -1) { //Start a new array of rows since the image changed
+		$images[] = $i; //Add array of rectangles to the array of images
 		$i = array();
 	}
 	$id = $current_id;
@@ -26,20 +25,21 @@ $images[] = $i;
 
 
 foreach ($images as $image) {
-	error_log("Current image " . $image[0]['image_id']);
 	$num_of_verified = 1;
 	$verified_users = array();
 	$image_verified = false;
 
 	for ($i = 0; $i < count($image); $i++) {
-		//error_log("The image id is " . $image[$i]['image_id']);
 		for ($j = $i + 1; $j < count($image); ++$j) {
-			if ($image[$i]['nothing_here'] == 1) {
+			if ($image[$j]['user_id'] == $image[$i]['user_id']) continue; //Don't compare the user's rectangles to each other
+
+			if ($image[$i]['nothing_here'] == 1) { //Check if both users marked the image as 'nothing here'
 				if ($image[$j]['nothing_here'] == 1) {
 					$num_of_verified++;
 					$verified_users[] = $image[$j]['user_id'];
 				}
 			} else {
+				//Check if the position and size of the rectangle are within the specified bounds
 				if ($image[$j]['nothing_here'] == 0 && abs(($image[$i]['top'] - $image[$j]['top'])) <= 10 && abs(($image[$i]['left_side'] - $image[$j]['left_side'])) <= 10 &&
 					abs(($image[$i]['height'] - $image[$j]['height']))  <= 20 && abs(($image[$i]['width'] - $image[$j]['width'])) <= 20) 
 					if ($image[$i]['species_id'] == $image[$i]['species_id']) {
