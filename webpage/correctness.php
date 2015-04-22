@@ -118,15 +118,17 @@ function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer) {
 
     // Get event and find match
     $num_matches = 0;
+    $total_seconds = 0;
     while ($row = $result->fetch_assoc()) {
         $start_sec = $row['start_time'] + $buffer;
         $end_sec = $row['end_time'] - $buffer;
+        $total_seconds += $end_sec - $start_sec;
 
         $match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_ids AND video_id = $video_id AND comp.version_id = alg.beta_version_id AND start_time_s >= $start_sec AND end_time_s <= $end_sec";
         $match_result = query_wildlife_video_db($match_query);
         $num_matches += $match_result->num_rows;
     }
-    return $num_matches;
+    return array($num_matches, $total_seconds);
 }
 
 /* Queries the user observation table */

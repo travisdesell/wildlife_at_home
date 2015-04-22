@@ -102,7 +102,8 @@ while ($species_row = $species_result->fetch_assoc()) {
         $user_id = $video_row['user_id'];
 
         foreach($algs as $a_id => $a_name) {
-            $alg_num_false[$a_id] += getFalsePositives($video_id, $user_id, $a_id, $buffer);
+            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer);
+            $alg_num_false[$a_id] += $false_positives;
         }
     }
 
