@@ -82,7 +82,7 @@ while ($row = $result->fetch_assoc()) {
     $obs_query = "SELECT id FROM timed_observations WHERE user_id = $expert_id AND video_id = $video_id AND start_time_s > 10 AND start_time_s <= end_time_s";
     $obs_result = query_wildlife_video_db($obs_query);
 
-    $computed_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE alg.main_version_id = comp.version_id AND comp.video_id = $video_id";
+    $computed_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE alg.beta_version_id = comp.version_id AND comp.video_id = $video_id";
     $computed_result = query_wildlife_video_db($computed_query);
 
     $total = $computed_result->num_rows;

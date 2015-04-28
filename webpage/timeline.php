@@ -22,7 +22,7 @@ ini_set("default_socket_timeout", 300);
 parse_str($_SERVER['QUERY_STRING']);
 
 $user_query = "SELECT user_id, expert, ot.name AS event_name, (UNIX_TIMESTAMP(vid.start_time) + start_time_s) AS start_time, (UNIX_TIMESTAMP(vid.start_time) + end_time_s) AS end_time FROM timed_observations JOIN observation_types AS ot ON event_id = ot.id JOIN video_2 as vid ON vid.id = video_id WHERE video_id = $video_id AND start_time_s >= 0 AND start_time_s <= end_time_s ORDER BY expert DESC";
-$comp_query = "SELECT alg.name AS algorithm_name, ot.name AS event_name, (UNIX_TIMESTAMP(vid.start_time) + start_time_s) AS start_time, (UNIX_TIMESTAMP(vid.start_time) + end_time_s) AS end_time FROM computed_events JOIN event_algorithms AS alg ON alg.id = algorithm_id JOIN observation_types AS ot ON event_id = ot.id JOIN video_2 AS vid ON vid.id = video_id WHERE video_id = $video_id AND version_id = alg.main_version_id AND start_time_s >= 0 AND start_time_s <= end_time_s";
+$comp_query = "SELECT alg.name AS algorithm_name, ot.name AS event_name, (UNIX_TIMESTAMP(vid.start_time) + start_time_s) AS start_time, (UNIX_TIMESTAMP(vid.start_time) + end_time_s) AS end_time FROM computed_events JOIN event_algorithms AS alg ON alg.id = algorithm_id JOIN observation_types AS ot ON event_id = ot.id JOIN video_2 AS vid ON vid.id = video_id WHERE video_id = $video_id AND version_id = alg.beta_version_id AND start_time_s >= 0 AND start_time_s <= end_time_s";
 $user_result = query_wildlife_video_db($user_query);
 $comp_result = query_wildlife_video_db($comp_query);
 
@@ -80,9 +80,6 @@ while ($user_row = $user_result->fetch_assoc()) {
 
 while ($comp_row = $comp_result->fetch_assoc()) {
     $name = $comp_row['algorithm_name'];
-    if ($comp_row['expert'] == 1) {
-        $name = $name . " (expert)";
-    }
 
     echo "['" . $name . "'";
     echo ",'" . $comp_row['event_name'] . "'";

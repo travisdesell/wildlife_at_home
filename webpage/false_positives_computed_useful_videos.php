@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/webpage/correctness.php");
 
-print_header("Wildlife@Home: Computer False Positives vs Users By Species", "", "wildlife");
+print_header("Wildlife@Home: Computer False Positives vs Experts By Species", "", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 //echo "Header:";
@@ -27,31 +27,24 @@ if (!isset($buffer)) {
     $buffer = 10;
 }
 
-if (!isset($threshold)) {
-    $threshold = 95;
+if (!isset($species)) {
+    $species = 1;
 }
 
-$species_query = "SELECT id, name FROM species";
+$species_query = "SELECT id, name FROM species WHERE id = $species";
 $species_result = query_wildlife_video_db($species_query, $wildlife_db);
 
 $algorithm_query = "SELECT id, name FROM event_algorithms";
 $algorithm_result = query_wildlife_video_db($algorithm_query, $wildlife_db);
 
-/*
-$species = array();
-while ($species_row = $species_result->fetch_assoc()) {
-    $species_id = $species_row['id'];
-    $species_name = $species_row['name'];
-    $species[$species_id] = $species_name;
-}
-ksort($species);
-*/
 
 $algs = array();
 while ($alg_row = $algorithm_result->fetch_assoc()) {
     $alg_id = $alg_row['id'];
     $alg_name = $alg_row['name'];
-    $algs[$alg_id] = $alg_name;
+    if ($alg_id <= 3) {
+        $algs[$alg_id] = $alg_name;
+    }
 }
 ksort($algs);
 
@@ -75,7 +68,7 @@ echo "
         function drawChart() {
             var container = document.getElementById('chart_div');
             data = new google.visualization.DataTable();
-            data.addColumn('string', 'Species');
+            data.addColumn('number', 'Threshold Percent');
 ";
 
 foreach($algs as $a_id => $a_name) {
@@ -91,11 +84,21 @@ while ($species_row = $species_result->fetch_assoc()) {
     $event_id = $not_in_vid_id;
     $species_id = $species_row['id'];
     $species_name = $species_row['name'];
-    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 0 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.beta_version_id = comp.version_id";
+    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 1 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.beta_version_id = comp.version_id";
     $video_result = query_wildlife_video_db($video_query);
+    $num_videos = $video_result->num_rows;
     $alg_num_false = array();
+    $alg_useful_vids = array();
+    $thresholds = array();
+    for($x = 0; $x <= 100; $x++) {
+        $thresholds[] = $x;
+    }
     foreach($algs as $a_id => $a_name) {
-        $alg_num_false[$a_id] = 0;
+        $alg_num_false[$a_id] = array();
+        $alg_useful_vids[$a_id] = array();
+        foreach($thresholds as $thresh) {
+            $alg_useful_vids[$a_id][$thresh] = 0;
+        }
     }
     while ($video_row = $video_result->fetch_assoc()) {
         $video_id = $video_row['video_id'];
@@ -103,25 +106,36 @@ while ($species_row = $species_result->fetch_assoc()) {
 
         foreach($algs as $a_id => $a_name) {
             list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer);
-            $alg_num_false[$a_id] += $false_positives;
+            $alg_num_false[$a_id][] += $false_positives;
+            foreach($thresholds as $thresh) {
+                if (($false_positives/$total_seconds)*100 <= $thresh) {
+                    $alg_useful_vids[$a_id][$thresh] += 1;
+                }
+            }
         }
     }
 
     $add_data = false;
     foreach($alg_num_false as $a_id => $a_val) {
-        if ($a_val > 0) {
-            $add_data = true;
+        foreach($a_val as $x) {
+            if($x > 0) {
+                $add_data = true;
+                break;
+            }
         }
+        if($add_data) break;
     }
 
     if ($add_data) {
-        echo "[";
-        echo "'$species_name'";
-        foreach($alg_num_false as $a_id => $a_val) {
-            echo ",";
-            echo $a_val;
+        foreach($thresholds as $thresh) {
+            echo "[";
+            echo $thresh;
+            foreach($alg_num_false as $a_id => $a_val) {
+                echo ",";
+                echo $alg_useful_vids[$a_id][$thresh]/$num_videos * 100;
+            }
+            echo "],";
         }
-        echo "],";
     }
 }
 
@@ -131,21 +145,26 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Computed False Positives vs Users for each Species',
-                hAxis: {title: 'Species'},
-                vAxis: {
-                    title: 'False Positives',
+                title: 'Percentage of Videos with Useful Computed Results vs False Postive Percentage Threshold',
+                hAxis: {
+                    title: 'False Postive Pecentage Threshold',
                     minValue: 0,
+                    maxValue: 100
+                },
+                vAxis: {
+                    title: 'Percent of Useful Videos',
+                    minValue: 0,
+                    maxValue: 100
                 }
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 
             chart.draw(data, options);
         }
     </script>
 
-            <h1>Computer False Posities vs Users by Species</h1>
+            <h1>Computer False Positives vs Experts by Species</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 

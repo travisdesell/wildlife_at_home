@@ -22,6 +22,7 @@ $allow_add_removal = csg_is_special_user($user, true);
 $extra_header = "
     <link rel='stylesheet' type='text/css' href='wildlife_css/custom.css'>
 
+    <script type='text/javascript' src='js/google_chart_utils.js'></script>
     <script type='text/javascript' src='timed_observations.js'></script>
     <script type='text/javascript' src='js/user_review.js'></script>
     <script type='text/javascript' src='js/expert_review.js'></script>

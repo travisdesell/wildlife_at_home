@@ -18,6 +18,7 @@ require_once($cwd[__FILE__] . "/watch_interface/observation_table.php");
  *  TODO: upgrade to bootstrap 3.x
  */
 $extra_stuff = "
+    <script type='text/javascript' src='js/google_chart_utils.js'></script>
     <script type='text/javascript' src='timed_observations.js'></script>
 
     <style>

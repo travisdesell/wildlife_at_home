@@ -93,7 +93,7 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT obs.id, obs.video_id, obs.species_id FROM timed_observations AS obs WHERE expert = 1 and obs.event_id = $type_id AND species_id <> 1 AND obs.start_time_s > 10 AND obs.start_time_s <= obs.end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.video_id = obs.video_id AND alg.main_version_id = comp.version_id)";
+    $timed_query = "SELECT obs.id, obs.video_id, obs.species_id FROM timed_observations AS obs WHERE expert = 1 and obs.event_id = $type_id AND species_id <> 1 AND obs.start_time_s > 10 AND obs.start_time_s <= obs.end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.video_id = obs.video_id AND alg.beta_version_id = comp.version_id)";
     $timed_result = query_wildlife_video_db($timed_query);
 
     $consensus_num = 0;

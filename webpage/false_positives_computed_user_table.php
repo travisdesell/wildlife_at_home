@@ -28,7 +28,7 @@ if (!isset($buffer)) {
 }
 
 if (!isset($threshold)) {
-    $threshold = 95;
+    $threshold = 10;
 }
 
 $species_query = "SELECT id, name FROM species";
@@ -83,6 +83,7 @@ foreach($algs as $a_id => $a_name) {
     echo "data.addColumn('number', '$a_name Mean');";
     echo "data.addColumn('number', '$a_name Stdev');";
     echo "data.addColumn('number', '$a_name Sum');";
+    echo "data.addColumn('number', '$a_name Useful Obs');";
 }
 
 echo "
@@ -94,19 +95,25 @@ while ($species_row = $species_result->fetch_assoc()) {
     $event_id = $not_in_vid_id;
     $species_id = $species_row['id'];
     $species_name = $species_row['name'];
-    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 0 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.main_version_id = comp.version_id";
+    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 0 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.beta_version_id = comp.version_id";
     $video_result = query_wildlife_video_db($video_query);
     $num_videos = $video_result->num_rows;
     $alg_num_false = array();
+    $alg_useful_vids = array();
     foreach($algs as $a_id => $a_name) {
         $alg_num_false[$a_id] = array();
+        $alg_useful_vids[$a_id] = 0;
     }
     while ($video_row = $video_result->fetch_assoc()) {
         $video_id = $video_row['video_id'];
         $user_id = $video_row['user_id'];
 
         foreach($algs as $a_id => $a_name) {
-            $alg_num_false[$a_id][] += getFalsePositives($video_id, $user_id, $a_id, $buffer);
+            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer);
+            $alg_num_false[$a_id][] += $false_positives;
+            if (($false_positives/$total_seconds)*100 < $threshold) {
+                $alg_useful_vids[$a_id] += 1;
+            }
         }
     }
 
@@ -135,6 +142,8 @@ while ($species_row = $species_result->fetch_assoc()) {
             echo stdev($a_val, $mean);
             echo ",";
             echo $sum;
+            echo ",";
+            echo $alg_useful_vids[$a_id];
         }
         echo "],";
     }
@@ -160,7 +169,7 @@ echo "
         }
     </script>
 
-            <h1>Computer False Posities vs Experts by Species</h1>
+            <h1>Computer False Positives vs Experts by Species</h1>
 
             <div id='chart_div' style='margin: auto; width: 90%; height: 500px;'></div>
 
