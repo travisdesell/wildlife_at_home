@@ -14,11 +14,11 @@ $i = array();
 
 while ($row = $result->fetch_assoc()) {
 	$current_id = $row['image_id'];
-	$i[] = $row; //Add row to array for that image
 	if ($id != $current_id  && $id != -1) { //Start a new array of rows since the image changed
 		$images[] = $i; //Add array of rectangles to the array of images
 		$i = array();
 	}
+	$i[] = $row; //Add row to array for that image
 	$id = $current_id;
 }
 $images[] = $i;
