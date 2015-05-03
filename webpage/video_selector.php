@@ -168,6 +168,8 @@ $thumbnails = array('thumbnail_list' => array(
                     )
                 );
 
+shuffle($thumbnails['thumbnail_list']);
+
 $projects_template = file_get_contents($cwd[__FILE__] . "/templates/projects_template.html");
 
 error_log( "projects_template: " . $cwd[__FILE__] . "/templates/projects_template.html");
