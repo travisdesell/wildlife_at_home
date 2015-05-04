@@ -42,7 +42,7 @@ foreach ($images as $image) {
 				//Check if the position and size of the rectangle are within the specified bounds
 				if ($image[$j]['nothing_here'] == 0 && abs(($image[$i]['top'] - $image[$j]['top'])) <= 10 && abs(($image[$i]['left_side'] - $image[$j]['left_side'])) <= 10 &&
 					abs(($image[$i]['height'] - $image[$j]['height']))  <= 20 && abs(($image[$i]['width'] - $image[$j]['width'])) <= 20) 
-					if ($image[$i]['species_id'] == $image[$i]['species_id']) {
+					if ($image[$i]['species_id'] == $image[$j]['species_id'] && $image[$i]['nest'] == $image[$j]['nest']) {
 						$num_of_verified++;
 						$verified_users[] = $image[$j]['user_id'];
 

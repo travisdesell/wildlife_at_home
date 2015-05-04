@@ -203,6 +203,10 @@ function initDraw(canvas) {
 	    location.reload();
     });
 
+    $('#skip-button').on('click', function() {
+	    location.reload();
+    });
+
 
     canvas.onmousemove = function (e) {
 	setMousePosition(e);
