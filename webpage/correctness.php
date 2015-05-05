@@ -106,13 +106,13 @@ function getBufferAccuracy($obs_id, $algorithm_id, $buffer) {
 function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer) {
     $not_in_vid_id = 4;
     if (is_array($algorithm_ids)) {
-        $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE obs.video_id = comp.video_id AND comp.version_id = alg.beta_version_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s AND (comp.algorithm_id = $algorithm_ids[0]";
+        $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND alg.beta_version_id = comp.version_id WHERE obs.video_id = comp.video_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s AND comp.algorithm_id = $algorithm_ids[0])";
         for ($i = 1; $i < count($algorithm_ids); $i++) {
             $not_in_vid_query += " OR comp.algorithm_id = $algorithm_ids[$i]";
         }
         $not_in_vid_query += ")";
     } else {
-        $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE obs.video_id = comp.video_id AND comp.version_id = alg.beta_version_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s AND comp.algorithm_id = $algorithm_ids)";
+        $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND alg.beta_version_id = comp.version_id WHERE obs.video_id = comp.video_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s AND comp.algorithm_id = $algorithm_ids)";
     }
     $result = query_wildlife_video_db($not_in_vid_query);
 
@@ -124,7 +124,7 @@ function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer) {
         $end_sec = $row['end_time'] - $buffer;
         $total_seconds += $end_sec - $start_sec;
 
-        $match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_ids AND video_id = $video_id AND comp.version_id = alg.beta_version_id AND start_time_s >= $start_sec AND end_time_s <= $end_sec";
+        $match_query = "SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND alg.beta_version_id = comp.version_id WHERE comp.algorithm_id = $algorithm_ids AND video_id = $video_id AND start_time_s >= $start_sec AND end_time_s <= $end_sec";
         $match_result = query_wildlife_video_db($match_query);
         $num_matches += $match_result->num_rows;
     }
