@@ -27,8 +27,18 @@ if (!isset($buffer)) {
     $buffer = 5;
 }
 
-if (!isset($threshold)) {
-    $threshold = 95;
+if (!isset($sample)) {
+    $sample = "experts"; // or "everyone" or "users"
+}
+
+if (!isset($species)) {
+    $species = 1;
+}
+
+if (!isset($beta)) {
+    $beta = FALSE;
+} else {
+    $beta = TRUE;
 }
 
 $type_query = "SELECT id, name FROM observation_types";
@@ -93,7 +103,23 @@ echo "
 while ($type_row = $type_result->fetch_assoc()) {
     $type_id = $type_row['id'];
     $type_name = $type_row['name'];
-    $timed_query = "SELECT id, video_id, species_id FROM timed_observations AS t WHERE expert = 1 AND event_id = $type_id AND species_id <> 1 AND start_time_s > 10 AND start_time_s <= end_time_s AND (SELECT COUNT(*) FROM computed_events AS comp WHERE comp.video_id = t.video_id) > 0";
+
+    $timed_query = "SELECT id, video_id FROM timed_observations AS t WHERE ";
+    if ($sample == "everyone") {
+        // Don't add anything to the query here.
+    } elseif ($sample == "experts") {
+        $timed_query = $timed_query . "expert = 1 AND ";
+    } elseif ($sample == "users") {
+        $timed_query = $timed_query . "expert = 0 AND ";
+    }
+    $timed_query = $timed_query . "event_id = $type_id AND species_id <> $species AND start_time_s > 10 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
+    if ($beta) {
+        $timed_query = $timed_query . "alg.beta_version_id ";
+    } else {
+        $timed_query = $timed_query . "alg.main_version_id ";
+    }
+    $timed_query = $timed_query . "WHERE comp.video_id = t.video_id)";
+
     $timed_result = query_wildlife_video_db($timed_query);
     $alg_num_events = array();
     $alg_match_events = array();
@@ -103,12 +129,9 @@ while ($type_row = $type_result->fetch_assoc()) {
     }
     while ($timed_row = $timed_result->fetch_assoc()) {
         $obs_id = $timed_row['id'];
-        $video_id = $timed_row['video_id'];
-        //$species_id = $timed_row['species_id'];
-        $expert_id = getExpert($video_id);
 
         foreach($algs as $a_id => $a_name) {
-            list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer);
+            list($start_match, $end_match) = getBufferAccuracy($obs_id, $a_id, $buffer, $beta);
 
             $alg_num_events[$a_id] += 2;
 

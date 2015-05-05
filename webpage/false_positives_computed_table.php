@@ -31,8 +31,10 @@ if (!isset($threshold)) {
     $threshold = 10;
 }
 
-if (!isset($version)) {
-    $version = "main"; // or "beta";
+if (!isset($beta)) {
+    $beta = FALSE;
+} else {
+    $beta = TRUE;
 }
 
 if (!isset($sample)) {
@@ -105,7 +107,7 @@ while ($species_row = $species_result->fetch_assoc()) {
     $species_name = $species_row['name'];
 
     $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t INNER JOIN computed_events AS comp ON comp.video_id = t.video_id INNER JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id AND comp.version_id = ";
-    if ($version == "beta") {
+    if ($beta) {
         $video_query = $video_query . "alg.beta_version_id WHERE ";
     } else { // "live"
         $video_query = $video_query . "alg.main_version_id WHERE ";
