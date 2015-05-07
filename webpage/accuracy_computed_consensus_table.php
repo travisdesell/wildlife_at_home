@@ -28,7 +28,7 @@ if (!isset($buffer)) {
 }
 
 if (!isset($sample)) {
-    $sample = "experts"; // or "everyone" or "users"
+    $sample = "everyone"; // or "experts" or "users"
 }
 
 if (!isset($species)) {
@@ -44,21 +44,8 @@ if (!isset($beta)) {
 $type_query = "SELECT id, name FROM observation_types";
 $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
-$species_query = "SELECT id, name FROM species";
-$species_result = query_wildlife_video_db($species_query, $wildlife_db);
-
 $algorithm_query = "SELECT id, name FROM event_algorithms";
 $algorithm_result = query_wildlife_video_db($algorithm_query, $wildlife_db);
-
-/*
-$species = array();
-while ($species_row = $species_result->fetch_assoc()) {
-    $species_id = $species_row['id'];
-    $species_name = $species_row['name'];
-    $species[$species_id] = $species_name;
-}
-ksort($species);
-*/
 
 $algs = array();
 while ($alg_row = $algorithm_result->fetch_assoc()) {
@@ -113,7 +100,7 @@ while ($type_row = $type_result->fetch_assoc()) {
     } elseif ($sample == "users") {
         $timed_query = $timed_query . "expert = 0 AND ";
     }
-    $timed_query = $timed_query . "event_id = $type_id AND species_id <> $species AND start_time_s > 10 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
+    $timed_query = $timed_query . "event_id = $type_id AND species_id = $species AND start_time_s > 10 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
     if ($beta) {
         $timed_query = $timed_query . "alg.beta_version_id ";
     } else {

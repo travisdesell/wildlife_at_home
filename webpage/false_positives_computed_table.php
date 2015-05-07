@@ -47,16 +47,6 @@ $species_result = query_wildlife_video_db($species_query, $wildlife_db);
 $algorithm_query = "SELECT id, name FROM event_algorithms";
 $algorithm_result = query_wildlife_video_db($algorithm_query, $wildlife_db);
 
-/*
-$species = array();
-while ($species_row = $species_result->fetch_assoc()) {
-    $species_id = $species_row['id'];
-    $species_name = $species_row['name'];
-    $species[$species_id] = $species_name;
-}
-ksort($species);
-*/
-
 $algs = array();
 while ($alg_row = $algorithm_result->fetch_assoc()) {
     $alg_id = $alg_row['id'];
@@ -136,7 +126,7 @@ while ($species_row = $species_result->fetch_assoc()) {
         $user_id = $video_row['user_id'];
 
         foreach($algs as $a_id => $a_name) {
-            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer);
+            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer, $beta);
             $alg_num_false[$a_id][] += $false_positives;
             if (($false_positives/$total_seconds)*100 < $threshold) {
                 $alg_useful_vids[$a_id] += 1;

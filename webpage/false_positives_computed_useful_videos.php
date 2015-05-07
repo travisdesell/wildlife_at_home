@@ -52,9 +52,9 @@ $algs = array();
 while ($alg_row = $algorithm_result->fetch_assoc()) {
     $alg_id = $alg_row['id'];
     $alg_name = $alg_row['name'];
-    if ($alg_id <= 3) {
+    //if ($alg_id <= 3) {
         $algs[$alg_id] = $alg_name;
-    }
+    //}
 }
 ksort($algs);
 
@@ -93,7 +93,7 @@ while ($species_row = $species_result->fetch_assoc()) {
     $species_id = $species_row['id'];
     $species_name = $species_row['name'];
 
-    $video_query = "/*" . MYSQLND_QC_ENABLED_SWITCH . "*/" . "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t INNER JOIN computed_events AS comp ON comp.video_id = t.video_id INNER JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id AND comp.version_id = ";
+    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t INNER JOIN computed_events AS comp ON comp.video_id = t.video_id INNER JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id AND comp.version_id = ";
     if ($beta) {
         $video_query = $video_query . "alg.beta_version_id WHERE ";
     } else { // "live"
@@ -130,7 +130,7 @@ while ($species_row = $species_result->fetch_assoc()) {
         $user_id = $video_row['user_id'];
 
         foreach($algs as $a_id => $a_name) {
-            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer);
+            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer, $beta);
             $alg_num_false[$a_id][] += $false_positives;
             foreach($thresholds as $thresh) {
                 if (($false_positives/$total_seconds)*100 <= $thresh) {
