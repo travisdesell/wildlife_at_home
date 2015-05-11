@@ -114,8 +114,10 @@ echo "
     <div class='col-sm-4'>
         <div id='selection-information'>
             <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image --> Image ID: $image_id
+	    <a href='#' class='btn btn-success' data-toggle='modal' data-target='#helpModal'>Help!</a>
         </div>
 	<textarea class='nothing-here-box' type='text' size='34' maxlength='512' value ='' id='comments' placeholder='comments' row='1'></textarea><br>
+	<button class='btn btn-primary' id='skip-button'>Skip</button>
 	<button class='btn nothing btn-danger' id='nothing-here-button' >There's Nothing Here</button>
         <button class='btn btn-primary' id='submit-selections-button'>Submit</button>
     </div>
@@ -130,20 +132,33 @@ echo "
 print_footer();
 
 echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
-		<div class='modal-dialog' role='dialog'>
+		<div class='modal-dialog modal-sm' role='dialog'>
 			<div class='modal-content'>
 				<div class='modal-header'>
 					<h4 class='modal-title''>Submission Complete</h4>
+				</div>
 					<div class='modal-body'>
-						<p>Thx!</p>
+						<p>Thank you!</p>
 					</div>
 					<div class='modal-footer'>
 						<button id='modalSubButton' type='button' class='btn btn-primary' data-dismiss='modal'>Close</button>
 					</div>
-				</div>
 			</div>
 		</div>
-	<div>";
+	</div>
+	<div id='helpModal' class='modal fade'>
+		<div class='modal-dialog' role='dialog'>
+			<div class='modal-content'>
+				<div class='modal-header'>
+					 <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>X</button>
+					<h4 class='modal-title''>Help</h4>
+				</div>
+					<div class='modal-body'>
+						<p>There will soon be some help here.<p>
+					</div>
+			</div>
+		</div>
+	</div>";
 
 
 

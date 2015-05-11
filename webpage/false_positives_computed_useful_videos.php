@@ -31,6 +31,16 @@ if (!isset($species)) {
     $species = 1;
 }
 
+if (!isset($beta)) {
+    $beta = FALSE;
+} else {
+    $beta = TRUE;
+}
+
+if (!isset($sample)) {
+    $sample = "everyone"; // or "experts" or "users"
+}
+
 $species_query = "SELECT id, name FROM species WHERE id = $species";
 $species_result = query_wildlife_video_db($species_query, $wildlife_db);
 
@@ -42,17 +52,15 @@ $algs = array();
 while ($alg_row = $algorithm_result->fetch_assoc()) {
     $alg_id = $alg_row['id'];
     $alg_name = $alg_row['name'];
-    if ($alg_id <= 3) {
+    //if ($alg_id <= 3) {
         $algs[$alg_id] = $alg_name;
-    }
+    //}
 }
 ksort($algs);
 
 echo "
 <div class='containder'>
-    <div class='row'>
-    <div class='col-sm-12'>
-    <script type = 'text/javascript' src='js/data_download.js'></script>
+    <div class='row'> <div class='col-sm-12'> <script type = 'text/javascript' src='js/data_download.js'></script>
     <script type = 'text/javascript' src='https://www.google.com/jsapi'></script>
     <script type = 'text/javascript'>
         google.load('visualization', '1.1', {packages:['corechart']});
@@ -84,7 +92,24 @@ while ($species_row = $species_result->fetch_assoc()) {
     $event_id = $not_in_vid_id;
     $species_id = $species_row['id'];
     $species_name = $species_row['name'];
-    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t JOIN computed_events AS comp ON comp.video_id = t.video_id JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id WHERE expert = 1 AND species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 and t.start_time_s <= t.end_time_s AND alg.beta_version_id = comp.version_id";
+
+    $video_query = "SELECT DISTINCT t.video_id AS video_id, t.user_id AS user_id FROM timed_observations AS t INNER JOIN computed_events AS comp ON comp.video_id = t.video_id INNER JOIN event_algorithms AS alg ON comp.algorithm_id = alg.id AND comp.version_id = ";
+    if ($beta) {
+        $video_query = $video_query . "alg.beta_version_id WHERE ";
+    } else { // "live"
+        $video_query = $video_query . "alg.main_version_id WHERE ";
+    }
+    if ($sample == "everyone") {
+        // Don't add anything
+    } elseif ($sample == "experts") {
+        $video_query = $video_query . "expert = 1 AND ";
+    } elseif ($sample == "users") {
+        $video_query = $video_query . "expert = 0 AND ";
+    } else {
+        throw new Exception("Incorrect sample name.");
+    }
+    $video_query = $video_query . "species_id = $species_id AND t.event_id = $event_id AND t.start_time_s >= 0 AND t.start_time_s <= t.end_time_s";
+
     $video_result = query_wildlife_video_db($video_query);
     $num_videos = $video_result->num_rows;
     $alg_num_false = array();
@@ -105,7 +130,7 @@ while ($species_row = $species_result->fetch_assoc()) {
         $user_id = $video_row['user_id'];
 
         foreach($algs as $a_id => $a_name) {
-            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer);
+            list($false_positives, $total_seconds) = getFalsePositives($video_id, $user_id, $a_id, $buffer, $beta);
             $alg_num_false[$a_id][] += $false_positives;
             foreach($thresholds as $thresh) {
                 if (($false_positives/$total_seconds)*100 <= $thresh) {

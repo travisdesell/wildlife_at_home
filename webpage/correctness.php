@@ -64,7 +64,7 @@ function getBufferCorrectness($obs_id, $expert_id, $buffer) {
 }
 
 /* Queries the computed events table */
-function getBufferAccuracy($obs_id, $algorithm_id, $buffer) {
+function getBufferAccuracy($obs_id, $algorithm_id, $buffer, $beta = FALSE) {
     $event_query = "SELECT video_id, event_id, start_time_s AS start_time, end_time_s AS end_time FROM timed_observations WHERE id = $obs_id";
     $event_result = query_wildlife_video_db($event_query);
 
@@ -80,11 +80,25 @@ function getBufferAccuracy($obs_id, $algorithm_id, $buffer) {
         $end_sec_top = $end_sec - $buffer;
         $end_sec_bot = $end_sec + $buffer;
 
-        $front_match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_id AND video_id = $video_id AND comp.version_id = alg.beta_version_id AND (start_time_s BETWEEN $start_sec_top AND $start_sec_bot OR end_time_s BETWEEN $start_sec_top AND $start_sec_bot)";
+        $front_match_query = "SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
+        if ($beta) {
+            $front_match_query = $front_match_query . "alg.beta_version_id ";
+        } else {
+            $front_match_query = $front_match_query . "alg.main_version_id ";
+        }
+        $front_match_query = $front_match_query . "WHERE comp.algorithm_id = $algorithm_id AND video_id = $video_id AND (start_time_s BETWEEN $start_sec_top AND $start_sec_bot OR end_time_s BETWEEN $start_sec_top AND $start_sec_bot)";
+
         $front_match_result = query_wildlife_video_db($front_match_query);
         $num_front_matches = $front_match_result->num_rows;
 
-        $back_match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_id AND video_id = $video_id AND comp.version_id = alg.beta_version_id AND (start_time_s BETWEEN $end_sec_top AND $end_sec_bot OR end_time_s BETWEEN $end_sec_top AND $end_sec_bot)";
+        $back_match_query = "SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
+        if ($beta) {
+            $back_match_query = $back_match_query . "alg.beta_version_id ";
+        } else {
+            $back_match_query = $back_match_query . "alg.main_version_id ";
+        }
+        $back_match_query = $back_match_query . "WHERE comp.algorithm_id = $algorithm_id AND video_id = $video_id AND (start_time_s BETWEEN $end_sec_top AND $end_sec_bot OR end_time_s BETWEEN $end_sec_top AND $end_sec_bot)";
+
         $back_match_result = query_wildlife_video_db($back_match_query);
         $num_back_matches = $back_match_result->num_rows;
 
@@ -103,17 +117,26 @@ function getBufferAccuracy($obs_id, $algorithm_id, $buffer) {
 }
 
 /* Queries the computed events table */
-function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer) {
+function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer, $beta = FALSE) {
     $not_in_vid_id = 4;
-    if (is_array($algorithm_ids)) {
-        $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE obs.video_id = comp.video_id AND comp.version_id = alg.beta_version_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s AND (comp.algorithm_id = $algorithm_ids[0]";
-        for ($i = 1; $i < count($algorithm_ids); $i++) {
-            $not_in_vid_query += " OR comp.algorithm_id = $algorithm_ids[$i]";
-        }
-        $not_in_vid_query += ")";
+
+    $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
+    if ($beta) {
+        $not_in_vid_query = $not_in_vid_query . "alg.beta_version_id ";
     } else {
-        $not_in_vid_query = "SELECT start_time_s AS start_time, end_time_s AS end_time FROM timed_observations AS obs WHERE obs.video_id = $video_id AND obs.user_id = $user_id AND obs.event_id = $not_in_vid_id AND start_time_s >= 0 AND start_time_s <= end_time_s AND EXISTS (SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE obs.video_id = comp.video_id AND comp.version_id = alg.beta_version_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s AND comp.algorithm_id = $algorithm_ids)";
+        $not_in_vid_query = $not_in_vid_query . "alg.main_version_id ";
     }
+    $not_in_vid_query = $not_in_vid_query . "WHERE obs.video_id = comp.video_id AND comp.start_time_s >= 0 AND comp.start_time_s <= comp.end_time_s AND ";
+    if (is_array($algorithm_ids)) {
+        $not_in_vid_query = $not_in_vid_query . "(comp.algorithm_id = $algorithm_ids[0]";
+        for ($i = 1; $i < count($algorithm_ids); $i++) {
+            $not_in_vid_query = $not_in_vid_query . " OR comp.algorithm_id = $algorithm_ids[$i]";
+        }
+        $not_in_vid_query = $not_in_vid_query . "))";
+    } else {
+        $not_in_vid_query = $not_in_vid_query . "comp.algorithm_id = $algorithm_ids)";
+    }
+
     $result = query_wildlife_video_db($not_in_vid_query);
 
     // Get event and find match
@@ -124,10 +147,18 @@ function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer) {
         $end_sec = $row['end_time'] - $buffer;
         $total_seconds += $end_sec - $start_sec;
 
-        $match_query = "SELECT * FROM computed_events AS comp JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id WHERE comp.algorithm_id = $algorithm_ids AND video_id = $video_id AND comp.version_id = alg.beta_version_id AND start_time_s >= $start_sec AND end_time_s <= $end_sec";
+        $match_query = "SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
+        if ($beta) {
+            $match_query = $match_query . "alg.beta_version_id ";
+        } else {
+            $match_query = $match_query . "alg.main_version_id ";
+        }
+        $match_query = $match_query . "WHERE comp.algorithm_id = $algorithm_ids AND video_id = $video_id AND start_time_s >= $start_sec AND end_time_s <= $end_sec";
+
         $match_result = query_wildlife_video_db($match_query);
         $num_matches += $match_result->num_rows;
     }
+    assert($total_seconds > 0);
     return array($num_matches, $total_seconds);
 }
 
