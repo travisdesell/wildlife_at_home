@@ -20,7 +20,7 @@ require_once($cwd . '/user.php');
  */
 function get_observation_data($data, $from_db = false) {
 
-    $res->comments = mysql_real_escape_string($data['comments']);
+    $res->comments = $boinc_db->real_escape_string($data['comments']);
     $res->bird_leave = $data['bird_leave'];
     $res->bird_return = $data['bird_return'];
     $res->bird_presence = $data['bird_presence'];
@@ -51,10 +51,10 @@ function get_observation_data($data, $from_db = false) {
  */
 $post_observation = get_observation_data($_POST);
 
-$start_time = mysql_real_escape_string($_POST['start_time']);
-$species_id = mysql_real_escape_string($_POST['species_id']);
-$location_id = mysql_real_escape_string($_POST['location_id']);
-$duration_s = mysql_real_escape_string($_POST['duration_s']);
+$start_time = $boinc_db->real_escape_string($_POST['start_time']);
+$species_id = $boinc_db->real_escape_string($_POST['species_id']);
+$location_id = $boinc_db->real_escape_string($_POST['location_id']);
+$duration_s = $boinc_db->real_escape_string($_POST['duration_s']);
 /**
  * Grab the other observations from the database.
  */

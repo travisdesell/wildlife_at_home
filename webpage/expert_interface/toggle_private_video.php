@@ -9,8 +9,8 @@ require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/my_query.php');
 require_once($cwd . '/user.php');
 
-$video_id = mysql_real_escape_string($_POST['video_id']);
-$is_private = mysql_real_escape_string($_POST['is_private']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
+$is_private = $boinc_db->real_escape_string($_POST['is_private']);
 
 error_log("TOGGLING PRIVATE VIDEO -- video_id: $video_id, is_private: $is_private");
 

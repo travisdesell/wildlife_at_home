@@ -15,9 +15,9 @@ Mustache_Autoloader::register();
 $user = csg_get_user();
 $user_id = $user['id'];
 
-$video_id = mysql_real_escape_string($_POST['video_id']);
-$species_id = mysql_real_escape_string($_POST['species_id']);
-$location_id = mysql_real_escape_string($_POST['location_id']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
+$species_id = $boinc_db->real_escape_string($_POST['species_id']);
+$location_id = $boinc_db->real_escape_string($_POST['location_id']);
 
 $species_location_hash = ($location_id * 100) + $species_id;
 

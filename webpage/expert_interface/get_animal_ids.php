@@ -7,10 +7,10 @@ $cwd = dirname(dirname($cwd));
 require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/my_query.php');
 
-$species_id = mysql_real_escape_string($_POST['species_id']);
-$location_id = mysql_real_escape_string($_POST['location_id']);
-$year = mysql_real_escape_string($_POST['year']);
-$video_status = mysql_real_escape_string($_POST['video_status']);
+$species_id = $boinc_db->real_escape_string($_POST['species_id']);
+$location_id = $boinc_db->real_escape_string($_POST['location_id']);
+$year = $boinc_db->real_escape_string($_POST['year']);
+$video_status = $boinc_db->real_escape_string($_POST['video_status']);
 
 $filter = '';
 

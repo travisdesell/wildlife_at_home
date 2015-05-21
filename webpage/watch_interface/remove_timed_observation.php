@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . '/../watch_interface/observation_table.php');
 $user = csg_get_user();
 $user_id = $user['id'];
 
-$observation_id = mysql_real_escape_string($_POST['observation_id']);
+$observation_id = $boinc_db->real_escape_string($_POST['observation_id']);
 
 $user_query = "UPDATE user SET total_events = total_events - 1 WHERE id = $user_id";
 $user_result = query_boinc_db($user_query);

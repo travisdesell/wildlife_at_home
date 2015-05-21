@@ -14,7 +14,7 @@ Mustache_Autoloader::register();
 $user = csg_get_user();
 $user_id = $user['id'];
 
-$video_id = mysql_real_escape_string($_POST['video_id']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
 $query = "SELECT species_id FROM video_2 WHERE id = $video_id";
 $result = query_wildlife_video_db($query);
 $row = $result->fetch_assoc();

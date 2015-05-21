@@ -15,11 +15,11 @@ $user = csg_get_user();
 $user_id = $user['id'];
 $is_special_user = csg_is_special_user($user, true);
 
-$video_id = mysql_real_escape_string($_POST['video_id']);
-$event_id  = mysql_real_escape_string($_POST['event_id']);
-$start_time = mysql_real_escape_string($_POST['start_time']);
-$end_time = mysql_real_escape_string($_POST['end_time']);
-$comments = mysql_real_escape_string($_POST['comments']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
+$event_id  = $boinc_db->real_escape_string($_POST['event_id']);
+$start_time = $boinc_db->real_escape_string($_POST['start_time']);
+$end_time = $boinc_db->real_escape_string($_POST['end_time']);
+$comments = $boinc_db->real_escape_string($_POST['comments']);
 
 $user_query = "UPDATE user SET total_events = total_events + 1 WHERE id = $user_id";
 $user_result = query_boinc_db($user_query);

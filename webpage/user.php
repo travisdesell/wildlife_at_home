@@ -50,7 +50,7 @@ function get_user($must_be_logged_in = true) {
         mysql_select_db("wildlife", $boinc_db);
     }
 
-    $authenticator = mysql_real_escape_string($authenticator);
+    $authenticator = $boinc_db->real_escape_string($authenticator);
     if ($authenticator) {
         $result = attempt_query_with_ping("SELECT * FROM user WHERE authenticator = '$authenticator'", $boinc_db);
         $g_logged_in_user__fixme = mysql_fetch_assoc($result);

@@ -74,7 +74,7 @@ do {
 $result = NULL;
 //TODO Update query so user doesn't see verified image - BCC
 if (array_key_exists('image_id', $_GET)) {
-    $image_id = mysql_real_escape_string($_GET['image_id']);
+    $image_id = $boinc_db->real_escape_string($_GET['image_id']);
     $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
 
 } else {

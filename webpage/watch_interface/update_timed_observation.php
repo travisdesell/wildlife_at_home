@@ -14,14 +14,14 @@ Mustache_Autoloader::register();
 $user = csg_get_user();
 $user_id = $user['id'];
 
-$observation_id = mysql_real_escape_string($_POST['observation_id']);
-$video_id = mysql_real_escape_string($_POST['video_id']);
-$event_id  = mysql_real_escape_string($_POST['event_id']);
-$start_time = mysql_real_escape_string($_POST['start_time']);
-$end_time = mysql_real_escape_string($_POST['end_time']);
-$start_time_s = mysql_real_escape_string($_POST['start_time_s']);
-$end_time_s = mysql_real_escape_string($_POST['end_time_s']);
-$tags = mysql_real_escape_string($_POST['tags']);
+$observation_id = $boinc_db->real_escape_string($_POST['observation_id']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
+$event_id  = $boinc_db->real_escape_string($_POST['event_id']);
+$start_time = $boinc_db->real_escape_string($_POST['start_time']);
+$end_time = $boinc_db->real_escape_string($_POST['end_time']);
+$start_time_s = $boinc_db->real_escape_string($_POST['start_time_s']);
+$end_time_s = $boinc_db->real_escape_string($_POST['end_time_s']);
+$tags = $boinc_db->real_escape_string($_POST['tags']);
 
 $comments = $_POST['comments'];
 //error_log("comments: '$comments'");
