@@ -69,7 +69,7 @@ function get_user($must_be_logged_in = true) {
 //        error_log("next url: " .$next_url);
 
         $next_url = urlencode($next_url);
-        Header("Location: http://volunteer.cs.und.edu/wildlife/login_form.php?next_url=$next_url");
+        Header("Location: http://csgrid.org/wildlife/login_form.php?next_url=$next_url");
         exit;
     }
 
