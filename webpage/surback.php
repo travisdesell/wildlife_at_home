@@ -579,15 +579,15 @@ function outputRadioNum($options, $depth, $iteration, $type) //List of items, nu
 
 function processRegis()
 {
-    $age = mysql_real_escape_string(urldecode($_POST['regis1'])); //Age
-    $sex = mysql_real_escape_string(urldecode($_POST['regis2'])); //Sex
-    $education = mysql_real_escape_string(urldecode($_POST['regis3'])); //Education
-    $profession = mysql_real_escape_string(urldecode($_POST['regis4'])); //Profession
+    $age = $boinc_db->real_escape_string(urldecode($_POST['regis1'])); //Age
+    $sex = $boinc_db->real_escape_string(urldecode($_POST['regis2'])); //Sex
+    $education = $boinc_db->real_escape_string(urldecode($_POST['regis3'])); //Education
+    $profession = $boinc_db->real_escape_string(urldecode($_POST['regis4'])); //Profession
     if($profession == "Student (Please describe field of study below)" || $profession == "Retired (Please describe past employment below)" || $profession == "Other (Please describe below)")
     {
         if(!empty($_POST['regis4tcon']))
         {
-            $profession .= "; " . mysql_real_escape_string(urldecode($_POST['regis4tcon']));
+            $profession .= "; " . $boinc_db->real_escape_string(urldecode($_POST['regis4tcon']));
         }
         else
         {
@@ -595,10 +595,10 @@ function processRegis()
         }
     }
 
-    $english = mysql_real_escape_string(urldecode($_POST['regis5'])); //Is english your first language?
-    $eng_fluent = mysql_real_escape_string(urldecode($_POST['regis6'])); //If not, are you fluent?
+    $english = $boinc_db->real_escape_string(urldecode($_POST['regis5'])); //Is english your first language?
+    $eng_fluent = $boinc_db->real_escape_string(urldecode($_POST['regis6'])); //If not, are you fluent?
 
-    $population = mysql_real_escape_string(urldecode($_POST['regis7'])); //Population of current city
+    $population = $boinc_db->real_escape_string(urldecode($_POST['regis7'])); //Population of current city
 
     $heard = ""; //How did you hear about wildlife @ home?
     $temp = "regis-8-";
@@ -610,7 +610,7 @@ function processRegis()
     $options = array("I want to make a contribution to the scientific knowledge."=>0, "I am interested in computer science."=>0, "I would like to build up as much credit as possible."=>0, "I would like to receive as many badges as possible."=>0, "I am interested in learning more about wildlife."=>0, "This is part of a school project."=>0, "Other. (Please explain)"=>1);
     $join = iterateCheck($join, $temp, 0, $options);
 
-    $participation = mysql_real_escape_string(urldecode($_POST['regis10'])); //How would you participate?
+    $participation = $boinc_db->real_escape_string(urldecode($_POST['regis10'])); //How would you participate?
 
     $activities = ""; //Do you participate in any of the following activities?
     $temp = "regis-11-";
@@ -636,7 +636,7 @@ function processRegis()
 
 function processGold()
 {
-    $participation = mysql_real_escape_string(urldecode($_POST['gold0']));
+    $participation = $boinc_db->real_escape_string(urldecode($_POST['gold0']));
     
     $speciesdata = "Sharp-Tailed Grouse: [Rating of " . $_POST['gold1'] . "; Given Reason: ";
     if(empty($_POST['gold1tcon']))
@@ -645,7 +645,7 @@ function processGold()
     }
     else
     {
-        $speciesdata .= mysql_real_escape_string(urldecode($_POST['gold1tcon']));
+        $speciesdata .= $boinc_db->real_escape_string(urldecode($_POST['gold1tcon']));
     }
     $speciesdata .= "]; Interior Least Tern: [Rating of " . $_POST['gold2'] . "; Given Reason: ";
     if(empty($_POST['gold2tcon']))
@@ -654,7 +654,7 @@ function processGold()
     }
     else
     {
-        $speciesdata .= mysql_real_escape_string(urldecode($_POST['gold2tcon']));
+        $speciesdata .= $boinc_db->real_escape_string(urldecode($_POST['gold2tcon']));
     }
     $speciesdata .= "]; Piping Plover: [Rating of " . $_POST['gold3'] . "; Given Reason: ";
     if(empty($_POST['gold3tcon']))
@@ -663,27 +663,27 @@ function processGold()
     }
     else
     {
-        $speciesdata .= mysql_real_escape_string(urldecode($_POST['gold3tcon']));
+        $speciesdata .= $boinc_db->real_escape_string(urldecode($_POST['gold3tcon']));
     }
     $speciesdata .= "]";
     
-    $perweek = mysql_real_escape_string(urldecode($_POST['gold4']));
-    $persitting = mysql_real_escape_string(urldecode($_POST['gold5']));
-    $vidspeed = mysql_real_escape_string(urldecode($_POST['gold6']));
+    $perweek = $boinc_db->real_escape_string(urldecode($_POST['gold4']));
+    $persitting = $boinc_db->real_escape_string(urldecode($_POST['gold5']));
+    $vidspeed = $boinc_db->real_escape_string(urldecode($_POST['gold6']));
     
-    $browser = mysql_real_escape_string(urldecode($_POST['gold7']));
+    $browser = $boinc_db->real_escape_string(urldecode($_POST['gold7']));
     if($browser == "Other")
     {
-        $browser .= " [Browser Listed: " . mysql_real_escape_string(urldecode($_POST['gold7tcon'])) . "]";
+        $browser .= " [Browser Listed: " . $boinc_db->real_escape_string(urldecode($_POST['gold7tcon'])) . "]";
     }
     
-    $otheract = mysql_real_escape_string(urldecode($_POST['gold8']));
+    $otheract = $boinc_db->real_escape_string(urldecode($_POST['gold8']));
     if($otheract == "Yes")
     {
-        $otheract .= "; " . mysql_real_escape_string(urldecode($_POST['gold8tcon']));
+        $otheract .= "; " . $boinc_db->real_escape_string(urldecode($_POST['gold8tcon']));
     }
     
-    $interesting = mysql_real_escape_string(urldecode($_POST['gold9']));
+    $interesting = $boinc_db->real_escape_string(urldecode($_POST['gold9']));
     if($interesting == "Yes")
     {
         $temp = "gold-10-";
@@ -696,13 +696,13 @@ function processGold()
         $interestelaboration = "[No elaboration given]";
     }
     
-    $learnednew = mysql_real_escape_string(urldecode($_POST['gold11tcon']));
+    $learnednew = $boinc_db->real_escape_string(urldecode($_POST['gold11tcon']));
     if(empty($learnednew))
     {
         $learnednew = "[No response]";
     }
     
-    $userexperience = mysql_real_escape_string(urldecode($_POST['gold12tcon']));
+    $userexperience = $boinc_db->real_escape_string(urldecode($_POST['gold12tcon']));
     if(empty($userexperience))
     {
         $userexperience = "[No response]";
@@ -713,20 +713,20 @@ function processGold()
     $motivation = "";
     $motivation = iterateCheck($motivation, $temp, 0, $options);
     
-    $otherspecies = mysql_real_escape_string(urldecode($_POST['gold14tcon']));
+    $otherspecies = $boinc_db->real_escape_string(urldecode($_POST['gold14tcon']));
     if(empty($otherspecies))
     {
         $otherspecies = "[No response]";
     }
     
-    $recommendation = mysql_real_escape_string(urldecode($_POST['gold15']));
+    $recommendation = $boinc_db->real_escape_string(urldecode($_POST['gold15']));
     if(empty($_POST['gold15tcon']))
     {
         $recommendation .= "; [No reasons given]";
     }
     else
     {
-        $recommendation .= "; " . mysql_real_escape_string(urldecode($_POST['gold15tcon']));
+        $recommendation .= "; " . $boinc_db->real_escape_string(urldecode($_POST['gold15tcon']));
     }
     
     $query = "INSERT INTO goldbadge (u_id, gold_participation, species_rank, hours_week, hours_sitting, video_speed, browser, other_activities, interesting, int_elaboration, learned, experience, motivation, other_species, recommendation) VALUES (" . $_POST['user'] . ", \"" . $participation . "\", \"" . $speciesdata . "\", \"" . $perweek . "\", \"" . $persitting . "\", \"" . $vidspeed . "\", \"" . $browser . "\", \"" . $otheract . "\", \"" . $interesting . "\", \"" . $interestelaboration . "\", \"" . $learnednew . "\", \"" . $userexperience . "\", \"" . $motivation . "\", \"" . $otherspecies . "\", \"" . $recommendation . "\")";
@@ -766,7 +766,7 @@ function iterateCheck($basevariable, $temp, $i, $options) //For use in form proc
                 $exfin = $_POST[$extemp];
                 if(!empty($exfin))
                 {
-                    $basevariable .= "; " . mysql_real_escape_string(urldecode($exfin));
+                    $basevariable .= "; " . $boinc_db->real_escape_string(urldecode($exfin));
                 }
                 else
                 {

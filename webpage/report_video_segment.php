@@ -10,10 +10,10 @@ require_once($cwd . '/user.php');
 
 $user = get_user();
 $reporter_id = $user['id'];
-$reporter_name = mysql_real_escape_string($user['name']);
+$reporter_name = $boinc_db->real_escape_string($user['name']);
 
-$report_comments = mysql_real_escape_string($_POST['report_comments']);
-$video_segment_id = mysql_real_escape_string($_POST['video_segment_id']);
+$report_comments = $boinc_db->real_escape_string($_POST['report_comments']);
+$video_segment_id = $boinc_db->real_escape_string($_POST['video_segment_id']);
 
 /**
  * Grab the other observations from the database.

@@ -12,12 +12,12 @@ require_once($cwd[__FILE__] . '/get_video_filter.php');
 require $cwd[__FILE__] . '/../../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-$video_filter_text = mysql_real_escape_string($_POST['video_filter_text']);
-$event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
-$video_min = mysql_real_escape_string($_POST['video_min']);
-$video_count = mysql_real_escape_string($_POST['video_count']);
-$showing_all_videos = mysql_real_escape_string($_POST['showing_all_videos']);
-$video_id_filter = mysql_real_escape_string($_POST['video_id_filter']);
+$video_filter_text = $boinc_db->real_escape_string($_POST['video_filter_text']);
+$event_filter_text = $boinc_db->real_escape_string($_POST['event_filter_text']);
+$video_min = $boinc_db->real_escape_string($_POST['video_min']);
+$video_count = $boinc_db->real_escape_string($_POST['video_count']);
+$showing_all_videos = $boinc_db->real_escape_string($_POST['showing_all_videos']);
+$video_id_filter = $boinc_db->real_escape_string($_POST['video_id_filter']);
 
 error_log("SHOWING ALL VIDEOS: $showing_all_videos\n");
 

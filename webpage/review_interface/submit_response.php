@@ -11,9 +11,9 @@ require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/my_query.php');
 require_once($cwd . '/user.php');
 
-$observation_id = mysql_real_escape_string($_POST['observation_id']);
-$response_comments = mysql_real_escape_string($_POST['response_comments']);
-$status = mysql_real_escape_string($_POST['validation_status']);
+$observation_id = $boinc_db->real_escape_string($_POST['observation_id']);
+$response_comments = $boinc_db->real_escape_string($_POST['response_comments']);
+$status = $boinc_db->real_escape_string($_POST['validation_status']);
 
 $user = get_user();
 $responder_id = $user['id'];

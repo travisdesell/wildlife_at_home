@@ -10,12 +10,12 @@ require_once($cwd[__FILE__] . '/get_video_filter.php');
 
 require_once($cwd[__FILE__] . '/generate_count_nav.php');
 
-$video_min = mysql_real_escape_string($_POST['video_min']);
-$video_count = mysql_real_escape_string($_POST['video_count']);
-$video_filter_text = mysql_real_escape_string($_POST['video_filter_text']);
-$event_filter_text = mysql_real_escape_string($_POST['event_filter_text']);
-$showing_all_videos = mysql_real_escape_string($_POST['showing_all_videos']);
-$video_id_filter = mysql_real_escape_string($_POST['video_id_filter']);
+$video_min = $boinc_db->real_escape_string($_POST['video_min']);
+$video_count = $boinc_db->real_escape_string($_POST['video_count']);
+$video_filter_text = $boinc_db->real_escape_string($_POST['video_filter_text']);
+$event_filter_text = $boinc_db->real_escape_string($_POST['event_filter_text']);
+$showing_all_videos = $boinc_db->real_escape_string($_POST['showing_all_videos']);
+$video_id_filter = $boinc_db->real_escape_string($_POST['video_id_filter']);
 
 if ($video_min == NULL) $video_min = 0;
 if ($video_count == NULL) $video_count = 5;

@@ -198,12 +198,12 @@ $start_time = time();
 
 $species_id = -1;
 if (array_key_exists("species", $_GET)) {
-    $species_id = mysql_real_escape_string($_GET['species']);
+    $species_id = $wildlife_db->real_escape_string($_GET['species']);
 }
 
 $location_id = -1;
 if (array_key_exists("location", $_GET)) {
-    $location_id = mysql_real_escape_string($_GET['location']);
+    $location_id = $wildlife_db->real_escape_string($_GET['location']);
 }
 
 //add some of the information about the video to javascript

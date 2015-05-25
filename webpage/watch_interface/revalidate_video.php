@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . '/../watch_interface/observation_table.php');
 $user = csg_get_user();
 $user_id = $user['id'];
 
-$video_id = mysql_real_escape_string($_POST['video_id']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
 
 $query = "UPDATE video_2 SET needs_revalidation = 1 WHERE id = $video_id";
 error_log("QUERY: $query");

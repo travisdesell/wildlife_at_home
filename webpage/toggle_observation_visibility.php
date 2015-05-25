@@ -8,7 +8,7 @@ require_once($cwd . '/wildlife_db.php');
 require_once($cwd . '/my_query.php');
 require_once($cwd . '/user.php');
 
-$observation_id = mysql_real_escape_string($_POST['observation_id']);
+$observation_id = $boinc_db->real_escape_string($_POST['observation_id']);
 $user = get_user();
 $user_id = $user['id'];
 

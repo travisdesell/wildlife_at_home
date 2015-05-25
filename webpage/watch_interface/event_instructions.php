@@ -9,8 +9,8 @@ require_once($cwd[__FILE__] . "/../../../citizen_science_grid/my_query.php");
 //require $cwd[__FILE__] . '/../mustache.php/src/Mustache/Autoloader.php';
 //Mustache_Autoloader::register();
 
-//$species_id = mysql_real_escape_string($_POST['species_id']);
-//$expert_only = mysql_real_escape_string($_POST['expert_only']);
+//$species_id = $boinc_db->real_escape_string($_POST['species_id']);
+//$expert_only = $boinc_db->real_escape_string($_POST['expert_only']);
 
 function get_event_instructions_html($species_id, $expert_only, $modal = 1) {
     global $cwd;

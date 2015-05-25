@@ -11,10 +11,10 @@ require_once($cwd[__FILE__] . '/../watch_interface/observation_table.php');
 $user = csg_get_user();
 $user_id = $user['id'];
 
-$video_id = mysql_real_escape_string($_POST['video_id']);
-$species_id = mysql_real_escape_string($_POST['species_id']);
-$location_id = mysql_real_escape_string($_POST['location_id']);
-//$random = mysql_real_escape_string($_POST['random']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
+$species_id = $boinc_db->real_escape_string($_POST['species_id']);
+$location_id = $boinc_db->real_escape_string($_POST['location_id']);
+//$random = $boinc_db->real_escape_string($_POST['random']);
 
 //get a simple hash for the location and species id, so all combinations are unique
 //this is good unless we get over 100 locations (which won't happen for awhile, if ever)
