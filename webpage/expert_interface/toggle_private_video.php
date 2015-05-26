@@ -1,29 +1,22 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
 
-
-require_once($cwd . '/wildlife_db.php');
-require_once($cwd . '/my_query.php');
-require_once($cwd . '/user.php');
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/user.php");
 
 $video_id = $boinc_db->real_escape_string($_POST['video_id']);
 $is_private = $boinc_db->real_escape_string($_POST['is_private']);
 
 error_log("TOGGLING PRIVATE VIDEO -- video_id: $video_id, is_private: $is_private");
 
-if (!is_special_user__fixme()) {
+$user = csg_get_user();
+if (!csg_is_special_user($user, true)) {
     error_log("non project scientists cannot submit expert observations.");
     die();
 }
-
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
 
 if ($is_private == 'false') {
     $release_to_public = 'false';
@@ -34,15 +27,13 @@ if ($is_private == 'false') {
 $query = "UPDATE video_2 SET release_to_public = $release_to_public WHERE id = $video_id";
 error_log($query);
 
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$result = query_wildlife_video_db($query);
 
 
 $query = "UPDATE video_segment_2 SET release_to_public = $release_to_public WHERE video_id = $video_id";
 error_log($query);
 
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$result = query_wildlife_video_db($query);
 
 $response['is_private'] = $release_to_public;
 

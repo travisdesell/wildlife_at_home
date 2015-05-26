@@ -1,45 +1,35 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
 
-require_once($cwd . '/wildlife_db.php');
-require_once($cwd . '/my_query.php');
-require_once($cwd . '/user.php');
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/user.php");
 
 $video_id = $boinc_db->real_escape_string($_POST['video_id']);
 
-if (!is_special_user__fixme()) {
+$user = csg_get_user();
+if (!csg_is_special_user($user, true)) {
     error_log("non project scientists cannot toggle the expert flag.");
     die();
 }
-
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
 $query = "SELECT count(*) FROM timed_observations WHERE video_id = $video_id";
 
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$result = query_wildlife_video_db($query);
 
-$row = mysql_fetch_assoc($result);
+$row = $result->fetch_assoc();
 $previous = $row['count(*)'];
 
 if ($previous == 0) $previous = 'UNWATCHED';
 else $previous = 'WATCHED';
 
 $query = "UPDATE video_2 SET expert_finished = IF (expert_finished != 'FINISHED', 'FINISHED', '$previous') WHERE id = $video_id";
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$result = query_wildlife_video_db($query);
 
 $query = "SELECT expert_finished FROM video_2 WHERE id = $video_id";
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
+$result = query_wildlife_video_db($query);
 
-echo json_encode(mysql_fetch_assoc($result));
+echo json_encode($result->fetch_assoc());
 
 ?>

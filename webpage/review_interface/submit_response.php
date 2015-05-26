@@ -1,42 +1,27 @@
 <?php
 
-$cwd = __FILE__;
-if (is_link($cwd)) $cwd = readlink($cwd);
-$cwd = dirname(dirname($cwd));
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname(dirname($cwd[__FILE__]));
 
-//require $cwd . '/../mustache.php/src/Mustache/Autoloader.php';
-//Mustache_Autoloader::register();
-
-require_once($cwd . '/wildlife_db.php');
-require_once($cwd . '/my_query.php');
-require_once($cwd . '/user.php');
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/user.php");
 
 $observation_id = $boinc_db->real_escape_string($_POST['observation_id']);
 $response_comments = $boinc_db->real_escape_string($_POST['response_comments']);
 $status = $boinc_db->real_escape_string($_POST['validation_status']);
 
-$user = get_user();
+$user = csg_get_user();
 $responder_id = $user['id'];
 $responder_name = $user['name'];
 
-if (!is_special_user__fixme($user, true)) return;
-
-ini_set("mysql.connect_timeout", 300);
-ini_set("default_socket_timeout", 300);
-
-$wildlife_db = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd);
-mysql_select_db("wildlife_video", $wildlife_db);
-
+if (!csg_is_special_user($user, true)) return;
 
 /**
  *  If event swapped between invalid, unvalidated, valid then change valid event count for user
  */
 
 $query = "UPDATE timed_observations SET response_comments = '$response_comments', report_status = 'RESPONDED', responder_id = $responder_id, responder_name = '$responder_name', status = '$status' WHERE id = $observation_id";
-$result = attempt_query_with_ping($query, $wildlife_db);
-if (!$result) {
-    error_log("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-    die ("MYSQL Error (" . mysql_errno($wildlife_db) . "): " . mysql_error($wildlife_db) . "\nquery: $query\n");
-}
+$result = query_wildlife_video_db($query);
 
 ?>
