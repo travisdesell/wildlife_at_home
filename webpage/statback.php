@@ -1,6 +1,11 @@
 <?php
 
-require_once("/home/tdesell/wildlife_at_home/webpage/wildlife_db.php");
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
+
+
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 function getEventsDay($connection, $species, $nest)
 {
@@ -14,11 +19,9 @@ function getEventsDay($connection, $species, $nest)
     
     $string .= " ORDER BY video_2.start_time";
     
-    $query = mysql_query($string, $connection);
+    $query = query_wildlife_video_db($string);
     
-    echo mysql_error();
-    
-    while($row = mysql_fetch_array($query))
+    while($row = $query->fetch_array())
     {
         $day = explode(" ", $row['start_time']);
         
@@ -53,9 +56,9 @@ function getEventsDuration($connection, $species)
         $string .= " AND v2.location_id=" . $nest;
     }
     
-    $query = mysql_query($string, $connection);
+    $query = query_wildlife_video_db($string);
     
-    while($row = mysql_fetch_array($query))
+    while($row = $query->fetch_array())
     {
         $tempstart = explode(":", $row['start_time']);
         $tempend = explode(":", $row['end_time']);
@@ -108,10 +111,10 @@ function getEventsTime($connection, $species)
         $string .= " AND v2.location_id=" . $nest;
     }
     
-    $query = mysql_query($string, $connection);
+    $query = query_wildlife_video_db($string);
     
     
-    while($row = mysql_fetch_array($query))
+    while($row = $query->fetch_array())
     {
         $time[count($time)] = $row['start_time'];
     }
@@ -502,20 +505,6 @@ function runOperations($event_type, $data)
         <h5>Confidence Interval (95%) High Endpoint: " . $confhighhr . ":" . $confhighmin . ":" . $confhighsec . "</h5>
         ";
     }
-}
-
-function getconnection() //Getting mysql connection
-{
-    global $wildlife_user, $wildlife_passwd;
-    $video_con = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd, TRUE);
-    //Making connection and setting DB
-    if(!$video_con)
-    {
-        echo "Could not connect to the server for some reason";
-        return 0;
-    }
-    mysql_select_db("wildlife_video", $video_con);
-    return $video_con;
 }
 
 function runRoutine($species, $nest) //Function to run all of the functions and output the stats, given a species id and nest site

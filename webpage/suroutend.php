@@ -1,13 +1,11 @@
 <?php
 
-/*Backend for the new surout.php*/
-require_once("/home/tdesell/wildlife_at_home/webpage/wildlife_db.php");
 
-$connection = getconnection(); //Let's just reuse this function
-if(empty($connection))
-{
-	die("No connection to the server could be made.");
-}
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
+
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 //Registration survey stuff
 
@@ -38,11 +36,11 @@ function outputRegis()
 
 //Get data
 $query = "SELECT * FROM registration ORDER BY id ASC";
-$result = mysql_query($query, $connection);
+$result = query_wildlife_video_db($query);
 
 $evebit = 0;
 
-while($row = mysql_fetch_array($result))
+while($row = $result->fetch_array())
 {
 	
 	if($evebit == 0)
@@ -125,11 +123,11 @@ function outputGold()
 	</tr>";
 	
 	$query = "SELECT * FROM goldbadge ORDER BY id ASC";
-	$result = mysql_query($query, $connection);
+	$result = query_wildlife_video_db($query);
 	
 	$evebit = 0;
 	
-	while($row = mysql_fetch_array($result))
+	while($row = $result->fetch_array())
 	{
 		if($evebit == 0)
 		{
@@ -188,20 +186,6 @@ while($row = mysql_fetch_array($result))
 
 file_put_contents($temp, $basestring);*/
 
-
-function getconnection() //Getting mysql connection
-{
-    global $wildlife_user, $wildlife_passwd;
-    $video_con = mysql_connect("wildlife.und.edu", $wildlife_user, $wildlife_passwd, TRUE);
-    //Making connection and setting DB
-    if(!$video_con)
-    {
-        echo "Could not connect to the server for some reason";
-        return 0;
-    }
-    mysql_select_db("wildlife_video", $video_con);
-    return $video_con;
-}
 
 function commaReplacement($row, $mode) //Replacing commas, but also the replaced quotes for easier readability. I hope you like nested str_replaces
 {
