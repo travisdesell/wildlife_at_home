@@ -1,5 +1,12 @@
 <?php
 
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
+
+require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+
+
 function getExpert($video_id) {
     $query = "SELECT user_id FROM timed_observations WHERE video_id = $video_id AND expert = 1 LIMIT 1";
     $result = query_wildlife_video_db($query);

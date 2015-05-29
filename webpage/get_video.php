@@ -12,9 +12,9 @@ require_once($cwd[__FILE__] . '/watch_interface/observation_table.php');
 require $cwd[__FILE__] . '/../../mustache.php/src/Mustache/Autoloader.php';
 Mustache_Autoloader::register();
 
-$video_id = mysql_real_escape_string($_POST['video_id']);
-$video_file = mysql_real_escape_string($_POST['video_file']);
-$video_converted = mysql_real_escape_string($_POST['video_converted']);
+$video_id = $boinc_db->real_escape_string($_POST['video_id']);
+$video_file = $boinc_db->real_escape_string($_POST['video_file']);
+$video_converted = $boinc_db->real_escape_string($_POST['video_converted']);
 
 $user = csg_get_user(true);
 
