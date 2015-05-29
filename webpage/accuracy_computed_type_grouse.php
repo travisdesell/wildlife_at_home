@@ -44,21 +44,13 @@ if (!isset($beta)) {
 $type_query = "SELECT id, name FROM observation_types";
 $type_result = query_wildlife_video_db($type_query, $wildlife_db);
 
-$species_query = "SELECT id, name FROM species";
-$species_result = query_wildlife_video_db($species_query, $wildlife_db);
-
-$algorithm_query = "SELECT id, name FROM event_algorithms";
-$algorithm_result = query_wildlife_video_db($algorithm_query, $wildlife_db);
-
-/*
-$species = array();
-while ($species_row = $species_result->fetch_assoc()) {
-    $species_id = $species_row['id'];
-    $species_name = $species_row['name'];
-    $species[$species_id] = $species_name;
+$algorithm_query = "SELECT id, name FROM event_algorithms WHERE ";
+if ($beta) {
+    $algorithm_query = $algorithm_query . "beta_version_id >= 0";
+} else {
+    $algorithm_query = $algorithm_query . "main_version_id >= 0";
 }
-ksort($species);
-*/
+$algorithm_result = query_wildlife_video_db($algorithm_query, $wildlife_db);
 
 $algs = array();
 while ($alg_row = $algorithm_result->fetch_assoc()) {

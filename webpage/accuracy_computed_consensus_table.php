@@ -79,8 +79,8 @@ echo "
             data.addColumn('number', 'Event Count');
             data.addColumn('number', 'Any Algorithm');
             data.addColumn('number', 'All Algorithms');
-            data.addColumn('number', 'MOG & ViBe Algorithms');
-            data.addColumn('number', 'MOG & PBAS Algorithms');
+            data.addColumn('number', 'AccAvg & ViBe Algorithms');
+            data.addColumn('number', 'AccAvg & PBAS Algorithms');
             data.addColumn('number', 'ViBe & PBAS Algorithms');
 ";
 
@@ -113,8 +113,8 @@ while ($type_row = $type_result->fetch_assoc()) {
     $consensus_num = 0;
     $consensus_any_matches = 0;
     $consensus_all_matches = 0;
-    $consensus_mog_vibe_matches = 0;
-    $consensus_mog_pbas_matches = 0;
+    $consensus_avg_vibe_matches = 0;
+    $consensus_avg_pbas_matches = 0;
     $consensus_vibe_pbas_matches = 0;
 
     while ($timed_row = $timed_result->fetch_assoc()) {
@@ -122,8 +122,8 @@ while ($type_row = $type_result->fetch_assoc()) {
 
         $any_match_start = FALSE;
         $any_match_end = FALSE;
-        $mog_match_start = FALSE;
-        $mog_match_end = FALSE;
+        $avg_match_start = FALSE;
+        $avg_match_end = FALSE;
         $vibe_match_start = FALSE;
         $vibe_match_end = FALSE;
         $pbas_match_start = FALSE;
@@ -136,8 +136,8 @@ while ($type_row = $type_result->fetch_assoc()) {
             if($start_match) {
                 $any_match_start = TRUE;
                 $all_match_start += 1;
-                if ($a_id == '1') {
-                    $mog_match_start = TRUE;
+                if ($a_id == '4') {
+                    $avg_match_start = TRUE;
                 } elseif ($a_id == '2') {
                     $vibe_match_start = TRUE;
                 } elseif ($a_id == '3') {
@@ -147,8 +147,8 @@ while ($type_row = $type_result->fetch_assoc()) {
             if($end_match) {
                 $any_match_end = TRUE;
                 $all_match_end += 1;
-                if ($a_id == '1') {
-                    $mog_match_end = TRUE;
+                if ($a_id == '4') {
+                    $avg_match_end = TRUE;
                 } elseif ($a_id == '2') {
                     $vibe_match_end = TRUE;
                 } elseif ($a_id == '3') {
@@ -165,25 +165,25 @@ while ($type_row = $type_result->fetch_assoc()) {
             $consensus_any_matches += 1;
         }
 
-        if($all_match_start == count($algs)) {
+        if($all_match_start == count($algs) - 1) {
             $consensus_all_matches += 1;
         }
-        if($all_match_end == count($algs)) {
+        if($all_match_end == count($algs) - 1) {
             $consensus_all_matches += 1;
         }
 
-        if ($mog_match_start AND $vibe_match_start) {
-            $consensus_mog_vibe_matches += 1;
+        if ($avg_match_start AND $vibe_match_start) {
+            $consensus_avg_vibe_matches += 1;
         }
-        if ($mog_match_end AND $vibe_match_end) {
-            $consensus_mog_vibe_matches += 1;
+        if ($avg_match_end AND $vibe_match_end) {
+            $consensus_avg_vibe_matches += 1;
         }
 
-        if ($mog_match_start AND $pbas_match_start) {
-            $consensus_mog_pbas_matches += 1;
+        if ($avg_match_start AND $pbas_match_start) {
+            $consensus_avg_pbas_matches += 1;
         }
-        if ($mog_match_end AND $pbas_match_end) {
-            $consensus_mog_pbas_matches += 1;
+        if ($avg_match_end AND $pbas_match_end) {
+            $consensus_avg_pbas_matches += 1;
         }
 
         if ($vibe_match_start AND $pbas_match_start) {
@@ -204,9 +204,9 @@ while ($type_row = $type_result->fetch_assoc()) {
         echo ",";
         echo "$consensus_all_matches";
         echo ",";
-        echo "$consensus_mog_vibe_matches";
+        echo "$consensus_avg_vibe_matches";
         echo ",";
-        echo "$consensus_mog_pbas_matches";
+        echo "$consensus_avg_pbas_matches";
         echo ",";
         echo "$consensus_vibe_pbas_matches";
         echo "],";
