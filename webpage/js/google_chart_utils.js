@@ -8,7 +8,7 @@ function getDate(date_string) {
     return null;
 }
 
-function onlyUnique(value, index, self) { 
+function onlyUnique(value, index, self) {
         return self.indexOf(value) === index;
 }
 
@@ -45,6 +45,23 @@ function drawWatchTimeline(video_id, event_data) {
     var options = {
         height: 160
     };
+    google.visualization.events.addListener(chart, 'select', function() {
+        var video_id = $('.fast-forward-button').attr('video_id');
+        var video = $('#wildlife-video-' + video_id).get(0);
+
+        var selection = chart.getSelection();
+        for (var i = 0; i < selection.length; i++) {
+            var item = selection[i];
+            if (item.row != null) {
+                var video_start_string = $("#wildlife-video-" + video_id).attr("start_time");
+                var video_start_time = getDate(video_start_string);
+                console.log("Start time: " + video_start_time);
+                var event_start_time = data.getValue(item.row, 1);
+                var seconds = (event_start_time - video_start_time)/1000 - 10;
+            }
+        }
+        video.currentTime = seconds;
+    });
     chart.draw(data, options);
 }
 

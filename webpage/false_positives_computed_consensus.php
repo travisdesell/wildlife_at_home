@@ -37,7 +37,12 @@ if (!isset($sample)) {
     $sample = "everyone"; // or "experts" or "users"
 }
 
-$algorithm_query = "SELECT id, name FROM event_algorithms";
+$algorithm_query = "SELECT id, name FROM event_algorithms WHERE ";
+if ($beta) {
+    $algorithm_query = $algorithm_query . "beta_version_id >= 0";
+} else {
+    $algorithm_query = $algorithm_query . "main_version_id >= 0";
+}
 $algorithm_result = query_wildlife_video_db($algorithm_query, $wildlife_db);
 
 $algs = array();

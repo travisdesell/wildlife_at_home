@@ -44,9 +44,13 @@ if (!isset($sample)) {
 $species_query = "SELECT id, name FROM species WHERE id = $species";
 $species_result = query_wildlife_video_db($species_query, $wildlife_db);
 
-$algorithm_query = "SELECT id, name FROM event_algorithms";
+$algorithm_query = "SELECT id, name FROM event_algorithms WHERE ";
+if ($beta) {
+    $algorithm_query = $algorithm_query . "beta_version_id >= 0";
+} else {
+    $algorithm_query = $algorithm_query . "main_version_id >= 0";
+}
 $algorithm_result = query_wildlife_video_db($algorithm_query, $wildlife_db);
-
 
 $algs = array();
 while ($alg_row = $algorithm_result->fetch_assoc()) {
@@ -152,14 +156,26 @@ while ($species_row = $species_result->fetch_assoc()) {
     }
 
     if ($add_data) {
+        $done = FALSE;
         foreach($thresholds as $thresh) {
-            echo "[";
-            echo $thresh;
+            $finished_algs =  0;
             foreach($alg_num_false as $a_id => $a_val) {
-                echo ",";
-                echo $alg_useful_vids[$a_id][$thresh]/$num_videos * 100;
+                if ($alg_useful_vids[$a_id][$thresh]/$num_videos >= 0.99) {
+                    $finished_algs = $finished_algs + 1;
+                }
+                if ($finished_algs == count($alg_num_false) AND $thresh % 50 == 1) {
+                    $done = TRUE;
+                }
             }
-            echo "],";
+            if (!$done) {
+                echo "[";
+                echo $thresh;
+                foreach($alg_num_false as $a_id => $a_val) {
+                    echo ",";
+                    echo $alg_useful_vids[$a_id][$thresh]/$num_videos * 100;
+                }
+                echo "],";
+            }
         }
     }
 }
@@ -170,14 +186,15 @@ echo "
 ";
 echo "
             var options = {
-                title: 'Percentage of Videos with Useful Computed Results vs False Postive Percentage Threshold',
+                title: 'Videos with Useful Computed Results vs False Postive Threshold',
                 hAxis: {
-                    title: 'False Postive Pecentage Threshold',
-                    minValue: 0,
-                    maxValue: 100
+                    title: 'False Postive Threshold',
+                    format: '#\'%\'',
+                    minValue: 0
                 },
                 vAxis: {
-                    title: 'Percent of Useful Videos',
+                    title: 'Useful Videos',
+                    format: '#\'%\'',
                     minValue: 0,
                     maxValue: 100
                 }

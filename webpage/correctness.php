@@ -152,9 +152,9 @@ function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer, $beta =
     while ($row = $result->fetch_assoc()) {
         $start_sec = $row['start_time'] + $buffer;
         $end_sec = $row['end_time'] - $buffer;
-        $total_seconds += $end_sec - $start_sec;
+        $total_seconds += $end_sec - $start_sec + 1;
 
-        $match_query = "SELECT * FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
+        $match_query = "SELECT start_time_s, end_time_s FROM computed_events AS comp INNER JOIN event_algorithms AS alg ON alg.id = comp.algorithm_id AND comp.version_id = ";
         if ($beta) {
             $match_query = $match_query . "alg.beta_version_id ";
         } else {
@@ -164,9 +164,15 @@ function getFalsePositives($video_id, $user_id, $algorithm_ids, $buffer, $beta =
 
         $match_result = query_wildlife_video_db($match_query);
         $num_matches += $match_result->num_rows;
+
+        $num_false_seconds = 0;
+        while ($match_row = $match_result->fetch_assoc()) {
+            $num_false_seconds += $match_row['end_time_s'] - $match_row['start_time_s'] + 1;
+        }
     }
     assert($total_seconds > 0);
-    return array($num_matches, $total_seconds);
+    //return array($num_matches, $total_seconds);
+    return array($num_false_seconds, $total_seconds);
 }
 
 /* Queries the user observation table */
