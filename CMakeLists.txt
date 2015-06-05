@@ -35,31 +35,40 @@ unset(Boost_INCLUDE_DIR CACHE)
 unset(Boost_LIBRARY_DIRS CACHE)
 
 #This may need to be updated or Linux/Windows
-set(CMAKE_LIBRARY_PATH /home/tdesell/boost_1_53_0/stage/lib ${CMAKE_LIBRARY_PATH} /Users/deselt/Dropbox/software/opencv/lib /opt/local/lib)
-
-#this adds the undvc_common FindX.cmake modules to look for BOINC and OpenCV
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/undvc_common/cmake/Modules/")
-
-#
-#   Just in case we need Boost
-#
-#set(BOOST_LIB_PREFIX "lib")
-#set(Boost_LIB_PREFIX "lib")
-#set(BOOST_COMPILER "-vc100")
-#set(Boost_COMPILER "-vc100")
-#set(Boost_ADDITIONAL_VERSIONS "1.47" "1.47.0")
-#set(Boost_USE_MULTITHREADED  OFF)
-#find_package(Boost REQUIRED filesystem system)
-#include_directories (${Boost_INCLUDE_DIR})
-
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
 include_directories (${PROJECT_SOURCE_DIR})
 
+#This will look for the undvc_common library, which should be in the
+#same directory as TAO. It should be compiled in the ../undvc_common/build
+#directory
+FIND_PATH(UNDVC_COMMON_INCLUDE_DIR file_io.hxx
+    ../undvc_common         #add addiitonal paths here if undvc_common is in a different directory
+    )
+
+MESSAGE(STATUS "UNDVC_COMMON include directory: ${UNDVC_COMMON_INCLUDE_DIR}")
+
+FIND_LIBRARY(UNDVC_COMMON_LIBRARY
+    NAMES undvc_common
+    PATHS ../undvc_common/build         #add additional paths here if undvc_common is in a different directory
+                                        #or if it has been build in a different directory
+    PATH_SUFFIXES lib
+    )
+MESSAGE(STATUS "UNDVC_COMMON library: ${UNDVC_COMMON_LIBRARY}")
+
+include_directories(${UNDVC_COMMON_INCLUDE_DIR})
+
+#UNDVC_COMMON has the FindBOINC.cmake and FindMYSQL.cmake files
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${UNDVC_COMMON_INCLUDE_DIR}/cmake/Modules/")
+
 find_package(BOINC)
-#find_package(OpenCV COMPONENTS highgui imageproc)
+message(STATUS "BOINC SOURCE: $ENV{BOINC_SOURCE}")
 
 add_definitions( -D_BOINC_ )
 
-add_subdirectory(undvc_common)
+find_package(MySQL)
+find_package(Boost REQUIRED COMPONENTS system)
+
+link_directories(${Boost_LIBRARY_DIRS})
+add_subdirectory(boinc_daemons)
 
 #add_subdirectory(client)
-add_subdirectory(boinc_daemons)

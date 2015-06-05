@@ -51,8 +51,8 @@
 
 #include "mysql.h"
 
-#include "undvc_common/arguments.hxx"
-#include "undvc_common/file_io.hxx"
+#include "arguments.hxx"
+#include "file_io.hxx"
 
 #include "wildlife_surf.hpp"
 

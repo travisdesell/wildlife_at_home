@@ -61,9 +61,9 @@ echo "
 
                     <h3>Reference</h3>
                     <p align='justify'>
-                        This data set was released in conjunction with a publication for the <a href='http://escience2015.mnm-team.org'>E-Science 2015 conference</a>: <!-- Please cite the following paper if you intend to use this dataset: -->
+                        This data set was released in conjunction with a publication for the <a href='http://escience2015.mnm-team.org'>eScience 2015 conference</a>: <!-- Please cite the following paper if you intend to use this dataset: -->
                         <ul>
-                            <li><b>A Comparison of Background Subtraction Algorithms for Detecting Avian Nesting Events in Uncontrolled Outdoor Video</b>. Kyle Goehner, Travis Desell, Rebecca Eckroad, Leila Mohsenian, Paul Burr, Nicholas Caswell, Alicia Andes and Susan-Ellis-Felege. In the <i>11th IEEE International Conference on eScience</i>.  Munich, Germany, August 31 - September 04, 2015. <i>Under Review</i>.</li>
+                            <li><b>A Comparison of Background Subtraction Algorithms for Detecting Avian Nesting Events in Uncontrolled Outdoor Video</b>. Kyle Goehner, Travis Desell, Rebecca Eckroad, Leila Mohsenian, Paul Burr, Nicholas Caswell, Alicia Andes and Susan-Ellis-Felege. In the <i>11th IEEE International Conference on eScience</i>.  Munich, Germany, August 31 - September 04, 2015.</li>
                         </ul>
                     </p>
                 </div> <!--well-->

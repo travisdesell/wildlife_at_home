@@ -55,8 +55,9 @@
 
 #include "mysql.h"
 
-#include "undvc_common/arguments.hxx"
-#include "undvc_common/file_io.hxx"
+//fromt UNDVC_CMMON
+#include "arguments.hxx"
+#include "file_io.hxx"
 
 
 const char* app_name = NULL;

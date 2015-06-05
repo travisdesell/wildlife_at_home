@@ -37,8 +37,9 @@
 #include <string>
 #include <algorithm>
 
-#include "undvc_common/parse_xml.hxx"
-#include "undvc_common/file_io.hxx"
+//from UNDV_COMMON
+#include "parse_xml.hxx"
+#include "file_io.hxx"
 
 using namespace std;
 
