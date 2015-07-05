@@ -44,10 +44,6 @@ if ($modulo > -1) {
      */
     echo "This is child $modulo of $number_of_processes\n";
 
-    //Connect to the database.
-    mysql_connect("localhost", $wildlife_user, $wildlife_pw);
-    mysql_select_db($wildlife_db);
-
     $iteration = 0;
     $videos_not_found = 0;
 
@@ -55,35 +51,40 @@ if ($modulo > -1) {
         $query = "";
 
         //Iterate over all the locations and species so we're generating
-        //videos for them someone uniformly.
-        if ($iteration % 5 == 0) {
+        //videos for them somewhat uniformly.
+        if ($iteration % 6 == 0) {
             $species_id = 1;
             $location_id = 1;
-        } else if ($iteration % 5 == 1) {
+        } else if ($iteration % 6 == 1) {
             $species_id = 1;
             $location_id = 2;
-        } else if ($iteration % 5 == 2) {
+        } else if ($iteration % 6 == 2) {
             $species_id = 1;
             $location_id = 3;
-        } else if ($iteration % 5 == 3) {
+        } else if ($iteration % 6 == 3) {
             $species_id = 2;
             $location_id = 4;
-        } else if ($iteration % 5 == 4) {
+        } else if ($iteration % 6 == 4) {
             $species_id = 3;
             $location_id = 4;
+        } else if ($iteration % 6 == 5) {
+            $species_id = 4;
+            $location_id = 7;
         }
         $iteration++;
 
         $query = "SELECT id, archive_filename, watermarked_filename, processing_status, duration_s FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id LIMIT 1";
         echo $query . "\n";
 
-        $result = mysql_query($query);
-        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-
-        $row = mysql_fetch_assoc($result);
+        $result = query_video_db($query);
+        if(!$result) {
+            echo("Query error: $videos_not_found\n");
+        } else {
+            $row = $result->fetch_assoc();
+        }
 
         if (!$row) { 
-            echo("No videos left to convert, attempt: $videos_not_found");
+            echo("No videos left to convert, attempt: $videos_not_found\n");
             $videos_not_found++;
             continue;
             if ($videos_not_found >= 5) die("No video left to convert with modulo $modulo!");
@@ -112,10 +113,15 @@ if ($modulo > -1) {
 
         //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
         //use HTML5 to stream it
-        $watermark_file = "/video/wildlife/watermark.png";
+        $und_watermark_file = "/video/wildlife/und_watermark.png";
+        $duck_watermark_file = "/video/wildlife/duck_watermark.png";
 
         //This should generate better sized videos
-        $command = "/home/tdesell/ffmpeg/bin/ffmpeg -y -i $archive_filename -i $watermark_file -vcodec libx264 -preset slow -filter_complex 'overlay=10:10' -b:v 200k $watermarked_filename.mp4 2>&1; echo $?";
+        if($location_id == 7) {
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec h264 -qscale:v 3 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.mp4 2>&1; echo $?";
+        } else {
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -vcodec libx264 -preset slow -filter_complex 'overlay=x=10:y=10' -b:v 200k $watermarked_filename.mp4 2>&1; echo $?";
+        }
 
         echo "\n\n$command\n\n";
         $output_status = shell_exec($command);
@@ -131,7 +137,12 @@ if ($modulo > -1) {
 
         echo "shell exec 1 completed\n\n";
 
-        $command = "/usr/bin/ffmpeg -y -i $watermarked_filename.mp4 -vcodec libtheora -acodec libvorbis -ab 160000 -g 30 $watermarked_filename.ogv 2>&1; echo $?";
+        if($location_id == 7) {
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec theora -qscale:v 3 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.ogv 2>&1; echo $?";
+        } else {
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -vcodec theora -preset slow -filter_complex 'overlay=x=10:y=10' -b:v 200k $watermarked_filename.ogv 2>&1; echo $?";
+        }
+
         echo "\n\n$command\n\n";
 
         $output_status = shell_exec($command);
@@ -155,11 +166,8 @@ if ($modulo > -1) {
         $filesize = filesize($watermarked_filename . ".mp4");
 
         $query = "UPDATE video_2 SET processing_status = 'WATERMARKED', size = $filesize, md5_hash = '$md5_hash', ogv_generated = true, needs_reconversion = false WHERE id = " . $row['id'];
-        $result = mysql_query($query);
-        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
-//        die();
+        $result = query_video_db($query);
     }
-
 } else {
     /**
      * This is the parent process. It just needs to wait for the child
@@ -175,5 +183,5 @@ if ($modulo > -1) {
     }
 }
 
-
 ?>
+
