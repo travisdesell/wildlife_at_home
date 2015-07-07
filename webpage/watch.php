@@ -234,7 +234,7 @@ if ($user_id == NULL) {
         </div> <!--container-->
         </div> <!--well-->";
 
-} else if ($species_id < 0 || $species_id > 3) {
+} else if ($species_id < 0 || $species_id > 4) {
     echo "
         <div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:15px; padding-bottom:15px;'>
         <div class='container'>
@@ -246,7 +246,7 @@ if ($user_id == NULL) {
         </div> <!--container-->
         </div> <!--well-->";
 
-} else if ($location_id < 0 || $location_id > 4) {
+} else if ($location_id < 0 || $location_id > 7) {
     echo "
         <div class='well well-large' style='margin-top:5px; margin-bottom:5px; padding-top:15px; padding-bottom:15px;'>
         <div class='container'>

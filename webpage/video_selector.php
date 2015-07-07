@@ -33,12 +33,14 @@ function get_video_progress($species_id, $location_id, &$available, &$validated)
     if ($species_id == 1)       $species = "grouse";
     else if ($species_id == 2)  $species = "least_tern";
     else if ($species_id == 3)  $species = "piping_plover";
+    else if ($species_id == 4)  $species  = "blue_winged_teal";
 
     $location = "";
     if ($location_id == 1)       $location = "belden";
     else if ($location_id == 2)  $location = "blaisdell";
     else if ($location_id == 3)  $location = "lostwood";
     else if ($location_id == 4)  $location = "missouri_river";
+    else if ($location_id == 7)  $location = "coteau_ranch";
 
     $result  = "var $species" . "_" . "$location" . "_total = " . $total . ";\n";
     $result .= "var $species" . "_" . "$location" . "_available = " . $available . ";\n";
@@ -58,6 +60,7 @@ $additional_scripts .= get_video_progress(1, 2, $grouse_blaisdell_available, $gr
 $additional_scripts .= get_video_progress(1, 3, $grouse_lostwood_available, $grouse_lostwood_validated);
 $additional_scripts .= get_video_progress(2, 4, $least_tern_available, $least_tern_validated);
 $additional_scripts .= get_video_progress(3, 4, $piping_plover_available, $piping_plover_validated);
+$additional_scripts .= get_video_progress(4, 7, $blue_winged_teal_available, $blue_winged_teal_validated);
 $additional_scripts .= "</script>";
 $additional_scripts .= "<script src='video_selector.js'></script>";
 
@@ -164,7 +167,29 @@ $thumbnails = array('thumbnail_list' => array(
                                     'available_percentage' => $piping_plover_available - $piping_plover_validated
                                 )
                             )
+                        ),
+
+                        array(
+                            'thumbnail_image' => './images/blue_winged_teal.png',
+                            'species_name' => 'Blue Winged Teal',
+                            'species_id' => '4',
+                            'species_latin_name' => 'Anas discors',
+                            'info_webpage' => '',
+                            'project_description' => '<p>Blue-winged teal are small ducks that nest in the grasslands of the plains.  They are one of the most common ducks nesting in North Dakota.</p><p>Active projects include: <ul><li>John Palarski and Nickolas Conrad - <a href="ducks_unlimited_project.php">Predation and Parental Care at Blue-Winged Teal Nests in North Dakota</a></li></ul></p>',
+                            'site' => array(
+                                array (
+                                    'enabled' => ($blue_winged_teal_available > 0),
+                                    'site_name' => 'Coteau Ranch, ND',
+                                    'year' => '2015',
+                                    'progress_id' => 'blue_winged_teal_progress',
+                                    'site_description' => 'Cameras were placed at blue winged teal nests along at the Coteau Ranch in western North Dakota.',
+                                    'site_id' => '7',
+                                    'validated_percentage' => $blue_winged_teal_validated,
+                                    'available_percentage' => $blue_winged_teal_available - $blue_winged_teal_validated
+                                )
+                            )
                         )
+
                     )
                 );
 

@@ -15,7 +15,7 @@ require_once($cwd[__FILE__] . "/../../../citizen_science_grid/my_query.php");
 function get_event_instructions_html($species_id, $expert_only, $modal = 1) {
     global $cwd;
 
-    if ($species_id > 3)  {
+    if ($species_id > 4)  {
         echo "<p>Species unknown for video. No instructions available.</p>";
         die();
     }
@@ -31,6 +31,8 @@ function get_event_instructions_html($species_id, $expert_only, $modal = 1) {
             $query .= "least_tern = 1";
         } else if ($species_id == 3) { //piping plover
             $query .= "piping_plover = 1";
+        } else if ($species_id == 4) { //blue winged teal
+            $query .= "sharptailed_grouse = 1";
         } else {
             return;
         }

@@ -34,5 +34,12 @@ $(document).ready(function () {
                            "<p>" + piping_plover_missouri_river_total + " videos total</p>";
 
     $('#piping_plover_progress').popover({ placement : 'bottom', html : true,  content : piping_plover_content, title : 'Progress'});
+
+
+    var blue_winged_teal_content = "<p>" + blue_winged_teal_coteau_ranch_validated + " videos watched</p>" +
+                           "<p>" + blue_winged_teal_coteau_ranch_available + " videos available</p>" +
+                           "<p>" + blue_winged_teal_coteau_ranch_total + " videos total</p>";
+
+    $('#blue_winged_teal_progress').popover({ placement : 'bottom', html : true,  content : blue_winged_teal_content, title : 'Progress'});
 });
 
