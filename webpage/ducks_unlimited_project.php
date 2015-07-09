@@ -19,32 +19,13 @@ echo "
 
             <section id='title' class='well'>
                 <div class='page-header'>
-                <h2>Predation and Parental Care at Blue-Winged Teal Nests in North Dakota <small>by John Palarski and Nickolas Conrad</small></h2>
+                <h2>Predation and Parental Care at Blue-Winged Teal Nests in North Dakota <small><br><br>by John Palarski and Nickolas Conrad</small></h2>
                 </div>
             </section>
 
-            <section id='figures' class='well'>
-                <div class='row'>
-                    <div class='col-sm-4'>
-                        <img style='width:100%;' src='images/alicia_plover_adult.png'></img>
-                        <p>A piping plover adult.</p>
-                    </div>
-
-                    <div class='col-sm-4'>
-                        <img style='width:100%;' src='images/alicia_plover_tern_habitat.png'></img>
-                        <p>A suitable nesting habitat for Least Terns and Piping Plovers on the Upper Missouri River.</p>
-                    </div>
-
-                    <div class='col-sm-4'>
-                        <img style='width:100%;' src='images/alicia_tern_chicks_eggs.png'></img>
-                        <p>Two newly hatched Least Tern chicks and one egg in a nest bowl.</p>
-                    </div>
-                </div>
-            </section>
-
-            <section id='identification' class='well'>
+            <section id='title' class='well'>
                 <div class='page-header'>
-                    <h2>Project Summary</h2>
+                <h2>Project Summary</h2>
                 </div>
 
                 <p>
@@ -52,39 +33,38 @@ echo "
                 </p>
             </section>
 
-
-            <section id='figures' class='well'>
+            <section id='camera_installation' class='well'>
                 <div class='row'>
-                    <div class='col-sm-6'>
-                        <img style='width:100%;' src='images/nest_dragging.png'></img>
-                        <p>Nest dragging to flush hens.</p>
-                    </div>
-
-                    <div class='col-sm-6'>
+                    <div class='col-sm-4'>
                         <img style='width:100%;' src='images/camera_installation.png'></img>
                         <p>Installing cameras.</p>
                     </div>
 
-                    <div class='col-sm-6'>
+                    <div class='col-sm-4'>
                         <img style='width:100%;' src='images/camera_installation_2.png'></img>
                         <p>Inspecting a camera.</p>
+                    </div>
+
+                    <div class='col-sm-4'>
+                        <img style='width:100%;' src='images/camera_installation_3.png'></img>
+                        <p>An installed camera.</p>
                     </div>
                 </div>
             </section>
 
 
             <section id='distribution' class='well'>
+                <div class='page-header'>
+                    <h2>How Do We Find the Nests?</h2>
+                </div>
+
                 <div class='row'>
                     <div class='col-sm-4'>
-                        <img src='./images/least_tern_distribution.png' style='width:100%;'></img>
-                        Yearly Distribution of the Least Tern (<a href='http://www.allaboutbirds.org/guide/least_tern/id'><i>Cornell Lab of Ornithology - All About Birds</i></a>)
+                        <img style='width:100%;' src='images/nest_dragging.png'></img>
+                        <p>Nest dragging to flush hens.</p>
                     </div>
 
                     <div class='col-sm-8'>
-                        <div class='page-header'>
-                            <h2>How Do We Find the Nests?</h2>
-                        </div>
-
                         <p>
                         We use an established protocol called <i>nest dragging</i> where two ATVs pull a long chain between them in order to flush hens from their nests (see image below).  The chain (yellow arrow pointing to where you can see it in the grass) goes over the grasses and as it approaches a nest, the hen flushes giving the researchers a chance to see where she was sitting and hopefully nesting.  Because the chain goes over the grasses, it does not hit the eggs and thus just allows us to locate nests.  
                         </p>
@@ -102,10 +82,13 @@ echo "
             </section>
 
 
+
             <section id='identification' class='well'>
                 <div class='page-header'>
                     <h2>Role of Citizen Scientists - We Need Your Help!</h2>
                 </div>
+
+                <img align='right' src='images/duckling.png'></img>
 
                 <p>
                 We need your help to watch nesting video and help us classify nesting behaviors, such as when the hen is on the nest attending her eggs versus when she out foraging and maintaining herself (i.e., \"mommy time!\").  We will also be interested in how blue-winged teal (and eventually other ducks we hope) respond to different predators, which predators are most common at the Ducks Unlimited Coteau Ranch, and how often nests hatched.  In addition, providing us about when the teal is in the field of view of the camera (whether on or off the nest) will be helpful to create a database of training videos to test out computer vision algorithms for our computer science team.  

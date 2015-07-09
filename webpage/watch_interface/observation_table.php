@@ -90,6 +90,8 @@ function get_observations($row_only, $video_id, $user_id, $observation_id, $spec
             $query .= "least_tern = 1";
         } else if ($species_id == 3) { //piping plover
             $query .= "piping_plover = 1";
+        } else if ($species_id == 4) { //blue winged teal
+            $query .= "sharptailed_grouse = 1";
         } else {
             return;
         }   

@@ -61,6 +61,8 @@ echo "
         <li><a href='javascript:;' class='video-filter-dropdown year-filter' year=2011>2011</a></li>
         <li><a href='javascript:;' class='video-filter-dropdown year-filter' year=2012>2012</a></li>
         <li><a href='javascript:;' class='video-filter-dropdown year-filter' year=2013>2013</a></li>
+        <li><a href='javascript:;' class='video-filter-dropdown year-filter' year=2014>2014</a></li>
+        <li><a href='javascript:;' class='video-filter-dropdown year-filter' year=2015>2015</a></li>
     </ul>
 </div> <!--button group-->";
 
@@ -72,6 +74,7 @@ echo "
         <li><a href='javascript:;' class='video-filter-dropdown species-filter' species_id=1>Sharp-tailed Grouse</a></li>
         <li><a href='javascript:;' class='video-filter-dropdown species-filter' species_id=2>Interior Least Tern</a></li>
         <li><a href='javascript:;' class='video-filter-dropdown species-filter' species_id=3>Piping Plover</a></li>
+        <li><a href='javascript:;' class='video-filter-dropdown species-filter' species_id=4>Blue Winged Teal</a></li>
     </ul>
 </div> <!--button group-->";
 
@@ -84,6 +87,7 @@ echo "
         <li><a href='javascript:;' class='video-filter-dropdown location-filter' location_id=2>Blaisdell</a></li>
         <li><a href='javascript:;' class='video-filter-dropdown location-filter' location_id=3>Lostwood</a></li>
         <li><a href='javascript:;' class='video-filter-dropdown location-filter' location_id=4>Missouri River</a></li>
+        <li><a href='javascript:;' class='video-filter-dropdown location-filter' location_id=7>Coteau Ranch</a></li>
     </ul>
 </div> <!--button group-->";
 
