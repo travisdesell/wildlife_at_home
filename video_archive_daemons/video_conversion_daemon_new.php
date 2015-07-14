@@ -138,7 +138,7 @@ if ($modulo > -1) {
         echo "shell exec 1 completed\n\n";
 
         if($location_id == 7) {
-            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec theora -qscale:v 2 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.ogv 2>&1; echo $?";
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec theora -qscale:v 6 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.ogv 2>&1; echo $?";
         } else {
             $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -vcodec theora -preset slow -filter_complex 'overlay=x=10:y=10' -b:v 200k $watermarked_filename.ogv 2>&1; echo $?";
         }
