@@ -165,7 +165,7 @@ if ($modulo > -1) {
         $md5_hash = md5_file($watermarked_filename . ".mp4");
         $filesize = filesize($watermarked_filename . ".mp4");
 
-        $query = "UPDATE video_2 SET processing_status = 'WATERMARKED', size = $filesize, md5_hash = '$md5_hash', ogv_generated = true, needs_reconversion = false WHERE id = " . $row['id'];
+        $query = "UPDATE video_2 SET processing_status = 'WATERMARKED', size = $filesize, md5_hash = '$md5_hash', ogv_generated = true, needs_reconversion = false WHERE id = " . $video_id;
         $result = query_video_db($query);
     }
 } else {
