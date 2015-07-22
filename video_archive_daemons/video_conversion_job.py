@@ -13,7 +13,7 @@ connection = None
 
 try:
     # Server, username, password, database
-    connection = sql.connect()
+    connection = sql.connect("wildlife.und.edu", "wildlife_user", "gr0u$e$", "wildlife_video")
 
     cursor = connection.cursor()
     cursor.execute("SELECT VERSION()")
@@ -64,25 +64,33 @@ try:
 
     # Watermark mp4 file
     if location_id == 7:
-        command = "ffmpeg -y -i %s -i %s -i %s -vcodec h264 -qscale:v 3 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10;y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10;y=(main_h-overlay_h)' %s.mp4 2>&1; echo $?" % (archive_filename, und_watermark_file, duck_watermark_file, watermarked_filename)
+        command = "ffmpeg -y -i %s -i %s -i %s -vcodec h264 -preset veryslow -crf 26 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10;y=(main_h-overlay_h)' %s.mp4" % (archive_filename, und_watermark_file, duck_watermark_file, watermarked_filename)
     else:
-        command = "ffmpeg -y -i %s -i %s -vcodec h264 -qscale:v 3 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10;y=10 [und_marked];'%s.mp4 2>&1; echo $?" % (archive_filename, und_watermark_file, watermarked_filename)
+        command = "ffmpeg -y -i %s -i %s -vcodec h264 -preset veryslow -crf 26 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10' %s.mp4" % (archive_filename, und_watermark_file, watermarked_filename)
 
     print command
 
-    # NOTE: This will throw an error if the subprocess fails for any reason.
-    #subprocess.check_call(command)
+    try:
+        # TODO: 'shell=True' is not secure
+        subprocess.check_call(command, shell=True)
+    except OSError, e:
+        print "Error %d: %s" % (e.args[0],e.args[1])
+        sys.exit(1)
 
     # Watermark ogv file
     if location_id == 7:
-        command = "ffmpeg -y -i %s -i %s -i %s -vcodec theora -qscale:v 6 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10;y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10;y=(main_h-overlay_h)' %s.ogv 2>&1; echo $?" % (archive_filename, und_watermark_file, duck_watermark_file, watermarked_filename)
+        command = "ffmpeg -y -i %s -i %s -i %s -vcodec theora -qscale:v 6 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10;y=(main_h-overlay_h)' %s.ogv" % (archive_filename, und_watermark_file, duck_watermark_file, watermarked_filename)
     else:
-        command = "ffmpeg -y -i %s -i %s -vcodec theora -qscale:v 6 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10;y=10 [und_marked];'%s.ogv 2>&1; echo $?" % (archive_filename, und_watermark_file, watermarked_filename)
+        command = "ffmpeg -y -i %s -i %s -vcodec theora -qscale:v 6 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10' %s.ogv" % (archive_filename, und_watermark_file, watermarked_filename)
 
     print command
 
-    # NOTE: This will throw an error if the subprocess fails for any reason.
-    #subprocess.check_call(command)
+    try:
+        # TODO: 'shell=True' is not secure
+        subprocess.check_call(command, shell=True)
+    except OSError, e:
+        print "Error %d: %s" % (e.args[0],e.args[1])
+        sys.exit(1)
 
     md5_hash = hashlib.md5(open((watermarked_filename + '.mp4'), 'rb').read()).hexdigest()
     filesize = os.path.getsize(watermarked_filename + '.mp4')
