@@ -9,6 +9,8 @@ import os
 und_watermark_file = "/share/wildlife/und_watermark.png"
 duck_watermark_file = "/share/wildlife/duck_watermark.png"
 
+connection = None
+
 try:
     # Server, username, password, database
     connection = sql.connect()
@@ -88,9 +90,9 @@ try:
     print "MD5 Hash: '%s'" % md5_hash
     print "Filesize: %d" % filesize
 
-    cursor.execute("UPDATE video_2 SET processing_status = 'WATERMARKED', size = %d, md5_hash = '%s', ogv_generated = true, needs_reconversion = false WHERE id = $d", [filesize, md5_hash, video_id]);
+    #cursor.execute("UPDATE video_2 SET processing_status = 'WATERMARKED', size = %d, md5_hash = '%s', ogv_generated = true, needs_reconversion = false WHERE id = $d", [filesize, md5_hash, video_id]);
 
-except sql.Error, r:
+except sql.Error, e:
     print "Error %d: %s" % (e.args[0],e.args[1])
     sys.exit(1)
 
