@@ -137,8 +137,9 @@ $(document).ready(function () {
                 var target = $(this).attr('href') + "_inner";
                 $( target ).html("<p>Loading...</p>");
 
+                var video_id = $( $(this).attr('href') ).attr("video_id");
                 var submission_data = {
-                                        video_id : $( $(this).attr('href') ).attr("video_id"),
+                                        video_id : video_id,
                                         video_file : $( $(this).attr('href') ).attr("video_file"),
                                         video_converted : $( $(this).attr('href') ).attr('video_converted')
                                       };
@@ -160,6 +161,28 @@ $(document).ready(function () {
 
                         enable_user_review();
                         enable_expert_review();
+
+
+                        $.ajax({
+                            type: 'GET',
+                            url: './video_computed_event_times.php',
+                            //data : {video_id : 59040},
+                            data : {video_id : video_id},
+                            dataType : 'json',
+                            success : function(response) {
+                                if (response.length > 0) {
+                                    for (var i in response) {
+                                        response[i][1] = new Date(response[i][1] * 1000);
+                                        response[i][2] = new Date(response[i][2] * 1000);
+                                    }
+                                    google.setOnLoadCallback(drawWatchTimeline(video_id, response));
+                                }
+                            },
+                            error : function(jqXHR, textStatus, errorThrown) {
+                                alert(errorThrown);
+                            },
+                            async: true
+                        });
 
                         $.ajax({
                             type: 'GET',
