@@ -505,8 +505,8 @@ int main(int argc, char** argv) {
                 cout << "    Insufficent users (" << user_observations_map.size() << ")." << endl;
                 cout << "    There was only one user id in the user observations map, this means it was only viewed by one user." << endl;
                 cout << "    This needs to be handled manually." << endl;
-//                require_another_view(video.id, user_ids.size());
-                exit(1);
+                require_another_view(video.id, user_ids.size());
+                //exit(1);
             } else if (n_user_observations == 2) {
                 if (!has_invalid && total_observations > 0) {
                     award_credit(video, user_ids, user_valid_count, user_observations);

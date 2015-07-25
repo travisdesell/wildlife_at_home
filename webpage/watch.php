@@ -267,7 +267,10 @@ if ($user_id == NULL) {
 
     $new_video = true;
 
-    if (array_key_exists($species_location_hash, $active_video_id) && $active_video_id[$species_location_hash] != 'NULL') {
+    if (array_key_exists($species_location_hash, $active_video_id) && 
+                    array_key_exists('video_id', $active_video_id[$species_location_hash]) &&
+                    $active_video_id[$species_location_hash] != 'NULL') {
+
         $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.id = " . $active_video_id[$species_location_hash]['video_id'];
 
         $result = query_wildlife_video_db($query);
