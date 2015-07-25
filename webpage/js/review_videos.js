@@ -171,9 +171,11 @@ $(document).ready(function () {
                             dataType : 'json',
                             success : function(response) {
                                 if (response.length > 0) {
+                                    var central_offset = 5*60*60000;
+                                    var local_offset = new Date().getTimezoneOffset()*60000;
                                     for (var i in response) {
-                                        response[i][1] = new Date(response[i][1] * 1000);
-                                        response[i][2] = new Date(response[i][2] * 1000);
+                                        response[i][1] = new Date((response[i][1] * 1000)-central_offset+local_offset);
+                                        response[i][2] = new Date((response[i][2] * 1000)-central_offset+local_offset);
                                     }
                                     google.setOnLoadCallback(drawWatchTimeline(video_id, response));
                                 }
