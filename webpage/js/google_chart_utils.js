@@ -55,7 +55,7 @@ function drawWatchTimeline(video_id, event_data) {
             if (item.row != null) {
                 var video_start_string = $("#wildlife-video-" + video_id).attr("start_time");
                 var video_start_time = getDate(video_start_string);
-                console.log("Start time: " + video_start_time);
+                //console.log("Start time: " + video_start_time);
                 var event_start_time = data.getValue(item.row, 1);
                 var seconds = (event_start_time - video_start_time)/1000 - 10;
             }

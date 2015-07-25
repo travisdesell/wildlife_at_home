@@ -18,7 +18,7 @@ function multi_explode($pattern, $string, $standardDelimiter = ':') {
  *  TODO: there might be a bug here because some of the video durations seem kind of weird.
  */
 function get_video_duration($filename) {
-    $command = "/usr/bin/ffmpeg -y -i {$filename} 2>&1";
+    $command = "avconv -y -i {$filename} 2>&1";
     echo "command: '$command'\n";
     ob_start();
     passthru($command);
@@ -83,8 +83,7 @@ function get_video_duration($filename) {
  */
 function already_inserted($filename) {
     $query = "SELECT count(*) FROM video_2 AS total WHERE archive_filename LIKE '" . $filename . "'"; 
-    $results = mysql_query($query);
-    if (!$results) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+    $results = query_video_db($query);
 
     $row = mysql_fetch_assoc($results);
 
@@ -95,10 +94,6 @@ function already_inserted($filename) {
 /**
  * SCRIPT STARTS HERE
  */
-
-mysql_connect("localhost", $wildlife_user, $wildlife_pw);
-mysql_select_db($wildlife_db);
-
 
 $dir = "/share/wildlife/archive";
 
@@ -134,11 +129,13 @@ foreach($directory_iterator as $filename => $path_object) {
         $parts = split("/", $filename);
 
         for ($i = 0; $i < count($parts); $i++) {
-            if ($parts[$i] == 'missouri_river_project' || $parts[$i] == 'oil_development' || $parts[$i] == 'lekking') break;
+            if ($parts[$i] == 'missouri_river_project' || $parts[$i] == 'oil_development' || $parts[$i] == 'lekking' || $parts[$i] == 'Coteau_Ranch') break;
         }
 
         $project = $parts[$i];
 
+        if ($project == "missouri_river_project") continue;
+        if ($project == "oil_development") continue;
         if ($project == "lekking") continue;
 //        echo "CHECKING: $filename\n";
         if (already_inserted($filename)) continue;
@@ -150,6 +147,9 @@ foreach($directory_iterator as $filename => $path_object) {
             $site = "Missouri River";
             $rivermile = $parts[$i + 3];
             $animal_id = $parts[$i + 4];
+        } else if ($project == "Coteau_Ranch") {
+            $site = "Coteau Ranch";
+            $animal_id = $parts[$i + 3];
         } else {
             $site = $parts[$i + 3];
             $animal_id = $parts[$i + 4];
@@ -183,9 +183,7 @@ foreach($directory_iterator as $filename => $path_object) {
         try {
             $duration_s = get_video_duration($filename);
         } catch (Exception $e) {
-            echo "Problems parsing duration.\n";
-//            die("Problems parsing duration.\n");
-            continue;
+            die("Problems parsing duration.\n");
         }
 
         if ($duration_s == 0) {
@@ -195,7 +193,7 @@ foreach($directory_iterator as $filename => $path_object) {
 
 
         $watermarked_filename = "/share/wildlife/watermarked/" . substr($filename, strlen("/share/wildlife/archive/"));
-        $watermarked_filename = str_replace(".avi", ".mp4", $watermarked_filename);
+        $watermarked_filename = str_replace(".avi", "", $watermarked_filename);
 
         $crowd_obs_count = 0;
         $expert_obs_count = 0;
@@ -208,8 +206,10 @@ foreach($directory_iterator as $filename => $path_object) {
             $species_id = 2;
         } else if ($species == "piping_plover") {
             $species_id = 3;
+        } else if ($species == "BWTE") {
+            $species_id = 4;
         } else {
-            die("Uknown species encountered: '$species'");
+            die("Unknown species encountered: '$species'");
         }
 
         if ($project == "oil_development") {
@@ -218,6 +218,8 @@ foreach($directory_iterator as $filename => $path_object) {
             $project_id = 2;
         } else if ($project == "missouri_river_project") {
             $project_id = 3;
+        } else if ($project == "Coteau_Ranch") {
+            $project_id = 4;
         } else {
             die("Unknown project encountered: '$project'");
         }
@@ -230,6 +232,8 @@ foreach($directory_iterator as $filename => $path_object) {
             $location_id = 3;
         } else if ($site == "Missouri River") {
             $location_id = 4;
+        } else if ($site == "Coteau Ranch") {
+            $location_id = 7;
         } else {
             echo "filename: $filename \n";
             die("Unknown location encountered: '$site' for year '$directory_year'\n");
@@ -246,7 +250,9 @@ foreach($directory_iterator as $filename => $path_object) {
         echo "\tlocation: '" . $site . "'\n";
         echo "\tlocation_id: '" . $location_id . "'\n";
         echo "\tanimal_id: '" . $animal_id . "'\n";
-        echo "\trivermile: '" . $rivermile. "'\n";
+        if ($species == 2 || $species == 3) {
+            echo "\trivermile: '" . $rivermile. "'\n";
+        }
         echo "\tstart_time: '" . $date . "'\n";
         echo "\tfile: '" . $file . "'\n";
 
@@ -281,8 +287,7 @@ foreach($directory_iterator as $filename => $path_object) {
         echo $query . "\n";
 //        die();
 
-        $result = mysql_query($query);
-        if (!$result) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+        $result = query_video_db($query);
 
         $count++;
     }
@@ -293,7 +298,6 @@ echo $count . " videos in '" . $dir . "'\n";
 echo "updating total video progress\n";
 
 $query = "UPDATE progress AS p SET total_video_s = (SELECT SUM(duration_S) FROM video_2 AS v2 WHERE v2.species_id = p.species_id AND v2.location_id = p.location_id)";
-$results = mysql_query($query);
-if (!$results) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
+//$results = query_video_db($query);
 
 ?>
