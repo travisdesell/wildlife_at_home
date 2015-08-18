@@ -33,7 +33,7 @@ if ($video_filter_text != '' || $event_filter_text != '' || is_numeric($video_id
     } else {
         $query = "SELECT v2.id, v2.processing_status, v2.watermarked_filename, v2.timed_obs_count, v2.expert_finished, v2.release_to_public, v2.start_time, v2.animal_id, v2.rivermile FROM video_2 AS v2 INNER JOIN watched_videos AS wv ON (v2.id = wv.video_id AND wv.user_id = " . $user['id'] . ") WHERE " . $filter_query;
     }
-    
+
     $query .= " ORDER BY animal_id, start_time LIMIT $video_min, $video_count";
     error_log("QUERY: $query");
 } else {
@@ -57,7 +57,7 @@ while ($row = $result->fetch_assoc()) {
         $row['private'] = true;
     }
 
-    if ($row['processing_status'] != 'WATERMARKED' && $row['processing_status'] != 'SPLIT') {
+    if ($row['processing_status'] == 'UNWATERMARKED' || $row['processing_status'] == 'WATERMARKING') {
         $row['not_ready'] = true;
     }
 

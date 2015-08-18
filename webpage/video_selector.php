@@ -21,7 +21,7 @@ function get_video_progress($species_id, $location_id, &$available, &$validated)
     $row = $results->fetch_assoc();
     $total = $row['count(*)'];
 
-    $results = query_wildlife_video_db("SELECT count(*) FROM video_2 WHERE location_id = $location_id AND species_id = $species_id AND processing_status != 'UNWATERMARKED' AND release_to_public = true");
+    $results = query_wildlife_video_db("SELECT count(*) FROM video_2 WHERE location_id = $location_id AND species_id = $species_id AND processing_status != 'UNWATERMARKED' AND processing_status != 'WATERMARKING' AND release_to_public = true");
     $row = $results->fetch_assoc();
     $available = $row['count(*)'];
 
