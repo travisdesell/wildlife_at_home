@@ -464,6 +464,8 @@ int make_job(int video_id, int species_id, int location_id, string video_address
 
 //    exit(0);
 
+    // TODO: Update the video processing_status to 'BGSUB_PROCESSING'.
+
     /**
      * Register the job with BOINC
      */
@@ -564,13 +566,15 @@ void main_loop(const vector<string> &arguments) {
     ostringstream unclassified_video_query, finished_expert_query;
     finished_expert_query << "SELECT DISTINCT id, watermarked_filename, duration_s, species_id, location_id, size, md5_hash"
         << " FROM video_2"
-        << " WHERE processing_status != 'UNWATERMAKED'"
+        << " WHERE processing_status != 'UNWATERMARKED'"
+        << " AND processing_status != 'WATERMARKING'"
         << " AND md5_hash IS NOT NULL"
         << " AND size IS NOT NULL"
         << " AND expert_finished = 'FINISHED'";
     unclassified_video_query << "SELECT id, watermarked_filename, duration_s, species_id, location_id, size, md5_hash"
-        << " FROM video_2 WHERE"
-        << " processing_status != 'UNWATERMARKED'"
+        << " FROM video_2"
+        << " WHERE processing_status != 'UNWATERMARKED'"
+        << " AND processing_status != 'WATERMARKING'"
         << " AND md5_hash IS NOT NULL"
         << " AND size IS NOT NULL";
 

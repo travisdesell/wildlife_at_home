@@ -52,6 +52,7 @@ static const string EVENT_ID = "32";
 double calcMean(vector<double> vals);
 double calcVariance(vector<double> vals, const double mean);
 vector<pair<size_t,size_t>> calculateEventTimes(vector<double> &vals, double dist, double fps);
+void updateProcessingStatus(const string &video_id);
 void addEvents(const string &video_id, const string &algorithm_id, const string &event_id, const string &version_id, const vector<pair<size_t,size_t>> &events);
 
 #define mysql_query_check(conn, query) __mysql_check (conn, query, __FILE__, __LINE__)
@@ -130,7 +131,7 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     try {
         tag_str = parse_xml<string>(xml_doc, "tag");
     } catch (string error_message) {
-        log_messages.printf(MSG_CRITICAL, "wildlife_bgsub_assimilation_policy assimilate_handler([RESULT#%d %s]) failed with error: %s\n", canonical_result.id, canonical_result.name, error_message.c_str());
+        log_messages.printf(MSG_CRITICAL, "wildlife_bgsub_assimilation_policy assimilate_handler([RESULT#%d %s]) failed with error: %s\n", (int)canonical_result.id, canonical_result.name, error_message.c_str());
         log_messages.printf(MSG_CRITICAL, "XML:\n'%s'\n", xml_doc.c_str());
         return 1;
         return 0;
@@ -201,6 +202,8 @@ int assimilate_handler(WORKUNIT& wu, vector<RESULT>& results, RESULT& canonical_
     addEvents(video_id, VIBE_ID, EVENT_ID, "100", vibe_events);
     addEvents(video_id, PBAS_ID, EVENT_ID, "100", pbas_events);
 
+    updateProcessingStatus(video_id);
+
     return 0;
 }
 
@@ -241,6 +244,14 @@ vector<pair<size_t,size_t>> calculateEventTimes(vector<double> &vals, double dis
         }
     }
     return output;
+}
+
+void updateProcessingStatus(const string &video_id) {
+    ostringstream update_status_query;
+    update_status_query << "UPDATE video_2 SET processing_status = 'BGSUB_COMPLETE' WHERE id = ";
+    update_status_query << video_id << ";";
+
+    mysql_query_check(wildlife_db_conn, update_status_query.str());
 }
 
 void addEvents(const string &video_id, const string &algorithm_id, const string &event_id, const string &version_id, const vector<pair<size_t,size_t>> &events) {
