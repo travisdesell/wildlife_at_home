@@ -13,7 +13,10 @@ connection = None
 
 try:
     # Server, username, password, database
-    connection = sql.connect("wildlife.und.edu", "wildlife_user", "gr0u$e$", "wildlife_video")
+    db_password = "NOPE"
+    db_user = "wildlife_user"
+    db_name = "wildlife_video"
+    connection = sql.connect("wildlife.und.edu", db_user, db_password, db_name)
 
     cursor = connection.cursor()
     cursor.execute("SELECT VERSION()")
