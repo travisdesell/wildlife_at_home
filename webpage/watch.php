@@ -280,7 +280,7 @@ if ($user_id == NULL) {
 
     } else {
         //try to get a video that has already been watched
-        $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count > 0 AND v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
+        $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count > 0 AND v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND v2.processing_status != 'WATERMARKING' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
         error_log("FIRST TRY QUERY: $query\n");
 
         $result = query_wildlife_video_db($query);
@@ -290,7 +290,7 @@ if ($user_id == NULL) {
         if (!$row) {    //try again with any video (not just watched videos)
             $found = true;
 
-            $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
+            $query = "SELECT id, animal_id, watermarked_filename, start_time FROM video_2 v2 WHERE v2.watch_count < v2.required_views AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND v2.processing_status != 'WATERMARKING' AND species_id = $species_id AND location_id = $location_id AND NOT EXISTS (SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY RAND() limit 1";
             error_log("SECOND TRY QUERY: $query\n");
             //    echo "<!-- $query -->\n";
 
@@ -299,7 +299,7 @@ if ($user_id == NULL) {
             if (!$row) {
                 $found = false;
                 error_log("did not find a watched video segment 2 on second try");
-            }   
+            }
         }
     }
 

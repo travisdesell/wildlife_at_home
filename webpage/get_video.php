@@ -29,7 +29,7 @@ $start_time = $row['start_time'];
 $needs_revalidation = $row['needs_revalidation'];
 
 //echo "<p>Got this for video: $video_id, and file: $video_file</p>";
-if ($row['processing_status'] == 'UNWATERMARKED') {
+if ($row['processing_status'] == 'UNWATERMARKED' || $row['processing_status'] == 'WATERMARKING') {
     echo "
         <div class='row'>
             <div class='col-sm-6' id='wildlife-video-span-$video_id'>
@@ -37,7 +37,7 @@ if ($row['processing_status'] == 'UNWATERMARKED') {
             </div>
             <div class='col-sm-6'>
             </div>
-        </div>"; 
+        </div>";
 } else {
     echo get_expert_video_row($species_id, $video_id, $video_file, $animal_id, $start_time, $needs_revalidation, $user);
 }

@@ -6,7 +6,7 @@ mysql_connect("localhost", $wildlife_user, $wildlife_pw);
 mysql_select_db($wildlife_db);
 
 //$query = "SELECT id, watermarked_filename FROM video_2 WHERE processing_status != 'UNWATERMARKED' AND (md5_hash IS NULL OR size IS NULL)";
-$query = "SELECT id, watermarked_filename FROM video_2 WHERE processing_status != 'UNWATERMARKED'";
+$query = "SELECT id, watermarked_filename FROM video_2 WHERE processing_status != 'UNWATERMARKED' AND processing_status != 'WATERMARKING'";
 $results = mysql_query($query);
 if (!$results) die ("MYSQL Error (" . mysql_errno() . "): " . mysql_error() . "\nquery: $query\n");
 

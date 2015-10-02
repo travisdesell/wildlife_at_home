@@ -31,7 +31,7 @@ if ($random == 'true') {
     $active_video_id[$species_location_hash]['difficulty'] = 'easy';
     $active_video_id[$species_location_hash]['start_time'] = date('Y-m-d H:i:s', time());
 
-    $video_query = "select v2.id from video_2 v1, video_2 v2 where v1.id = $video_id and v2.animal_id = v1.animal_id AND v2.start_time > v1.start_time AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND NOT EXISTS(SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY v2.start_time limit 1";
+    $video_query = "select v2.id from video_2 v1, video_2 v2 where v1.id = $video_id and v2.animal_id = v1.animal_id AND v2.start_time > v1.start_time AND v2.release_to_public = true AND v2.processing_status != 'UNWATERMARKED' AND v2.processing_status != 'WATERMARKING' AND NOT EXISTS(SELECT * FROM watched_videos wv WHERE wv.video_id = v2.id AND wv.user_id = $user_id) ORDER BY v2.start_time limit 1";
     $video_result = query_wildlife_video_db($video_query);
     error_log($video_query);
 
