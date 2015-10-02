@@ -102,7 +102,6 @@ foreach ($all_ids as $id) {
             <td rowspan='$n_rows'>$species_id</td>
             <td rowspan='$n_rows'>
                 <a href='http://wildlife.und.edu$watermarked_filename.mp4'>[mp4]</a>
-                <a href='http://wildlife.und.edu$watermarked_filename.ogv'>[ogv]</a>
             </td>";
 
     $i = 0;
