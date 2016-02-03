@@ -68,6 +68,11 @@ var canvasSelector = function (canvas, image, context) {
     })
 };
 
+/** Remove a specific element. */
+canvasSelector.prototype.deleteElement = function(obj, id) {
+
+};
+
 /** When the mouse moves, change the cursor */
 canvasSelector.prototype.mouseMoved = function(obj, ev) {
     var point = obj.getScaledPoint(obj, {
@@ -105,8 +110,8 @@ canvasSelector.prototype.logEvent = function(str) {
 canvasSelector.prototype.getCenter = function(obj, ev) {
 	var offset = obj.canvas.offset();
 	return {
-		'x': ev.center.x - offset.left,
-		'y': ev.center.y - offset.top
+		'x': $(document).scrollLeft() + ev.center.x - offset.left,
+		'y': $(document).scrollTop() + ev.center.y - offset.top
 	};
 }
 
@@ -126,14 +131,19 @@ canvasSelector.prototype.getScaledPoint = function(obj, ev, offset) {
 canvasSelector.prototype.onResize = function(obj) {
     var windowHeight = window.innerHeight || $(window).height();
 	var windowWidth = window.innerWidth || $(window).width();
-	
-	if (windowWidth < obj.image.width) {
-		obj.ctx.canvas.width = windowWidth-20;
-	}
-	
-	if (windowHeight < obj.image.height) {
-		obj.ctx.canvas.height = windowHeight-20;
-	}
+    var x = obj.canvas.offset().left;
+    var y = obj.canvas.offset().top;
+    var width = windowWidth - x - 20;
+    var height = windowHeight - $(".footer").height()*2 - y - 20;
+
+    // fill all available space and minimum size
+    if (width > obj.image.width) width = obj.image.width;
+    else if (width < 400) width = 400;
+    if (height > obj.image.height) height = obj.image.height;
+    else if (height < 400) height = 400;
+
+    obj.ctx.canvas.width = width;
+    obj.ctx.canvas.height = height;
 	
 	obj.redrawCanvas(obj);
 };
@@ -260,6 +270,8 @@ canvasSelector.prototype.onDoubleTap = function(obj, ev) {
 	var radius = size / 2;
 	var point = obj.getScaledPoint(obj, ev, radius);
 	var center = obj.getScaledPoint(obj, ev);
+
+    obj.logEvent(point);
 	
 	size = size / obj.curScale;
 	if (size < obj.minSize) size = obj.minSize;

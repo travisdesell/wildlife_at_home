@@ -11,7 +11,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 
 
-print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/canvas_test.css' rel='stylesheet'> <script type='text/javascript' src='./js/canvas_test.js'></script>", "wildlife");
+print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/canvas_test.css' rel='stylesheet'>", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 function container_start() {
@@ -30,28 +30,6 @@ function container_end() {
         </div> <!-- row -->
     </div> <!-- /container -->";
 }
-
-/*
-container_start();
-
-echo "
-<div class='row'>
-    <div class='col-sm-8'>
-        <div id='canvas'>
-            <img class='img-responsive' src='./images/nd_pred_coyote.jpg'></img>
-        </div>
-    </div>
-
-    <div class='col-sm-4'>
-        <div id='selection-information'>
-        </div>
-        <button class='btn btn-primary' id='submit-selections-button'>Submit</button>
-
-    </div>
-</div>";
-
-container_end();
-*/
 
 $user = csg_get_user();
 $user_id = $user['id'];
@@ -112,19 +90,29 @@ else
 echo "
 <div class='row'>
     <div class='col-sm-4'>
-        <div id='selection-information'>
-            <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image --> Image ID: $image_id
-	    <a href='#' class='btn btn-success' data-toggle='modal' data-target='#helpModal'>Help!</a>
+        <div class='container-fluid'>
+            <div class='row'>
+                <div id='selection-information'>
+                    <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image --> Image ID: $image_id
+                    <a href='#' class='btn btn-success' data-toggle='modal' data-target='#helpModal'>Help!</a>
+                    <br><br>
+                 </div>
+            </div>
+            <div class='row'>
+                <div class='text-center'>
+                    <div class='btn-group btn-group-lg'>
+                        <button class='btn btn-primary' id='skip-button'>Skip</button>
+                        <button class='btn nothing btn-danger' id='nothing-here-button' >There's Nothing Here</button>
+                        <button class='btn btn-primary' id='submit-selections-button' disabled>Submit</button>
+                     </div>
+                </div>
+            </div>
         </div>
-	<textarea class='nothing-here-box' type='text' size='34' maxlength='512' value ='' id='comments' placeholder='comments' row='1'></textarea><br>
-	<button class='btn btn-primary' id='skip-button'>Skip</button>
-	<button class='btn nothing btn-danger' id='nothing-here-button' >There's Nothing Here</button>
-        <button class='btn btn-primary' id='submit-selections-button'>Submit</button>
     </div>
-    <div class='col-sm-8' onselectstart='return false' ondragstart='return false'>
-        <div id='canvas'>
-            <img id='$image_id'  src='http://wildlife.und.edu/$image'></img>
-        </div>
+    <div class='col-sm-8' id='canvasContainer'>
+        <canvas id='canvas' width='600' height='400'>
+            <img id='canvasImg' src='http://wildlife.und.edu/$image'></img>
+        </canvas>
     </div>
 </div>";
 	
@@ -160,6 +148,9 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 		</div>
 	</div>";
 
-
+echo "<script src='./js/jquery.mousewheel.min.js'></script>
+<script src='./js/hammer.min.js'></script>
+<script src='./js/canvas_selector.js'></script>
+<script src='./js/canvas_test.js'></script>";
 
 ?>
