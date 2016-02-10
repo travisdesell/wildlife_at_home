@@ -65,12 +65,32 @@ var canvasSelector = function (canvas, image, context) {
     		"scale": zoom
     	});
     	return false;
-    })
+    });
+
+    // see if we were sent in any rectangles
+    if (context.rectangles) {
+        // make sure we're sorted
+        context.rectangles.sort(function(a,b) {
+            return a.id - b.id;
+        });
+
+        // add them all programattically
+        context.rectangles.forEach(function(e) {
+            savedThis.addRectangle(savedThis, e, false);
+        });
+    }
+
+    // force a resize
+    this.resizeFunc(savedThis);
 };
 
-/** Remove a specific element. */
-canvasSelector.prototype.deleteElement = function(obj, id) {
+canvasSelector.prototype.addRectangle = function(obj, rect, redraw) {
+	obj.rectangles.push(rect);
 
+	if (redraw !== false) obj.redrawCanvas(obj);
+	
+	// call the callback
+	if (obj.callback) obj.callback(rect.id);
 };
 
 /** When the mouse moves, change the cursor */
@@ -248,14 +268,16 @@ canvasSelector.prototype.onPan = function(obj, ev) {
 	obj.logEvent(obj.image.width + ", " + obj.image.height + ", " + obj.curScale);
 
 	// make sure the image stays within the canvas
-	if (tmpLeft + (obj.image.width * obj.curScale) < obj.canvas.width() || tmpTop + (obj.image.height * obj.curScale) < obj.canvas.height()) {
-		return;
+	if (tmpLeft + (obj.image.width * obj.curScale) < obj.canvas.width()) {
+        tmpLeft = obj.canvas.width() - (obj.image.width * obj.curScale);
+    }
+    if (tmpTop + (obj.image.height * obj.curScale) < obj.canvas.height()) {
+		tmpTop = obj.canvas.height() - (obj.image.height * obj.curScale);
 	}
 
-	// make sure we have a positive value
-	if (tmpLeft > 0 || tmpTop > 0) {
-		return;
-	}
+	// make sure we have a negative value
+	if (tmpLeft > 0) tmpLeft = 0;
+    if (tmpTop > 0) tmpTop = 0;
 
 	// update the current locations and redraw
 	obj.curLeft = tmpLeft;
@@ -288,18 +310,40 @@ canvasSelector.prototype.onDoubleTap = function(obj, ev) {
 	if (obj.rectangles.length > 0) {
 	    id = obj.rectangles[obj.rectangles.length-1].id + 1;
 	}
-	obj.rectangles.push({
-		'left': point.x,
-		'top': point.y,
-		'width': size,
-		'height': size,
-		'id': id
-	});
 
-	obj.redrawCanvas(obj);
-	
-	// call the callback
-	if (obj.callback) obj.callback(id);
+    obj.addRectangle(obj, {
+        'left': point.x,
+        'top': point.y,
+        'width': size,
+        'height': size,
+        'id': id
+    });
+};
+
+canvasSelector.prototype.removeRect = function(obj, id) {
+    var rect = undefined;
+
+    obj.rectangles.forEach(function(e) {
+        if (e.id == id) {
+            rect = e;
+            return;
+        }
+    });
+
+    if (rect) obj.internalRemoveRect(obj, rect);
+};
+
+canvasSelector.prototype.internalRemoveRect = function(obj, rect) {
+    obj.logEvent("DELETING RECTANGLE");
+    var index = obj.rectangles.indexOf(rect);
+    var id = rect.id;
+    obj.rectangles.splice(index, 1);
+    
+    obj.redrawCanvas(obj);
+    
+    if (obj.deleteCallback) {
+        obj.deleteCallback(id, obj.rectangles.length == 0);
+    }
 };
 
 /** Triple tap is currently a way for touch users to destroy a square. */ 
@@ -312,14 +356,7 @@ canvasSelector.prototype.onTripleTap = function(obj, ev) {
 
 	// delete the rectangle if we found one
 	if (rect) {
-		obj.logEvent("DELETING RECTANGLE");
-		var index = obj.rectangles.indexOf(rect);
-		var id = rect.id;
-		obj.rectangles.splice(index, 1);
-		
-		obj.redrawCanvas(obj);
-		
-		if (obj.deleteCallback) obj.deleteCallback(id);
+        obj.internalRemoveRect(obj, rect);
 		return;
 	}
 

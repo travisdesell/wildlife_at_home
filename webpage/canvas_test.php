@@ -103,7 +103,7 @@ echo "
                     <div class='btn-group btn-group-lg'>
                         <button class='btn btn-primary' id='skip-button'>Skip</button>
                         <button class='btn nothing btn-danger' id='nothing-here-button' >There's Nothing Here</button>
-                        <button class='btn btn-primary' id='submit-selections-button' disabled>Submit</button>
+                        <button class='btn btn-primary disabled' id='submit-selections-button' disabled>Submit</button>
                      </div>
                 </div>
             </div>
