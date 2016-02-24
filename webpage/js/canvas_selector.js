@@ -1,7 +1,7 @@
 var canvasSelector = function (canvas, image, context) {
     this.canvas = canvas;
     this.canvasHTML = canvas[0];
-    this.image = image[0] || image;
+    this.image = image;
     this.ctx = this.canvasHTML.getContext("2d");
     this.mc = new Hammer.Manager(this.canvasHTML);
     this.callback = context.callback || null;
@@ -79,9 +79,6 @@ var canvasSelector = function (canvas, image, context) {
             savedThis.addRectangle(savedThis, e, false);
         });
     }
-
-    // force a resize
-    this.resizeFunc(savedThis);
 };
 
 canvasSelector.prototype.addRectangle = function(obj, rect, redraw) {
@@ -150,17 +147,18 @@ canvasSelector.prototype.getScaledPoint = function(obj, ev, offset) {
  */
 canvasSelector.prototype.onResize = function(obj) {
     var windowHeight = window.innerHeight || $(window).height();
-	var windowWidth = window.innerWidth || $(window).width();
-    var x = obj.canvas.offset().left;
     var y = obj.canvas.offset().top;
-    var width = windowWidth - x - 20;
     var height = windowHeight - $(".footer").height()*2 - y - 20;
+    
+    /* scale it to the parent container */
+    var p = obj.canvas.parent();
+    var width = p.width() - 20;
 
     // fill all available space and minimum size
     if (width > obj.image.width) width = obj.image.width;
     else if (width < 400) width = 400;
     if (height > obj.image.height) height = obj.image.height;
-    else if (height < 400) height = 400;
+    else if (height < 400) height = 400; 
 
     obj.ctx.canvas.width = width;
     obj.ctx.canvas.height = height;

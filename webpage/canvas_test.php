@@ -111,7 +111,6 @@ echo "
     </div>
     <div class='col-sm-8' id='canvasContainer'>
         <canvas id='canvas' width='600' height='400'>
-            <img id='canvasImg' src='http://wildlife.und.edu/$image'></img>
         </canvas>
     </div>
 </div>";
@@ -151,6 +150,7 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 echo "<script src='./js/jquery.mousewheel.min.js'></script>
 <script src='./js/hammer.min.js'></script>
 <script src='./js/canvas_selector.js'></script>
+<script>var imgsrc = 'http://wildlife.und.edu/$image';</script>
 <script src='./js/canvas_test.js'></script>";
 
 ?>
