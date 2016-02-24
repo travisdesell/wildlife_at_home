@@ -5,9 +5,7 @@ var newRectCallback = function(id) {
     table = "<div class='panel panel-primary' id='S" + id + "'>" +
         "<div class='panel-heading'>" +
             "Selection " + id +
-            "<button type='button' class='btn btn-danger delete pull-right' id='remove" + id + "'>" +
-                "Remove" +
-            "</button>" +
+			"<button type='button' class='close' data-dismiss='modal' aria-hidden='true' id='remove" + id + "'>X</button>" +
         "</div>" +
         "<div class='panel-body'>" +
             "<select class='form-control' id='species" + id + "'>" + options + "</select>" +
