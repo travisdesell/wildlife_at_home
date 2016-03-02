@@ -76,7 +76,7 @@ if (isset($_POST['submitSuccess']) and $_POST['submitSuccess']) {
 }
 
 echo "
-    <div class='container-fluid'>
+<div class='container-fluid'>
 <div class='row'>
     <div class='col-sm-12'>
         <div class='alert $alert_class' role='alert'>
@@ -88,9 +88,16 @@ echo "
     <div class='col-sm-4'>
         <div class='container-fluid'>
             <div class='row'>
-                <div id='selection-information'>
+            <div id='selection-information'>
+                    <div class='btn-group btn-group-sm' role='group'>
+                        <button type='button' class='btn disabled' disabled><strong>Image #: $image_id</strong></button>
+                        <button type='button' id='discuss-button' class='btn btn-primary'>&nbsp;<span class='glyphicon glyphicon-comment'> </span></button>
+                    </div>
                     <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image Image ID: $image_id -->
-                    <a href='#' class='btn btn-success' data-toggle='modal' data-target='#helpModal'>Species Help!</a>
+                    <div class='btn-group btn-group-sm pull-right' role='group'>
+                        <button type='button' class='btn btn-info' data-toggle='modal' data-target='#helpModal'>Species <span class='glyphicon glyphicon-question-sign'> </span></button>
+                        <button type='button' class='btn btn-info' data-toggle='modal' data-target='#interfaceModal'>Interface <span class='glyphicon glyphicon-question-sign'> </span></button>
+                    </div>
                     <br><br>
                  </div>
             </div>
@@ -130,6 +137,19 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 			</div>
 		</div>
 	</div>
+	<div id='interfaceModal' class='modal fade' style='height: 80%'>
+		<div class='modal-dialog modal-lg' role='dialog'>
+			<div class='modal-content'>
+                <div class='modal-header'>
+				    <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>X</button>
+					<h4 class='modal-title''>Interface Help</h4>
+                </div>
+                <div class='modal-body' style='overflow-y: scroll'>
+                    Interface help coming soon.
+                </div>
+            </div>
+        </div>
+    </div>
 	<div id='helpModal' class='modal fade' style='height: 80%'>
 		<div class='modal-dialog modal-lg' role='dialog'>
 			<div class='modal-content'>
@@ -222,6 +242,10 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 echo "
 <form class='hidden' action='' method='POST' id='submitForm'>
     <input type='hidden' id='submitSuccess' name='submitSuccess' value='1'/>
+</form>
+    
+<form id='forumPost' class='hidden' action='//csgrid.org/csg/forum_post.php?id=8' method='post' target='_blank'>
+    <input type='hidden' id='forumContent' name='content' value=''>
 </form>";
 
 echo "<script src='./js/jquery.mousewheel.min.js'></script>

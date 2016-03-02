@@ -85,6 +85,11 @@ $(document).ready(function() {
     });
 });
 
+$("#discuss-button").click(function() {
+    $("#forumContent").val('I would like to discuss the following trail cam image:\n\n[img]' + imgsrc + '[/img]');
+    $("#forumPost").submit();
+});
+
 $("#skip-button").click(function() {
     $("#submitSuccess").val(0);
     $("#submitForm").submit();
