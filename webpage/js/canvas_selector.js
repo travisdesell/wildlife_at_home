@@ -10,6 +10,7 @@ var canvasSelector = function (canvas, image, context) {
     this.logging = context.logging === true;
     this.minSize = context.minSize || 20;
     this.errorMargin = context.errorMargin || 5;
+    this.allowOverlap = (context.allowOverlap !== false ? true : false);
     
     // variables that get updated automatically
     this.rectangles = [];
@@ -421,6 +422,7 @@ canvasSelector.prototype.getRectangle = function(obj, x, y) {
 
 /** Determines if there is a collision between rectangles at a given location. */
 canvasSelector.prototype.isCollision = function(obj, rect, left, top, width, height) {
+    if (obj.allowOverlap) return false;
 	var returnVal = false;
 	
 	obj.rectangles.forEach(function (e) {
