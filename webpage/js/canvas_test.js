@@ -86,17 +86,18 @@ $(document).ready(function() {
 });
 
 $("#skip-button").click(function() {
-    location.reload();
+    $("#submitSuccess").val(0);
+    $("#submitForm").submit();
 });
 
 $("#nothing-here-button").click(function() {
-    // TODO: SAVE NOTHING
-    location.reload();
+    // TODO: SAVE
+    $("#submitForm").submit();
 });
 
 $("#submit-selections-button").click(function() {
     // TODO: SAVE
-    location.reload();
+    $("#submitForm").submit();
 });
 
 $(window).resize(function() {

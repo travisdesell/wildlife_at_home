@@ -70,8 +70,20 @@ else
 
 //TODO make 'nothing here' button work -Jaeden
 
+$alert_class = 'hidden';
+if (isset($_POST['submitSuccess']) and $_POST['submitSuccess']) {
+    $alert_class = 'alert-success';
+}
+
 echo "
-<div class='container-fluid'>
+    <div class='container-fluid'>
+<div class='row'>
+    <div class='col-sm-12'>
+        <div class='alert $alert_class' role='alert'>
+            <strong>Success!</strong> Data submited to the database.
+        </div>
+    </div>
+</div>
 <div class='row'>
     <div class='col-sm-4'>
         <div class='container-fluid'>
@@ -205,7 +217,12 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
                 </div>
 			</div>
 		</div>
-	</div>";
+        </div>";
+
+echo "
+<form class='hidden' action='' method='POST' id='submitForm'>
+    <input type='hidden' id='submitSuccess' name='submitSuccess' value='1'/>
+</form>";
 
 echo "<script src='./js/jquery.mousewheel.min.js'></script>
 <script src='./js/hammer.min.js'></script>
