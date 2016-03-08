@@ -28,7 +28,7 @@ echo "
 	</div>
 	<div class='row row-centered'>
 		<div class='col-sm-4'>
-			<div class='well'>
+			<div class='well' id='well1'>
 				<p> hihihi
 				</p>
 				<p> lindsey
@@ -163,7 +163,7 @@ echo"
 </div>";
 */
 
-print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
+print_footer('Travis Desell, Susan Ellis-Felege, Lindsey Wingate and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 echo "</body></html>";
 
