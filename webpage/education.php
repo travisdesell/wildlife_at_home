@@ -11,10 +11,54 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 
-print_header("Wildlife@Home: Teaching & Learning", "", "wildlife");
+
+$css_header = "<link rel='stylesheet' type='text/css' href='wildlife_css/education_style.css'/>";
+
+print_header("Wildlife@Home: Teaching & Learning", "$css_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 echo "
+<div class='container'>
+	<div class='row'>
+		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
+			<div class='well'>
+				hi
+			</div>
+		</div>
+	</div>
+	<div class='row row-centered'>
+		<div class='col-sm-4'>
+			<div class='well'>
+				<p> hihihi
+				</p>
+				<p> lindsey
+				</p>
+				<p> wingate
+				</p>
+			</div><!--class-->
+		</div><!--col-->
+		<div class='col-sm-4'>
+			<div class='well'>
+				<p> hi </p>
+			</div><!--well-->
+		</div><!--col-->
+		<div class='col-sm-4'>
+			<div class='well'>
+				<p>	blah blah blah </p>
+			</div>
+		</div><!--col-->
+	</div><!--row-->
+	<div class='row'>
+		<div class='col-sm-12'>
+			<div class='well'>
+				test yoo
+			</div>
+		</div><!--col-->		
+	</div><!--row-->
+</div><!--container-->
+";
+
+/*echo "
 <style type=\"text/css\">
 	.modlink {margin-left: 5px;}
 		.modlink textarea {height: 100px; width: 300px; margin-top: 5px; margin-bottom: 10px;}
@@ -24,6 +68,8 @@ echo "
 	.modtable {margin-top: 5px;}
 	.modtable td {padding: 15px; border: 1px solid #000000;}
 </style>
+";
+echo"
 <div class=\"container\">
 	<div class=\"row\">
 		<h2>Wildlife@Home Education Modules</h2>
@@ -115,7 +161,7 @@ echo "
 		</div>
 	</div>
 </div>";
-
+*/
 
 print_footer('Travis Desell, Susan Ellis-Felege and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
