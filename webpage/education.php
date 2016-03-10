@@ -21,49 +21,51 @@ echo "
 <div class='container'>
 	<div class='row'>
 		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
-				<img src='images/900px_leaninghouse.jpg' class='img-rounded' >				
 		</div>
 	</div>
-	<div class='row row-centered'>
-		<div class='col-sm-12'>	
-			<p align='center'>
-				Test
-			</p>			
-		</div>
+<div class='row row-centered'>
+	<div class='col-sm-12'>	
+		<p align='center'>
+			<p><center>Sharp-Tailed Grouse</center></p>	
+		</p>			
 	</div>
-	<div class='row row-centered'>
-		<div class='col-sm-4'>
-			<div class='well' id='well1'>
-				<p>K-5 Module</p>
-					<a href=\"publications/Grade-5-Food-Web-Module.docx\">(download.docx)</a>
-					<p></p>
-					<img src='images/900x324_susan.jpg'>
+</div>
+<div class='row row-centered'>
+	<div class='col-sm-4'>
+		<div class='well' id='well1'>
+			<p>K-5 Module 
+				<a href='publications/Grade-5-Food-Web-Module.docx'>(download)</a>
+			</p>
 				<p></p>
-				<p> Isso é pra practicar. Precisava practicar portugues, enao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
-			</div><!--class-->
-		</div><!--col-->
-		<div class='col-sm-4'>
-			<div class='well'>
-				<p> 6-9 Module </p>
-					<a href=\"publications/MS-Module.docx\">(download.doc)</a>
-					<p></p>
-				<img src='images/900x293_hatch.jpg'>
-			</div><!--well-->
-		</div><!--col-->
-		<div class='col-sm-4'>
-			<div class='well'>
-				<p>10-12 Module </p>
-					<a href=\"publications/HS-Module.docx\">(download.dc)</a>
-					<p></p>
-				<img src='images/900x276_oil.jpg'>
-			</div>
-		</div><!--col-->
-	</div><!--row-->
-	<div class='row'>
-		<div class='col-sm-12'>
-			<div class='well'>
-				test yoo
-			</div>
+				<img src='images/900x324_susan.jpg'>
+			<p></p>
+			<p> Isso é pra practicar. Precisava practicar portugues, enao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
+		</div><!--class-->
+	</div><!--col-->
+	<div class='col-sm-4'>
+		<div class='well'>
+			<p>6-9 Module
+				<a href='publications/MS-Module.docx'>(download)</a>
+			</p>
+				<p></p>
+					<img src='images/900x293_hatch.jpg'>
+				</div><!--well-->
+			</div><!--col-->
+	<div class='col-sm-4'>
+		<div class='well'>
+			<p>10-12 Module 
+				<a href=\"publications/HS-Module.docx\">(download)</a>
+			</p>
+				<p></p>
+			<img src='images/900x276_oil.jpg'>
+		</div>
+	</div><!--col-->
+</div><!--row-->
+<div class='row'>
+	<div class='col-sm-12'>
+		<div class='well well-sm'>
+			<p> If you have any suggestions or questions about the modules, feel free to drop by the <a href=\"http://volunteer.cs.und.edu/csg/forum_forum.php?id=3\">Education and Learning forum</a>.</p>
+		</div>
 		</div><!--col-->		
 	</div><!--row-->
 </div><!--container-->
