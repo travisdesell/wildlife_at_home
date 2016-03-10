@@ -21,25 +21,30 @@ echo "
 <div class='container'>
 	<div class='row'>
 		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
-			<div class='well'>
-				hi
-			</div>
+				<img src='images/900px_leaninghouse.jpg' class='img-rounded'>				
+		</div>
+	</div>
+	<div class='row row-centered'>
+		<div class='col-sm-12'>	
+			<p align='center'>
+				Test
+			</p>			
 		</div>
 	</div>
 	<div class='row row-centered'>
 		<div class='col-sm-4'>
 			<div class='well' id='well1'>
-				<p> hihihi
-				</p>
-				<p> lindsey
-				</p>
-				<p> wingate
-				</p>
+				<p> K-5 Module</p>
+				<img src='images/900x293_hatch.jpg'>
+				<p></p>
+				<p> Isso e pra practicar. Precisava practicar portugues, entao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
 			</div><!--class-->
 		</div><!--col-->
 		<div class='col-sm-4'>
 			<div class='well'>
-				<p> hi </p>
+				<p> 6-9 Module </p>
+				<p></p>
+				<img src='images/900x293_hatch.jpg'>
 			</div><!--well-->
 		</div><!--col-->
 		<div class='col-sm-4'>
