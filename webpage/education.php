@@ -21,7 +21,7 @@ echo "
 <div class='container'>
 	<div class='row'>
 		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
-				<img src='images/900px_leaninghouse.jpg' class='img-rounded'>				
+				<img src='images/900px_leaninghouse.jpg' class='img-rounded' >				
 		</div>
 	</div>
 	<div class='row row-centered'>
@@ -35,9 +35,9 @@ echo "
 		<div class='col-sm-4'>
 			<div class='well' id='well1'>
 				<p> K-5 Module</p>
-				<img src='images/900x293_hatch.jpg'>
+				<img src='images/900x324_susan.jpg'>
 				<p></p>
-				<p> Isso e pra practicar. Precisava practicar portugues, entao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
+				<p> Isso é pra practicar. Precisava practicar portugues, enao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
 			</div><!--class-->
 		</div><!--col-->
 		<div class='col-sm-4'>
@@ -49,7 +49,8 @@ echo "
 		</div><!--col-->
 		<div class='col-sm-4'>
 			<div class='well'>
-				<p>	blah blah blah </p>
+				<p>10-12 Module </p>
+				<img src='images/900x276_oil.jpg'>
 			</div>
 		</div><!--col-->
 	</div><!--row-->
