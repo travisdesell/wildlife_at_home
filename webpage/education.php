@@ -34,8 +34,10 @@ echo "
 	<div class='row row-centered'>
 		<div class='col-sm-4'>
 			<div class='well' id='well1'>
-				<p> K-5 Module</p>
-				<img src='images/900x324_susan.jpg'>
+				<p>K-5 Module</p>
+					<a href=\"publications/Grade-5-Food-Web-Module.docx\">(download.docx)</a>
+					<p></p>
+					<img src='images/900x324_susan.jpg'>
 				<p></p>
 				<p> Isso é pra practicar. Precisava practicar portugues, enao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
 			</div><!--class-->
@@ -43,13 +45,16 @@ echo "
 		<div class='col-sm-4'>
 			<div class='well'>
 				<p> 6-9 Module </p>
-				<p></p>
+					<a href=\"publications/MS-Module.docx\">(download.doc)</a>
+					<p></p>
 				<img src='images/900x293_hatch.jpg'>
 			</div><!--well-->
 		</div><!--col-->
 		<div class='col-sm-4'>
 			<div class='well'>
 				<p>10-12 Module </p>
+					<a href=\"publications/HS-Module.docx\">(download.dc)</a>
+					<p></p>
 				<img src='images/900x276_oil.jpg'>
 			</div>
 		</div><!--col-->
