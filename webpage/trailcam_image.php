@@ -10,12 +10,11 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 
+$user = csg_get_user();
+$user_id = $user['id'];
 
 print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/canvas_test.css' rel='stylesheet'>", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
-
-$user = csg_get_user();
-$user_id = $user['id'];
 
 $image_id = -1;
 $project_id = $_GET[('p')];
