@@ -17,6 +17,26 @@ img {
 	width: 100%;
 }
 
+a {
+	color: rgb(127, 255, 0);
+}
+
+a:link {
+	color: rgb(127, 255, 0);
+}
+
+a:visited {
+	color: rgb(127, 255, 0);
+}
+
+a:hover {
+	color: green;
+}
+
+a:active {
+	color: green;
+}
+
 .page-header {
 	margin-top: 60px;
 {
