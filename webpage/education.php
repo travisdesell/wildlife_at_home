@@ -21,6 +21,9 @@ echo "
 <div class='container'>
 	<div class='row'>
 		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
+			<p> </p>
+			<p>  </p>
+			<h3><center>Wildlife at Home Education Modules</center></h3>
 		</div>
 	</div>
 <div class='row row-centered'>
@@ -64,7 +67,7 @@ echo "
 <div class='row'>
 	<div class='col-sm-12'>
 		<div class='well well-sm'>
-			<p> If you have any suggestions or questions about the modules, feel free to drop by the <a href=\"http://volunteer.cs.und.edu/csg/forum_forum.php?id=3\">Education and Learning forum</a>.</p>
+			<p>If you have any suggestions or questions about the modules, feel free to drop by the <a href=\"http://volunteer.cs.und.edu/csg/forum_forum.php?id=3\">Education and Learning Forum</a>.</p>
 		</div>
 		</div><!--col-->		
 	</div><!--row-->

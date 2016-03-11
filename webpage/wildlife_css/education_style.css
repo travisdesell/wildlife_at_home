@@ -1,11 +1,15 @@
 .well {
-	background-color: rgba(1, 1, 1, 0.1) ;
+	background-color: rgba(1, 1, 1, 0.3) ;
 	color: white;
 }
 
 body {
 	color: white;
-	background-color: rgba(56, 56, 56, 1);
+	background-image: url('../images/wildlife_background.jpg');
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	/*background-color: rgba(56, 56, 56, 1);
+*/
 }
 
 img {
@@ -13,3 +17,6 @@ img {
 	width: 100%;
 }
 
+.page-header {
+	margin-top: 60px;
+{
