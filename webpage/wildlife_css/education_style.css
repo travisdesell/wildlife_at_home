@@ -1,5 +1,22 @@
+@font-face {
+	font-family: Amatic;
+	src: url('fonts/amaticSC-Regular.ttf');
+}
+@font-face {
+	font-family: Windsong;
+	src: url(fonts/Windsong.ttf);
+}
+@font-face {
+	font-family: Alex-Brush;
+	src: url(fonts/AlexBrush-Regular.ttf);
+}
+
+#test_for_font {
+	font-family: Amatic;
+}
+
 .well {
-	background-color: rgba(1, 1, 1, 0.3) ;
+	background-color: rgba(1, 1, 1, 0.5) ;
 	color: white;
 }
 
@@ -37,6 +54,3 @@ a:active {
 	color: green;
 }
 
-.page-header {
-	margin-top: 60px;
-{

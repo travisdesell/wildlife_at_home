@@ -19,11 +19,11 @@ print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 echo "
 <div class='container'>
-	<div class='row'>
+	<div class='row' id='test_for_font'>
 		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
 			<p> </p>
 			<p>  </p>
-			<h3><center>Wildlife at Home Education Modules</center></h3>
+			<h1><center>Wildlife at Home -  Education Modules</center></h1>
 		</div>
 	</div>
 <div class='row row-centered'>
