@@ -23,7 +23,7 @@ echo "
 		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
 			<p> </p>
 			<p>  </p>
-			<h1 id='title'><center>Wildlife at Home -  Education Modules</center></h1>
+			<h1 id='title1'><center>Wildlife at Home -  Education Modules</center></h1>
 		</div>
 	</div>
 <div class='row row-centered'>
@@ -35,32 +35,37 @@ echo "
 </div>
 <div class='row row-centered'>
 	<div class='col-sm-4'>
-		<div class='well' id='well1'>
-			<h4 id='subtitle'>K-5 Module
+		<div class='well well-sm' id='well1'>
+			<h4 id='subtitle'><center>K-5 Module
 				<a href='publications/Grade-5-Food-Web-Module.docx'>(download)</a>
-			</h4>
+			
+			</center></h4>
 				<p></p>
 				<img src='images/900x324_susan.jpg'>
 			<p></p>
-			<p> Isso é pra practicar. Precisava practicar portugues, enao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
+			<p> Isso é pra practicar. Precisava practicar portugues, ntao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
 		</div><!--class-->
 	</div><!--col-->
 	<div class='col-sm-4'>
-		<div class='well'>
-			<h4 id='subtitle'>6-9 Module
+		<div class='well well-sm' id='well2'>
+			<h4 id='subtitle'><center>6-9 Module
 				<a href='publications/MS-Module.docx'>(download)</a>
-			</h4>
+			</center></h4>
 				<p></p>
 					<img src='images/900x293_hatch.jpg'>
+				<p></p>
+				<p>Mais um practique!</p>
 				</div><!--well-->
 			</div><!--col-->
 	<div class='col-sm-4'>
-		<div class='well'>
-			<h4 id='subtitle'>10-12 Module 
+		<div class='well well-sm' id='well3'>
+			<h4 id='subtitle'><center>10-12 Module 
 				<a href=\"publications/HS-Module.docx\">(download)</a>
-			</h4>
+			</center></h4>
 				<p></p>
 			<img src='images/900x276_oil.jpg'>
+				<p></p>
+				<p>ultimo module!</p>
 		</div>
 	</div><!--col-->
 </div><!--row-->

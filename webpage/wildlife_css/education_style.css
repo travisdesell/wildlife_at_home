@@ -16,16 +16,30 @@
 	src: url(fonts/Note_this.ttf);
 }
 
+@font-face {
+	font-family: Cabin_Regular; 
+	src: url(fonts/CabinSketch_Regular.ttf);
+}
+
+@font-face {
+	font-family: Cabin_Bold;
+	src: url(CabinSketch_Bold.ttf);
+}
+
+#title1{
+	font-family: Cabin_Regular;
+	padding-top: 5%;
+}
+
 #title {
-	font-family: Note_This;
+	font-family: Cabin_Regular;
 }
 
 #subtitle {
-	font-family: Note_This;
+	font-family: Cabin_Regular;
 }
 
 .well {
-	font-family: Note_This;
 	background-color: rgba(1, 1, 1, 0.5) ;
 	color: white;
 }
