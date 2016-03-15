@@ -23,22 +23,22 @@ echo "
 		<div class='col-sm-12'><!--column allows all rows to match up in size--> 
 			<p> </p>
 			<p>  </p>
-			<h1><center>Wildlife at Home -  Education Modules</center></h1>
+			<h1 id='title'><center>Wildlife at Home -  Education Modules</center></h1>
 		</div>
 	</div>
 <div class='row row-centered'>
 	<div class='col-sm-12'>	
 		<p align='center'>
-			<p><center>Sharp-Tailed Grouse</center></p>	
+			<h3 id='title'><center>Sharp-Tailed Grouse</center></h3>	
 		</p>			
 	</div>
 </div>
 <div class='row row-centered'>
 	<div class='col-sm-4'>
 		<div class='well' id='well1'>
-			<p>K-5 Module 
+			<h4 id='subtitle'>K-5 Module
 				<a href='publications/Grade-5-Food-Web-Module.docx'>(download)</a>
-			</p>
+			</h4>
 				<p></p>
 				<img src='images/900x324_susan.jpg'>
 			<p></p>
@@ -47,18 +47,18 @@ echo "
 	</div><!--col-->
 	<div class='col-sm-4'>
 		<div class='well'>
-			<p>6-9 Module
+			<h4 id='subtitle'>6-9 Module
 				<a href='publications/MS-Module.docx'>(download)</a>
-			</p>
+			</h4>
 				<p></p>
 					<img src='images/900x293_hatch.jpg'>
 				</div><!--well-->
 			</div><!--col-->
 	<div class='col-sm-4'>
 		<div class='well'>
-			<p>10-12 Module 
+			<h4 id='subtitle'>10-12 Module 
 				<a href=\"publications/HS-Module.docx\">(download)</a>
-			</p>
+			</h4>
 				<p></p>
 			<img src='images/900x276_oil.jpg'>
 		</div>

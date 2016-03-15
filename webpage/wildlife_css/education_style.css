@@ -11,11 +11,21 @@
 	src: url(fonts/AlexBrush-Regular.ttf);
 }
 
-#test_for_font {
-	font-family: Amatic;
+@font-face {
+	font-family: Note_This;
+	src: url(fonts/Note_this.ttf);
+}
+
+#title {
+	font-family: Note_This;
+}
+
+#subtitle {
+	font-family: Note_This;
 }
 
 .well {
+	font-family: Note_This;
 	background-color: rgba(1, 1, 1, 0.5) ;
 	color: white;
 }
