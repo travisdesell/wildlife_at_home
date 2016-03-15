@@ -43,7 +43,7 @@ echo "
 				<p></p>
 				<img src='images/900x324_susan.jpg'>
 			<p></p>
-			<p> Isso é pra practicar. Precisava practicar portugues, ntao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
+			<p> Isso é pra practicar. Precisava practicar portugue entao vou aqui. Os fotos precisam aparacer lindos e capturar a atencao de todos que visitam o site </p>				
 		</div><!--class-->
 	</div><!--col-->
 	<div class='col-sm-4'>

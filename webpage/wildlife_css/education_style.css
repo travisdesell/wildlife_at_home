@@ -23,23 +23,30 @@
 
 @font-face {
 	font-family: Cabin_Bold;
-	src: url(CabinSketch_Bold.ttf);
+	src: url(fonts/CabinSketch_Bold.ttf);
 }
 
+@font-face {
+	font-family: Existence;
+	src: url(fonts/ExistenceLight.ttf);
+}
+
+
 #title1{
-	font-family: Cabin_Regular;
+	font-family: Existence; 
 	padding-top: 5%;
 }
 
 #title {
-	font-family: Cabin_Regular;
+	font-family: Existence;
 }
 
 #subtitle {
-	font-family: Cabin_Regular;
+	font-family: Existence;
 }
 
 .well {
+	font-family: Existence;
 	background-color: rgba(1, 1, 1, 0.5) ;
 	color: white;
 }
