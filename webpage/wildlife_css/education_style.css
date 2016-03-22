@@ -33,21 +33,21 @@
 
 
 #title1{
-	font-family: Existence; 
+	font-family: Amatic; 
 	padding-top: 5%;
 }
 
 #title {
-	font-family: Existence;
+	font-family: Amatic;
 }
 
 #subtitle {
-	font-family: Existence;
+	font-family: Amatic;
 }
 
 .well {
-	font-family: Existence;
-	background-color: rgba(1, 1, 1, 0.5) ;
+/*	font-family: Existence;
+*/	background-color: rgba(1, 1, 1, 0.5) ;
 	color: white;
 }
 
