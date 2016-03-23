@@ -4,15 +4,6 @@
 
 }
 
-.img-responsive {
-	-moz-user-select: none;
-	-webkit-user-select: none;
-	user-select: none;
-	min-height: 768px;
-        min-width: 1024px;
-	max-height: 768px;
-        maX-width: 1024px;	
-}
 .rectangle {  
     border: 4px solid #FF0000;
     background: rgba(255,0,0,0.3);
@@ -43,29 +34,13 @@
     cursor: normal;
 }
 
-.well {
-	max-width: 400px;
-	min-width: 400px;
-	padding-top: 20px;
-	padding-bottom: 20px;
-}
-
-.col-sm-4 {
-	min-width: 420px;
-	max-width: 450px;
-	width: 95%;
-	padding-left: 30px;
-
-}
-
 table, td {
     border: 1px outset #E6E6E6;
     border-collapse: collapse;
 }
 
 table {
-	min-width: 360px;
-	max-width: 360px;
+	width: 100%;
 }
 
 textarea {

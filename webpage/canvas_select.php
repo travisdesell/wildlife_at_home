@@ -9,11 +9,36 @@ $result= array();
 $project_id= $_POST['p'];
 if (!$project_id) $project_id = 1;
 
-$res = query_wildlife_video_db("select species, species_id from species_lookup where species_id = any (select species_id from species_project_lookup where project_id=$project_id)");
+// force UAS project for now
+if ($project_id == 2) {
+    $res = query_uas_db("SELECT name, speciesId FROM tblSpecies");
 
-while ($row = $res->fetch_assoc()) {
-	$result[] = array( "name" => $row['species'],
-			"id" => $row['species_id']);
+    while ($row = $res->fetch_assoc()) {
+        $phase = query_uas_db("SELECT name, phaseId FROM tblPhases");
+
+        if ($prow = $phase->fetch_assoc()) {
+            do {
+                $results[] = array(
+                    "name" => $row['name'] . ' - '.$prow['name'],
+                    "id" => $row['speciesId'],
+                    "phaseId" => $prow['phaseId']
+                );
+            } while ($prow = $phase->fetch_assoc());
+        } else {
+            $results[] = array(
+                "name" => $row['name'],
+                "id" => $row['speciesId'],
+                "phaseId" => 0
+            );
+        }
+    }
+} else {
+    $res = query_wildlife_video_db("select species, species_id from species_lookup where species_id = any (select species_id from species_project_lookup where project_id=$project_id)");
+
+    while ($row = $res->fetch_assoc()) {
+        $result[] = array( "name" => $row['species'],
+                "id" => $row['species_id']);
+    }
 }
 echo json_encode($result);
 ?>
