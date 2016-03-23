@@ -136,12 +136,12 @@ $(document).ready(function() {
                     else if (data['count'] == 1) html = '1 rectangle added.';
                     else html = data['count'] + ' rectangles added.';
 
-                    $("#ajaxalert").html("<strong>Success!</strong> " + html + ' Reloading page in 5 seconds.');
+                    $("#ajaxalert").html("<strong>Success!</strong> " + html + ' Reloading page in 3 seconds.');
                     $("#ajaxalert").removeClass('hidden');
 
                     setTimeout(function() {
                         location.reload();
-                    }, 5000);
+                    }, 3000);
                 }
             });
 

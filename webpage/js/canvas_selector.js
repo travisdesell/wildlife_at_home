@@ -451,9 +451,12 @@ canvasSelector.prototype.redrawCanvas = function(obj) {
 
 	// draw all the rectangles
 	obj.ctx.font = "16px serif";
+    var red = 255;
+    var green = 0;
+    var blue = 0;
 	obj.rectangles.forEach(function(e) {
 		obj.ctx.beginPath();
-		obj.ctx.fillStyle="rgba(255, 0, 0, 0.15)";
+		obj.ctx.fillStyle="rgba(" + red + ", " + green + ", " + blue + ", 0.15)";
 		obj.ctx.fillRect(e.left, e.top, e.width, e.height);
 		obj.ctx.lineWidth="2";
 		obj.ctx.strokeStyle="red";
