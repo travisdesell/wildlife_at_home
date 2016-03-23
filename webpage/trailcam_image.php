@@ -75,8 +75,10 @@ echo "
                     </div>
                     <br><br>
                  </div>
-            </div>
+                 </div>
             <div class='row'>
+                <textarea class='form-control' rows='3' placeholder='Comments' name='comment-area' id='comment-area'></textarea>
+                <br>
                 <div class='text-center'>
                     <div class='btn-group btn-group-lg'>
                         <button class='btn btn-primary' id='skip-button'>Skip</button>

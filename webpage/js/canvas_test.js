@@ -104,7 +104,7 @@ $(document).ready(function() {
         var formData = {
             'metadata': {
                 'image_id' : $('input[name=image_id]').val(),
-                'comments' : '',
+                'comments' : $('#comment-area').val(),
                 'start_time': $('input[name=submitStart]').val(),
                 'nothing_here': cs.rectangles.length == 0 ? 1 : 0
             },

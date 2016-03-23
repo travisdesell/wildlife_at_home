@@ -98,11 +98,9 @@ if ($nothing_here) {
 }
 
 // add comments, if needed
-if ($success && $metadata['comments']) {
-    $comments = mysql_escape_string($metadata['comments']);
-
-    $temp_success = query_wildlife_video_db("INSERT INTO image_observation_comments (image_observation_id, comment) values ($image_observation_id, $comments)");
-    if (!$temp_success) $errors[] = 'Unable to insert comments.';
+if ($success && $comments) {
+    //$temp_success = query_wildlife_video_db("INSERT INTO image_observation_comments (image_observation_id, comment) values ($image_observation_id, '".mysql_escape_string($comments)."'");
+    //if (!$temp_success) $errors[] = 'Unable to insert comments.';
 }
 
 // finally, update our table on success and return the count
