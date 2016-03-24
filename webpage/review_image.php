@@ -134,16 +134,6 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
                     </thead>
                     <tbody>
                     <tr>
-                        <td><span class='glyphicon glyphicon-resize-full'></span></td>
-                        <td>Zoom / Scroll Up</td>
-                        <td>Zooms the image in</td>
-                    </tr>
-                    <tr>
-                        <td><span class='glyphicon glyphicon-resize-small'></span></td>
-                        <td>Zoom / Scroll Down</td>
-                        <td>Zooms the image out</td>
-                    </tr>
-                    <tr>
                         <td><span class='glyphicon glyphicon-hand-up'></span> <strong>(x2)</strong></td>
                         <td>Double-tap / Double-click</td>
                         <td>Creates a new box</td>
@@ -152,6 +142,16 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
                         <td><span class='glyphicon glyphicon-hand-up'></span> <strong>(x3)</strong></td>
                         <td>Triple-tap / Triple-click</td>
                         <td>Deletes a box</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-resize-full'></span></td>
+                        <td>Zoom / Scroll Up</td>
+                        <td>Zooms the image in</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-resize-small'></span></td>
+                        <td>Zoom / Scroll Down</td>
+                        <td>Zooms the image out</td>
                     </tr>
                     <tr>
                         <td><span class='glyphicon glyphicon-move'></span></td>
