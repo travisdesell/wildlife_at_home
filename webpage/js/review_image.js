@@ -8,12 +8,22 @@ var newRectCallback = function(id) {
 			"<button type='button' class='close' data-dismiss='modal' aria-hidden='true' id='remove" + id + "'>X</button>" +
         "</div>" +
         "<div class='panel-body'>" +
-            "<select class='form-control' id='species" + id + "'>" + options + "</select>" +
-            "<div class='input-group'>" +
-                "<input type='text' class='form-control disabled' value='On Nest?' disabled>" +
-                "<span class='input-group-addon'>" +
-                    "<input type='checkbox' id='nest" + id + "'>" +
-                "</span>" +
+            "<div class='form-horizontal'>" +
+                "<div class='form-group'>" +
+                    "<label for='species" + id + "' class='col-sm-2 control-label'>Species</label>" +
+                    "<div class='col-sm-10'>" +
+                        "<select class='form-control' id='species" + id + "'>" + options + "</select>" +
+                    "</div>" +
+                "</div>" +
+                "<div class='form-group'>" +
+                    "<div class='col-sm-offset-2 col-sm-10'>" +
+                        "<div class='checkbox'>" +
+                            "<label>" +
+                                "<input type='checkbox' id='nest'" + id + "'> On nest?" +
+                            "</label>" +
+                        "</div>" +
+                    "</div>" +
+                "</div>" +
             "</div>" +
             "<div class='input-group hidden' id='otherdiv" + id + "'>" +
                 "<div class='input-group'>" +
@@ -136,12 +146,12 @@ $(document).ready(function() {
                     else if (data['count'] == 1) html = '1 rectangle added.';
                     else html = data['count'] + ' rectangles added.';
 
-                    $("#ajaxalert").html("<strong>Success!</strong> " + html + ' Reloading page in 3 seconds.');
+                    $("#ajaxalert").html("<strong>Success!</strong> " + html + ' Reloading page in 1-3 seconds.');
                     $("#ajaxalert").removeClass('hidden');
 
                     setTimeout(function() {
                         location.reload();
-                    }, 3000);
+                    }, 1000);
                 }
             });
 
