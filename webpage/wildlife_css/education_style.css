@@ -36,13 +36,13 @@
 #title1{
 	font-family: Amatic; 
 	padding-top: 5%;
-	font-style: underline;
-	font-size: 30px;
+	text-decoration: underline;
+	font-size: 40px;
 }
 
 #title {
 	font-family: Amatic;
-	font-size: 20px;
+	font-size: 30px;
 }
 
 #subtitle {
