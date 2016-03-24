@@ -19,7 +19,7 @@ var newRectCallback = function(id) {
                     "<div class='col-sm-offset-2 col-sm-10'>" +
                         "<div class='checkbox'>" +
                             "<label>" +
-                                "<input type='checkbox' id='nest'" + id + "'> On nest?" +
+                                "<input type='checkbox' id='nest" + id + "'> On nest?" +
                             "</label>" +
                         "</div>" +
                     "</div>" +
@@ -88,9 +88,13 @@ $(document).ready(function() {
         dataType: 'json',
         success: function(data) {
             species = data;
-            species.forEach(function(e) {
-                options += "<option value='" + e.id + "'>" + e.name + "</option>";
-            });
+            var keys = Object.keys(species);
+            keys.sort();
+
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                options += "<option value='" + species[key] + "'>" + key + "</option>";
+            }
         }
     });
 
