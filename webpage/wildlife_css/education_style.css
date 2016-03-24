@@ -1,7 +1,9 @@
+/*Official theme for Education Modules*/
 @font-face {
 	font-family: Amatic;
 	src: url('fonts/amaticSC-Regular.ttf');
 }
+/*extra fonts to play*/
 @font-face {
 	font-family: Windsong;
 	src: url(fonts/Windsong.ttf);
@@ -31,18 +33,21 @@
 	src: url(fonts/ExistenceLight.ttf);
 }
 
-
 #title1{
 	font-family: Amatic; 
 	padding-top: 5%;
+	font-style: underline;
+	font-size: 30px;
 }
 
 #title {
 	font-family: Amatic;
+	font-size: 20px;
 }
 
 #subtitle {
 	font-family: Amatic;
+	font-size: 25px;
 }
 
 .well {
