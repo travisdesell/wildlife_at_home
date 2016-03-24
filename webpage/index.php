@@ -114,7 +114,7 @@ echo "
             <div class='btn-group btn-group-justified' style='margin-top:20px;'>
                 <a class='btn btn-primary' role='button' href='../instructions.php'><h4>Volunteer Your Computer</h4></a>
                 <a class='btn btn-primary' role='button' href='./video_selector.php'><h4>Watch Wildlife Videos</h4></a>
-                <a class='btn btn-primary' role='button' href='./trailcam_image.php'><h4>Review Wildlife Images</h4></a>
+                <a class='btn btn-primary' role='button' href='./review_image.php'><h4>Review Wildlife Images</h4></a>
             </div>
 
             </div> <!-- col-sm-12 -->

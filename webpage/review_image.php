@@ -13,12 +13,14 @@ require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 $user = csg_get_user();
 $user_id = $user['id'];
 
-print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/canvas_test.css' rel='stylesheet'>", "wildlife");
+print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/review_image.css' rel='stylesheet'>", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 $image_id = -1;
-$project_id = $_GET[('p')];
-if(!$project_id) $project_id=1;
+$project_id = 1;
+if (isset($_GET['p'])) {
+    $project_id = $_GET[('p')];
+}
 
 $result = NULL;
 if (array_key_exists('image_id', $_GET)) {
@@ -66,7 +68,7 @@ echo "
             <div id='selection-information'>
                     <div class='btn-group btn-group-sm' role='group'>
                         <button type='button' class='btn disabled' disabled><strong>Image #: $image_id</strong></button>
-                        <button type='button' id='discuss-button' class='btn btn-primary'>&nbsp;<span class='glyphicon glyphicon-comment'> </span></button>
+                        <button type='button' id='discuss-button' class='btn btn-primary' data-toggle='tooltip' title='Discuss this image on the forum'>&nbsp;<span class='glyphicon glyphicon-comment'> </span></button>
                     </div>
                     <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Year: $year. <br> $image Image ID: $image_id -->
                     <div class='btn-group btn-group-sm pull-right' role='group'>
@@ -75,13 +77,15 @@ echo "
                     </div>
                     <br><br>
                  </div>
-            </div>
+                 </div>
             <div class='row'>
+                <textarea class='form-control' rows='3' placeholder='Comments' name='comment-area' id='comment-area'></textarea>
+                <br>
                 <div class='text-center'>
                     <div class='btn-group btn-group-lg'>
-                        <button class='btn btn-primary' id='skip-button'>Skip</button>
-                        <button class='btn nothing btn-danger' id='nothing-here-button' >There's Nothing Here</button>
-                        <button class='btn btn-primary disabled' id='submit-selections-button' disabled>Submit</button>
+                        <button class='btn btn-primary' id='skip-button' data-toggle='tooltip' title='Skip this image'>Skip</button>
+                        <button class='btn nothing btn-danger' id='nothing-here-button' data-toggle='tooltip' title='No animals in this image'>There's Nothing Here</button>
+                        <button class='btn btn-primary disabled' id='submit-selections-button' data-toggle='tooltip' title='Submit species to the database' disabled>Submit</button>
                      </div>
                 </div>
             </div>
@@ -120,7 +124,57 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 					<h4 class='modal-title''>Interface Help</h4>
                 </div>
                 <div class='modal-body' style='overflow-y: scroll'>
-                    Interface help coming soon.
+                    <table class='table table-striped'>
+                    <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Action</th>
+                        <th>Result</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-hand-up'></span> <strong>(x2)</strong></td>
+                        <td>Double-tap / Double-click</td>
+                        <td>Creates a new box</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-hand-up'></span> <strong>(x3)</strong></td>
+                        <td>Triple-tap / Triple-click</td>
+                        <td>Deletes a box</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-resize-full'></span></td>
+                        <td>Zoom / Scroll Up</td>
+                        <td>Zooms the image in</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-resize-small'></span></td>
+                        <td>Zoom / Scroll Down</td>
+                        <td>Zooms the image out</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-move'></span></td>
+                        <td>Tap / Click and Drag</td>
+                        <td>Moves a box</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-resize-vertical'></span></td>
+                        <td>Tap / Click on Top or Bottom and Drag</td>
+                        <td>Adjusts the height of a box</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-resize-horizontal'></span></td>
+                        <td>Tap / Click on Side and Drag</td>
+                        <td>Adjust the width of a box</td>
+                    </tr>
+                    <tr>
+                        <td><span class='glyphicon glyphicon-fullscreen'></span></td>
+                        <td>Tap / Click on Corner and Drag </td>
+                        <td>Adjust the height and width of a box</td>
+                    </tr>
+                    </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -229,6 +283,6 @@ echo "<script src='./js/jquery.mousewheel.min.js'></script>
 <script src='./js/hammer.min.js'></script>
 <script src='./js/canvas_selector.js'></script>
 <script>var imgsrc = 'http://wildlife.und.edu/$image';</script>
-<script src='./js/canvas_test.js'></script>";
+<script src='./js/review_image.js'></script>";
 
 ?>
