@@ -59,26 +59,42 @@ echo "
 	<div class='col-sm-4'>
 		<div class='well well-sm' id='well2'>
 			<h3 id='subtitle'><center>6-9 Module
-				<a href='publications/MS-Module.docx'>(download)</a>
 			</center></h3>
 				<p></p>
 					<img src='images/900x293_hatch.jpg'>
 				<p></p>
-				<p>The Wildlife at Home Education Middle School Module \"Impacts of Gas and Oil on Nest Success of Sharp-tailed Grouse in Western North Dakota\" was developed to address MS-LS2-4 and LS2.A. Students construct an argument supported by empirical evidence that relates to the physical or biological components of an ecosystem that affects populations from three study sites in Western North Dakota.  These three sites represent areas of high, medium and low intensity development of gas and oil extraction.  Students use real data collected as part of a study by UND, North Dakota Game and Fish, and Brigham Young University to identify predators captured on camera. Then, they classify their data and use it to calculate nest success rates, predation rates and types, and chick survival to make inferences about the effects of gas and oil development on the population of Sharp-tailed Grouse in Western North Dakota.  MS-LS1-6 and MS-LS1-8 are also supported because the theme of obtaining, analyzing, and communicating empirical evidence is emphasized throughout the module.</div><!--well-->
-			<br>
-			<br>
-			<br>
-			</div><!--col-->
+				<p>The Wildlife at Home Education Middle School Module \"Impacts of Gas and Oil on Nest Success of Sharp-tailed Grouse in Western North Dakota\" was developed to address MS-LS2-4 and LS2.A. Students construct an argument supported by empirical evidence that relates to the physical or biological components of an ecosystem that affects populations from three study sites in Western North Dakota.  These three sites represent areas of high, medium and low intensity development of gas and oil extraction.  Students use real data collected as part of a study by UND, North Dakota Game and Fish, and Brigham Young University to identify predators captured on camera. Then, they classify their data and use it to calculate nest success rates, predation rates and types, and chick survival to make inferences about the effects of gas and oil development on the population of Sharp-tailed Grouse in Western North Dakota.  MS-LS1-6 and MS-LS1-8 are also supported because the theme of obtaining, analyzing, and communicating empirical evidence is emphasized throughout the module.</p>
+		<center>
+		<a href='publications/HS-Module.docx'>
+			<button type='button' class='btn btn-success btn-sm'>
+				Lesson Plan
+			</button>
+		</a>
+		<button type='button' class='btn btn-success btn-sm'>
+			Student Resources
+		</button>	
+		</center>
+		</div><!--well-->
+		</div><!--col-->
 	<div class='col-sm-4'>
 		<div class='well well-sm' id='well3'>
 			<h3 id='subtitle'><center>10-12 Module 
-				<a href=\"publications/HS-Module.docx\">(download)</a>
 			</center></h3>
 				<p></p>
 			<img src='images/900x276_oil.jpg'>
 				<p></p>
 				<p>The UND Wildlife at Home Education High School Module \"Impacts of Gas and Oil on Nest Success of Sharp-tailed Grouse in Western North Dakota\" was developed to address HS-LS2-2 and LS2.A. Students first construct an argument supported by empirical evidence related to the physical or biological components of an ecosystem that affect populations from three study sites in Western North Dakota. These three sites represent areas of high, medium and low intensity development of gas and oil extraction. Students use real data collected as part of a study by UND, North Dakota Game and Fish, and Brigham Young University to identify predators captured on camera. Then, they classify their data and use it to calculate nest success rates, predation rates and types, and chick survival to make inferences about the effects of gas and oil development on the population of Sharp-tailed Grouse in Western North Dakota.  HS-LS2-6 and HS-LS2-8 are also supported because the theme of obtaining, analyzing, and communicating empirical evidence is emphasized throughout the module.</p>
-		</div>
+		<center>
+		<a href='publications/HS-Module.docx'>
+			<button type='button' class='btn btn-success btn-sm'>
+				Lesson Plan
+			</button>
+		</a>
+		<button type='button' class='btn btn-success btn-sm'>
+			Student Resources
+		</button>
+		</center>
+		</div><!--well-->
 	</div><!--col-->
 </div><!--row-->
 <div class='row'>
