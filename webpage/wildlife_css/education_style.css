@@ -90,3 +90,14 @@ a:active {
 	color: green;
 }
 
+.btn {
+	border: solid #7FFF00 1px;
+	background-color: black !important;
+}
+
+.btn:hover{
+/*	border: solid #2B3856 5px;
+	background-color: solid white;
+*/
+}
+
