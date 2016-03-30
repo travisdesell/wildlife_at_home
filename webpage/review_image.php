@@ -18,8 +18,12 @@ print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 $image_id = -1;
 $project_id = 1;
+$species_id = 0;
 if (isset($_GET['p'])) {
-    $project_id = $_GET[('p')];
+    $project_id = $boinc_db->real_escape_string($_GET['p']);
+}
+if (isset($_GET['s'])) {
+    $species_id = $boinc_db->real_escape_string($_GET['s']);
 }
 
 $result = NULL;
@@ -27,8 +31,7 @@ if (array_key_exists('image_id', $_GET)) {
     $image_id = $boinc_db->real_escape_string($_GET['image_id']);
     $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
 } else {
-    // TODO: This seems *very* inefficient. Work on optimizing this query.
-    $temp_result = query_wildlife_video_db("select max(id), min(id) from images");
+    /*$temp_result = query_wildlife_video_db("select max(id), min(id) from images");
     $row = $temp_result->fetch_assoc();
     $max_int = $row['max(id)'];
     $min_int = $row['min(id)'];
@@ -38,10 +41,28 @@ if (array_key_exists('image_id', $_GET)) {
         $temp_result = query_wildlife_video_db("select id, watermarked_filename, watermarked, species, year from images where watermarked=1 and views < needed_views and project_id=$project_id and id not in (select image_id from image_observations where user_id=$user_id) and id=$temp_id");
     } while ($temp_result->num_rows < 1);
 
-    $result = $temp_result;
+    $result = $temp_result;*/
 
-    //$query = "select id, watermarked_filename, watermarked, species, year from (select id, watermarked_filename, watermarked, species, year from images where watermarked=1 and views < needed_views and project_id=$project_id order by rand() limit 1000) as t1 where id != any (select image_id from image_observations where user_id=$user_id) limit 1";
+    $species = '';
+    if ($species_id > 0)
+        $species = "and species=$species_id";
+
+    $query = "select id, watermarked_filename, species, year from images where watermarked=1 and views < needed_views and project_id=$project_id $species and id != any (select image_id from image_observations where user_id=$user_id) order by rand() limit 1";
+    $result = query_wildlife_video_db($query);
 }
+
+if ($result->num_rows < 1) {
+    echo "
+    <div class='container-fluid'>
+    <div class='row'>
+        <div class='col-sm-12'>
+            <div class='alert alert-error' role='alert' id='ajaxalert'>
+                <strong>Error!</strong> Unable to find an available image for project_id=$project_id $species
+            </div>
+        </div>
+    </div>
+    ";
+} else {
 
 $row = $result->fetch_assoc();
 
@@ -97,6 +118,8 @@ echo "
     </div>
     </div>
 </div>";
+
+}
 	
 
 print_footer();
@@ -282,7 +305,10 @@ echo "
 echo "<script src='./js/jquery.mousewheel.min.js'></script>
 <script src='./js/hammer.min.js'></script>
 <script src='./js/canvas_selector.js'></script>
-<script>var imgsrc = 'http://wildlife.und.edu/$image';</script>
+<script>
+    var imgsrc = 'http://wildlife.und.edu/$image';
+    var species_id = $species_id;
+</script>
 <script src='./js/review_image.js'></script>";
 
 ?>
