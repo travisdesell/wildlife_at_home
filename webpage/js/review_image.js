@@ -93,7 +93,10 @@ $(document).ready(function() {
 
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
-                options += "<option value='" + species[key] + "'>" + key + "</option>";
+                options += "<option value='" + species[key] + "'";
+                if (species_id == species[key])
+                    options += " selected='selected'";
+                options += ">" + key + "</option>";
             }
         }
     });

@@ -11,8 +11,10 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 function get_count($table_name, $where_clause) {
     $results = query_wildlife_video_db("SELECT count(*) FROM $table_name WHERE $where_clause");
-    $row = $results->fetch_assoc();
+    if ($results->num_rows < 1)
+        return 0;
 
+    $row = $results->fetch_assoc();
     return $row['count(*)'];
 }
 
@@ -25,127 +27,79 @@ echo "
         <div class='row'>
             <div class='col-sm-12'>
                 <div class='well'>
-                <p>Select the project you'd like to review images for, and click the review images button to get started. You will have to <a href='../create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the interface instructions and training images for each species first.
+                <p>Select the project (and species, if there is more than one species for the project) you'd like to review images for, and click the review images button to get started. You will have to <a href='../create_account_form.php'>create an account</a> first if you do not have one. Please take a look at the interface instructions and training images for each species first. Determining if a bird is on a nest can be particularly difficult! With your help, we'll be able to test different computer vision algorithms to automate the detection of animals within the images.
                 </div>
             </div>
         </div>
     </div>
 ";
 
+$hbp_eider_total = get_count('images', 'project_id=1 and species=1');
+$hbp_eider_done  = get_count('images', 'project_id=1 and species=1 and views >= needed_views'); 
+$hbp_eider_ratio = ($hbp_eider_total != 0 ? $hbp_eider_done / $hbp_eider_total : 0) * 100;
+
+$hbp_lsg_total = get_count('images', 'project_id=1 and species=2');
+$hbp_lsg_done  = get_count('images', 'project_id=1 and species=2 and views >= needed_views');
+$hbp_lsg_ratio = ($hbp_lsg_total != 0 ? $hbp_lsg_done / $hbp_lsg_total : 0) * 100;
+
+$uas_total = get_count('images', 'project_id=3');
+$uas_done = get_count('images', 'project_id=3 and views >= needed_views');
+$uas_ratio = ($uas_total != 0 ? $uas_done / $uas_total : 0) * 100;
+
 $thumbnails = array('thumbnail_list' => array(
                         array(
-                            'thumbnail_image' => './images/thumbnail_sharptailed_grouse.png',
-                            'species_name' => 'Sharp-Tailed Grouse',
+                            'thumbnail_image' => './images/marshall_common_eider.png',
+                            'species_name' => 'Common Eider',
                             'species_id' => '1',
-                            'training_webpage' => './sharptailed_grouse_training.php',
-                            'info_webpage' => 'sharptailed_grouse_info.php',
-                            'species_latin_name' => 'Tympanuchus phasianellus',
-                            'project_description' => '<p>Sharp-tailed grouse are an important ground-nesting bird and a species that can serve as an indicator of grassland health. Cameras were placed in areas with different degrees of gas and oil development.</p> <p>Active projects include: <ul><li>Rebecca Eckroad - <a href="becca_grouse_project.php">Nest Cameras and Citizen Science: Implications for evaluating Sharp-tailed Grouse Nesting Ecology</a></li><li>Paul Burr - <a href="paul_project.php">Sharp-tailed Grouse Nest Predation Relative to Gas and Oil Development in North Dakota</a></li></li><li>Kyle Goehner - <a href="kyle_project.php">Automated Wildlife Detection in Uncontrolled Environments</a></li></ul></p>',
+                            'project_name' => 'Hudson Bay Project',
+                            'project_id' => '1',
+                            'species_latin_name' => 'Somateria mollissima',
+                            'project_description' => '<p>We are using trail cameras with time-lapse photography coupled with motion sensor triggers to document nesting events of Common Eiders and Snow Geese at La Peruse Bay within Wapusk National Park, near Churchill, Manitoba.  Your help with facilitate us knowing what predators are in the nesting colonies, when predators are arriving at nests, and how the birds are behaving throughout incubation (time when birds tend their eggs).</p> <p>Active projects include: <ul><li>David Iles, Utah State University - <a href="david_iles_project.php">Polar Bear Predation of Waterfowl Nests in Western Hudson Bay</a></li><li>Tanner Stechmann - <a href="tanner_stechmann_project.php">Common Eider Research (full overview comming soon)</a></li></ul></p>',
                             'site' => array(
-                                array (
-                                    'enabled' => ($grouse_belden_available > 0),
-                                    'site_name' => 'Belden, ND',
-                                    'year' => '2012-2013',
-                                    'progress_id' => 'grouse_belden_progress',
-                                    'site_description' => 'Cameras were placed at grouse nests in areas of intense gas and oil development.',
-                                    'site_id' => '1',
-                                    'validated_percentage' => $grouse_belden_validated,
-                                    'available_percentage' => $grouse_belden_available - $grouse_belden_validated
-                                ), 
-
-                                array (
-                                    'enabled' => ($grouse_blaisdell_available > 0),
-                                    'site_name' => 'Blaisdell, ND',
-                                    'year' => '2012-2013',
-                                    'progress_id' => 'grouse_blaisdell_progress',
-                                    'site_description' => 'Cameras were placed at grouse nests in areas of low intensity of gas and oil development.',
-                                    'site_id' => '2',
-                                    'validated_percentage' => $grouse_blaisdell_validated,
-                                    'available_percentage' => $grouse_blaisdell_available - $grouse_blaisdell_validated
-                                ), 
-
-                                array (
-                                    'enabled' => ($grouse_lostwood_available > 0),
-                                    'site_name' => 'Lostwood Wildlife Refuge, ND',
-                                    'year' => '2012',
-                                    'progress_id' => 'grouse_lostwood_progress',
-                                    'site_description' => 'Cameras were placed at grouse nests in this National Wildlife Refuge, representing a historic grassland.',
-                                    'site_id' => '3',
-                                    'validated_percentage' => $grouse_lostwood_validated,
-                                    'available_percentage' => $grouse_lostwood_available - $grouse_lostwood_validated
-                                )
+                                'enabled' => true,
+                                'site_name' => 'La Peruse Bay, Manitoba',
+                                'year' => '2013-2016',
+                                'done_ratio' => $hbp_eider_ratio,
+                                'left_ratio' => 100 - $hbp_eider_ratio
                             )
                         ),
 
                         array(
-                            'thumbnail_image' => './images/thumbnail_least_tern.png',
-                            'species_name' => 'Interior Least Tern',
+                            'thumbnail_image' => './images/marshall_snow_goose.png',
+                            'species_name' => 'Lesser Snow Goose',
                             'species_id' => '2',
-                            'species_latin_name' => 'Sternula antillarum',
-                            'info_webpage' => 'least_tern_info.php',
-                            'project_description' => '<p>Interior least terns are federally listed as an endangered species. They nest on sandbars and islands along the Missouri River in western North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="alicia_project.php">Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li><li>Kyle Goehner - <a href="kyle_project.php">Automated Wildlife Detection in Uncontrolled Environments</a></li></ul></p>',
+                            'project_name' => 'Hudson Bay Project',
+                            'project_id' => '1',
+                            'species_latin_name' => 'Chen caerulescens caerulescens',
+                            'project_description' => '<p>We are using trail cameras with time-lapse photography coupled with motion sensor triggers to document nesting events of Common Eiders and Snow Geese at La Peruse Bay within Wapusk National Park, near Churchill, Manitoba.  Your help with facilitate us knowing what predators are in the nesting colonies, when predators are arriving at nests, and how the birds are behaving throughout incubation (time when birds tend their eggs).</p><p>Active projects include: <ul><li>David Iles, Utah State University - <a href="david_iles_project.php">Polar Bear Predation of Waterfowl Nests in Western Hudson Bay</a></li></ul></p>',
                             'site' => array(
-                                array (
-                                    'enabled' => ($least_tern_available > 0),
-                                    'site_name' => 'Missouri River, ND',
-                                    'year' => '2012-2013',
-                                    'progress_id' => 'least_tern_progress',
-                                    'site_description' => 'Cameras were placed at least tern nests along the Missouri River in western North Dakota.',
-                                    'site_id' => '4',
-                                    'validated_percentage' => $least_tern_validated,
-                                    'available_percentage' => $least_tern_available - $least_tern_validated
-                                )
+                                'enabled' => true,
+                                'site_name' => 'La Peruse Bay, Manitoba',
+                                'year' => '2013-2016',
+                                'done_ratio' => $hbp_lsg_ratio,
+                                'left_ratio' => 100 - $hbp_lsg_ratio
                             )
                         ),
-
+                        
                         array(
-                            'thumbnail_image' => './images/thumbnail_piping_plover.png',
-                            'species_name' => 'Piping Plover',
-                            'species_id' => '3',
-                            'species_latin_name' => 'Charadrius melodus',
-                            'info_webpage' => 'piping_plover_info.php',
-                            'project_description' => '<p>Northern great plains piping plovers are federally listed as threatened species. They nest on sandbars and islands along the Missouri River and Alkali lakes in North Dakota.</p><p>Active projects include: <ul><li>Alicia Andes - <a href="alicia_project.php">Refined Monitoring Techniques to Understand Least Tern and Piping Plover Nest Dynamics</a></li></li><li>Kyle Goehner - <a href="kyle_project.php">Automated Wildlife Detection in Uncontrolled Environments</a></li></ul></p>',
+                            'thumbnail_image' => './images/marshall_snow_goose_blue.png',
+                            'project_name' => 'UAS Estimating Snow Geese',
+                            'project_id' => '3',
+                            'project_description' => '<p>We are using an unmanned aerial survey (UAS) unit to take aerial imagery in the Hudson Bay, near Churchill, Manitoba.</p><p>Active projects include: <ul><li>Andrew Barnas</li><li>Marshall Mattingly - <a href="marshall_mattingly_project.php">Using Computer Vision Algorithms to Detect Animals in UAS Imagery</a></li></ul></p>',
                             'site' => array(
-                                array (
-                                    'enabled' => ($piping_plover_available > 0),
-                                    'site_name' => 'Missouri River, ND',
-                                    'year' => '2012-2013',
-                                    'progress_id' => 'piping_plover_progress',
-                                    'site_description' => 'Cameras were placed at piping plover nests along the Missouri River in western North Dakota.',
-                                    'site_id' => '4',
-                                    'validated_percentage' => $piping_plover_validated,
-                                    'available_percentage' => $piping_plover_available - $piping_plover_validated
-                                )
-                            )
-                        ),
-
-                        array(
-                            'thumbnail_image' => './images/blue_winged_teal.png',
-                            'species_name' => 'Blue Winged Teal',
-                            'species_id' => '4',
-                            'species_latin_name' => 'Anas discors',
-                            'info_webpage' => '',
-                            'project_description' => '<p>Blue-winged teal are small ducks that nest in the grasslands of the plains.  They are one of the most common ducks nesting in North Dakota.</p><p>Active projects include: <ul><li>John Palarski and Nickolas Conrad - <a href="ducks_unlimited_project.php">Predation and Parental Care at Blue-Winged Teal Nests in North Dakota</a></li></ul></p>',
-                            'site' => array(
-                                array (
-                                    'enabled' => ($blue_winged_teal_available > 0),
-                                    'site_name' => 'Coteau Ranch, ND',
-                                    'year' => '2015',
-                                    'progress_id' => 'blue_winged_teal_progress',
-                                    'site_description' => 'Cameras were placed at blue winged teal nests along at the Coteau Ranch in western North Dakota.',
-                                    'site_id' => '7',
-                                    'validated_percentage' => $blue_winged_teal_validated,
-                                    'available_percentage' => $blue_winged_teal_available - $blue_winged_teal_validated
-                                )
+                                'enabled' => true,
+                                'site_name' => 'Hudson Bay, Manitoba',
+                                'year' => '2014-2015',
+                                'done_ratio' => $uas_ratio,
+                                'left_ratio' => 100 - $uas_ratio
                             )
                         )
-
                     )
                 );
 
 shuffle($thumbnails['thumbnail_list']);
 
-$projects_template = file_get_contents($cwd[__FILE__] . "/templates/projects_template.html");
+$projects_template = file_get_contents($cwd[__FILE__] . "/templates/image_projects_template.html");
 
 error_log( "projects_template: " . $cwd[__FILE__] . "/templates/projects_template.html");
 

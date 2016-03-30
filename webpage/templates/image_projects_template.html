@@ -1,0 +1,82 @@
+<div class='container'>
+    <div class='row'>
+        <div class='col-sm-12'>
+            {{#thumbnail_list}}
+            <div class='well'>
+                <div class='row'>
+                    <div class='col-sm-4'>
+                        <img class='img-responsive' src='{{thumbnail_image}}' alt=''></img>
+
+                        <div class='btn-group btn-group-justified' style='margin-top:20px;'>
+                            {{#training_webpage}}
+                            <a class='btn btn-sm btn-primary col-sm-6' role='button' style='line-height:30px; margin-bottom:10px;' href='{{training_webpage}}'>Training Videos</a>
+                            {{/training_webpage}}
+                            {{^training_webpage}}
+                            <a class='btn btn-xs btn-primary col-sm-6 disabled' role='button' style='line-height:30px; margin-bottom:10px;'>Training Videos</a>
+                            {{/training_webpage}}
+
+                            {{#info_webpage}}
+                            <a class='btn btn-sm btn-primary col-sm-6' role='button' style='line-height:30px; margin-bottom:10px;' href='{{info_webpage}}'>Species Information</a>
+                            {{/info_webpage}}
+                            {{^info_webpage}}
+                            <a class='btn btn-xs btn-primary col-sm-6 disabled' role='button' style='line-height:30px; margin-bottom:10px;'>Species Information</a>
+                            {{/info_webpage}}
+                        </div>
+                    </div>
+
+                    <div class='col-sm-4'>
+                            <h4 style='margin-top:0px;'>{{project_name}}</h4>
+                            {{#species_name}}
+                            <h5 style='margin-top:0px;'>{{species_name}} <small>{{species_latin_name}}</small></h5>
+                            {{/species_name}}
+                            <p>{{{project_description}}}</p>
+                    </div>
+
+                    <div class='col-sm-4'>
+                        {{#site}}
+                        <div class='row'>
+                            <div class='col-sm-8' style='text-align:left;'>
+                                <b>{{site_name}}</b>
+                            </div>
+                            <div class='col-sm-4' style='text-align:right;'>
+                                <b>{{year}}</b>
+                            </div>
+                        </div>
+
+                        {{#site_description}}
+                        <p>{{site_description}}</p>
+                        {{/site_description}}
+                        {{^site_description}}
+                        <p>&nbsp;</p>
+                        {{/site_description}}
+
+                        <div class='row'>
+                            <div class='col-sm-8'>
+                                <div class='progress'>
+                                    <div class='progress-bar progress-bar-success' style="width: {{done_ratio}}%;"></div>
+                                    <div class='progress-bar' style="width: {{left_ratio}}%;"></div>
+                                </div>
+                            </div>
+
+                            <div class='col-sm-4'>
+                                {{#enabled}}
+                                {{#species_id}}
+                                <a class='btn btn-xs btn-primary pull-right' style='margin-top:0px;' href='review_image.php?p={{project_id}}&s={{species_id}}'>Review Images</a>
+                                {{/species_id}}
+                                {{^species_id}}
+                                <a class='btn btn-xs btn-primary pull-right' style='margin-top:0px;' href='review_image.php?p={{project_id}}'>Review Images</a>
+                                {{/species_id}}
+                                {{/enabled}}
+                                {{^enabled}}
+                                <a class='btn btn-xs btn-primary pull-right disabled' style='margin-top:0px;'>Review Images</a>
+                                {{/enabled}}
+                            </div>
+                        </div>
+                        {{/site}}
+                    </div>
+                </div>
+            </div>
+            {{/thumbnail_list}}
+        </div>
+    </div>
+</div>
