@@ -11,8 +11,10 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 
 function get_count($table_name, $where_clause) {
     $results = query_wildlife_video_db("SELECT count(*) FROM $table_name WHERE $where_clause");
-    $row = $results->fetch_assoc();
+    if ($results->num_rows < 1)
+        return 0;
 
+    $row = $results->fetch_assoc();
     return $row['count(*)'];
 }
 
@@ -32,6 +34,18 @@ echo "
     </div>
 ";
 
+$hbp_eider_total = get_count('images', 'project_id=1 and species=1');
+$hbp_eider_done  = get_count('images', 'project_id=1 and species=1 and views >= needed_views'); 
+$hbp_eider_ratio = ($hbp_eider_total != 0 ? $hbp_eider_done / $hbp_eider_total : 0) * 100;
+
+$hbp_lsg_total = get_count('images', 'project_id=1 and species=2');
+$hbp_lsg_done  = get_count('images', 'project_id=1 and species=2 and views >= needed_views');
+$hbp_lsg_ratio = ($hbp_lsg_total != 0 ? $hbp_lsg_done / $hbp_lsg_total : 0) * 100;
+
+$uas_total = get_count('images', 'project_id=3');
+$uas_done = get_count('images', 'project_id=3 and views >= needed_views');
+$uas_ratio = ($uas_total != 0 ? $uas_done / $uas_total : 0) * 100;
+
 $thumbnails = array('thumbnail_list' => array(
                         array(
                             'thumbnail_image' => './images/marshall_common_eider.png',
@@ -45,6 +59,8 @@ $thumbnails = array('thumbnail_list' => array(
                                 'enabled' => true,
                                 'site_name' => 'La Peruse Bay, Manitoba',
                                 'year' => '2013-2016',
+                                'done_ratio' => $hbp_eider_ratio,
+                                'left_ratio' => 100 - $hbp_eider_ratio
                             )
                         ),
 
@@ -60,8 +76,24 @@ $thumbnails = array('thumbnail_list' => array(
                                 'enabled' => true,
                                 'site_name' => 'La Peruse Bay, Manitoba',
                                 'year' => '2013-2016',
+                                'done_ratio' => $hbp_lsg_ratio,
+                                'left_ratio' => 100 - $hbp_lsg_ratio
                             )
                         ),
+                        
+                        array(
+                            'thumbnail_image' => './images/marshall_snow_goose_blue.png',
+                            'project_name' => 'UAS Estimating Snow Geese',
+                            'project_id' => '3',
+                            'project_description' => '<p>We are using an unmanned aerial survey (UAS) unit to take aerial imagery in the Hudson Bay, near Churchill, Manitoba.</p><p>Active projects include: <ul><li>Andrew Barnas</li><li>Marshall Mattingly - <a href="marshall_mattingly_project.php">Using Computer Vision Algorithms to Detect Animals in UAS Imagery</a></li></ul></p>',
+                            'site' => array(
+                                'enabled' => true,
+                                'site_name' => 'Hudson Bay, Manitoba',
+                                'year' => '2014-2015',
+                                'done_ratio' => $uas_ratio,
+                                'left_ratio' => 100 - $uas_ratio
+                            )
+                        )
                     )
                 );
 

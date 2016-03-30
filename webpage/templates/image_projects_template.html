@@ -24,7 +24,7 @@
                         </div>
                     </div>
 
-                    <div class='col-sm-5'>
+                    <div class='col-sm-4'>
                             <h4 style='margin-top:0px;'>{{project_name}}</h4>
                             {{#species_name}}
                             <h5 style='margin-top:0px;'>{{species_name}} <small>{{species_latin_name}}</small></h5>
@@ -32,7 +32,7 @@
                             <p>{{{project_description}}}</p>
                     </div>
 
-                    <div class='col-sm-3'>
+                    <div class='col-sm-4'>
                         {{#site}}
                         <div class='row'>
                             <div class='col-sm-8' style='text-align:left;'>
@@ -51,9 +51,21 @@
                         {{/site_description}}
 
                         <div class='row'>
-                            <div class='col-sm-12'>
+                            <div class='col-sm-8'>
+                                <div class='progress'>
+                                    <div class='progress-bar progress-bar-success' style="width: {{done_ratio}}%;"></div>
+                                    <div class='progress-bar' style="width: {{left_ratio}}%;"></div>
+                                </div>
+                            </div>
+
+                            <div class='col-sm-4'>
                                 {{#enabled}}
+                                {{#species_id}}
                                 <a class='btn btn-xs btn-primary pull-right' style='margin-top:0px;' href='review_image.php?p={{project_id}}&s={{species_id}}'>Review Images</a>
+                                {{/species_id}}
+                                {{^species_id}}
+                                <a class='btn btn-xs btn-primary pull-right' style='margin-top:0px;' href='review_image.php?p={{project_id}}'>Review Images</a>
+                                {{/species_id}}
                                 {{/enabled}}
                                 {{^enabled}}
                                 <a class='btn btn-xs btn-primary pull-right disabled' style='margin-top:0px;'>Review Images</a>
