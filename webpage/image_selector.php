@@ -34,17 +34,20 @@ echo "
     </div>
 ";
 
-$hbp_eider_total = get_count('images', 'project_id=1 and species=1');
-$hbp_eider_done  = get_count('images', 'project_id=1 and species=1 and views >= needed_views'); 
-$hbp_eider_ratio = ($hbp_eider_total != 0 ? $hbp_eider_done / $hbp_eider_total : 0) * 100;
+//$hbp_eider_total = get_count('images', 'project_id=1 and species=1');
+//$hbp_eider_done  = get_count('images', 'project_id=1 and species=1 and views >= needed_views'); 
+//$hbp_eider_ratio = ($hbp_eider_total != 0 ? $hbp_eider_done / $hbp_eider_total : 0) * 100;
+$hbp_eider_total = 0;
 
-$hbp_lsg_total = get_count('images', 'project_id=1 and species=2');
-$hbp_lsg_done  = get_count('images', 'project_id=1 and species=2 and views >= needed_views');
-$hbp_lsg_ratio = ($hbp_lsg_total != 0 ? $hbp_lsg_done / $hbp_lsg_total : 0) * 100;
+//$hbp_lsg_total = get_count('images', 'project_id=1 and species=2');
+//$hbp_lsg_done  = get_count('images', 'project_id=1 and species=2 and views >= needed_views');
+//$hbp_lsg_ratio = ($hbp_lsg_total != 0 ? $hbp_lsg_done / $hbp_lsg_total : 0) * 100;
+$hbp_lsg_total = 0;
 
-$uas_total = get_count('images', 'project_id=3');
-$uas_done = get_count('images', 'project_id=3 and views >= needed_views');
-$uas_ratio = ($uas_total != 0 ? $uas_done / $uas_total : 0) * 100;
+//$uas_total = get_count('images', 'project_id=3');
+//$uas_done = get_count('images', 'project_id=3 and views >= needed_views');
+//$uas_ratio = ($uas_total != 0 ? $uas_done / $uas_total : 0) * 100;
+$uas_ratio = 0;
 
 $thumbnails = array('thumbnail_list' => array(
                         array(
@@ -85,9 +88,9 @@ $thumbnails = array('thumbnail_list' => array(
                             'thumbnail_image' => './images/marshall_snow_goose_blue.png',
                             'project_name' => 'UAS Estimating Snow Geese',
                             'project_id' => '3',
-                            'project_description' => '<p>We are using an unmanned aerial survey (UAS) unit to take aerial imagery in the Hudson Bay, near Churchill, Manitoba.</p><p>Active projects include: <ul><li>Andrew Barnas</li><li>Marshall Mattingly - <a href="marshall_mattingly_project.php">Using Computer Vision Algorithms to Detect Animals in UAS Imagery</a></li></ul></p>',
+                            'project_description' => '<p><strong>Available soon. We\'re still creating some training documents.</strong> We are using an unmanned aerial survey (UAS) unit to take aerial imagery in the Hudson Bay, near Churchill, Manitoba.</p><p>Active projects include: <ul><li>Andrew Barnas</li><li>Marshall Mattingly - <a href="marshall_mattingly_project.php">Using Computer Vision Algorithms to Detect Animals in UAS Imagery</a></li></ul></p>',
                             'site' => array(
-                                'enabled' => true,
+                                'enabled' => false,
                                 'site_name' => 'Hudson Bay, Manitoba',
                                 'year' => '2014-2015',
                                 'done_ratio' => $uas_ratio,

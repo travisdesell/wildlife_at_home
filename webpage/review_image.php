@@ -31,26 +31,26 @@ if (array_key_exists('image_id', $_GET)) {
     $image_id = $boinc_db->real_escape_string($_GET['image_id']);
     $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
 } else {
-    /*$temp_result = query_wildlife_video_db("select max(id), min(id) from images");
+    $species = '';
+    if ($species_id > 0)
+        $species = "and species=$species_id";
+
+    $temp_result = query_wildlife_video_db("select max(id), min(id) from images");
     $row = $temp_result->fetch_assoc();
     $max_int = $row['max(id)'];
     $min_int = $row['min(id)'];
 
     do {
         $temp_id = mt_rand($min_int, $max_int);
-        $temp_result = query_wildlife_video_db("select id, watermarked_filename, watermarked, species, year from images where watermarked=1 and views < needed_views and project_id=$project_id and id not in (select image_id from image_observations where user_id=$user_id) and id=$temp_id");
+        $temp_result = query_wildlife_video_db("select id, archive_filename, watermarked_filename, watermarked, species, year from images where views < needed_views $species and project_id=$project_id and id not in (select image_id from image_observations where user_id=$user_id) and id=$temp_id");
     } while ($temp_result->num_rows < 1);
 
-    $result = $temp_result;*/
-
-    $species = '';
-    if ($species_id > 0)
-        $species = "and species=$species_id";
+    $result = $temp_result;
 
     // kind of complex query to allow forced watermarking (or not), specific species, and only showing
     // images that the user hasn't already done... look at changing from order by rand()
-    $query = "select id, archive_filename, watermarked_filename, watermarked, species, year from images where watermarked>=(select require_watermark from project_lookup where project_id=$project_id) and views < needed_views and project_id=$project_id $species and id != any (select image_id from image_observations where user_id=$user_id) order by rand() limit 1";
-    $result = query_wildlife_video_db($query);
+    // $query = "select id, archive_filename, watermarked_filename, watermarked, species, year from images where watermarked>=(select require_watermark from project_lookup where project_id=$project_id) and views < needed_views and project_id=$project_id $species and id != any (select image_id from image_observations where user_id=$user_id) order by rand() limit 1";
+    //$result = query_wildlife_video_db($query);
 }
 
 if ($result->num_rows < 1) {
