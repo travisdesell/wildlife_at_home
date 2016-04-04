@@ -212,6 +212,10 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 					<h4 class='modal-title''>Species Help</h4>
 				</div>
                 <div class='modal-body' style='overflow-y: scroll'>
+";
+
+if ($project_id == 1) {
+    echo "
                 <table class='table'>
                     <thead>
                         <tr>
@@ -222,24 +226,9 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><img src='images/marshall_arctic_fox.png' class='img-responsive'></td>
-                            <td>Arctic Fox</td>
-                            <td>Small fox</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_canada_geese.png' class='img-responsive'></td>
-                            <td>Canada Goose</td>
-                            <td>Goose</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_caribou.png' class='img-responsive'></td>
-                            <td>Caribou</td>
-                            <td>Caribou</td>
-                        </tr>
-                        <tr>
                             <td><img src='images/marshall_common_eider.png' class='img-responsive'></td>
                             <td>Common Eider</td>
-                            <td>Male in the top right. Female in the bottom left.</td>
+                            <td>Male Common Eider (in back right) and a female Common Eider (lower left).  The female is sitting on a nest.  She is usually the only one to incubate the nest so although you might see males hanging around initially at the onset of incubation, it is the female that will tend the eggs and hatched  young.</td>
                         </tr>
                         <tr>
                             <td><img src='images/marshall_common_eider_nest.png' class='img-responsive'></td>
@@ -247,51 +236,72 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
                             <td>Female common eider on a nest.</td>
                         </tr>
                         <tr>
-                            <td><img src='images/marshall_crow.png' class='img-responsive'></td>
-                            <td>Crow</td>
-                            <td>Common scavenger in the area.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_grizzly_bear.png' class='img-responsive'></td>
-                            <td>Grizzly Bear</td>
-                            <td>Large brown bear.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_gull.png' class='img-responsive'></td>
-                            <td>Gull</td>
-                            <td>Gull.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_polar_bear.png' class='img-responsive'></td>
-                            <td>Polar Bear</td>
-                            <td>Large white bear.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_sandhill_crane.png' class='img-responsive'></td>
-                            <td>Sandhill Crane</td>
-                            <td>Crane.</td>
-                        </tr>
-                        <tr>
                             <td><img src='images/marshall_snow_goose.png' class='img-responsive'></td>
                             <td>Snow Goose</td>
-                            <td>How is this different from the Canada Goose?</td>
+                            <td>Snow geese can be white, as pictured here, or a blue-phase (pictured below).</td>
                         </tr>
                         <tr>
                             <td><img src='images/marshall_snow_goose_blue.png' class='img-responsive'></td>
                             <td>Snow Goose, Blue Phase</td>
-                            <td>Along with the white Snow Goose, there is a blue phase to the Snow Goose. This should still be categorized as a Snow Goose.</td>
+                            <td>Along with the white Snow Goose, there is a blue phase to the Snow Goose.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_arctic_fox.png' class='img-responsive'></td>
+                            <td>Arctic Fox</td>
+                            <td>Arctic Fox stealing an egg from an eider nest.  Although this species is snow white in the winter, they have patches of black apparent on their faces and bodies during the summer when are cameras are deployed.  They are a common nest predator for both snow geese and eiders.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_canada_geese.png' class='img-responsive'></td>
+                            <td>Canada Goose</td>
+                            <td>Other species of geese, including Canada Geese, also nest in the region.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_caribou.png' class='img-responsive'></td>
+                            <td>Caribou</td>
+                            <td>Caribou also reside within Wapusk National Park.  They are generally not considered nest predators; however, they will consume eggs opportunistically.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_grizzly_bear.png' class='img-responsive'></td>
+                            <td>Grizzly Bear</td>
+                            <td>Grizzly Bears are large, brown bears.  They were previously absent from Manitoba until around 1989, but in recent years observations at Wapusk National Park have occurred and some of these have been at bird nests.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_gull.png' class='img-responsive'></td>
+                            <td>Gull</td>
+                            <td>Gulls are often predators of nesting bird eggs, including those of eiders and snow geese.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_polar_bear.png' class='img-responsive'></td>
+                            <td>Polar Bear</td>
+                            <td>Polar Bears appear to be coming ashore earlier each year and that time now coincides with nesting snow geese and eiders.  This is a polar bear in the middle of the eider colony.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_crow.png' class='img-responsive'></td>
+                            <td>Raven</td>
+                            <td>A raven is a black bird similar to a crow.  They are common nest predators and scavengers.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_sandhill_crane.png' class='img-responsive'></td>
+                            <td>Sandhill Crane</td>
+                            <td>Sandhill Cranes are tall birds that in some years have been found to be eating eggs of common eiders (sitting in background behind the crane).</td>
                         </tr>
                         <tr>
                             <td><img src='images/marshall_wolverine.png' class='img-responsive'></td>
                             <td>Wolverine</td>
-                            <td>Wolverine.</td>
+                            <td>Wolverines are large weasels that are occasionally caught on our cameras.  They can destroy nests and eat eggs, but will also try to capture the incubating parents.</td>
                         </tr>
                     </tbody>
                 </table> 
+";
+} else {
+    echo "<p>Top-down species instruction coming soon.</p>";
+}
+
+echo "
                 </div>
 			</div>
 		</div>
-        </div>";
+    </div>";
 
 echo "
 <form class='hidden' action='' method='POST' id='submitForm'>
