@@ -42,15 +42,8 @@ if (array_key_exists('image_id', $_GET)) {
 
     do {
         $temp_id = mt_rand($min_int, $max_int);
-        $temp_result = query_wildlife_video_db("select id, archive_filename, watermarked_filename, watermarked, species, year from images where views < needed_views $species and project_id=$project_id and id not in (select image_id from image_observations where user_id=$user_id) and id=$temp_id");
-    } while ($temp_result->num_rows < 1);
-
-    $result = $temp_result;
-
-    // kind of complex query to allow forced watermarking (or not), specific species, and only showing
-    // images that the user hasn't already done... look at changing from order by rand()
-    // $query = "select id, archive_filename, watermarked_filename, watermarked, species, year from images where watermarked>=(select require_watermark from project_lookup where project_id=$project_id) and views < needed_views and project_id=$project_id $species and id != any (select image_id from image_observations where user_id=$user_id) order by rand() limit 1";
-    //$result = query_wildlife_video_db($query);
+        $result = query_wildlife_video_db("select images.id, archive_filename, watermarked_filename, watermarked, species, year from images left outer join image_observations on images.id = image_observations.image_id where views < needed_views and project_id=$project_id $species and image_observations.user_id is null and images.id = $temp_id");
+    } while ($result->num_rows < 1);
 }
 
 if ($result->num_rows < 1) {
@@ -214,87 +207,22 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
                 <div class='modal-body' style='overflow-y: scroll'>
 ";
 
-if ($project_id == 1) {
-    echo "
-                <table class='table'>
-                    <thead>
-                        <tr>
-                            <th style='width:40%'>Image</th>
-                            <th style='width:20%'>Species</th>
-                            <th style='width:40%'>Info</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><img src='images/marshall_common_eider.png' class='img-responsive'></td>
-                            <td>Common Eider</td>
-                            <td>Male Common Eider (in back right) and a female Common Eider (lower left).  The female is sitting on a nest.  She is usually the only one to incubate the nest so although you might see males hanging around initially at the onset of incubation, it is the female that will tend the eggs and hatched  young.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_common_eider_nest.png' class='img-responsive'></td>
-                            <td>Common Eider on Nest</td>
-                            <td>Female common eider on a nest.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_snow_goose.png' class='img-responsive'></td>
-                            <td>Snow Goose</td>
-                            <td>Snow geese can be white, as pictured here, or a blue-phase (pictured below).</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_snow_goose_blue.png' class='img-responsive'></td>
-                            <td>Snow Goose, Blue Phase</td>
-                            <td>Along with the white Snow Goose, there is a blue phase to the Snow Goose.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_arctic_fox.png' class='img-responsive'></td>
-                            <td>Arctic Fox</td>
-                            <td>Arctic Fox stealing an egg from an eider nest.  Although this species is snow white in the winter, they have patches of black apparent on their faces and bodies during the summer when are cameras are deployed.  They are a common nest predator for both snow geese and eiders.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_canada_geese.png' class='img-responsive'></td>
-                            <td>Canada Goose</td>
-                            <td>Other species of geese, including Canada Geese, also nest in the region.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_caribou.png' class='img-responsive'></td>
-                            <td>Caribou</td>
-                            <td>Caribou also reside within Wapusk National Park.  They are generally not considered nest predators; however, they will consume eggs opportunistically.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_grizzly_bear.png' class='img-responsive'></td>
-                            <td>Grizzly Bear</td>
-                            <td>Grizzly Bears are large, brown bears.  They were previously absent from Manitoba until around 1989, but in recent years observations at Wapusk National Park have occurred and some of these have been at bird nests.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_gull.png' class='img-responsive'></td>
-                            <td>Gull</td>
-                            <td>Gulls are often predators of nesting bird eggs, including those of eiders and snow geese.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_polar_bear.png' class='img-responsive'></td>
-                            <td>Polar Bear</td>
-                            <td>Polar Bears appear to be coming ashore earlier each year and that time now coincides with nesting snow geese and eiders.  This is a polar bear in the middle of the eider colony.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_crow.png' class='img-responsive'></td>
-                            <td>Raven</td>
-                            <td>A raven is a black bird similar to a crow.  They are common nest predators and scavengers.</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_sandhill_crane.png' class='img-responsive'></td>
-                            <td>Sandhill Crane</td>
-                            <td>Sandhill Cranes are tall birds that in some years have been found to be eating eggs of common eiders (sitting in background behind the crane).</td>
-                        </tr>
-                        <tr>
-                            <td><img src='images/marshall_wolverine.png' class='img-responsive'></td>
-                            <td>Wolverine</td>
-                            <td>Wolverines are large weasels that are occasionally caught on our cameras.  They can destroy nests and eat eggs, but will also try to capture the incubating parents.</td>
-                        </tr>
-                    </tbody>
-                </table> 
-";
+
+$projects_template = file_get_contents($cwd[__FILE__] . "/templates/species_description_popup.html");
+
+require_once($cwd[__FILE__] . "/image_species.php");
+
+$project_objects = NULL;
+if (array_key_exists($project_id, $project_species)) {
+    $project_objects = $project_species[$project_id];
+}
+
+if ($project_objects) {
+    $m = new Mustache_Engine;
+    $project_objects['project_id'] = $project_id;
+    echo $m->render($projects_template, $project_objects);
 } else {
-    echo "<p>Top-down species instruction coming soon.</p>";
+    echo '<p>Help for this project coming soon!</p>';
 }
 
 echo "

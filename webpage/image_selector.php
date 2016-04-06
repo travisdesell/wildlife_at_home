@@ -58,6 +58,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'project_id' => '1',
                             'species_latin_name' => 'Somateria mollissima',
                             'project_description' => '<p>We are using trail cameras with time-lapse photography coupled with motion sensor triggers to document nesting events of Common Eiders and Snow Geese at La Peruse Bay within Wapusk National Park, near Churchill, Manitoba.  Your help with facilitate us knowing what predators are in the nesting colonies, when predators are arriving at nests, and how the birds are behaving throughout incubation (time when birds tend their eggs).</p> <p>Active projects include: <ul><li>David Iles, Utah State University - <a href="david_iles_project.php">Polar Bear Predation of Waterfowl Nests in Western Hudson Bay</a></li><li>Tanner Stechmann - <a href="tanner_stechmann_project.php">Common Eider Research (full overview comming soon)</a></li></ul></p>',
+                            'info_webpage' => 'species_help.php?p=1',
                             'site' => array(
                                 'enabled' => true,
                                 'site_name' => 'La Peruse Bay, Manitoba',
@@ -75,6 +76,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'project_id' => '1',
                             'species_latin_name' => 'Chen caerulescens caerulescens',
                             'project_description' => '<p>We are using trail cameras with time-lapse photography coupled with motion sensor triggers to document nesting events of Common Eiders and Snow Geese at La Peruse Bay within Wapusk National Park, near Churchill, Manitoba.  Your help with facilitate us knowing what predators are in the nesting colonies, when predators are arriving at nests, and how the birds are behaving throughout incubation (time when birds tend their eggs).</p><p>Active projects include: <ul><li>David Iles, Utah State University - <a href="david_iles_project.php">Polar Bear Predation of Waterfowl Nests in Western Hudson Bay</a></li></ul></p>',
+                            'info_webpage' => 'species_help.php?p=1',
                             'site' => array(
                                 'enabled' => true,
                                 'site_name' => 'La Peruse Bay, Manitoba',
@@ -89,6 +91,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'project_name' => 'UAS Estimating Snow Geese',
                             'project_id' => '3',
                             'project_description' => '<p><strong>Available soon. We\'re still creating some training documents.</strong> We are using an unmanned aerial survey (UAS) unit to take aerial imagery in the Hudson Bay, near Churchill, Manitoba.</p><p>Active projects include: <ul><li>Andrew Barnas</li><li>Marshall Mattingly - <a href="marshall_mattingly_project.php">Using Computer Vision Algorithms to Detect Animals in UAS Imagery</a></li></ul></p>',
+                            'info_webpage' => 'species_help.php?p=3',
                             'site' => array(
                                 'enabled' => false,
                                 'site_name' => 'Hudson Bay, Manitoba',
