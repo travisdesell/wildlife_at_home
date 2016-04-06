@@ -1,0 +1,105 @@
+<div class='container'>
+    <div class='row'>
+        <div class='col-sm-12'>
+            <div class='well'>
+                <h3>{{title}}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-sm-3'>
+            <h4>Background</h4>
+        </div>
+        <div class='col-sm-9'>
+            <p>{{background}}</p>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-sm-3'>
+            <h4>Task</h4>
+        </div>
+        <div class='col-sm-9'>
+            <p>{{task}}</p>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-sm-3'>
+            <h4>Identification</h4>
+        </div>
+        <div class='col-sm-9'>
+            <p>{{identification}}</p>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-sm-12'>
+            <table class='table table-hover'>
+                <thead>
+                    <tr>
+                        <th style='width:40%'>Image</th>
+                        <th style='width:20%'>Species</th>
+                        <th style='width:40%'>Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#examples}}
+                    {{#issection}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-sm-12'>
+            <div class='alert alert-success'>
+                <strong>{{title}} -</strong> {{description}}
+            </div>
+        </div>
+    </div>
+
+    <div class='row'>
+        <div class='col-sm-12'>
+            <table class='table table-hover'>
+                <thead>
+                    <tr>
+                        <th style='width:40%'>Image</th>
+                        <th style='width:20%'>
+                            {{#rename_species}}
+                            {{rename_species}}
+                            {{/rename_species}}
+                            {{^rename_species}}
+                            Species
+                            {{/rename_species}}
+                        </th>
+                        <th style='width:40%'>Info</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{/issection}}
+                    {{^issection}}
+                    <tr>
+                        {{#isnote}}
+                        <td colspan='3' class='warning'>
+                            <strong>Note:</strong> {{isnote}}
+                        </td>
+                        {{/isnote}}
+                        {{^isnote}}
+                        <td>
+                            {{#image}}
+                            <img src='images/{{image}}' class='img-responsive'>
+                            {{/image}}
+                        </td>
+                        <td>{{title}}</td>
+                        <td>{{description}}</td>
+                        {{/isnote}}
+                    {{/issection}}
+                    </tr>
+                    {{/examples}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

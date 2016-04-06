@@ -1,0 +1,47 @@
+<div class='well'>
+    <p>This popup will help with the identification of species within these photographs. If a creature it too small to determine conclusively, please omit submitting it. If a create is not on this list, please select "Other" and manually include the species name.</p>
+    {{#project_id}}
+    <p><strong>For a more thorough help, see:</strong> <a href='species_help.php?p={{project_id}}'>{{title}}</a></p>
+    {{/project_id}}
+</div>
+
+<table class='table table-hover'>
+    <thead>
+        <tr>
+            <th style='width:40%'>Image</th>
+            <th style='width:20%'>Species</th>
+            <th style='width:40%'>Info</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#examples}}
+        {{#issection}}
+        <tr>
+            <td colspan='3'>&nbsp;</td>
+        </tr>
+        <tr class='success'>
+            <td colspan='3'>
+                <strong>{{title}} -</strong> {{description}}
+            </td>
+        {{/issection}}
+        {{^issection}}
+        <tr>
+            {{#isnote}}
+            <td colspan='3' class='warning'>
+                <strong>Note:</strong> {{isnote}}
+            </td>
+            {{/isnote}}
+            {{^isnote}}
+            <td>
+                {{#image}}
+                <img src='images/{{image}}' class='img-responsive'>
+                {{/image}}
+            </td>
+            <td>{{title}}</td>
+            <td>{{description}}</td>
+            {{/isnote}}
+        {{/issection}}
+        </tr>
+        {{/examples}}
+    </tbody>
+</table>
