@@ -20,17 +20,19 @@ print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 echo"
 <div class='container'>
 	<div class='row'>
-		<div class='col-sm-12'
+		<div class='col-sm-6'>
 			<div class='well well-sm'>
-				<video width=100% height=40% id='wildlife_video' controls>
+				<video width=100% height=40% id='wildlife_video' controls='controls'>
 					<source src='clips_grouse/BEL_2012/148.954_48.11126_102.440147.mp4' type='video/mp4'>
 					<source src='clips/grouse/BEL_2012/148.954_48.11126_102.440147.ogv' type='video/ogv'>
+					<source src='clips/grouse/BEL_2012/148.954_48.11126_102.440147.wmv' type='video/wmv'>
 				</video>
-			</div
-			<div class='well well-sm'>
-				<video width=100% height=40% id='wildlife_video' controls>
-					<source src='clips_grouse/BEL_2012/148.954_48.11126_102.44829.mp4' type='video/mp4'>
-					<source src='clips_grouse/BEL_2012/148.954_48.11126_102.44829.ogv' type='video/ogv'>
+			</div>
+			<div class='well well-sm'>	
+				<video width=100% height=40% id='wildlife_video2' controls='controls'>
+					<source src='clips_grouse/BEL_2012/149.085_48.06332_102.44829.mp4' type='video/mp4'>
+					<source src='clips_grouse/BEL_2012/149.085_48.06332_102.44829.ogv' type='video/ogv'>
+					<source src='clips/grouse/BEL_2012/149.085_48.06332_102.44829.wmv' type='video/wmv'>
 				</video>
 			</div>
 		</div>
