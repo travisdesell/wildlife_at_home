@@ -81,4 +81,10 @@ shell_exec($command);
 $command = "ln -s $cwd/js $target/js";
 shell_exec("rm $target/js");
 shell_exec($command);
+
+$command = "ln -s $cwd/Education $target/Education";
+shell_exec("rm $target/Education ");
+shell_exec($command);
+
+
 ?>
