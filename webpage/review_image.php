@@ -124,8 +124,8 @@ if ($project_id == 4) {
     $alert_class = 'alert-info';
     $alert_message = "Completed <strong>$mosaic_number</strong> out of <strong>100</strong> for Mosaic #<strong>$mosaic_id</strong>.";
 } else {
-    $alert_class = 'hidden';
-    $alert_message = "<strong>Success!</strong> Data submited to the database.";
+    $alert_class = 'alert-info';
+    $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible to help our computer alogrithms learn.";
 }
 
 echo "

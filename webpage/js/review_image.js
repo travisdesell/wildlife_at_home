@@ -108,10 +108,15 @@ $(document).ready(function() {
 
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
+                var name = key;
+                // hardcoded temporarily, update to DB
+                if (name == 'Lesser Snow Goose')
+                    name = 'Lesser Snow Goose, White Phase';
+
                 options += "<option value='" + species[key] + "'";
                 if (species_id == species[key])
                     options += " selected='selected'";
-                options += ">" + key + "</option>";
+                options += ">" + name + "</option>";
             }
         }
     });
