@@ -2,6 +2,27 @@ var species = [];
 var options = "";
 
 var newRectCallback = function(id) {
+    nest = "";
+    nestid = "nest" + id;
+    if (nest_confidence) {
+        nest = "<label for='" + nestid + "' class='col-sm-2 control-label'>On Nest?</label>" +
+            "<div class='col-sm-10'>" +
+                "<select class='form-control' id='" + nestid + "'>" +
+                    "<option value='0' selected='selected'>No nest</option>" +
+                    "<option value='1'>Low confidence</option>" +
+                    "<option value='2'>High confidence</option>" +
+                "</select>" +
+            "</div>";
+    } else {
+        nest = "<div class='col-sm-offset-2 col-sm-10'>" +
+                "<div class='checkbox'>" +
+                    "<label>" +
+                        "<input type='checkbox' id='" + nestid + "'> On nest?" +
+                    "</label>" +
+                "</div>" +
+            "</div>"; 
+    }
+
     table = "<div class='panel panel-primary' id='S" + id + "'>" +
         "<div class='panel-heading'>" +
             "Selection " + id +
@@ -16,13 +37,7 @@ var newRectCallback = function(id) {
                     "</div>" +
                 "</div>" +
                 "<div class='form-group'>" +
-                    "<div class='col-sm-offset-2 col-sm-10'>" +
-                        "<div class='checkbox'>" +
-                            "<label>" +
-                                "<input type='checkbox' id='nest" + id + "'> On nest?" +
-                            "</label>" +
-                        "</div>" +
-                    "</div>" +
+                    nest +
                 "</div>" +
             "</div>" +
             "<div class='input-group hidden' id='otherdiv" + id + "'>" +
@@ -93,10 +108,15 @@ $(document).ready(function() {
 
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
+                var name = key;
+                // hardcoded temporarily, update to DB
+                if (name == 'Lesser Snow Goose')
+                    name = 'Lesser Snow Goose, White Phase';
+
                 options += "<option value='" + species[key] + "'";
                 if (species_id == species[key])
                     options += " selected='selected'";
-                options += ">" + key + "</option>";
+                options += ">" + name + "</option>";
             }
         }
     });
@@ -106,7 +126,12 @@ $(document).ready(function() {
         var boxes = [];
         cs.rectangles.forEach(function(e) {
             var species = $("#species" + e.id + " option:selected")[0].value;
-            var nest = $("#nest" + e.id)[0].checked ? 1 : 0;
+            var nest = 0;
+            if (nest_confidence) {
+                nest = $("#nest" + e.id + " option:selected")[0].value;
+            } else {
+                nest = $("#nest" + e.id)[0].checked ? 1 : 0;
+            }
 
             boxes.push({
                 'x': e.left,
@@ -141,11 +166,13 @@ $(document).ready(function() {
             .done(function(data) {
                 if (!data['success']) {
                     $("#ajaxalert").removeClass('alert-success');
+                    $("#ajaxalert").removeClass('alert-info');
                     $("#ajaxalert").addClass('alert-danger');
                     $("#ajaxalert").html("<strong>Error!</strong> " + data['errors']);
                     $("#ajaxalert").removeClass('hidden');
                 } else {
                     $("#ajaxalert").removeClass('alert-danger');
+                    $("#ajaxalert").removeClass('alert-info');
                     $("#ajaxalert").addClass('alert-success');
 
                     var html = '';

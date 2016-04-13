@@ -19,6 +19,7 @@ print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 $image_id = -1;
 $project_id = 1;
 $species_id = 0;
+$nest_confidence = 0;
 if (isset($_GET['p'])) {
     $project_id = $boinc_db->real_escape_string($_GET['p']);
 }
@@ -27,32 +28,85 @@ if (isset($_GET['s'])) {
 }
 
 $result = NULL;
-if (array_key_exists('image_id', $_GET)) {
-    $image_id = $boinc_db->real_escape_string($_GET['image_id']);
-    $result = query_wildlife_video_db("SELECT id, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
+$mosaic_number = 0;
+$mosaic_id = 0;
+
+// project 4 is super special mosaic project
+if ($project_id == 4) {
+    $species_id = 2;
+    $nest_confidence = 1;
+
+    // see which mosaics this user has submitted for
+    $result = query_wildlife_video_db("SELECT DISTINCT m.id FROM image_observations AS io JOIN images AS i ON io.image_id = i.id JOIN mosaic_split_images AS s ON io.image_id = s.image_id JOIN mosaic_images AS m ON s.mosaic_image_id = m.id WHERE io.user_id = $user_id");
+    if ($result->num_rows > 0) {
+        // determine the first mosaic for which the user has not submitted all
+        while ($row = $result->fetch_assoc()) {
+            $mosaic_id = $row['id'];
+            $temp_result = query_wildlife_video_db("SELECT MAX(s.number) FROM mosaic_split_images AS s JOIN image_observations AS io ON io.image_id = s.image_id WHERE s.mosaic_image_id = $mosaic_id AND io.user_id = $user_id");
+
+            if ($temp_result->num_rows < 1)
+                continue;
+
+            // if we found one that the user hasn't completed, stick to this mosaic
+            $temp_row = $temp_result->fetch_assoc();
+            $number = $temp_row['MAX(s.number)'];
+            if ($number < 99) {
+                // get the actual next value
+                $mosaic_number = $number + 1;
+                break;
+            }
+
+            // reset the mosaic_id and number
+            $mosaic_id = 0;
+            $mosaic_number = 0;
+        }
+    }
+
+    // if we don't have a mosaic_id, we need to select a random mosaic
+    if ($mosaic_id < 1) {
+        $result = query_wildlife_video_db("SELECT m.id FROM mosaic_images as m JOIN mosaic_split_images AS s ON m.id = s.mosaic_image_id JOIN images AS i ON s.image_id = i.id LEFT OUTER JOIN image_observations AS io ON (s.image_id = io.image_id AND io.user_id = 100) WHERE s.number = 0 AND i.views < i.needed_views AND io.user_id IS NULL ORDER BY rand() LIMIT 1");
+
+        // no mosaics left for this user!
+        if ($result->num_rows < 1) {
+            $result = NULL;
+        } else {
+            $row = $result->fetch_assoc();
+            $mosaic_id = $row['id'];
+            $mosaic_number = 0;
+        }
+    }
+
+    if ($result) {
+        $result = query_wildlife_video_db("SELECT i.id, archive_filename, watermarked_filename, watermarked, species, year FROM mosaic_split_images AS s JOIN images AS i ON s.image_id = i.id WHERE s.mosaic_image_id = $mosaic_id AND s.number = $mosaic_number");
+    }
 } else {
-    $species = '';
-    if ($species_id > 0)
-        $species = "and species=$species_id";
+    if (array_key_exists('image_id', $_GET)) {
+        $image_id = $boinc_db->real_escape_string($_GET['image_id']);
+        $result = query_wildlife_video_db("SELECT id, archive_filename, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
+    } else {
+        $species = '';
+        if ($species_id > 0)
+            $species = "and species=$species_id";
 
-    $temp_result = query_wildlife_video_db("select max(id), min(id) from images");
-    $row = $temp_result->fetch_assoc();
-    $max_int = $row['max(id)'];
-    $min_int = $row['min(id)'];
+        $temp_result = query_wildlife_video_db("select max(id), min(id) from images");
+        $row = $temp_result->fetch_assoc();
+        $max_int = $row['max(id)'];
+        $min_int = $row['min(id)'];
 
-    do {
-        $temp_id = mt_rand($min_int, $max_int);
-        $result = query_wildlife_video_db("select images.id, archive_filename, watermarked_filename, watermarked, species, year from images left outer join image_observations on images.id = image_observations.image_id where views < needed_views and project_id=$project_id $species and image_observations.user_id is null and images.id = $temp_id");
-    } while ($result->num_rows < 1);
+        do {
+            $temp_id = mt_rand($min_int, $max_int);
+            $result = query_wildlife_video_db("select images.id, archive_filename, watermarked_filename, watermarked, species, year from images left outer join image_observations on images.id = image_observations.image_id where views < needed_views and project_id=$project_id $species and image_observations.user_id is null and images.id = $temp_id");
+        } while ($result->num_rows < 1);
+    }
 }
 
-if ($result->num_rows < 1) {
+if (!$result || $result->num_rows < 1) {
     echo "
     <div class='container-fluid'>
     <div class='row'>
         <div class='col-sm-12'>
             <div class='alert alert-error' role='alert' id='ajaxalert'>
-                <strong>Error!</strong> Unable to find an available image for project_id=$project_id $species
+                <strong>Error!</strong> Unable to find an available image for project_id=$project_id $species.
             </div>
         </div>
     </div>
@@ -66,14 +120,20 @@ $image_watermarked = $row['watermarked'];
 $image = $image_watermarked ? $row['watermarked_filename'] : $row['archive_filename'];
 $year = $row['year'];
 
-$alert_class = 'hidden';
+if ($project_id == 4) {
+    $alert_class = 'alert-info';
+    $alert_message = "Completed <strong>$mosaic_number</strong> out of <strong>100</strong> for Mosaic #<strong>$mosaic_id</strong>.";
+} else {
+    $alert_class = 'alert-info';
+    $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible to help our computers learn to automate the detection.";
+}
 
 echo "
 <div class='container-fluid'>
 <div class='row'>
     <div class='col-sm-12'>
         <div class='alert $alert_class' role='alert' id='ajaxalert'>
-            <strong>Success!</strong> Data submited to the database.
+            $alert_message
         </div>
     </div>
 </div>
@@ -248,6 +308,7 @@ echo "<script src='./js/jquery.mousewheel.min.js'></script>
 <script>
     var imgsrc = 'http://wildlife.und.edu/$image';
     var species_id = $species_id;
+    var nest_confidence = $nest_confidence;
 </script>
 <script src='./js/review_image.js'></script>";
 
