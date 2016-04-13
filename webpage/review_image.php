@@ -167,9 +167,28 @@ echo "
             </div>
         </div>
     </div>
-    <div class='col-sm-8' id='canvasContainer'>
-        <canvas id='canvas' width='600' height='400'>
-        </canvas>
+    <div class='col-sm-8'>
+        <div class='row'>
+            <div class='col-sm-11' id='canvasContainer'>
+                <canvas id='canvas' width='600' height='400'></canvas>
+            </div>
+            <div class='col-sm-1'>
+                <div class='progress progress-bar-vertical' id='progress_vertical'>
+                    <div class='progress-bar progress-bar-transparent' id='progress_vertical_top'></div>
+                    <div class='progress-bar progress-bar-info' id='progress_vertical_middle'></div>
+                    <div class='progress-bar progress-bar-transparent' id='progress_vertical_bottom'></div>
+                </div>
+            </div>
+        </div>
+        <div class='row' style='margin-top: 5px'>
+            <div class='col-sm-11'>
+                <div class='progress' id='progress_horizontal'>
+                    <div class='progress-bar progress-bar-transparent' id='progress_horizontal_left'></div>
+                    <div class='progress-bar progress-bar-info' id='progress_horizontal_middle'></div>
+                    <div class='progress-bar progress-bar-transparent' id='progress_horizontal_right'></div>
+                </div>
+            </div>
+        </div>
     </div>
     </div>
 </div>";
