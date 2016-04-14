@@ -39,13 +39,18 @@ echo "
 			<h3 id='subtitle'><center>K-5 Module
 			</center></h3>
 				<p></p>
-				<img src='images/900x324_susan.jpg'>
+				<img src='images/900x293_susan.jpg'>
 			<p></p>
 			<p> The UND Wildlife at Home Education Elementary School Module \"Impacts of Gas and Oil on Nest Success of Sharp-tailed Grouse in Western North Dakota\" was developed to address K LS1-1, ESS 3-1, ESS 3-3, 3 LS1-1LS2-1 LS 3-2 ESS 2-1, 4 ESS 3-2, 5 LS 2-1 ESS 3-1.  Organisms can be related using food webs. Some animals eat plants for food and other animals eat the animals that eat plants. Organisms can survive only in environments in which their particular needs are met. In this module students will examine the impacts of human activity (gas and oil development) on the Sharp-tailed grouse in western North Dakota. A healthy ecosystem is one way multiple species of different types are able to meet their needs in a relatively stable web of life. Newly introduced species can damage the balance of an ecosystem. (5-LS2-1 LS2.B). </p>				
 		<center><!--centers buttons-->
 		<a href='publications/Grade-5-Food-Web-Module.docx'>
 			<button type='button' class='btn btn-success btn-sm'>
 				Lesson Plan	
+			</button>
+		</a>
+		<a href=''>
+			<button type='button' class='btn btn-success btn-sm'>
+				Video Key
 			</button>
 		</a>
 		<a href='http://csgrid.org/csg/wildlife_lwingate/k5_module.php'>
