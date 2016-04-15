@@ -363,7 +363,7 @@ $k5 = file_get_contents($cwd[__file__] . "/templates/k5.html");
 
 $m = new mustache_engine;
 echo $m->render($k5, $wells);	
-
+echo $m->render($k5, $wells2);
 print_footer('travis desell, susan ellis-felege, lindsey wingate and the wildlife@home team', 'travis desell, susan ellis-felege');
 
 echo "</body></html>";
