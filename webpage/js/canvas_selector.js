@@ -11,6 +11,8 @@ var canvasSelector = function (canvas, image, context) {
     this.minSize = context.minSize || 20;
     this.errorMargin = context.errorMargin || 5;
     this.allowOverlap = (context.allowOverlap !== false ? true : false);
+    this.progressBarX = context.progressBarX || null;
+    this.progressBarY = context.progressBarY || null;
     
     // variables that get updated automatically
     this.rectangles = [];
@@ -153,7 +155,7 @@ canvasSelector.prototype.onResize = function(obj) {
     
     /* scale it to the parent container */
     var p = obj.canvas.parent();
-    var width = p.width() - 20;
+    var width = p.width();
 
     // fill all available space and minimum size
     if (width > obj.image.width) width = obj.image.width;
@@ -163,6 +165,15 @@ canvasSelector.prototype.onResize = function(obj) {
 
     obj.ctx.canvas.width = width;
     obj.ctx.canvas.height = height;
+
+    // update the progress bar
+    if (obj.progressBarX) {
+        $("#" + obj.progressBarX).width(width + 5);
+    }
+
+    if (obj.progressBarY) {
+        $("#" + obj.progressBarY).height(height + 5);
+    }
 	
 	obj.redrawCanvas(obj);
 };
@@ -448,6 +459,41 @@ canvasSelector.prototype.redrawCanvas = function(obj) {
 	obj.ctx.setTransform(1, 0, 0, 1, obj.curLeft, obj.curTop);
 	obj.ctx.scale(obj.curScale, obj.curScale);
 	obj.ctx.drawImage(obj.image, 0, 0, obj.image.width, obj.image.height);
+
+    // update the progress bar
+    if (obj.progressBarX) {
+        var leftProgress = 100.0 * (-obj.curLeft) / (obj.image.width * obj.curScale);
+        if (leftProgress < 0.01) {
+            leftProgress = 0.0;
+        }
+
+        var middleProgress = 100.0 * obj.canvas.width() / (obj.image.width * obj.curScale);
+        var rightProgress =  100.0 - middleProgress - leftProgress;
+        if (rightProgress < 0.01) {
+            rightProgress = 0.0;
+        }
+
+        $("#" + obj.progressBarX + "_left").width(leftProgress + "%");
+        $("#" + obj.progressBarX + "_middle").width(middleProgress + "%");
+        $("#" + obj.progressBarX + "_right").width(rightProgress + "%");
+    }
+
+    if (obj.progressBarY) {
+        var leftProgress = 100.0 * (-obj.curTop) / (obj.image.height * obj.curScale);
+        if (leftProgress < 0.01) {
+            leftProgress = 0.0;
+        }
+
+        var middleProgress = 100.0 * obj.canvas.height() / (obj.image.height * obj.curScale);
+        var rightProgress =  100.0 - middleProgress - leftProgress;
+        if (rightProgress < 0.01) {
+            rightProgress = 0.0;
+        }
+
+        $("#" + obj.progressBarY + "_top").height(leftProgress + "%");
+        $("#" + obj.progressBarY + "_middle").height(middleProgress + "%");
+        $("#" + obj.progressBarY + "_bottom").height(rightProgress + "%");
+    }
 
 	// draw all the rectangles
 	obj.ctx.font = "16px serif";

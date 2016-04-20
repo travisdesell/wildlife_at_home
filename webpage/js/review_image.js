@@ -89,7 +89,9 @@ img.src = imgsrc;
 var cs = new canvasSelector($("#canvas"), img, {
     "logging": true,
     "callback": newRectCallback,
-    "deleteCallback": deleteCallback
+    "deleteCallback": deleteCallback,
+    "progressBarX": "progress_horizontal",
+    "progressBarY": "progress_vertical"
 });
 
 img.onload = function() {
