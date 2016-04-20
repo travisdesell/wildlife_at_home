@@ -1,6 +1,6 @@
 <div class='container'>
-	<div class='row'>
-		<div class='col-sm-6'>
+	<div class='row row-centered'>
+		<div class='col-sm-12'>
 			{{#well}}
 			<div class='well well-sm'>
 				<ol>
@@ -13,24 +13,8 @@
 					<source src='{{video}}.ogv' type='video/mp4'>
 					<source src='{{video}}.wmv' type='video/mp4'>
 				</video>
-			</div>
+			</div><!--well-->
 			{{/well}}
-		</div>
-		<div class='col-sm-6'>
-			{{#well2}}
-			<div class='well well-sm'>
-				<ol>
-				{{#list2}}
-					<li>{{item3}}: {{item4}} </li>
-				{{/list2}}
-				</ol>
-				<video style='width:95%;' id='wildlife_video2' controls='controls'>
-					<source src='{{video2}}.mp4' type='video/mp4'>
-					<source src='{{video2}}.ogv' type='video/mp4'>
-					<source src='{{video2}}.wmv' type='video/mp4'>
-				</video>
-			</div>
-			{{/well2}}
-		</div>
+		</div><!--col-->
 	</div>
 </div>
