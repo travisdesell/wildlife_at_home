@@ -20,6 +20,8 @@ $image_id = -1;
 $project_id = 1;
 $species_id = 0;
 $nest_confidence = 0;
+$reload_location = "null";
+$can_reload = 1;
 if (isset($_GET['p'])) {
     $project_id = $boinc_db->real_escape_string($_GET['p']);
 }
@@ -78,6 +80,11 @@ if ($project_id == 4) {
 
     if ($result) {
         $result = query_wildlife_video_db("SELECT i.id, archive_filename, watermarked_filename, watermarked, species, year FROM mosaic_split_images AS s JOIN images AS i ON s.image_id = i.id WHERE s.mosaic_image_id = $mosaic_id AND s.number = $mosaic_number");
+
+        if ($mosaic_number == 99) {
+            $reload_location = "full_mosaic.php?m=$mosaic_id";
+            $can_reload = 0;
+        }
     }
 } else {
     if (array_key_exists('image_id', $_GET)) {
@@ -125,7 +132,7 @@ if ($project_id == 4) {
     $alert_message = "Completed <strong>$mosaic_number</strong> out of <strong>100</strong> for Mosaic #<strong>$mosaic_id</strong>.";
 } else {
     $alert_class = 'alert-info';
-    $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible to help our computers learn to automate the detection.";
+    $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible (75% or more of the creature should fit in the smalled box; any less and the creature should be ignored). Boxes can shrink (a little) and grow.";
 }
 
 echo "
@@ -187,6 +194,9 @@ echo "
                     <div class='progress-bar progress-bar-info' id='progress_horizontal_middle'></div>
                     <div class='progress-bar progress-bar-transparent' id='progress_horizontal_right'></div>
                 </div>
+            </div>
+            <div class='col-sm-1'>
+                <span id='scale_span'>1.0x</span>
             </div>
         </div>
     </div>
@@ -292,13 +302,17 @@ $projects_template = file_get_contents($cwd[__FILE__] . "/templates/species_desc
 require_once($cwd[__FILE__] . "/image_species.php");
 
 $project_objects = NULL;
-if (array_key_exists($project_id, $project_species)) {
-    $project_objects = $project_species[$project_id];
+$project_no = $project_id;
+if ($project_id == 4) {
+    $project_no = 3;
+}
+if (array_key_exists($project_no, $project_species)) {
+    $project_objects = $project_species[$project_no];
 }
 
 if ($project_objects) {
     $m = new Mustache_Engine;
-    $project_objects['project_id'] = $project_id;
+    $project_objects['project_id'] = $project_no;
     echo $m->render($projects_template, $project_objects);
 } else {
     echo '<p>Help for this project coming soon!</p>';
@@ -319,7 +333,8 @@ echo "
     
 <form id='forumPost' class='hidden' action='//csgrid.org/csg/forum_post.php?id=8' method='post' target='_blank'>
     <input type='hidden' id='forumContent' name='content' value=''>
-</form>";
+    </form>";
+
 
 echo "<script src='./js/jquery.mousewheel.min.js'></script>
 <script src='./js/hammer.min.js'></script>
@@ -328,6 +343,8 @@ echo "<script src='./js/jquery.mousewheel.min.js'></script>
     var imgsrc = 'http://wildlife.und.edu/$image';
     var species_id = $species_id;
     var nest_confidence = $nest_confidence;
+    var reload_location = '$reload_location';
+    var can_reload = $can_reload;
 </script>
 <script src='./js/review_image.js'></script>";
 
