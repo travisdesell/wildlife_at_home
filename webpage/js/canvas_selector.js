@@ -13,6 +13,7 @@ var canvasSelector = function (canvas, image, context) {
     this.allowOverlap = (context.allowOverlap !== false ? true : false);
     this.progressBarX = context.progressBarX || null;
     this.progressBarY = context.progressBarY || null;
+    this.scaleArea = context.scaleArea || null;
     
     // variables that get updated automatically
     this.rectangles = [];
@@ -411,6 +412,9 @@ canvasSelector.prototype.onPinch = function(obj, ev) {
 		obj.initScale = obj.curScale;
 	}
 
+    if (obj.scaleArea) {
+        $("#" + obj.scaleArea).html(tmpScale.toFixed(2) + "x");
+    }
 	obj.redrawCanvas(obj);
 };
 

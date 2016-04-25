@@ -103,28 +103,28 @@ $project_species = array(
                 'description' => 'Nest location data is an important metric for researchers as it allows easy calculations of nest density and helps us understand how birds are using different habitat types. Though it may seem straightforward at first, identifying a nest can be difficult for a number of reasons. Here are a few questions you should ask yourself when trying to identify a nest.',
                 'image' => '',
                 'issection' => true,
-                'rename_species' => 'Question'
+                'rename_species' => 'Scenario'
             ),
             array (
-                'title' => 'Question 1',
+                'title' => 'Scenario 1',
                 'description' => 'Does the habitat type make sense for a nest? Snow geese prefer to nest on raised hummocks of vegetation to keep their eggs out of cold water. There are also lots of small ponds and lakes in the area we work, and snow geese definitely do not nest in the water.',
                 'image' => 'marshall_uas_land_water_no_nest.png',
                 'fig_note' => 'There are different colors of land and water in this photo. See that there are two geese in the water and one on land. There are no nests in this photo.'
             ),
             array (
-                'title' => 'Question 2',
+                'title' => 'Scenario 2',
                 'description' => 'What is the shape of the bird? Recall earlier we mentioned that standing birds have more of a tapered look to them? This is their tail feathers clearly forming a distinct pointy shape. Sitting birds are more “puffed-out” and end up looking much more round shaped as a result.',
                 'image' => 'marshall_uas_standing_vs_sitting.png',
                 'fig_note' => 'The birds on the left are much more streamlined and are clearly standing birds. See the difference in the two birds on the right, these birds are more rounded and clearly sitting.'
             ),
             array (
-                'title' => 'Question 3',
+                'title' => 'Scenario 3',
                 'description' => 'Is there a visible nest ring around my sitting bird? So now that you have determined that this is a sitting goose in an area that could have a nest, how do you tell it is actually on a nest? In many cases, you should see a slight (or obvious) nest ring, a pile of vegetation that mother goose has accumulated around her eggs to keep out the cold air.',
                 'image' => 'marshall_uas_nest_ring.png',
                 'fig_note' => 'A white goose on her nest, red arrows pointing to the visible nest ring around her nest. Note the distinct difference in color of the nest ring when compared to the surrounding ground.'
             ),
             array (
-                'title' => 'Question 4',
+                'title' => 'Scenario 4',
                 'description' => 'Is the nesting pair visible? Often geese come in a nesting pair, the female sits on the nest while the attending male is often nearby keeping watch for predators or other geese intruding on their personal space. If you are hesitant on whether or not you are looking at a nest, the presence of an attending male can help you decide.',
                 'image' => 'marshall_uas_nest_pair.png',
                 'fig_note' => 'In this photo the bottom white goose is clearly sitting, but there is no visible nest ring. The bird near the top is standing, and likely an attending male. For that reason I would classify the bottom bird as a female on a nest.'

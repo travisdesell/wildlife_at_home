@@ -9,8 +9,8 @@ var newRectCallback = function(id) {
             "<div class='col-sm-10'>" +
                 "<select class='form-control' id='" + nestid + "'>" +
                     "<option value='0' selected='selected'>No nest</option>" +
-                    "<option value='1'>Low confidence</option>" +
-                    "<option value='2'>High confidence</option>" +
+                    "<option value='1'>On nest: Low confidence</option>" +
+                    "<option value='2'>On nest: High confidence</option>" +
                 "</select>" +
             "</div>";
     } else {
@@ -91,7 +91,8 @@ var cs = new canvasSelector($("#canvas"), img, {
     "callback": newRectCallback,
     "deleteCallback": deleteCallback,
     "progressBarX": "progress_horizontal",
-    "progressBarY": "progress_vertical"
+    "progressBarY": "progress_vertical",
+    "scaleArea": "scale_span"
 });
 
 img.onload = function() {
@@ -166,6 +167,7 @@ $(document).ready(function() {
             encode: true
         })
             .done(function(data) {
+                window.scrollTo(0,0);
                 if (!data['success']) {
                     $("#ajaxalert").removeClass('alert-success');
                     $("#ajaxalert").removeClass('alert-info');
@@ -186,7 +188,11 @@ $(document).ready(function() {
                     $("#ajaxalert").removeClass('hidden');
 
                     setTimeout(function() {
-                        location.reload();
+                        if (can_reload) {
+                            location.reload();
+                        } else {
+                            window.location.href = reload_location;
+                        }
                     }, 1000);
                 }
             });
@@ -199,6 +205,11 @@ $(document).ready(function() {
         e.preventDefault();
     });
 });
+
+// scroll to top on reload
+window.onbeforeunload = function() {
+    window.scrollTo(0,0);
+}
 
 $("#discuss-button").click(function() {
     $("#forumContent").val('I would like to discuss the following trail cam image:\n\n[img]' + imgsrc + '[/img]');
