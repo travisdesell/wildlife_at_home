@@ -11,14 +11,19 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 
-
-$css_header = "<link rel='stylesheet' type='text/css' href='wildlife_css/education_style.css'/>";
-
-print_header("Wildlife@Home: Teaching & Learning", "$css_header", "wildlife");
+$css_header = "<link rel='stylesheet' href='http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css'>";
+$js_header = "<script src='http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js></script>";
+$js_maps = "<script src= blahblahblah></script>";
+print_header("Wildlife@Home: Teaching & Learning", "$css_header", "$js_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
+echo"
+
+<div id="mapid"></div>
+
+";
 //videos from BEL_2012
-$wells = array();
+/*$wells = array();
 
 $wells['well'][] = array('video' => "clips_grouse/BEL_2012/148.954_48.11126_102.440147", 
 		"list" => array(
@@ -484,7 +489,7 @@ $wells['well'][] = array('video'=>"clips_grouse/BEL_2013/151.675_48.10591_102.44
 			array("item1" => "next", "item2" => "test2")
 		)
 	);
-/*
+
 $wells['well'][] = array('video'=>"clips_grouse/LOST_2013/148.043_48.52878_102.49752",
 		"list" => array(
 			array("item1" => "LOST_2013", "item2" => "test"),
