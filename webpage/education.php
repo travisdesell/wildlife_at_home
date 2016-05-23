@@ -48,7 +48,7 @@ echo "
 				Lesson Plan	
 			</button>
 		</a>
-		<a href=''>
+		<a href='publications/video_key.pdf'>
 			<button type='button' class='btn btn-success btn-sm'>
 				Video Key
 			</button>
