@@ -17,8 +17,16 @@ $css_header = "<link rel='stylesheet' type='text/css' href='wildlife_css/educati
 print_header("Wildlife@Home: Teaching & Learning", "$css_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
-print_footer('Travis Desell, Susan Ellis-Felege, Lindsey Wingate and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
+echo "
+<div class='container'>
+	<div class='row'>
 
-echo "</body></html>";
+		<p>TESTINGGGG</p>
+
+	</div>
+</div>
+";
+
+print_footer('Travis Desell, Susan Ellis-Felege, Lindsey Wingate and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
 ?>
