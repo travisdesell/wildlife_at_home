@@ -1,0 +1,20 @@
+<div class='container'>
+	<div class='row row-centered'>
+		<div class='col-sm-12'>
+			{{#well}}
+			<div class='well well-sm'>
+				<ol>
+				{{#list}}
+					<li>{{item1}}: {{item2}} </li>
+				{{/list}}
+				</ol>
+				<video style='width:95%;' id='wildlife_video' controls='controls'>
+					<source src='{{video}}.mp4' type='video/mp4'>
+					<source src='{{video}}.ogv' type='video/mp4'>
+					<source src='{{video}}.wmv' type='video/mp4'>
+				</video>
+			</div><!--well-->
+			{{/well}}
+		</div><!--col-->
+	</div>
+</div>

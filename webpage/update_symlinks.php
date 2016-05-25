@@ -81,4 +81,9 @@ shell_exec($command);
 $command = "ln -s $cwd/js $target/js";
 shell_exec("rm $target/js");
 shell_exec($command);
+
+$command = "ln -s $cwd/clips_grouse $target/clips_grouse";
+shell_exec("rm $target/clips_grouse");
+shell_exec($command);
+
 ?>

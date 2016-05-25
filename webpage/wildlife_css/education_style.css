@@ -1,0 +1,103 @@
+/*Official theme for Education Modules*/
+@font-face {
+	font-family: Amatic;
+	src: url('fonts/amaticSC-Regular.ttf');
+}
+/*extra fonts to play*/
+@font-face {
+	font-family: Windsong;
+	src: url(fonts/Windsong.ttf);
+}
+@font-face {
+	font-family: Alex-Brush;
+	src: url(fonts/AlexBrush-Regular.ttf);
+}
+
+@font-face {
+	font-family: Note_This;
+	src: url(fonts/Note_this.ttf);
+}
+
+@font-face {
+	font-family: Cabin_Regular; 
+	src: url(fonts/CabinSketch_Regular.ttf);
+}
+
+@font-face {
+	font-family: Cabin_Bold;
+	src: url(fonts/CabinSketch_Bold.ttf);
+}
+
+@font-face {
+	font-family: Existence;
+	src: url(fonts/ExistenceLight.ttf);
+}
+
+#title1{
+	font-family: Amatic; 
+	padding-top: 5%;
+	text-decoration: underline;
+	font-size: 40px;
+}
+
+#title {
+	font-family: Amatic;
+	font-size: 30px;
+}
+
+#subtitle {
+	font-family: Amatic;
+	font-size: 25px;
+}
+
+.well {
+/*	font-family: Existence;
+*/	background-color: rgba(1, 1, 1, 0.8) ;
+	color: white;
+}
+
+body {
+	color: white;
+	background-image: url('../images/wildlife_background_Bw_Fotor.jpg');
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	/*background-color: rgba(56, 56, 56, 1);
+*/
+}
+
+img {
+	border:1px solid;	
+	width: 100%;
+}
+
+a {
+	color: rgb(127, 255, 0);
+}
+
+a:link {
+	color: rgb(127, 255, 0);
+}
+
+a:visited {
+	color: rgb(127, 255, 0);
+}
+
+a:hover {
+	color: green;
+}
+
+a:active {
+	color: green;
+}
+
+.btn {
+	border: solid #7FFF00 1px;
+	background-color: black !important;
+}
+
+.btn:hover{
+/*	border: solid #2B3856 5px;
+	background-color: solid white;
+*/
+}
+
