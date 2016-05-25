@@ -10,78 +10,108 @@ require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 $user = csg_get_user();
 $user_id = $user['id'];
 
-//TEMPORARY//
-//$user_id = 0;
-
-error_log("id: " . $_POST['some_id']);
-
-$data = json_decode($_POST['data'], true);
-
-$nothing_here = $data['nothing_here'];
-
-$image_id = $data[0][image_id];
-
-query_wildlife_video_db("UPDATE images SET views = views + 1 WHERE id = '$image_id';");
-
-if(!$nothing_here)
-{
-	for ($i = 0; $i < count($data); $i++) {
-    	error_log("data[" . $i . "] height: " . $data["$i"]['height'] . 
-        	",  width: " . $data["$i"]['width'] .
-        	", left: " . $data["$i"]['left'] .
-        	", top: " . $data["$i"]['top'] . 
-		", nest: " . $data["$i"]['nest'] . 
-		", species: " . $data["$i"]['species'] . 
-		", comments: " . $data["$i"]['comments'] . 
-		", image id: " . $data["$i"]['image_id'] .
-		", nothing_here: " . $data["$i"]['nothing_here']);
-	
-
-	//$image_id = $data[$i][image_id];
-	$height = $data[$i][height];
-	$height = (int)preg_replace('/\D/', '', $height);
-	$width = $data[$i][width];
-	$width = (int)preg_replace('/\D/', '', $width );
-	$top = $data[$i][top];
-	$top = (int)preg_replace('/\D/', '', $top );
-	$left = $data[$i][left];
-	$left = (int)preg_replace('/\D/', '', $left );
-	$species = $data[$i][species];
-	$comments = mysql_escape_string($data[$i][comments]);
-	$nest = $data[$i][nest];
-	$nothing = $data[$i][nothing_here];
-
-	if($nest) $nest = 1;
-	else $nest = 0;
-
-	query_wildlife_video_db("INSERT INTO test_image_observations " .
-				"(user_id, image_id, height, width, top, left_side, species_id, comments, nest, nothing_here) " .
-			"VALUES ($user_id, $image_id, $height, $width, $top, $left, '$species', '$comments', $nest, $nothing);");
-	}
-}
-else
-{
-	error_log(" nothing_here: " . $data['nothing_here'] .
-		", image id: " . $data['image_id'] .
-		", comments: " . $data['comments']);
-
-	$comments = mysql_escape_string($data[comments]);
-	
-	query_wildlife_video_db("INSERT INTO test_image_observations " .
-				"(user_id, image_id, comments, nothing_here) " .
-			" VALUES ($user_id, $data[image_id], '$comments', $data[nothing_here]);");
+if (!isset($_POST['metadata'])) {
+    echo json_encode(array(
+        'success' => false,
+        'errors' => ['No metadata.'],
+        'count' => 0
+    ));
+    return;
 }
 
+// get our metadata
+$metadata = $_POST['metadata'];
+$nothing_here = $metadata['nothing_here'];
+$image_id = $metadata['image_id'];
+$comments = $metadata['comments'];
+$start_time = $metadata['start_time'];
+$submit_time = time();
+$duration = $submit_time - $start_time;
+$mysqltime = date("Y-m-d H:i:s", $submit_time);
 
+// make sure we don't have this in the db already
+$result = query_wildlife_video_db("select * from image_observations where user_id=$user_id and image_id=$image_id");
+if ($result->num_rows > 0) {
+    echo json_encode(array(
+        'success' => false,
+        'errors' => ["You've already submitted this image. Please reload and try again."],
+        'count' => 0
+    ));
+    return;
+}
 
+$success = false;
+$count = 0;
+$image_observation_id = NULL;
+$errors = array();
+if ($nothing_here) {
+    $success = query_wildlife_video_db("insert into image_observations (user_id, image_id, nothing_here, submit_time, duration) values ($user_id, $image_id, 1, '$mysqltime', $duration)");
 
-//TODO Get Picture info from the database as well - BCC
+    if (!$success) {
+        echo json_encode(array(
+            'success' => false,
+            'errors' => ['Unable to insert metadata.'],
+            'count' => 0
+        ));
+        return;
+    }
 
-error_log("got data from canvas_test.php: '$data'");
-//TODO Actually add this info to the database
-//Or hire/force someone to manually watch the error log and keep track - BCC
+    $image_observation_id = $wildlife_db->insert_id;
+} else {
+    // make sure we have boxes
+    if (!isset($_POST['boxes'])) {
+        echo json_encode(array(
+            'success' => false,
+            'errors' => ['No boxes defined.'],
+            'count' => 0
+        ));
+        return;
+    }
 
-//TODO verify data from users -Jaeden
+    // insert our metadata information first
+    $success = query_wildlife_video_db("insert into image_observations (user_id, image_id, nothing_here, submit_time, duration) values ($user_id, $image_id, 0, '$mysqltime', $duration)");
 
+    if (!$success) {
+        echo json_encode(array(
+            'success' => false,
+            'errors' => ['Unable to insert metadata.'],
+            'count' => 0
+        ));
+        return;
+    }
 
+    $image_observation_id = $wildlife_db->insert_id;
+
+    $data = $_POST['boxes'];
+    for ($i = 0; $i < count($data); $i++) {
+        $height = (int)$data[$i]['height'];
+        $width = (int)$data[$i]['width'];
+        $x = (int)$data[$i]['x'];
+        $y = (int)$data[$i]['y'];
+        $species_id = (int)$data[$i]['species_id'];
+        $on_nest = (int)$data[$i]['on_nest'];
+        
+        $temp_success = query_wildlife_video_db("INSERT INTO image_observation_boxes (image_observation_id, species_id, x, y, width, height, on_nest) values ($image_observation_id, $species_id, $x, $y, $width, $height, $on_nest)");
+        if ($temp_success) $count++;
+        else $errors[] = "Unable to insert box index $i.";
+    }
+}
+
+// add comments, if needed
+if ($success && $comments) {
+    $comments = substr(mysql_escape_string(trim($comments)), 0, 255);
+    $temp_success = query_wildlife_video_db("INSERT INTO image_observation_comments (image_observation_id, comment) values ($image_observation_id, '$comments')");
+    if (!$temp_success) $errors[] = 'Unable to insert comments.';
+}
+
+// finally, update our table on success and return the count
+if ($success) {
+    query_wildlife_video_db("UPDATE images SET views = views + 1 WHERE id=$image_id");
+}
+
+echo json_encode(array(
+    'success' => $success,
+    'errors' => $errors,
+    'count' => $count
+));
 ?>

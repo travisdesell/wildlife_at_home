@@ -14,23 +14,6 @@ require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/canvas_test.css' rel='stylesheet'>", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
-function container_start() {
-    echo "
-    <div class='container'>
-        <div class='row'>
-            <div class='col-sm-12'>
-                <div class='well'>";
-
-}
-
-function container_end() {
-    echo "
-                </div> <!-- well -->
-            </div> <!-- col-sm-12 -->
-        </div> <!-- row -->
-    </div> <!-- /container -->";
-}
-
 $user = csg_get_user();
 $user_id = $user['id'];
 
@@ -88,13 +71,14 @@ else
 //TODO make 'nothing here' button work -Jaeden
 
 echo "
+<div class='container-fluid'>
 <div class='row'>
     <div class='col-sm-4'>
         <div class='container-fluid'>
             <div class='row'>
                 <div id='selection-information'>
-                    <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image --> Image ID: $image_id
-                    <a href='#' class='btn btn-success' data-toggle='modal' data-target='#helpModal'>Help!</a>
+                    <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Species: $species. Year: $year. <br> $image Image ID: $image_id -->
+                    <a href='#' class='btn btn-success' data-toggle='modal' data-target='#helpModal'>Species Help!</a>
                     <br><br>
                  </div>
             </div>
@@ -112,6 +96,7 @@ echo "
     <div class='col-sm-8' id='canvasContainer'>
         <canvas id='canvas' width='600' height='400'>
         </canvas>
+    </div>
     </div>
 </div>";
 	
@@ -133,16 +118,91 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 			</div>
 		</div>
 	</div>
-	<div id='helpModal' class='modal fade'>
-		<div class='modal-dialog' role='dialog'>
+	<div id='helpModal' class='modal fade' style='height: 80%'>
+		<div class='modal-dialog modal-lg' role='dialog'>
 			<div class='modal-content'>
 				<div class='modal-header'>
 					 <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>X</button>
-					<h4 class='modal-title''>Help</h4>
+					<h4 class='modal-title''>Species Help</h4>
 				</div>
-					<div class='modal-body'>
-						<p>There will soon be some help here.<p>
-					</div>
+                <div class='modal-body' style='overflow-y: scroll'>
+                <table class='table'>
+                    <thead>
+                        <tr>
+                            <th style='width:40%'>Image</th>
+                            <th style='width:20%'>Species</th>
+                            <th style='width:40%'>Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><img src='images/marshall_arctic_fox.png' class='img-responsive'></td>
+                            <td>Arctic Fox</td>
+                            <td>Small fox</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_canada_geese.png' class='img-responsive'></td>
+                            <td>Canada Goose</td>
+                            <td>Goose</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_caribou.png' class='img-responsive'></td>
+                            <td>Caribou</td>
+                            <td>Caribou</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_common_eider.png' class='img-responsive'></td>
+                            <td>Common Eider</td>
+                            <td>Male in the top right. Female in the bottom left.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_common_eider_nest.png' class='img-responsive'></td>
+                            <td>Common Eider on Nest</td>
+                            <td>Female common eider on a nest.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_crow.png' class='img-responsive'></td>
+                            <td>Crow</td>
+                            <td>Common scavenger in the area.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_grizzly_bear.png' class='img-responsive'></td>
+                            <td>Grizzly Bear</td>
+                            <td>Large brown bear.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_gull.png' class='img-responsive'></td>
+                            <td>Gull</td>
+                            <td>Gull.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_polar_bear.png' class='img-responsive'></td>
+                            <td>Polar Bear</td>
+                            <td>Large white bear.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_sandhill_crane.png' class='img-responsive'></td>
+                            <td>Sandhill Crane</td>
+                            <td>Crane.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_snow_goose.png' class='img-responsive'></td>
+                            <td>Snow Goose</td>
+                            <td>How is this different from the Canada Goose?</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_snow_goose_blue.png' class='img-responsive'></td>
+                            <td>Snow Goose, Blue Phase</td>
+                            <td>Along with the white Snow Goose, there is a blue phase to the Snow Goose. This should still be categorized as a Snow Goose.</td>
+                        </tr>
+                        <tr>
+                            <td><img src='images/marshall_wolverine.png' class='img-responsive'></td>
+                            <td>Wolverine</td>
+                            <td>Wolverine.</td>
+                        </tr>
+                    </tbody>
+                </table> 
+                </div>
 			</div>
 		</div>
 	</div>";
