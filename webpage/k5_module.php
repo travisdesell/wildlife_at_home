@@ -17,13 +17,8 @@ $js_maps = "<script src= blahblahblah></script>";
 print_header("Wildlife@Home: Teaching & Learning", "$css_header", "$js_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
-echo"
-
-<div id="mapid"></div>
-
-";
 //videos from BEL_2012
-/*$wells = array();
+$wells = array();
 
 $wells['well'][] = array('video' => "clips_grouse/BEL_2012/148.954_48.11126_102.440147", 
 		"list" => array(
@@ -556,7 +551,7 @@ $wells['well'][] = array('video'=>"clips_grouse/LOST_2013/151.683_48.52316_102.4
 			array("item1" => "next", "item2" => "test2")
 		)
 	);
-*/
+
 
 $k5 = file_get_contents($cwd[__file__] . "/templates/k5.html");
 
