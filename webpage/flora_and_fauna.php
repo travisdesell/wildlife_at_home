@@ -12,7 +12,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 
 
-$css_header = "<link rel='stylesheet' type='text/css' href='wildlife_css/education_style.css'/>";
+//$css_header = "<link rel='stylesheet' type='text/css' href='wildlife_css/education_style.css'/>";
 
 print_header("Wildlife@Home: Teaching & Learning", "$css_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
@@ -20,10 +20,28 @@ print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 echo "
 <div class='container'>
 	<div class='row'>
-
-		<p>TESTINGGGG</p>
-
-	</div>
+		<h1><center>North Dakota Flora and Fauna</center></h1>
+	</div><!--row-->
+	<div class='row'>
+		<div class='col-sm-6'>
+			<div class='well'>
+				<p>This is a well!</p>
+			</div><!--well-->
+		</div><!--col-sm-6-->
+		<div class='col-sm-6'>
+			<div class='well'>
+				<p>This is another well!</p>
+			</div><!--well-->
+		</div><!--col-->
+		<div class='col-sm-12'>
+			<div class='well'>
+				The third well.
+			</div><!--well-->
+			<center><button type='button' class='btn btn-default'>
+				Button
+			</button></center>	
+		</div><!--col-->
+	</div><!--row-->
 </div>
 ";
 
