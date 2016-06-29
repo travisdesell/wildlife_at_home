@@ -87,14 +87,16 @@ if ($project_id == 4) {
         }
     }
 } else {
+    // not the mosaic project
     if (array_key_exists('image_id', $_GET)) {
         $image_id = $boinc_db->real_escape_string($_GET['image_id']);
         $result = query_wildlife_video_db("SELECT id, archive_filename, watermarked_filename, watermarked, species, year FROM images WHERE id = $image_id");
     } else {
         $species = '';
         if ($species_id > 0)
-            $species = "and species=$species_id";
+            $species = "and iq.species=$species_id";
 
+        /*
         $temp_result = query_wildlife_video_db("select max(id), min(id) from images");
         $row = $temp_result->fetch_assoc();
         $max_int = $row['max(id)'];
@@ -104,6 +106,11 @@ if ($project_id == 4) {
             $temp_id = mt_rand($min_int, $max_int);
             $result = query_wildlife_video_db("select images.id, archive_filename, watermarked_filename, watermarked, species, year from images left outer join image_observations on images.id = image_observations.image_id where views < needed_views and project_id=$project_id $species and image_observations.user_id is null and images.id = $temp_id");
         } while ($result->num_rows < 1);
+         */
+
+        // user our new queue system
+        $query = "select i.id, i.archive_filename, i.watermarked_filename, i.watermarked, i.species, i.year from images_queue as iq inner join images as i on iq.image_id = i.id left outer join image_observations as io on i.id = io.image_id where iq.project_id = $project_id $species and io.user_id is null ORDER BY rand() LIMIT 1";
+        $result = query_wildlife_video_db($query);
     }
 }
 
