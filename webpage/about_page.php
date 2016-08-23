@@ -17,33 +17,8 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 print_header("Wildlife@Home: Teaching & Learning", "$css_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
-echo "
-<div class='container'>
-	<div class='row'>
-		<h1><center>North Dakota Flora and Fauna</center></h1>
-	</div><!--row-->
-	<div class='row'>
-		<div class='col-sm-6'>
-			<div class='well'>
-				<p>This is a well!</p>
-			</div><!--well-->
-		</div><!--col-sm-6-->
-		<div class='col-sm-6'>
-			<div class='well'>
-				<p>This is another well!</p>
-			</div><!--well-->
-		</div><!--col-->
-		<div class='col-sm-12'>
-			<div class='well'>
-				The third well.
-			</div><!--well-->
-			<center><button type='button' class='btn btn-default'>
-				Button
-			</button></center>	
-		</div><!--col-->
-	</div><!--row-->
-</div>
-";
+echo "peace";
+
 
 print_footer('Travis Desell, Susan Ellis-Felege, Cheyenne Letourneau, Lindsey Wingate and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
 
