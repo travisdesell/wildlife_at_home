@@ -107,6 +107,22 @@ if ($success && $comments) {
 // finally, update our table on success and return the count
 if ($success) {
     query_wildlife_video_db("UPDATE images SET views = views + 1 WHERE id=$image_id");
+    $result = query_wildlife_video_db("SELECT views, needed_views, project_id, species FROM images where id=$image_id");
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        if ($row['views'] >= $row['needed_views']) {
+            $project_id = $row['project_id'];
+            $species_id = $row['species_id'];
+
+            // only project 1 cares about species
+            if ($project_id != 1) {
+                $species_id = 0;
+            }
+
+            // print to standard out to start the processing
+            exec('/usr/bin/php ' . $cwd[__FILE__] . '/reprocess_queue.php ' . $project_id . ' ' . $species_id);
+        }
+    }
 }
 
 echo json_encode(array(
