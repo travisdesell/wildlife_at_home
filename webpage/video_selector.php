@@ -182,7 +182,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'species_id' => '4',
                             'species_latin_name' => 'Anas discors',
                             'info_webpage' => '',
-                            'project_description' => '<p>Blue-winged teal are small ducks that nest in the grasslands of the plains.  They are one of the most common ducks nesting in North Dakota.</p><p>Active projects include: <ul><li>John Palarski and Nickolas Conrad - <a href="ducks_unlimited_project.php">Predation and Parental Care at Duck Teal Nests in North Dakota</a></li></ul></p>',
+                            'project_description' => '<p>Blue-winged teal are small ducks that nest in the grasslands of the plains.  They are one of the most common ducks nesting in North Dakota.</p><p>Active projects include: <ul><li>John Palarski and Nickolas Conrad - <a href="ducks_unlimited_project.php">Predation and Parental Care at Duck Nests in North Dakota</a></li></ul></p>',
                             'site' => array(
                                 array (
                                     'enabled' => ($blue_winged_teal_coteau_ranch_available > 0),
