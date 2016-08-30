@@ -124,31 +124,48 @@ foreach($directory_iterator as $filename => $path_object) {
         //  /share/wildlife/archive/missouri_river_project/2012/piping_plover/XXXX.X/N1031_24LED_cam/7-23-12_N1031/
         //  /share/wildlife/archive/missouri_river_project/2013/piping_plover/1357.0/506/05252013/
         //
+        //
+        //BLUE-WINGED TEAL
+        //  /share/wildlife/archive/Coteau_Ranch/2015/BWTE/...
+        //  /share/wildlife/archive/Coteau_Ranch/2016/BWTE/...
+        //  /share/wildlife/archive/davis_ranch_du/2016/BWTE/...
+        //
+        //MALLARD
+        //  /share/wildlife/archive/Coteau_Ranch/2016/MALL/...
+        //  /share/wildlife/archive/davis_ranch_du/2016/MALL/...
+        //
         //  Directory after species name is river mile, directory after that is animal id
 
         $parts = split("/", $filename);
 
         for ($i = 0; $i < count($parts); $i++) {
-            if ($parts[$i] == 'missouri_river_project' || $parts[$i] == 'oil_development' || $parts[$i] == 'lekking' || $parts[$i] == 'Coteau_Ranch') break;
+            if ($parts[$i] == 'missouri_river_project' || $parts[$i] == 'oil_development' || $parts[$i] == 'lekking' || $parts[$i] == 'Coteau_Ranch' || $parts[i] == 'davis_ranch_du') break;
         }
 
+        if ($i >= count($parts)) continue;
         $project = $parts[$i];
 
+        // skipping specific projects?
         if ($project == "missouri_river_project") continue;
         if ($project == "oil_development") continue;
         if ($project == "lekking") continue;
+
 //        echo "CHECKING: $filename\n";
         if (already_inserted($filename)) continue;
 
         $directory_year = $parts[$i + 1];
         $species = $parts[$i + 2];
 
+        // grab project / animal based on the project folder structure
         if ($project == "missouri_river_project") {
             $site = "Missouri River";
             $rivermile = $parts[$i + 3];
             $animal_id = $parts[$i + 4];
         } else if ($project == "Coteau_Ranch") {
             $site = "Coteau Ranch";
+            $animal_id = $parts[$i + 3];
+        } else if ($project == "davis_ranch_du") {
+            $site = "Davis Ranch";
             $animal_id = $parts[$i + 3];
         } else {
             $site = $parts[$i + 3];
@@ -200,6 +217,7 @@ foreach($directory_iterator as $filename => $path_object) {
         $machine_obs_count = 0;
         $processing_status = "UNWATERMARKED";
 
+        // DB lookup here?
         if ($species == "sharptailed_grouse") {
             $species_id = 1;
         } else if ($species == "least_tern") {
@@ -208,10 +226,13 @@ foreach($directory_iterator as $filename => $path_object) {
             $species_id = 3;
         } else if ($species == "BWTE") {
             $species_id = 4;
+        } else if ($species == "MALL") {
+            $species_id = 5;
         } else {
             die("Unknown species encountered: '$species'");
         }
 
+        // TODO: See where these numbers come from
         if ($project == "oil_development") {
             $project_id = 1;
         } else if ($project == "lekking") {
@@ -224,6 +245,7 @@ foreach($directory_iterator as $filename => $path_object) {
             die("Unknown project encountered: '$project'");
         }
 
+        // DB lookup here?
         if ($site == "Belden") {
             $location_id = 1;
         } else if ($site == "Blaisdell") {
@@ -234,6 +256,8 @@ foreach($directory_iterator as $filename => $path_object) {
             $location_id = 4;
         } else if ($site == "Coteau Ranch") {
             $location_id = 7;
+        } else if ($site == "Davis Ranch") {
+            $location_id = 9;
         } else {
             echo "filename: $filename \n";
             die("Unknown location encountered: '$site' for year '$directory_year'\n");
