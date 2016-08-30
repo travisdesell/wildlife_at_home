@@ -19,7 +19,7 @@ echo "
 
             <section id='title' class='well'>
                 <div class='page-header'>
-                <h2>Predation and Parental Care at Blue-Winged Teal Nests in North Dakota <small><br><br>by John Palarski and Nickolas Conrad</small></h2>
+                <h2>Predation and Parental Care at Duck Nests in North Dakota <small><br><br>by John Palarski and Nickolas Conrad</small></h2>
                 </div>
             </section>
 
