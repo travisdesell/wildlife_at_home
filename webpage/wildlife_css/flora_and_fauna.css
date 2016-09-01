@@ -9,6 +9,14 @@
     }
 }
 
+#middle_section {
+	background-color: green;
+}
+
+#bottom_section {
+	background-color: gray;
+}
+
 .well {
 	background-color: white;
 }

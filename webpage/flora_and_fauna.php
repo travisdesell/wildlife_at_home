@@ -31,12 +31,20 @@ echo "
   		<h1>Flora and Fauna</h1> 
  	 		<p>Bringing wildlife to you.</p> 
 			<form class='form-inline'>
-    <input type='email' class='form-control' size='50' placeholder='Search'>
-    <button type='button' class='btn btn-danger'>Go</button>
-  </form>
+    			<input type='email' class='form-control' size='50' placeholder='Search'>
+    			<button type='button' class='btn btn-danger'>Go</button>
+			</form>
+			<br>
+		<div class='row'>
+			<input type='checkbox' class='keyword-checkbox' value='0'>This </input>
+			<input type='checkbox' class='keyword-checkbox' value='0'>That </input>
+			<input type='checkbox' class='keyword-checkbox' value='0'>This </input>
+			<input type='checkbox' class='keyword-checkbox' value='0'>That </input>
+			<input type='checkbox' class='keyword-checkbox' value='0'>Keyword </input>
+		</row><!--row-->
 		</center>
 	</div><!--jumbotron-->
-<div class='container-fluid'>
+<div class='container-fluid' id='middle_section'>
   <div class='row'>
     <div class='col-sm-8'>
       <h2>About the Photographers</h2>
@@ -50,7 +58,7 @@ echo "
   </div>
 </div>
 
-<div class='container-fluid bg-grey'>
+<div class='container-fluid bg-grey' id='bottom_section'>
   <div class='row'>
     <div class='col-sm-4'>
       <span class='glyphicon glyphicon-globe logo'></span> 
