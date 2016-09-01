@@ -27,23 +27,25 @@ echo "
 </head>
 <body>
 	<div class='jumbotron'>
-  		<h1>Company</h1> 
- 	 		<p>We specialize in blablabla</p> 
+		<center>
+  		<h1>Flora and Fauna</h1> 
+ 	 		<p>Bringing wildlife to you.</p> 
 			<form class='form-inline'>
-    <input type='email' class='form-control' size='50' placeholder='Email Address'>
-    <button type='button' class='btn btn-danger'>Subscribe</button>
+    <input type='email' class='form-control' size='50' placeholder='Search'>
+    <button type='button' class='btn btn-danger'>Go</button>
   </form>
+		</center>
 	</div><!--jumbotron-->
 <div class='container-fluid'>
   <div class='row'>
     <div class='col-sm-8'>
-      <h2>About Company Page</h2>
-      <h4>Lorem ipsum..</h4> 
+      <h2>About the Photographers</h2>
+      <h4>Very important things..</h4> 
       <p>Lorem ipsum..</p>
       <button class='btn btn-default btn-lg'>Get in Touch</button>
     </div>
     <div class='col-sm-4'>
-      <span class='glyphicon glyphicon-signal logo'></span>
+      <span class='glyphicon glyphicon-camera logo'></span>
     </div>
   </div>
 </div>
@@ -54,7 +56,7 @@ echo "
       <span class='glyphicon glyphicon-globe logo'></span> 
     </div>
     <div class='col-sm-8'>
-      <h2>Our Values</h2>
+      <h2>More Info?</h2>
       <h4><strong>MISSION:</strong> Our mission lorem ipsum..</h4> 
       <p><strong>VISION:</strong> Our vision Lorem ipsum..</p>
     </div>
