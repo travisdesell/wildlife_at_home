@@ -18,3 +18,10 @@ print_header("Wildlife@Home: Teaching & Learning", "$css_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 
+
+
+
+print_footer('Travis Desell, Susan Ellis-Felege, Lindsey Wingate and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
+
+//echo "</body></html>";
+?>
