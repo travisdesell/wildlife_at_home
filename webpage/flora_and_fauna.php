@@ -12,37 +12,56 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
 require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 
 
-//$css_header = "<link rel='stylesheet' type='text/css' href='wildlife_css/education_style.css'/>";
+$css_header = "<link rel='stylesheet' type='text/css' href='wildlife_css/flora_and_fauna.css'/>";
 
 print_header("Wildlife@Home: Teaching & Learning", "$css_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 echo "
-<div class='container'>
-	<div class='row'>
-		<h1><center>North Dakota Flora and Fauna</center></h1>
-	</div><!--row-->
-	<div class='row'>
-		<div class='col-sm-6'>
-			<div class='well'>
-				<p>This is a well!</p>
-			</div><!--well-->
-		</div><!--col-sm-6-->
-		<div class='col-sm-6'>
-			<div class='well'>
-				<p>This is another well!</p>
-			</div><!--well-->
-		</div><!--col-->
-		<div class='col-sm-12'>
-			<div class='well'>
-				The third well.
-			</div><!--well-->
-			<center><button type='button' class='btn btn-default'>
-				Button
-			</button></center>	
-		</div><!--col-->
-	</div><!--row-->
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+	<title>Bootstrap Theme Company</title>
+	<meta charset='utf-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+<body>
+	<div class='jumbotron'>
+  		<h1>Company</h1> 
+ 	 		<p>We specialize in blablabla</p> 
+			<form class='form-inline'>
+    <input type='email' class='form-control' size='50' placeholder='Email Address'>
+    <button type='button' class='btn btn-danger'>Subscribe</button>
+  </form>
+	</div><!--jumbotron-->
+<div class='container-fluid'>
+  <div class='row'>
+    <div class='col-sm-8'>
+      <h2>About Company Page</h2>
+      <h4>Lorem ipsum..</h4> 
+      <p>Lorem ipsum..</p>
+      <button class='btn btn-default btn-lg'>Get in Touch</button>
+    </div>
+    <div class='col-sm-4'>
+      <span class='glyphicon glyphicon-signal logo'></span>
+    </div>
+  </div>
 </div>
+
+<div class='container-fluid bg-grey'>
+  <div class='row'>
+    <div class='col-sm-4'>
+      <span class='glyphicon glyphicon-globe logo'></span> 
+    </div>
+    <div class='col-sm-8'>
+      <h2>Our Values</h2>
+      <h4><strong>MISSION:</strong> Our mission lorem ipsum..</h4> 
+      <p><strong>VISION:</strong> Our vision Lorem ipsum..</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
 ";
 
 print_footer('Travis Desell, Susan Ellis-Felege, Cheyenne Letourneau, Lindsey Wingate and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
