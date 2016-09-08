@@ -70,7 +70,7 @@ echo "
 				<p></p>
 				<p>The Wildlife at Home Education Middle School Module \"Impacts of Gas and Oil on Nest Success of Sharp-tailed Grouse in Western North Dakota\" was developed to address MS-LS2-4 and LS2.A. Students construct an argument supported by empirical evidence that relates to the physical or biological components of an ecosystem that affects populations from three study sites in Western North Dakota.  These three sites represent areas of high, medium and low intensity development of gas and oil extraction.  Students use real data collected as part of a study by UND, North Dakota Game and Fish, and Brigham Young University to identify predators captured on camera. Then, they classify their data and use it to calculate nest success rates, predation rates and types, and chick survival to make inferences about the effects of gas and oil development on the population of Sharp-tailed Grouse in Western North Dakota.  MS-LS1-6 and MS-LS1-8 are also supported because the theme of obtaining, analyzing, and communicating empirical evidence is emphasized throughout the module.</p>
 		<center>
-		<a href='publications/HS-Module.docx'>
+		<a href='publications/MS-Module.docx'>
 			<button type='button' class='btn btn-success btn-sm'>
 				Lesson Plan
 			</button>

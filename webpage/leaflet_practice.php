@@ -1,31 +1,24 @@
 <?php
-
 $cwd[__FILE__] = __FILE__;
 if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
 $cwd[__FILE__] = dirname($cwd[__FILE__]);
 
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/header.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/navbar.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/footer.php");
-require_once($cwd[__FILE__] . "/../../citizen_science_grid/my_query.php");
+echo"
+<DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet Quick Start Guide Example</title>
+	<meta charset='utf-8' />
 
-$leaflet_css = "<link rel='stylesheet' type='text/css' href='wildlife_css/leaflet.css";
-$leaflet_js ="<script type='text/javascript' src='js/leaflet_practice.js'></script>";
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
 
-print_header("Wildlife@Home: Teaching & Learning", "$leaflet_css, $leaflet_js,<link rel='stylesheet' href='https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.css' /> <script src='https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js'></script>", "wildlife");
-print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
+	<link rel='stylesheet' href='https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.css' />
+</head>
+<body>
+	<div id='mapid' style='width: 600px; height: 400px'></div>
 
-echo "
-<div class='container'>
-	<div class='row'>
-		<div class='col-sm-12'>
-			<div id='mapid'></div>
-		</div>
-	</div>
-</div>
+	<script src=https://npmcdn.com/leaflet@1.0.0-rc.3/dist/leaflet.js'></script>
+	<script>
+		var mymap = L.map('mapid').setView([51.505, -0.09], 13);
 ";
-
-print_footer('Travis Desell, Susan Ellis-Felege, Lindsey Wingate and the Wildlife@Home Team', 'Travis Desell, Susan Ellis-Felege');
-
-echo "</body></html>";
 ?>
