@@ -1,0 +1,22 @@
+.logo {
+    font-size: 200px;
+}
+
+@media screen and (max-width: 768px) {
+	.col-sm-4 {
+        text-align: center;
+        margin: 25px 0;
+    }
+}
+
+#middle_section {
+	background-color: green;
+}
+
+#bottom_section {
+	background-color: gray;
+}
+
+.well {
+	background-color: white;
+}

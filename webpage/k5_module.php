@@ -13,7 +13,7 @@ require_once($cwd[__FILE__] . "/../../citizen_science_grid/csg_uotd.php");
 
 $css_header = "<link rel='stylesheet' href='http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css'>";
 $js_header = "<script src='http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js></script>";
-$js_maps = "<script src= blahblahblah></script>";
+//$js_maps = "<script src= blahblahblah></script>";
 print_header("Wildlife@Home: Teaching & Learning", "$css_header", "$js_header", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
