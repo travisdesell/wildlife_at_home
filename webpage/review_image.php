@@ -22,11 +22,15 @@ $species_id = 0;
 $nest_confidence = 0;
 $reload_location = "null";
 $can_reload = 1;
+$year = 0;
 if (isset($_GET['p'])) {
     $project_id = $boinc_db->real_escape_string($_GET['p']);
 }
 if (isset($_GET['s'])) {
     $species_id = $boinc_db->real_escape_string($_GET['s']);
+}
+if (isset($_GET['y']) && csg_is_special_user($user)) {
+    $year = $boinc_db->real_escape_string($_GET['y']);
 }
 
 $result = NULL;
@@ -66,7 +70,12 @@ if ($project_id == 4) {
 
     // if we don't have a mosaic_id, we need to select a random mosaic
     if ($mosaic_id < 1) {
-        $result = query_wildlife_video_db("SELECT m.id FROM mosaic_images as m JOIN mosaic_split_images AS s ON m.id = s.mosaic_image_id JOIN images AS i ON s.image_id = i.id LEFT OUTER JOIN image_observations AS io ON (s.image_id = io.image_id AND io.user_id = 100) WHERE s.number = 0 AND i.views < i.needed_views AND io.user_id IS NULL ORDER BY rand() LIMIT 1");
+        $year_str = "";
+        if ($year > 0) {
+            $year_str = "AND m.year = $year";
+        }
+
+        $result = query_wildlife_video_db("SELECT m.id FROM mosaic_images as m JOIN mosaic_split_images AS s ON m.id = s.mosaic_image_id JOIN images AS i ON s.image_id = i.id LEFT OUTER JOIN image_observations AS io ON (s.image_id = io.image_id AND io.user_id = 100) WHERE s.number = 0 AND i.views < i.needed_views AND io.user_id IS NULL $year_str ORDER BY rand() LIMIT 1");
 
         // no mosaics left for this user!
         if ($result->num_rows < 1) {
