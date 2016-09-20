@@ -75,7 +75,7 @@ if ($project_id == 4) {
             $year_str = "AND m.year = $year";
         }
 
-        $result = query_wildlife_video_db("SELECT m.id FROM mosaic_images as m JOIN mosaic_split_images AS s ON m.id = s.mosaic_image_id JOIN images AS i ON s.image_id = i.id LEFT OUTER JOIN image_observations AS io ON (s.image_id = io.image_id AND io.user_id = 100) WHERE s.number = 0 AND i.views < i.needed_views AND io.user_id IS NULL $year_str ORDER BY rand() LIMIT 1");
+        $result = query_wildlife_video_db("SELECT m.id FROM mosaic_images as m JOIN mosaic_split_images AS s ON m.id = s.mosaic_image_id JOIN images AS i ON s.image_id = i.id LEFT OUTER JOIN image_observations AS io ON (s.image_id = io.image_id AND io.user_id = $user_id) WHERE s.number = 0 AND i.views < i.needed_views AND io.user_id IS NULL $year_str ORDER BY rand() LIMIT 1");
 
         // no mosaics left for this user!
         if ($result->num_rows < 1) {
