@@ -89,13 +89,13 @@ $thumbnails = array('thumbnail_list' => array(
                         array(
                             'thumbnail_image' => './images/marshall_snow_goose_blue.png',
                             'project_name' => 'UAS Estimating Snow Geese',
-                            'project_id' => '3',
-                            'project_description' => '<p><strong>Available soon. We\'re still creating some training documents.</strong> We are using an unmanned aerial survey (UAS) unit to take aerial imagery in the Hudson Bay, near Churchill, Manitoba.</p><p>Active projects include: <ul><li>Andrew Barnas</li><li>Marshall Mattingly - <a href="marshall_mattingly_project.php">Using Computer Vision Algorithms to Detect Animals in UAS Imagery</a></li></ul></p>',
+                            'project_id' => '5',
+                            'project_description' => '<p><strong>Important:</strong> These are presented as image sets, ranging from 100 - almost 1000 images per set. You can see how many images are left in the set in the information section at the top of the page. When reviewingthis project, you will automatically be presented the next image in the set you are currently working on after submission. Progress is saved, so you can come back at a later date to finish the set.</p><p>We are using an unmanned aerial survey (UAS) unit to take aerial imagery in the Hudson Bay, near Churchill, Manitoba.</p><p>Active projects include: <ul><li>Andrew Barnas</li><li>Marshall Mattingly - <a href="marshall_mattingly_project.php">Using Computer Vision Algorithms to Detect Animals in UAS Imagery</a></li></ul></p>',
                             'info_webpage' => 'species_help.php?p=3',
                             'site' => array(
-                                'enabled' => false,
+                                'enabled' => true,
                                 'site_name' => 'Hudson Bay, Manitoba',
-                                'year' => '2014-2015',
+                                'year' => '2014-2016',
                                 'done_ratio' => $uas_ratio,
                                 'left_ratio' => 100 - $uas_ratio
                             )
