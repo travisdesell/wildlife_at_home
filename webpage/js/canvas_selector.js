@@ -63,11 +63,18 @@ var canvasSelector = function (canvas, image, context) {
     	var zoom = 0.025;
     	if (ev.deltaY > 0) zoom = 1 + zoom;
     	else zoom = 1 - zoom;
+
+        var offset = savedThis.canvas.offset();
     	
     	savedThis.onPinch(savedThis, {
     		"type": "pinchend",
-    		"scale": zoom
+    		"scale": zoom,
+            "center": {
+                'x': ev.clientX - offset.left,
+                'y': ev.clientY - offset.top 
+            }
     	});
+
     	return false;
     });
 
@@ -140,6 +147,7 @@ canvasSelector.prototype.getCenter = function(obj, ev) {
 canvasSelector.prototype.getScaledPoint = function(obj, ev, offset) {
 	var center = obj.getCenter(obj, ev);
 	var trueOffset = offset || 0;
+
 	return {
 		'x': Math.floor((center.x - obj.curLeft - trueOffset) / obj.curScale),
 		'y': Math.floor((center.y - obj.curTop - trueOffset) / obj.curScale)
@@ -380,36 +388,47 @@ canvasSelector.prototype.onPinch = function(obj, ev) {
 	}
 
 	obj.logEvent("Pinch ( " + ev.scale + " )");
+    obj.logEvent(ev);
 
 	var tmpScale = obj.initScale * ev.scale;
-	if (tmpScale >= 1.0 && tmpScale <= 4.0) {
-		// we have to make sure that the image stays within the frame in case we've panned
-		var tmpLeft = obj.curLeft;
-		obj.logEvent(obj.image.width + ", " + obj.curLeft + ", " + tmpScale + ", " + obj.canvas.width());
-		if (obj.image.width * tmpScale + obj.curLeft < obj.canvas.width()) {
-			// see if we can correct the curLeft to fit within the bounds
-			tmpLeft = Math.ceil(obj.canvas.width() - obj.curLeft - obj.image.width * tmpScale);
-			if (tmpLeft > 0 || tmpLeft < -obj.canvas.width()) {
-				return;
-			}
-		}
+    if (tmpScale < 1.0) {
+        if (obj.initScale == 1.0) return;
+        tmpScale = 1.0;
+    } else if (tmpScale > 4.0) {
+        if (obj.initScale == 4.0) return;
+        tmpScale = 4.0;
+    }
 
-		var tmpTop = obj.curTop;
-		if (obj.image.height * tmpScale + obj.curTop < obj.canvas.height()) {
-			// see if we can correct the curHeight to fit within the bounds
-			tmpTop = Math.ceil(obj.canvas.height() - obj.curTop - obj.image.height * tmpScale);
-			if (tmpTop > 0 || tmpTop < -obj.canvas.height()) {
-				return;
-			}
-		}
+    // we have to make sure that the image stays within the frame in case we've panned
+    console.log(ev);
+    var tmpLeft = obj.curLeft * ev.scale;
 
-		// we've made it this far, so lets correct the left/top and scale
-		obj.curLeft = tmpLeft;
-		obj.curTop = tmpTop;
-		obj.curScale = tmpScale;
-	}
+    obj.logEvent(obj.image.width + ", " + obj.curLeft + ", " + tmpLeft + tmpScale + ", " + obj.canvas.width());
+    if (tmpLeft > 0) {
+        tmpLeft = 0;
+    } else if (Math.ceil(obj.image.width * tmpScale + tmpLeft) < obj.canvas.width()) {
+        // see if we can correct the curLeft to fit within the bounds
+        tmpLeft = Math.ceil(obj.canvas.width() - (obj.image.width * tmpScale));
+    }
+
+    var tmpTop = obj.curTop * ev.scale;
+    if (tmpTop > 0) {
+        tmpTop = 0;
+    }
+    else if (Math.ceil(obj.image.height * tmpScale + tmpTop) < obj.canvas.height()) {
+        // see if we can correct the curHeight to fit within the bounds
+        tmpTop = Math.ceil(obj.canvas.height() - (obj.image.height * tmpScale));
+    }
+
+    // we've made it this far, so lets correct the left/top and scale
+    obj.curLeft = tmpLeft;
+    obj.curTop = tmpTop;
+    obj.curScale = tmpScale;
+
 	if (ev.type == 'pinchend') {
 		obj.initScale = obj.curScale;
+        obj.initLeft = obj.curLeft;
+        obj.initTop = obj.curTop;
 	}
 
     if (obj.scaleArea) {

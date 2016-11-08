@@ -21,52 +21,83 @@ $project_id = 1;
 $species_id = 0;
 $nest_confidence = 0;
 $reload_location = "null";
+$mosaic_projects = array(4, 5);
 $can_reload = 1;
+$year = 0;
 if (isset($_GET['p'])) {
     $project_id = $boinc_db->real_escape_string($_GET['p']);
 }
 if (isset($_GET['s'])) {
     $species_id = $boinc_db->real_escape_string($_GET['s']);
 }
+if (isset($_GET['y']) && csg_is_special_user($user)) {
+    $year = $boinc_db->real_escape_string($_GET['y']);
+}
 
 $result = NULL;
 $mosaic_number = 0;
 $mosaic_id = 0;
+$mosaic_count = 100;
+$mosaic_empty = 0;
+$mosaic_skipped = 0;
+$mosaic_toskip = 0;
 
 // project 4 is super special mosaic project
-if ($project_id == 4) {
+if (in_array($project_id, $mosaic_projects)) {
     $species_id = 2;
     $nest_confidence = 1;
 
     // see which mosaics this user has submitted for
-    $result = query_wildlife_video_db("SELECT DISTINCT m.id FROM image_observations AS io JOIN images AS i ON io.image_id = i.id JOIN mosaic_split_images AS s ON io.image_id = s.image_id JOIN mosaic_images AS m ON s.mosaic_image_id = m.id WHERE io.user_id = $user_id");
+    $result = query_wildlife_video_db("SELECT DISTINCT m.id, m.split_count, m.empty_count FROM image_observations AS io JOIN images AS i ON io.image_id = i.id JOIN mosaic_split_images AS s ON io.image_id = s.image_id JOIN mosaic_images AS m ON s.mosaic_image_id = m.id WHERE io.user_id = $user_id AND m.project_id=$project_id");
     if ($result->num_rows > 0) {
         // determine the first mosaic for which the user has not submitted all
         while ($row = $result->fetch_assoc()) {
             $mosaic_id = $row['id'];
-            $temp_result = query_wildlife_video_db("SELECT MAX(s.number) FROM mosaic_split_images AS s JOIN image_observations AS io ON io.image_id = s.image_id WHERE s.mosaic_image_id = $mosaic_id AND io.user_id = $user_id");
+            $mosaic_count = $row['split_count'];
+            $mosaic_empty = $row['empty_count'];
 
-            if ($temp_result->num_rows < 1)
+            $temp_result = query_wildlife_video_db("SELECT MAX(s.number) FROM mosaic_split_images AS s JOIN image_observations AS io ON io.image_id = s.image_id WHERE s.mosaic_image_id = $mosaic_id AND io.user_id = $user_id");
+            if ($temp_result->num_rows < 1) {
+                // reset the mosaic_id and number
+                $mosaic_id = 0;
+                $mosaic_number = 0;
+                $mosaic_count = 100;
+                $mosaic_empty = 0;
                 continue;
+            }
 
             // if we found one that the user hasn't completed, stick to this mosaic
             $temp_row = $temp_result->fetch_assoc();
             $number = $temp_row['MAX(s.number)'];
-            if ($number < 99) {
-                // get the actual next value
-                $mosaic_number = $number + 1;
-                break;
+
+            $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 AND number > $number LIMIT 1");
+            if ($temp_result->num_rows < 1) {
+                // reset the mosaic_id and number
+                $mosaic_id = 0;
+                $mosaic_number = 0;
+                $mosaic_count = 100;
+                $mosaic_empty = 0;
+                continue;
             }
 
-            // reset the mosaic_id and number
-            $mosaic_id = 0;
-            $mosaic_number = 0;
+            $temp_row = $temp_result->fetch_assoc();
+            $mosaic_number = $temp_row['number'];
+
+            $temp_result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=1 AND number > $mosaic_number");
+            $temp_row = $temp_result->fetch_assoc();
+            $mosaic_toskip = $temp_row['COUNT(*)'];
+            $mosaic_skipped = $mosaic_number - $number - 1;
         }
     }
 
     // if we don't have a mosaic_id, we need to select a random mosaic
     if ($mosaic_id < 1) {
-        $result = query_wildlife_video_db("SELECT m.id FROM mosaic_images as m JOIN mosaic_split_images AS s ON m.id = s.mosaic_image_id JOIN images AS i ON s.image_id = i.id LEFT OUTER JOIN image_observations AS io ON (s.image_id = io.image_id AND io.user_id = 100) WHERE s.number = 0 AND i.views < i.needed_views AND io.user_id IS NULL ORDER BY rand() LIMIT 1");
+        $year_str = "";
+        if ($year > 0) {
+            $year_str = "AND m.year = $year";
+        }
+
+        $result = query_wildlife_video_db("SELECT m.id, m.split_count, m.empty_count FROM mosaic_images as m JOIN mosaic_split_images AS s ON m.id = s.mosaic_image_id JOIN images AS i ON s.image_id = i.id LEFT OUTER JOIN image_observations AS io ON (s.image_id = io.image_id AND io.user_id = $user_id) WHERE m.project_id = $project_id AND s.number = 0 AND i.views < i.needed_views AND io.user_id IS NULL $year_str ORDER BY rand() LIMIT 1");
 
         // no mosaics left for this user!
         if ($result->num_rows < 1) {
@@ -74,14 +105,26 @@ if ($project_id == 4) {
         } else {
             $row = $result->fetch_assoc();
             $mosaic_id = $row['id'];
-            $mosaic_number = 0;
+            $mosaic_count = $row['split_count'];
+            $mosaic_empty = $row['empty_count'];
+
+            // skip empty ones
+            $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 LIMIT 1");
+            $temp_row = $temp_result->fetch_assoc();
+            $mosaic_number = $temp_row['number'];
+            $mosaic_skipped = $mosaic_number;
+
+            // how many are left to skip?
+            $temp_result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=1 AND number > $mosaic_number");
+            $temp_row = $temp_result->fetch_assoc();
+            $mosaic_toskip = $temp_row['COUNT(*)'];
         }
     }
 
     if ($result) {
         $result = query_wildlife_video_db("SELECT i.id, archive_filename, watermarked_filename, watermarked, species, year FROM mosaic_split_images AS s JOIN images AS i ON s.image_id = i.id WHERE s.mosaic_image_id = $mosaic_id AND s.number = $mosaic_number");
 
-        if ($mosaic_number == 99) {
+        if ($mosaic_number == ($mosaic_count-1)) {
             $reload_location = "full_mosaic.php?m=$mosaic_id";
             $can_reload = 0;
         }
@@ -134,9 +177,9 @@ $image_watermarked = $row['watermarked'];
 $image = $image_watermarked ? $row['watermarked_filename'] : $row['archive_filename'];
 $year = $row['year'];
 
-if ($project_id == 4) {
+if (in_array($project_id, $mosaic_projects)) {
     $alert_class = 'alert-info';
-    $alert_message = "Completed <strong>$mosaic_number</strong> out of <strong>100</strong> for Mosaic #<strong>$mosaic_id</strong>.";
+    $alert_message = "<strong>".($mosaic_count - $mosaic_toskip - $mosaic_number)."</strong> remaining for Mosaic #<strong>$mosaic_id</strong>.";
 } else {
     $alert_class = 'alert-info';
     $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible (75% or more of the creature should fit in the smalled box; any less and the creature should be ignored). Boxes can shrink (a little) and grow.";
@@ -213,7 +256,7 @@ echo "
 }
 	
 
-print_footer();
+print_footer('','');
 
 echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 		<div class='modal-dialog modal-sm' role='dialog'>
@@ -310,7 +353,7 @@ require_once($cwd[__FILE__] . "/image_species.php");
 
 $project_objects = NULL;
 $project_no = $project_id;
-if ($project_id == 4) {
+if (in_array($project_id, $mosaic_projects)) {
     $project_no = 3;
 }
 if (array_key_exists($project_no, $project_species)) {
