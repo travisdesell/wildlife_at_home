@@ -49,6 +49,7 @@ if (in_array($project_id, $mosaic_projects)) {
 
     // see which mosaics this user has submitted for
     $result = query_wildlife_video_db("SELECT DISTINCT m.id, m.split_count, m.empty_count FROM image_observations AS io JOIN images AS i ON io.image_id = i.id JOIN mosaic_split_images AS s ON io.image_id = s.image_id JOIN mosaic_images AS m ON s.mosaic_image_id = m.id WHERE io.user_id = $user_id AND m.project_id=$project_id");
+
     if ($result->num_rows > 0) {
         // determine the first mosaic for which the user has not submitted all
         while ($row = $result->fetch_assoc()) {
@@ -70,25 +71,41 @@ if (in_array($project_id, $mosaic_projects)) {
             $temp_row = $temp_result->fetch_assoc();
             $number = $temp_row['MAX(s.number)'];
 
-            $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 AND number > $number LIMIT 1");
-            if ($temp_result->num_rows < 1) {
-                // reset the mosaic_id and number
-                $mosaic_id = 0;
-                $mosaic_number = 0;
-                $mosaic_count = 100;
-                $mosaic_empty = 0;
-                continue;
+            if ($project_id == 5) {
+                $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 AND number > $number LIMIT 1"); if ($temp_result->num_rows < 1) {
+                    // reset the mosaic_id and number
+                    $mosaic_id = 0;
+                    $mosaic_number = 0;
+                    $mosaic_count = 100;
+                    $mosaic_empty = 0;
+                    continue;
+                }
+
+                $temp_row = $temp_result->fetch_assoc();
+                $mosaic_number = $temp_row['number'];
+
+                $temp_result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=1 AND number > $mosaic_number");
+                $temp_row = $temp_result->fetch_assoc();
+                $mosaic_toskip = $temp_row['COUNT(*)'];
+                $mosaic_skipped = $mosaic_number - $number - 1;
+
+                break;
+            } else {
+                $mosaic_number = $number + 1;
+
+                if ($mosaic_number >= $mosaic_count) {
+                    $mosaic_id = 0;
+                    $mosaic_number = 0;
+                    $mosaic_count = 100;
+                    $mosaic_empty = 0;
+                    continue;
+                }
+
+                break;
             }
-
-            $temp_row = $temp_result->fetch_assoc();
-            $mosaic_number = $temp_row['number'];
-
-            $temp_result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=1 AND number > $mosaic_number");
-            $temp_row = $temp_result->fetch_assoc();
-            $mosaic_toskip = $temp_row['COUNT(*)'];
-            $mosaic_skipped = $mosaic_number - $number - 1;
         }
     }
+
 
     // if we don't have a mosaic_id, we need to select a random mosaic
     if ($mosaic_id < 1) {
@@ -108,16 +125,22 @@ if (in_array($project_id, $mosaic_projects)) {
             $mosaic_count = $row['split_count'];
             $mosaic_empty = $row['empty_count'];
 
-            // skip empty ones
-            $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 LIMIT 1");
-            $temp_row = $temp_result->fetch_assoc();
-            $mosaic_number = $temp_row['number'];
-            $mosaic_skipped = $mosaic_number;
+            if ($project_id == 5) {
+                // skip empty ones
+                $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 LIMIT 1");
+                $temp_row = $temp_result->fetch_assoc();
+                $mosaic_number = $temp_row['number'];
+                $mosaic_skipped = $mosaic_number;
 
-            // how many are left to skip?
-            $temp_result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=1 AND number > $mosaic_number");
-            $temp_row = $temp_result->fetch_assoc();
-            $mosaic_toskip = $temp_row['COUNT(*)'];
+                // how many are left to skip?
+                $temp_result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=1 AND number > $mosaic_number");
+                $temp_row = $temp_result->fetch_assoc();
+                $mosaic_toskip = $temp_row['COUNT(*)'];
+            } else {
+                $mosaic_number = 0;
+                $mosaic_skipped = 0;
+                $mosaic_toskip = 0;
+            }
         }
     }
 
@@ -179,7 +202,11 @@ $year = $row['year'];
 
 if (in_array($project_id, $mosaic_projects)) {
     $alert_class = 'alert-info';
-    $alert_message = "<strong>".($mosaic_count - $mosaic_toskip - $mosaic_number)."</strong> remaining for Mosaic #<strong>$mosaic_id</strong>.";
+    if ($project_id == 5) {
+        $alert_message = "<strong>".($mosaic_count - $mosaic_toskip - $mosaic_number)."</strong> remaining for Mosaic #<strong>$mosaic_id</strong>.";
+    } else {
+        $alert_message = "<strong>".($mosaic_number+1)."</strong> out of <strong>$mosaic_count</strong> for Mosaic #<strong>$mosaic_id</strong>.";
+    }
 } else {
     $alert_class = 'alert-info';
     $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible (75% or more of the creature should fit in the smalled box; any less and the creature should be ignored). Boxes can shrink (a little) and grow.";
