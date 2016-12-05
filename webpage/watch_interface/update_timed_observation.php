@@ -45,7 +45,7 @@ $query = "UPDATE timed_observations SET start_time = :start_time, end_time = :en
 
 //$result = query_wildlife_video_db_prepared($query, $bind_params);
 
-$wildlife_pdo = new PDO("mysql:host=wildlife.und.edu;dbname=wildlife_video;", $wildlife_user, $wildlife_passwd);
+$wildlife_pdo = new PDO("mysql:host=csgrid.org;dbname=wildlife_video;", $wildlife_user, $wildlife_passwd);
 
 try {
 //    error_log("quoted: '" . $wildlife_pdo->quote($comments) . "'");
