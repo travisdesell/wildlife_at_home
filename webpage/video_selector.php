@@ -208,7 +208,7 @@ $thumbnails = array('thumbnail_list' => array(
                         ),
 
                         array(
-                            'thumbnail_image' => './images/blue_winged_teal.png',
+                            'thumbnail_image' => './images/mallard.jpg',
                             'species_name' => 'Mallard',
                             'species_id' => '5',
                             'species_latin_name' => 'Anas platyrhnchos',

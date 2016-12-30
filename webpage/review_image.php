@@ -72,7 +72,8 @@ if (in_array($project_id, $mosaic_projects)) {
             $number = $temp_row['MAX(s.number)'];
 
             if ($project_id == 5) {
-                $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 AND number > $number LIMIT 1"); if ($temp_result->num_rows < 1) {
+                $temp_result = query_wildlife_video_db("SELECT number FROM mosaic_split_images WHERE mosaic_image_id=$mosaic_id AND is_empty=0 AND number > $number LIMIT 1");
+                if ($temp_result->num_rows < 1) {
                     // reset the mosaic_id and number
                     $mosaic_id = 0;
                     $mosaic_number = 0;
