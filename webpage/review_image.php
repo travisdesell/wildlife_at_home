@@ -176,7 +176,7 @@ if (in_array($project_id, $mosaic_projects)) {
          */
 
         // user our new queue system
-        $query = "select i.id, i.archive_filename, i.watermarked_filename, i.watermarked, i.species, i.year from images_queue as iq inner join images as i on iq.image_id = i.id left outer join image_observations as io on i.id = io.image_id where iq.project_id = $project_id $species and io.user_id is null ORDER BY rand() LIMIT 1";
+        $query = "select i.id, i.archive_filename, i.watermarked_filename, i.watermarked, i.species, i.year from images_queue as iq inner join images as i on iq.image_id = i.id inner join image_observations as io on i.id = io.image_id where iq.project_id = $project_id $species and io.user_id != $user_id ORDER BY rand() LIMIT 1";
         $result = query_wildlife_video_db($query);
     }
 }
