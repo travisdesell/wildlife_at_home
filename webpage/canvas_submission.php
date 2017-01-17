@@ -40,12 +40,17 @@ if ($result->num_rows > 0) {
     return;
 }
 
+$is_expert = 0;
+$result = query_wildlife_video_db("SELECT * FROM image_observation_experts WHERE user_id=$user_id");
+if ($result && $result->num_rows > 0)
+    $is_expert = 1;
+
 $success = false;
 $count = 0;
 $image_observation_id = NULL;
 $errors = array();
 if ($nothing_here) {
-    $success = query_wildlife_video_db("insert into image_observations (user_id, image_id, nothing_here, submit_time, duration) values ($user_id, $image_id, 1, '$mysqltime', $duration)");
+    $success = query_wildlife_video_db("insert into image_observations (user_id, image_id, nothing_here, submit_time, duration, is_expert) values ($user_id, $image_id, 1, '$mysqltime', $duration, $is_expert)");
 
     if (!$success) {
         echo json_encode(array(
@@ -69,7 +74,7 @@ if ($nothing_here) {
     }
 
     // insert our metadata information first
-    $success = query_wildlife_video_db("insert into image_observations (user_id, image_id, nothing_here, submit_time, duration) values ($user_id, $image_id, 0, '$mysqltime', $duration)");
+    $success = query_wildlife_video_db("insert into image_observations (user_id, image_id, nothing_here, submit_time, duration, is_expert) values ($user_id, $image_id, 0, '$mysqltime', $duration, $is_expert)");
 
     if (!$success) {
         echo json_encode(array(
@@ -106,7 +111,12 @@ if ($nothing_here) {
 
 // finally, update our table on success and return the count
 if ($success) {
-    query_wildlife_video_db("UPDATE images SET views = views + 1 WHERE id=$image_id");
+    // see if the user is an expert
+    $views = "views";
+    if ($is_expert)
+        $views = "expert_views";
+
+    query_wildlife_video_db("UPDATE images SET $views = $views + 1 WHERE id=$image_id");
     $result = query_wildlife_video_db("SELECT views, needed_views, project_id, species FROM images where id=$image_id");
     if ($result && $result->num_rows > 0) {
         $row = $result->fetch_assoc();
