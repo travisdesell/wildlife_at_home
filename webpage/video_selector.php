@@ -211,7 +211,7 @@ $thumbnails = array('thumbnail_list' => array(
                             'thumbnail_image' => './images/mallard.jpg',
                             'species_name' => 'Mallard',
                             'species_id' => '5',
-                            'species_latin_name' => 'Anas platyrhnchos',
+                            'species_latin_name' => 'Anas platyrhynchos',
                             'info_webpage' => '',
                             'project_description' => '<p>Mallards are small ducks that nest in the grasslands of the plains.  They are one of the most common ducks nesting in North Dakota.</p><p>Active projects include: <ul><li>John Palarski and Nickolas Conrad - <a href="ducks_unlimited_project.php">Predation and Parental Care at Duck Nests in North Dakota</a></li></ul></p>',
                             'site' => array(
