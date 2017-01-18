@@ -1,6 +1,8 @@
 <?php
 
-require_once("wildlife_db.php");
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
 
 /**
  * SCRIPT STARTS HERE
@@ -32,6 +34,9 @@ for ($i = 0; $i < $number_of_processes; $i++) {
         $child_pids[] = $pid;
     }
 }
+
+// require after the fork
+require_once($cwd[__FILE__] . '/../../citizen_science_grid/my_query.php');
 
 $species_id = 1;
 $location_id = 0;
@@ -76,7 +81,7 @@ if ($modulo > -1) {
         $query = "SELECT id, archive_filename, watermarked_filename, processing_status, duration_s FROM video_2 WHERE (id % $number_of_processes) = $modulo AND processing_status = 'UNWATERMARKED' AND species_id = $species_id AND location_id = $location_id LIMIT 1";
         echo $query . "\n";
 
-        $result = query_video_db($query);
+        $result = query_wildlife_video_db($query);
         if(!$result) {
             echo("Query error: $videos_not_found\n");
         } else {
@@ -113,8 +118,8 @@ if ($modulo > -1) {
 
         //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
         //use HTML5 to stream it
-        $und_watermark_file = "/video/wildlife/und_watermark.png";
-        $duck_watermark_file = "/video/wildlife/duck_watermark.png";
+        $und_watermark_file = "/share/wildlife/und_watermark.png";
+        $duck_watermark_file = "/share/wildlife/duck_watermark.png";
 
         //This should generate better sized videos
         if($location_id == 7) {
@@ -168,7 +173,7 @@ if ($modulo > -1) {
         $filesize = filesize($watermarked_filename . ".mp4");
 
         $query = "UPDATE video_2 SET processing_status = 'WATERMARKED', size = $filesize, md5_hash = '$md5_hash', ogv_generated = false, needs_reconversion = false WHERE id = " . $video_id;
-        $result = query_video_db($query);
+        $result = query_wildlife_video_db($query);
     }
 } else {
     /**
