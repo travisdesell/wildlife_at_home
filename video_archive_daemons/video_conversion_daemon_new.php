@@ -114,7 +114,7 @@ if ($modulo > -1) {
         //Need to try and create the directories to the file.
         $base_directory = substr($watermarked_filename, 0, strrpos($watermarked_filename, "/"));
         echo "attempting to create directories if they don't exist: $base_directory\n";
-        mkdir($base_directory, 0755 /*all for owner, read/execute for others*/, true /*recursive*/);
+        mkdir($base_directory, 0775 /*all for owner, read/execute for others*/, true /*recursive*/);
 
         //Run FFMPEG to do the watermarking, also convert the file to mp4 so we can
         //use HTML5 to stream it
