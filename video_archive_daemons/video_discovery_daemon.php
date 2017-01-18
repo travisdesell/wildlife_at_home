@@ -1,6 +1,10 @@
 <?php
 
-require_once("wildlife_db.php");
+$cwd[__FILE__] = __FILE__;
+if (is_link($cwd[__FILE__])) $cwd[__FILE__] = readlink($cwd[__FILE__]);
+$cwd[__FILE__] = dirname($cwd[__FILE__]);
+
+require_once($cwd[__FILE__] . '/../../citizen_science_grid/my_query.php');
 
 /**
  * This splits a string based on multiple delimiters
@@ -83,7 +87,7 @@ function get_video_duration($filename) {
  */
 function already_inserted($filename) {
     $query = "SELECT count(*) FROM video_2 AS total WHERE archive_filename LIKE '" . $filename . "'"; 
-    $results = query_video_db($query);
+    $results = query_wildlife_video_db($query);
 
     $row = mysql_fetch_assoc($results);
 
@@ -136,10 +140,10 @@ foreach($directory_iterator as $filename => $path_object) {
         //
         //  Directory after species name is river mile, directory after that is animal id
 
-        $parts = split("/", $filename);
+        $parts = explode("/", $filename);
 
         for ($i = 0; $i < count($parts); $i++) {
-            if ($parts[$i] == 'missouri_river_project' || $parts[$i] == 'oil_development' || $parts[$i] == 'lekking' || $parts[$i] == 'Coteau_Ranch' || $parts[i] == 'davis_ranch_du') break;
+            if ($parts[$i] == 'missouri_river_project' || $parts[$i] == 'oil_development' || $parts[$i] == 'lekking' || $parts[$i] == 'Coteau_Ranch' || $parts[$i] == 'davis_ranch_du') break;
         }
 
         if ($i >= count($parts)) continue;
@@ -311,7 +315,7 @@ foreach($directory_iterator as $filename => $path_object) {
         echo $query . "\n";
 //        die();
 
-        $result = query_video_db($query);
+        $result = query_wildlife_video_db($query);
 
         $count++;
     }
@@ -322,6 +326,6 @@ echo $count . " videos in '" . $dir . "'\n";
 echo "updating total video progress\n";
 
 $query = "UPDATE progress AS p SET total_video_s = (SELECT SUM(duration_S) FROM video_2 AS v2 WHERE v2.species_id = p.species_id AND v2.location_id = p.location_id)";
-//$results = query_video_db($query);
+//$results = query_wildlife_video_db($query);
 
 ?>
