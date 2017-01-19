@@ -4,6 +4,15 @@
 
 }
 
+#selection-info-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.close {
+    opacity: 0.6;
+}
+
 .progress-bar-transparent {
     opacity: 0;
     background-color: transparent;

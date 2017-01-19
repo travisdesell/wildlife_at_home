@@ -1,5 +1,15 @@
 var species = [];
 var options = "";
+var lastId = 0;
+
+function resizeSelectionArea() {
+    var sic = $("#selection-info-container");
+    var margin = parseInt(sic.css('margin-top')) + parseInt(sic.css('margin-bottom')) + parseInt($("#progress_horizontal").css('margin-bottom'));
+    var height = $("#col-canvas").height() - $("#row-image-info").height() - $("#row-button-area").height() - margin;
+    height = '' + height + 'px';
+    sic.height(height);
+    sic.css('max-height', height);
+}
 
 var newRectCallback = function(id) {
     nest = "";
@@ -22,6 +32,13 @@ var newRectCallback = function(id) {
                 "</div>" +
             "</div>"; 
     }
+
+    if (lastId) {
+        $("#S" + lastId).addClass('panel-info');
+        $("#S" + lastId).removeClass('panel-success');
+    }
+
+    lastId = id;
 
     table = "<div class='panel panel-primary' id='S" + id + "'>" +
         "<div class='panel-heading'>" +
@@ -51,7 +68,9 @@ var newRectCallback = function(id) {
         "</div>" +
     "</div>";
 
-    $("#selection-information").append(table);
+    $("#selection-information").prepend(table);
+    resizeSelectionArea();
+
     $("#submit-selections-button").prop("disabled", false);
     $("#submit-selections-button").removeClass("disabled");
     $("#nothing-here-button").prop("disabled", true);
@@ -75,6 +94,11 @@ var newRectCallback = function(id) {
 var deleteCallback = function(id, empty) {
     var selectionId = 'S' + id;
     $('#'+selectionId).remove();
+    resizeSelectionArea();
+
+    if (lastId == id) {
+        lastId = 0;
+    }
 
     if (empty) {
         $("#submit-selections-button").prop("disabled", true);
@@ -87,16 +111,18 @@ var deleteCallback = function(id, empty) {
 var img = new Image();
 img.src = imgsrc;
 var cs = new canvasSelector($("#canvas"), img, {
-    "logging": true,
+    "logging": false,
     "callback": newRectCallback,
     "deleteCallback": deleteCallback,
     "progressBarX": "progress_horizontal",
     "progressBarY": "progress_vertical",
-    "scaleArea": "scale_span"
+    "scaleArea": "scale_span",
+    "boxArea": "selection-information"
 });
 
 img.onload = function() {
     cs.resizeFunc(cs);
+    resizeSelectionArea();
 };
 
 $(document).ready(function() {
@@ -156,7 +182,7 @@ $(document).ready(function() {
             'boxes': boxes
         };
 
-        console.log(formData);
+        //console.log(formData);
 
         // process
         $.ajax({
@@ -230,4 +256,5 @@ $("#submit-selections-button").click(function() {
 
 $(window).resize(function() {
     cs.resizeFunc(cs);
+    resizeSelectionArea();
 });

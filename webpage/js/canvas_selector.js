@@ -159,6 +159,7 @@ canvasSelector.prototype.getScaledPoint = function(obj, ev, offset) {
  */
 canvasSelector.prototype.onResize = function(obj) {
     var windowHeight = window.innerHeight || $(window).height();
+    var windowWidth = window.innerWidth || $(window).width();
     var y = obj.canvas.offset().top;
     var height = windowHeight - $(".footer").height()*2 - y - 20;
     
