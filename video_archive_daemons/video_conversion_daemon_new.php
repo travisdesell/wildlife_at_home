@@ -91,8 +91,8 @@ if ($modulo > -1) {
         if (!$row) { 
             echo("No videos left to convert, attempt: $videos_not_found\n");
             $videos_not_found++;
-            continue;
             if ($videos_not_found >= 5) die("No video left to convert with modulo $modulo!");
+            continue;
         } else {
             $videos_not_found = 0;
         }
@@ -123,10 +123,19 @@ if ($modulo > -1) {
 
         //This should generate better sized videos
         if($location_id == 7) {
-            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec h264 -qscale:v 3 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.mp4 2>&1; echo $?";
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec h264 -strict -2 -threads 2 -qscale:v 3 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.mp4 2>&1";
         } else {
-            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -vcodec libx264 -preset slow -filter_complex 'overlay=x=10:y=10' -b:v 200k $watermarked_filename.mp4 2>&1; echo $?";
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -vcodec libx264 -strict -2 -threads 2 -preset slow -filter_complex 'overlay=x=10:y=10' -b:v 200k $watermarked_filename.mp4 2>&1";
         }
+
+        # run with lower priority
+        $command = "nice -n 10 $command";
+
+        // delete any preexisting file
+        if (file_exists("$watermarked_filename.mp4"))
+            unlink("$watermarked_filename.mp4");
+        if (file_exists("$watermarked_filename.ogv"))
+            unlink("$watermarked_filename.ogv");
 
         echo "\n\n$command\n\n";
         $output_status = shell_exec($command);
@@ -134,7 +143,16 @@ if ($modulo > -1) {
         //        echo "output status: " . $output_status . "\n\n";
         //1 looks like an error
 
-        if (strlen($output_status) < 2 || $output_status{strlen($output_status) - 2} != '0') {
+        echo "\nNAME: $watermarked_filename.mp4\n";
+        if (!file_exists("$watermarked_filename.mp4")) {
+            echo "FFMPEG conversion to mp4 failed, dying!\n";
+            echo "output status:\n\n" . $output_status ."\n\n";
+            die();
+        }
+        
+        $filesize = filesize("$watermarked_filename.mp4");
+        echo "\nSIZE: $filesize\n";
+        if ($filesize < 100) {
             echo "FFMPEG conversion to mp4 failed, dying!\n";
             echo "output status:\n\n" . $output_status ."\n\n";
             die();
@@ -144,9 +162,9 @@ if ($modulo > -1) {
 
         /*
         if($location_id == 7) {
-            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec theora -qscale:v 6 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.ogv 2>&1; echo $?";
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -i $duck_watermark_file -vcodec theora -qscale:v 6 -an -filter_complex '[1:v]scale=87:40 [und]; [0:v][und]overlay=x=10:y=10 [und_marked]; [2:v]scale=79:50 [duck]; [und_marked][duck]overlay=x=10:y=(main_h-overlay_h)' $watermarked_filename.ogv 2>&1";
         } else {
-            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -vcodec theora -preset slow -filter_complex 'overlay=x=10:y=10' -b:v 200k $watermarked_filename.ogv 2>&1; echo $?";
+            $command = "ffmpeg -y -i $archive_filename -i $und_watermark_file -vcodec theora -preset slow -filter_complex 'overlay=x=10:y=10' -b:v 200k $watermarked_filename.ogv 2>&1";
         }
 
         echo "\n\n$command\n\n";
@@ -183,11 +201,13 @@ if ($modulo > -1) {
      * function.
      */
     echo "This is the parent.\n";
+    query_wildlife_video_db("UPDATE status SET online = 1 WHERE id = 1");
     for ($i = 0; $i < $number_of_processes; $i++) {
         echo "\twaiting on child " . $child_pids[$i] . " to finish.\n";
         pcntl_waitpid($child_pids[$i], $status);
         echo "\tchild " . $child_pids[$i] . " has finished.\n\n";
     }
+    query_wildlife_video_db("UPDATE status SET online = 0 WHERE id = 1");
 }
 
 ?>

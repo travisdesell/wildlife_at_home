@@ -13,7 +13,7 @@ require_once($cwd[__FILE__] . '/../../citizen_science_grid/user.php');
 $user = csg_get_user();
 $user_id = $user['id'];
 
-print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/review_image.css' rel='stylesheet'>", "wildlife");
+print_header("Wildlife@Home: Image Viewer",  "<link href='./wildlife_css/review_image.css?v=2017011902' rel='stylesheet'>", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
 $image_id = -1;
@@ -225,21 +225,24 @@ echo "
 <div class='row'>
     <div class='col-sm-4'>
         <div class='container-fluid'>
-            <div class='row'>
-            <div id='selection-information'>
-                    <div class='btn-group btn-group-sm' role='group'>
-                        <button type='button' class='btn disabled' disabled><strong>Image #: $image_id</strong></button>
-                        <button type='button' id='discuss-button' class='btn btn-primary' data-toggle='tooltip' title='Discuss this image on the forum'>&nbsp;<span class='glyphicon glyphicon-comment'> </span></button>
+            <div class='row' id='row-image-info'>
+                <div class='btn-group btn-group-sm' role='group'>
+                    <button type='button' class='btn disabled' disabled><strong>Image #: $image_id</strong></button>
+                    <button type='button' id='discuss-button' class='btn btn-primary' data-toggle='tooltip' title='Discuss this image on the forum'>&nbsp;<span class='glyphicon glyphicon-comment'> </span></button>
+                </div>
+                <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Year: $year. <br> $image Image ID: $image_id -->
+                <div class='btn-group btn-group-sm pull-right' role='group'>
+                    <button type='button' class='btn btn-info' data-toggle='modal' data-target='#helpModal'>Species <span class='glyphicon glyphicon-question-sign'> </span></button>
+                    <button type='button' class='btn btn-info' data-toggle='modal' data-target='#interfaceModal'>Interface <span class='glyphicon glyphicon-question-sign'> </span></button>
+                </div>
+            </div>
+            <div class='row' id='row-selection-info'>
+                <div class='well pre-scrollable' id='selection-info-container'>
+                    <div id='selection-information'>
                     </div>
-                    <!-- You are looking at image: $image_id and it is watermarked? $image_watermarked. <br>Year: $year. <br> $image Image ID: $image_id -->
-                    <div class='btn-group btn-group-sm pull-right' role='group'>
-                        <button type='button' class='btn btn-info' data-toggle='modal' data-target='#helpModal'>Species <span class='glyphicon glyphicon-question-sign'> </span></button>
-                        <button type='button' class='btn btn-info' data-toggle='modal' data-target='#interfaceModal'>Interface <span class='glyphicon glyphicon-question-sign'> </span></button>
-                    </div>
-                    <br><br>
-                 </div>
-                 </div>
-            <div class='row'>
+                </div>
+            </div>
+            <div class='row' id='row-button-area'>
                 <textarea class='form-control' rows='3' placeholder='Comments' name='comment-area' id='comment-area'></textarea>
                 <br>
                 <div class='text-center'>
@@ -252,7 +255,7 @@ echo "
             </div>
         </div>
     </div>
-    <div class='col-sm-8'>
+    <div class='col-sm-8' id='col-canvas'>
         <div class='row'>
             <div class='col-sm-11' id='canvasContainer'>
                 <canvas id='canvas' width='600' height='400'></canvas>
@@ -424,6 +427,6 @@ echo "<script src='./js/jquery.mousewheel.min.js'></script>
     var reload_location = '$reload_location';
     var can_reload = $can_reload;
 </script>
-<script src='./js/review_image.js'></script>";
+<script src='./js/review_image.js?v=2017011902'></script>";
 
 ?>
