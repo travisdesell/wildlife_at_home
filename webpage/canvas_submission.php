@@ -42,8 +42,9 @@ if ($result->num_rows > 0) {
 
 $is_expert = 0;
 $result = query_wildlife_video_db("SELECT * FROM image_observation_experts WHERE user_id=$user_id");
-if ($result && $result->num_rows > 0)
+if ($result && $result->num_rows > 0) {
     $is_expert = 1;
+}
 
 $success = false;
 $count = 0;
@@ -113,14 +114,16 @@ if ($nothing_here) {
 if ($success) {
     // see if the user is an expert
     $views = "views";
-    if ($is_expert)
+    if ($is_expert) {
         $views = "expert_views";
+    }
 
     query_wildlife_video_db("UPDATE images SET $views = $views + 1 WHERE id=$image_id");
     $result = query_wildlife_video_db("SELECT views, needed_views, project_id, species FROM images where id=$image_id");
     if ($result && $result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        if ($row['views'] >= $row['needed_views']) {
+        $mosaic_projects = array(4, 5);
+        if ($row['views'] >= $row['needed_views'] && !in_array($project_id, $mosaic_projects)) {
             $project_id = $row['project_id'];
             $species_id = $row['species_id'];
 
