@@ -232,6 +232,103 @@ $(document).ready(function() {
     });
 });
 
+// allow arrow key movement in the frame
+var currentPan = {
+    'x': 0,
+    'y': 0,
+    'status': {
+        'left': false,
+        'right': false,
+        'up': false,
+        'down': false
+    }
+};
+
+function isPanning() {
+    return  currentPan['status']['left'] ||
+            currentPan['status']['right'] ||
+            currentPan['status']['up'] ||
+            currentPan['status']['down'];
+}
+
+$(document).keydown(function(e) {
+    var scrollAmount = 20;
+    var evtype = isPanning() ? 'panmove' : 'panstart';
+
+    switch (e.which) {
+        case 37: // left
+            currentPan['left'] = true;
+            break;
+        case 38: // up
+            currentPan['up'] = true;
+            break;
+        case 39: // right
+            currentPan['right'] = true;
+            break;
+        case 40: // down
+            currentPan['down'] = true;
+            break;
+        default:
+            return;
+    }
+
+    if (currentPan['left']) currentPan['x'] += scrollAmount;
+    if (currentPan['right']) currentPan['x'] -= scrollAmount;
+    if (currentPan['up']) currentPan['y'] += scrollAmount;
+    if (currentPan['down']) currentPan['y'] -= scrollAmount;
+
+    var ev = {
+        'deltaX': currentPan['x'],
+        'deltaY': currentPan['y'],
+        'center': {
+            'x': 1000000,
+            'y': 1000000
+        },
+        'type': evtype
+    };
+
+    cs.onPan(cs, ev);
+    e.preventDefault();
+});
+
+$(document).keyup(function(e) {
+    switch (e.which) {
+        case 37: // left
+            currentPan['left'] = false;
+            break;
+        case 38: // up
+            currentPan['up'] = false;
+            break;
+        case 39: // right
+            currentPan['right'] = false;
+            break;
+        case 40: // down
+            currentPan['down'] = false;
+            break;
+        default:
+            return;
+    }
+
+    if (!isPanning()) {
+        var ev = {
+            'deltaX': currentPan['x'],
+            'deltaY': currentPan['y'],
+            'center': {
+                'x': 1000000,
+                'y': 1000000
+            },
+            'type': 'panend'
+        };
+
+        currentPan['x'] = 0;
+        currentPan['y'] = 0;
+
+        cs.onPan(cs, ev);
+    }
+
+    e.preventDefault();
+});
+
 // scroll to top on reload
 window.onbeforeunload = function() {
     window.scrollTo(0,0);

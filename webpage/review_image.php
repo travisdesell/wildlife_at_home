@@ -397,6 +397,6 @@
     var reload_location = '$reload_location';
     var can_reload = $can_reload;
 </script>
-<script src='./js/review_image.js?v=2017011902'></script>";
+<script src='./js/review_image.js?v=2017020801'></script>";
 
 ?>
