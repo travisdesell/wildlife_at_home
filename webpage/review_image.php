@@ -85,6 +85,7 @@
 
             // if we don't have another image, the user is done!
             if ($temp_result->num_rows == 0) {
+                query_wildlife_video_db("UPDATE mosaic_user_status SET is_completed=1 WHERE user_id=$user_id AND mosaic_image_id=$mosaic_id");
                 $reload_location = "full_mosaic.php?m=$mosaic_id";
                 $can_reload = 0;
                 $result = NULL;
@@ -158,10 +159,21 @@
     $row = $result->fetch_assoc();
 
     $image_id = $row['id'];
-    $image_watermarked = $row['watermarked'];
-    $image = $image_watermarked ? $row['watermarked_filename'] : $row['archive_filename'];
-    $image = ltrim($image, '/');
     $year = $row['year'];
+
+    // see if we have a shifted version of the image
+    $temp_result = query_wildlife_video_db("SELECT archive_filename FROM uas_blueshift_images WHERE image_id=$image_id");
+    if ($temp_result && $temp_result->num_rows > 0) {
+        $temp_row = $temp_result->fetch_assoc();
+        $image_watermarked = 0;
+        $image = $temp_row['archive_filename'];
+    } else {
+        $image_watermarked = $row['watermarked'];
+        $image = $image_watermarked ? $row['watermarked_filename'] : $row['archive_filename'];
+    }
+
+    // always left trim
+    $image = ltrim($image, '/');
 
     if (in_array($project_id, $mosaic_projects)) {
         $alert_class = 'alert-info';

@@ -135,6 +135,18 @@ if ($success) {
             // print to standard out to start the processing
             exec('/usr/bin/php ' . $cwd[__FILE__] . '/reprocess_queue.php ' . $project_id . ' ' . $species_id);
         }
+
+        // if it's a mosaic, we need to show that it's started it
+        $result = query_wildlife_video_db("SELECT mosaic_image_id FROM mosaic_split_images WHERE image_id=$image_id");
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $mosaic_id = $row['mosaic_image_id'];
+
+            $result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_user_status WHERE mosaic_image_id=$mosaic_id AND user_id=$user_id");
+            if ($result && $result->num_rows == 0) {
+                query_wildlife_video_db("INSERT INTO mosaic_user_status (mosaic_image_id, user_id, is_expert) VALUES ($mosaic_id, $user_id, $is_expert)");
+            }
+        }
     }
 }
 

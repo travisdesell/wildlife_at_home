@@ -2,3 +2,4 @@ wildlife_db.php
 boinc_db.php
 build
 *.dat
+nohup.out
