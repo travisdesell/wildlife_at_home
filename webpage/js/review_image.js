@@ -237,10 +237,10 @@ var currentPan = {
     'x': 0,
     'y': 0,
     'status': {
-        'left': false,
-        'right': false,
-        'up': false,
-        'down': false
+        'left': 0,
+        'right': 0,
+        'up': 0,
+        'down': 0 
     }
 };
 
@@ -257,25 +257,40 @@ $(document).keydown(function(e) {
 
     switch (e.which) {
         case 37: // left
-            currentPan['left'] = true;
+            currentPan['left'] += 1;
             break;
         case 38: // up
-            currentPan['up'] = true;
+            currentPan['up'] += 1;
             break;
         case 39: // right
-            currentPan['right'] = true;
+            currentPan['right'] += 1;
             break;
         case 40: // down
-            currentPan['down'] = true;
+            currentPan['down'] += 1;
             break;
         default:
             return;
     }
 
-    if (currentPan['left']) currentPan['x'] += scrollAmount;
-    if (currentPan['right']) currentPan['x'] -= scrollAmount;
-    if (currentPan['up']) currentPan['y'] += scrollAmount;
-    if (currentPan['down']) currentPan['y'] -= scrollAmount;
+    if (currentPan['left'] && !currentPan['right']) {
+        currentPan['x'] += scrollAmount * ((currentPan['left'] + 3) / 4);
+    }
+    else if (currentPan['right'] && !currentPan['left']) {
+        currentPan['x'] -= scrollAmount * ((currentPan['right'] + 3) / 4);
+    } else if (currentPan['left'] && currentPan['right']) {
+        currentPan['left'] = 1;
+        currentPan['right'] = 1;
+    }
+
+    if (currentPan['up'] && !currentPan['down']) {
+        currentPan['y'] += scrollAmount * ((currentPan['up'] + 3) / 4);
+    }
+    else if (currentPan['down'] && !currentPan['up']) {
+        currentPan['y'] -= scrollAmount * ((currentPan['down'] + 3) / 4);
+    } else if (currentPan['up'] && currentPan['down']) {
+        currentPan['up'] = 1;
+        currentPan['down'] = 1;
+    }
 
     var ev = {
         'deltaX': currentPan['x'],
@@ -294,16 +309,16 @@ $(document).keydown(function(e) {
 $(document).keyup(function(e) {
     switch (e.which) {
         case 37: // left
-            currentPan['left'] = false;
+            currentPan['left'] = 0;
             break;
         case 38: // up
-            currentPan['up'] = false;
+            currentPan['up'] = 0;
             break;
         case 39: // right
-            currentPan['right'] = false;
+            currentPan['right'] = 0;
             break;
         case 40: // down
-            currentPan['down'] = false;
+            currentPan['down'] = 0;
             break;
         default:
             return;
