@@ -91,6 +91,9 @@ if (isset($_FILES['userfile'])) {
 
     unset($_FILES);
 } else {
+    $maxfilesize = ini_get("upload_max_filesize");
+    $maxfilecount = ini_get("max_file_uploads");
+
     echo "
 <div class='panel panel-info'>
     <div class='panel-heading'>Upload an IDX File</div>
@@ -100,6 +103,8 @@ if (isset($_FILES['userfile'])) {
                 <input type='hidden' name='MAX_FILE_SIZE' value='30000000'>
                 <label for='userfile'>IDX file to test</label>
                 <input name='userfile[]' type='file' id='userfile' accept='.idx' multiple='multiple'>
+                <h6>Max file size: $maxfilesize</h6>
+                <h6>Max file count: $maxfilecount</h6>
             </div>
             <button type='submit' class='btn btn-primary'>Upload Files</button>
         </form>
