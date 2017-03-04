@@ -92,7 +92,7 @@ foreach ($all_ids as $id) {
     $result = query_wildlife_video_db("SELECT watermarked_filename, species_id FROM video_2 WHERE id = $id");
     $row = $result->fetch_assoc();
     $species_id = $row['species_id'];
-    $watermarked_filename = $row['watermarked_filename'];
+    $watermarked_filename = ltrim($row['watermarked_filename'], '/');
 
     $obs_result = query_wildlife_video_db("SELECT expert, start_time_s, end_time_s, event_id, tags, comments FROM timed_observations WHERE video_id = $id");
     $n_rows = $obs_result->num_rows;
@@ -101,7 +101,7 @@ foreach ($all_ids as $id) {
             <td rowspan='$n_rows'>$id</td>
             <td rowspan='$n_rows'>$species_id</td>
             <td rowspan='$n_rows'>
-                <a href='http://wildlife.und.edu$watermarked_filename.mp4'>[mp4]</a>
+                <a href='http://$sharehost/$watermarked_filename.mp4'>[mp4]</a>
             </td>";
 
     $i = 0;

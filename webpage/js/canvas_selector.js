@@ -304,6 +304,11 @@ canvasSelector.prototype.onPan = function(obj, ev) {
 	obj.curTop = tmpTop;
 
 	obj.redrawCanvas(obj);
+
+    if (ev.type == 'keypress') {
+        obj.initLeft = obj.curLeft;
+        obj.initTop = obj.curTop;
+    }
 };
 
 /** Double tap creates a new rectangle, if it will fit at the given location. */

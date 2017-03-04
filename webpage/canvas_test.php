@@ -56,7 +56,7 @@ $row = $result->fetch_assoc();
 
 $image_id = $row['id'];
 $image_watermarked = $row['watermarked'];
-$image = $row['watermarked_filename'];
+$image = ltrim($row['watermarked_filename'], '/');
 $species_id = $row['species'];
 $year = $row['year'];
 if($species_id == 3)
@@ -210,7 +210,7 @@ echo "<div id='submitModal' class='modal fade' data-backdrop='static'>
 echo "<script src='./js/jquery.mousewheel.min.js'></script>
 <script src='./js/hammer.min.js'></script>
 <script src='./js/canvas_selector.js'></script>
-<script>var imgsrc = 'http://wildlife.und.edu/$image';</script>
+<script>var imgsrc = 'http://$sharehost/$image';</script>
 <script src='./js/canvas_test.js'></script>";
 
 ?>

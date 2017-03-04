@@ -232,6 +232,118 @@ $(document).ready(function() {
     });
 });
 
+// allow arrow key movement in the frame
+var currentPan = {
+    'x': 0,
+    'y': 0,
+    'status': {
+        'left': 0,
+        'right': 0,
+        'up': 0,
+        'down': 0 
+    }
+};
+
+function isPanning() {
+    return  currentPan['status']['left'] ||
+            currentPan['status']['right'] ||
+            currentPan['status']['up'] ||
+            currentPan['status']['down'];
+}
+
+$(document).keydown(function(e) {
+    var scrollAmount = 20;
+    var evtype = isPanning() ? 'panmove' : 'panstart';
+
+    switch (e.which) {
+        case 37: // left
+            currentPan['left'] += 1;
+            break;
+        case 38: // up
+            currentPan['up'] += 1;
+            break;
+        case 39: // right
+            currentPan['right'] += 1;
+            break;
+        case 40: // down
+            currentPan['down'] += 1;
+            break;
+        default:
+            return;
+    }
+
+    if (currentPan['left'] && !currentPan['right']) {
+        currentPan['x'] += scrollAmount * ((currentPan['left'] + 3) / 4);
+    }
+    else if (currentPan['right'] && !currentPan['left']) {
+        currentPan['x'] -= scrollAmount * ((currentPan['right'] + 3) / 4);
+    } else if (currentPan['left'] && currentPan['right']) {
+        currentPan['left'] = 1;
+        currentPan['right'] = 1;
+    }
+
+    if (currentPan['up'] && !currentPan['down']) {
+        currentPan['y'] += scrollAmount * ((currentPan['up'] + 3) / 4);
+    }
+    else if (currentPan['down'] && !currentPan['up']) {
+        currentPan['y'] -= scrollAmount * ((currentPan['down'] + 3) / 4);
+    } else if (currentPan['up'] && currentPan['down']) {
+        currentPan['up'] = 1;
+        currentPan['down'] = 1;
+    }
+
+    var ev = {
+        'deltaX': currentPan['x'],
+        'deltaY': currentPan['y'],
+        'center': {
+            'x': 1000000,
+            'y': 1000000
+        },
+        'type': evtype
+    };
+
+    cs.onPan(cs, ev);
+    e.preventDefault();
+});
+
+$(document).keyup(function(e) {
+    switch (e.which) {
+        case 37: // left
+            currentPan['left'] = 0;
+            break;
+        case 38: // up
+            currentPan['up'] = 0;
+            break;
+        case 39: // right
+            currentPan['right'] = 0;
+            break;
+        case 40: // down
+            currentPan['down'] = 0;
+            break;
+        default:
+            return;
+    }
+
+    if (!isPanning()) {
+        var ev = {
+            'deltaX': currentPan['x'],
+            'deltaY': currentPan['y'],
+            'center': {
+                'x': 1000000,
+                'y': 1000000
+            },
+            'type': 'panend'
+        };
+
+        currentPan['x'] = 0;
+        currentPan['y'] = 0;
+
+        cs.onPan(cs, ev);
+    }
+
+    e.preventDefault();
+});
+
 // scroll to top on reload
 window.onbeforeunload = function() {
     window.scrollTo(0,0);
