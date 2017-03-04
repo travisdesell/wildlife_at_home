@@ -96,21 +96,21 @@ include_directories(
 	${MYSQL_INCLUDE_DIR}
 )
 
-add_executable(wildlife_bgsub_validator
-    ${BOINC_INCLUDE_DIR}/sched/validator
-    ${BOINC_INCLUDE_DIR}/sched/validate_util
-    ${BOINC_INCLUDE_DIR}/sched/validate_util2
-    wildlife_bgsub_validation_policy)
-target_link_libraries(wildlife_bgsub_validator ${UNDVC_COMMON_LIBRARY} ${BOINC_SERVER_LIBRARIES} ${MYSQL_LIBRARIES})
+#add_executable(wildlife_bgsub_validator
+#    ${BOINC_INCLUDE_DIR}/sched/validator
+#    ${BOINC_INCLUDE_DIR}/sched/validate_util
+#    ${BOINC_INCLUDE_DIR}/sched/validate_util2
+#    wildlife_bgsub_validation_policy)
+#target_link_libraries(wildlife_bgsub_validator ${UNDVC_COMMON_LIBRARY} ${BOINC_SERVER_LIBRARIES} ${MYSQL_LIBRARIES})
 
-add_executable(wildlife_bgsub_assimilator
-    ${BOINC_INCLUDE_DIR}/sched/assimilator
-    ${BOINC_INCLUDE_DIR}/sched/validate_util
-    wildlife_bgsub_assimilation_policy)
-target_link_libraries(wildlife_bgsub_assimilator ${UNDVC_COMMON_LIBRARY} ${BOINC_SERVER_LIBRARIES} ${MYSQL_LIBRARIES})
+#add_executable(wildlife_bgsub_assimilator
+#    ${BOINC_INCLUDE_DIR}/sched/assimilator
+#    ${BOINC_INCLUDE_DIR}/sched/validate_util
+#    wildlife_bgsub_assimilation_policy)
+#target_link_libraries(wildlife_bgsub_assimilator ${UNDVC_COMMON_LIBRARY} ${BOINC_SERVER_LIBRARIES} ${MYSQL_LIBRARIES})
 
-add_executable(wildlife_work_generator wildlife_work_generator)
-target_link_libraries(wildlife_work_generator ${UNDVC_COMMON_LIBRARY} ${BOINC_SERVER_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
+#add_executable(wildlife_work_generator wildlife_work_generator)
+#target_link_libraries(wildlife_work_generator ${UNDVC_COMMON_LIBRARY} ${BOINC_SERVER_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(crowd_observation_validator crowd_observation_validator)
 target_link_libraries(crowd_observation_validator ${UNDVC_COMMON_LIBRARY} ${BOINC_SERVER_LIBRARIES} ${MYSQL_LIBRARIES} ${OPENSSL_LIBRARIES})

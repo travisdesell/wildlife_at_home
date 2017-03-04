@@ -298,6 +298,8 @@ void award_credit(const DBVideo &video, const vector<int> &user_ids, const vecto
         MYSQL_RES *team_res = mysql_store_result(boinc_db_conn);
         MYSQL_ROW team_row = mysql_fetch_row(team_res);
 
+        cout << "checking team row" << endl;
+
         if (atoi(team_row[0]) > 0) {
             ostringstream team_credit_query;
             team_credit_query << "UPDATE team SET bossa_total_credit = bossa_total_credit + " << video_credit_s << ", valid_events = valid_events + " << user_valid_count[i] << " WHERE id = " << team_row[0];
@@ -306,6 +308,7 @@ void award_credit(const DBVideo &video, const vector<int> &user_ids, const vecto
             mysql_query_check(boinc_db_conn, team_credit_query.str());
         }
 
+        cout << "setting status" << endl;
 
         for (unsigned int j = 0; j < user_observations[i].size(); j++) {
             //set status of timed_observation
