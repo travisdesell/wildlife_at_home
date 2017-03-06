@@ -85,7 +85,7 @@
 
             // if we don't have another image, the user is done!
             if ($temp_result->num_rows == 0) {
-                query_wildlife_video_db("UPDATE mosaic_user_status SET is_completed=1 WHERE user_id=$user_id AND mosaic_image_id=$mosaic_id");
+                query_wildlife_video_db("UPDATE mosaic_user_status SET completed=1 WHERE user_id=$user_id AND mosaic_image_id=$mosaic_id");
                 $reload_location = "full_mosaic.php?m=$mosaic_id";
                 $can_reload = 0;
                 $result = NULL;
