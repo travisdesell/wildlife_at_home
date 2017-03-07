@@ -142,9 +142,12 @@ if ($success) {
             $row = $result->fetch_assoc();
             $mosaic_id = $row['mosaic_image_id'];
 
-            $result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_user_status WHERE mosaic_image_id=$mosaic_id AND user_id=$user_id");
-            if ($result && $result->num_rows == 0) {
-                query_wildlife_video_db("INSERT INTO mosaic_user_status (mosaic_image_id, user_id, is_expert) VALUES ($mosaic_id, $user_id, $is_expert)");
+            $result = query_wildlife_video_db("SELECT COUNT(*) AS num FROM mosaic_user_status WHERE mosaic_image_id=$mosaic_id AND user_id=$user_id");
+            if ($result && $result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                if ($row['num'] == 0) {
+                    query_wildlife_video_db("INSERT INTO mosaic_user_status (mosaic_image_id, user_id, is_expert) VALUES ($mosaic_id, $user_id, $is_expert)");
+                }
             }
         }
     }
