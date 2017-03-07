@@ -104,7 +104,7 @@
                 $temp_result = query_wildlife_video_db("SELECT split_count, empty_count FROM mosaic_images WHERE id = $mosaic_id");
                 $temp_row = $temp_result->fetch_assoc();
                 $mosaic_count = $temp_row['split_count'];
-                $mosaic_empty = $mosaic_count - $temp_row['empty_count'];
+                $mosaic_empty = $temp_row['empty_count'];
 
                 // update the result 
                 $result = query_wildlife_video_db("SELECT i.id, archive_filename, watermarked_filename, watermarked, species, year FROM mosaic_split_images AS s JOIN images AS i ON s.image_id = i.id WHERE s.mosaic_image_id = $mosaic_id AND s.number = $mosaic_number");
