@@ -217,7 +217,15 @@
                     <br>
                     <div class='text-center'>
                         <div class='btn-group btn-group-lg'>
+";
+
+    if (!in_array($project_id, $mosaic_projects)) {
+        echo "
                             <button class='btn btn-primary' id='skip-button' data-toggle='tooltip' title='Skip this image'>Skip</button>
+";
+    }
+
+    echo "
                             <button class='btn nothing btn-danger' id='nothing-here-button' data-toggle='tooltip' title='No animals in this image'>There's Nothing Here</button>
                             <button class='btn btn-primary disabled' id='submit-selections-button' data-toggle='tooltip' title='Submit species to the database' disabled>Submit</button>
                          </div>
