@@ -99,6 +99,27 @@ $project_species = array(
                 'isnote' => "We do not count geese that are in flight! We don't count them because they move very quickly as the UAV is taking imagery, and there is a high chance that they could show up in multiple images, leading to miscounts. (no picture, have not found one yet!)."
             ),
             array (
+                'title' => 'Other Species',
+                'description' => 'Some other species that may rarely occur in the images for this project. If you cannot identify a species in the image from the list, select "Other" for manual review.',
+                'image' => '',
+                'issection' => true
+            ),
+            array (
+                'title' => 'Beluga Whale',
+                'description' => 'UAS image of a beluga whale near the surface of the water. Depending on the depth, a silhouette of the beluga whale may appear as a dark shape in the water, similar to the one shown.',
+                'image' => 'uas_beluga_whale.jpg'
+            ),
+            array (
+                'title' => 'Caribou',
+                'description' => 'UAS image of a herd of caribou. Given the stark contrast with the background, this group of caribou is easy to spot at a distance. However, it may be more difficult on terrain with less grass.',
+                'image' => 'uas_caribou.jpg'
+            ),
+            array (
+                'title' => 'Polar Bear',
+                'description' => 'UAS image of a polar bear walking or laying on land. Polar bears may be difficult to spot depending on the height of the camera and the coloration of the ground. Try to look for an oval bordered object to zoom in on from a distance.',
+                'image' => 'uas_polar_bear.jpg'
+            ),
+            array (
                 'title' => 'Nests',
                 'description' => 'Nest location data is an important metric for researchers as it allows easy calculations of nest density and helps us understand how birds are using different habitat types. Though it may seem straightforward at first, identifying a nest can be difficult for a number of reasons. Here are a few questions you should ask yourself when trying to identify a nest.',
                 'image' => '',

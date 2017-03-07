@@ -130,6 +130,8 @@ $(document).ready(function() {
         url: "http://csgrid.org/csg/wildlife_mmattingly/canvas_select.php",
         async: false,
         dataType: 'json',
+        data: 'p=' + project_id,
+        type: 'POST',
         success: function(data) {
             species = data;
             var keys = Object.keys(species);

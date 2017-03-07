@@ -399,12 +399,13 @@
     <script src='./js/hammer.min.js'></script>
     <script src='./js/canvas_selector.js'></script>
     <script>
-        var imgsrc = 'http://$sharehost/$image';
+    var imgsrc = 'http://$sharehost/$image';
     var species_id = $species_id;
     var nest_confidence = $nest_confidence;
     var reload_location = '$reload_location';
     var can_reload = $can_reload;
+    var project_id = $project_id;
 </script>
-<script src='./js/review_image.js?v=2017020801'></script>";
+<script src='./js/review_image.js?v=2017030502'></script>";
 
 ?>
