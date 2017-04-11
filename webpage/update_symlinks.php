@@ -4,86 +4,62 @@ if (count($argv) != 2) {
     die("Error, invalid arguments. usage: php $argv[0] <target_directory>\n");
 }
 
-$target = $argv[1];
-$cwd = dirname(__FILE__);
+function create_link(string $cwd, string $target, string $filename)
+{
+    $command = "ln -s $cwd/$filename $target/$filename";
+    echo "\t$command\n";
+    shell_exec("rm $target/$filename");
+    shell_exec($command);
+}
+
+$target = rtrim($argv[1], '/');
+$cwd = rtrim(dirname(__FILE__), '/');
 
 echo "cwd:    $cwd\n";
 echo "target: $target\n";
 
-foreach (glob("*.php") as $filename) {
-    if ($filename == "boinc_db.php" || $filename == "wildlife_db.php") {
-        echo "Not copying '$filename' because it contains the database passwords and is not needed.\n";
-        continue;
+// all the filename globs to symlink
+// the key is the glob and the value is a blacklist for unwanted files
+$globs = array(
+    '*.php' => array(
+        "boinc_db.php",
+        "wildlife_db.php"
+    ),
+    '*.js' => array(),
+    '*.css' => array(),
+    '*.docx' => array(),
+);
+
+// all of the directories to symlink
+$dirs = array(
+    'clips_grouse',
+    'data_interface',
+    'expert_interface',
+    'images',
+    'js',
+    'publications',
+    'review_interface',
+    'watch_interface',
+    'wildlife_badges',
+    'wildlife_css'
+);
+
+echo "\nLinking globs...\n";
+foreach ($globs as $glob => $blacklist) {
+    echo "glob: '$glob'\n";
+    foreach (glob($glob) as $filename) {
+        if (in_array($filename, $blacklist, true)) {
+            echo "\tNot copying '$filename' beacuse it is in the blacklist.\n";
+            continue;
+        }
+
+        create_link($cwd, $target, $filename);
     }
-
-    $command = "ln -s $cwd/$filename $target/$filename";
-    echo "$command\n";
-    shell_exec("rm $target/$filename");
-    shell_exec($command);
 }
 
-foreach (glob("*.js") as $filename) {
-    //echo $filename . "\n";
-    $command = "ln -s $cwd/$filename $target/$filename";
-    echo "$command\n";
-    shell_exec("rm $target/$filename");
-    shell_exec($command);
+echo "\nLinking directories...\n";
+foreach ($dirs as $dir) {
+    create_link($cwd, $target, $dir);
 }
-
-foreach (glob("*.css") as $filename) {
-    //echo $filename . "\n";
-    $command = "ln -s $cwd/$filename $target/$filename";
-    echo "$command\n";
-    shell_exec("rm $target/$filename");
-    shell_exec($command);
-}
-
-foreach (glob("*.docx") as $filename) {
-    //echo $filename . "\n";
-    $command = "ln -s $cwd/$filename $target/$filename";
-    echo "$command\n";
-    shell_exec("rm $target/$filename");
-    shell_exec($command);
-}
-
-$command = "ln -s $cwd/wildlife_css $target/wildlife_css";
-echo "$command\n";
-shell_exec("rm $target/wildlife_css");
-shell_exec($command);
-
-$command = "ln -s $cwd/expert_interface $target/expert_interface";
-echo "$command\n";
-shell_exec("rm $target/expert_interface");
-shell_exec($command);
-
-$command = "ln -s $cwd/watch_interface $target/watch_interface";
-echo "$command\n";
-shell_exec("rm $target/watch_interface");
-shell_exec($command);
-
-$command = "ln -s $cwd/publications $target/publications";
-echo "$command\n";
-shell_exec("rm $target/publications");
-shell_exec($command);
-
-$command = "ln -s $cwd/images $target/images";
-shell_exec("rm $target/images");
-shell_exec($command);
-
-$command = "ln -s $cwd/wildlife_badges $target/wildlife_badges";
-shell_exec("rm $target/wildlife_badges");
-shell_exec($command);
-
-$command = "ln -s $cwd/review_interface $target/review_interface";
-shell_exec("rm $target/review_interface");
-shell_exec($command);
-
-$command = "ln -s $cwd/js $target/js";
-shell_exec("rm $target/js");
-shell_exec($command);
-
-$command = "ln -s $cwd/clips_grouse $target/clips_grouse";
-shell_exec("rm $target/clips_grouse");
-shell_exec($command);
 
 ?>
