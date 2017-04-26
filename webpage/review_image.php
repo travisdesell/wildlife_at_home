@@ -24,14 +24,20 @@
     $mosaic_projects = array(4, 5);
     $can_reload = 1;
     $year = 0;
+    $spoof = false;
+
     if (isset($_GET['p'])) {
-        $project_id = $boinc_db->real_escape_string($_GET['p']);
+        $project_id = intval($boinc_db->real_escape_string($_GET['p']));
     }
     if (isset($_GET['s'])) {
-        $species_id = $boinc_db->real_escape_string($_GET['s']);
+        $species_id = intval($boinc_db->real_escape_string($_GET['s']));
     }
     if (isset($_GET['y']) && csg_is_special_user($user)) {
-        $year = $boinc_db->real_escape_string($_GET['y']);
+        $year = intval($boinc_db->real_escape_string($_GET['y']));
+    }
+    if (isset($_GET['u']) && csg_is_special_user($user)) {
+        $user_id = intval($boinc_db->real_escape_string($_GET['u']));
+        $spoof = true;
     }
 
     $result = NULL;
@@ -41,12 +47,27 @@
     $mosaic_empty = 0;
     $mosaic_skipped = 0;
     $mosaic_toskip = 0;
+    $spoof_note = "";
 
+    // is_expert?
     $is_expert = query_wildlife_video_db("SELECT COUNT(*) FROM image_observation_experts WHERE user_id=$user_id");
-    $is_expert = $is_expert->num_rows > 0 ? 1 : 0;
+    if ($is_expert && $is_expert->num_rows > 0) {
+        $row = $is_expert->fetch_row();
+        $is_expert = $row[0] == 1;
+    } else {
+        die('Unable to connect to database');
+    }
+
+    if ($spoof) {
+        $spoof_note .= "User: $user_id<br>";
+    }
 
     // project 4 is super special mosaic project
     if (in_array($project_id, $mosaic_projects)) {
+        if ($spoof) {
+            $spoof_note .= "Mosaic project: $project_id<br>";
+        }
+            
         $species_id = 2;
         $nest_confidence = 1;
 
@@ -61,9 +82,16 @@
                 $view = "view_mosaic_citizen_queue";
             }
 
+            if ($spoof) {
+                $spoof_note .= "Finding a new mosaic on $view<br>";
+            }
+
             $result = query_wildlife_video_db("SELECT queue.mosaic_image_id AS mosaic_image_id FROM $view AS queue WHERE queue.project_id = $project_id AND (SELECT COUNT(*) FROM mosaic_user_status WHERE mosaic_image_id = queue.mosaic_image_id AND user_id = $user_id) = 0 LIMIT 1");
 
             if ($result->num_rows == 0) {
+                if ($spoof) {
+                    $spoof_note .= "No mosaic found in $view<br>";
+                }
                 $result = NULL;
             }
         }
@@ -78,6 +106,9 @@
             if ($temp_result->num_rows > 0) {
                 $temp_row = $temp_result->fetch_assoc();
                 $mosaic_number = $temp_row['number'];
+                if ($spoof) {
+                    $spoof_note .= "Found submission $mosaic_id -> #$mosaic_number<br>";
+                }
             }
 
             // get the next image for this mosaic that isn't empty
@@ -90,6 +121,10 @@
                 $can_reload = 0;
                 $result = NULL;
             } else {
+                if ($mosaic_number < 0) {
+                    $mosaic_number = 0;
+                }
+
                 $temp_row = $temp_result->fetch_assoc();
                 $mosaic_new_number = $temp_row['number'];
                 $mosaic_skipped = $mosaic_new_number - $mosaic_number - 1;
@@ -107,7 +142,7 @@
                 $mosaic_empty = $temp_row['empty_count'];
 
                 // update the result 
-                $result = query_wildlife_video_db("SELECT i.id, archive_filename, watermarked_filename, watermarked, species, year FROM mosaic_split_images AS s JOIN images AS i ON s.image_id = i.id WHERE s.mosaic_image_id = $mosaic_id AND s.number = $mosaic_number");
+                $result = query_wildlife_video_db("SELECT i.id, archive_filename, watermarked_filename, watermarked, species, year FROM mosaic_split_images AS s INNER JOIN images AS i ON s.image_id = i.id WHERE s.mosaic_image_id = $mosaic_id AND s.number = $mosaic_number");
             }
         } else {
             $result = NULL;
@@ -148,8 +183,15 @@
         <div class='container-fluid'>
         <div class='row'>
             <div class='col-sm-12'>
-                <div class='alert alert-error' role='alert' id='ajaxalert'>
+                <div class='alert alert-danger' role='alert' id='ajaxalert'>
                     <strong>Error!</strong> Unable to find an available image for project_id=$project_id $species.
+        ";
+
+        if ($spoof) {
+            echo "<br>$spoof_note";
+        }
+
+        echo "
                 </div>
             </div>
         </div>
@@ -181,6 +223,10 @@
     } else {
         $alert_class = 'alert-info';
         $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible (75% or more of the creature should fit in the smalled box; any less and the creature should be ignored). Boxes can shrink (a little) and grow.";
+    }
+
+    if ($spoof) {
+        $alert_mesage .= "<br>$spoof_note";
     }
 
     echo "
@@ -383,6 +429,7 @@
             </div>
         </div>";
 
+    if (!$spoof) {
     echo "
     <form class='hidden' action='' method='POST' id='submitForm'>
     <input type='hidden' id='submitStart' name='submitStart' value='".time()."'/>
@@ -393,6 +440,7 @@
     <form id='forumPost' class='hidden' action='//csgrid.org/csg/forum_post.php?id=8' method='post' target='_blank'>
         <input type='hidden' id='forumContent' name='content' value=''>
         </form>";
+    }
 
 
     echo "<script src='./js/jquery.mousewheel.min.js'></script>
