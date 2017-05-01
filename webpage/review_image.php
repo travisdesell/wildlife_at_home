@@ -226,7 +226,7 @@
     }
 
     if ($spoof) {
-        $alert_mesage .= "<br>$spoof_note";
+        $alert_message .= "<br>$spoof_note";
     }
 
     echo "
