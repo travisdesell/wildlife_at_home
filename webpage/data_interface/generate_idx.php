@@ -31,9 +31,8 @@ $bg_ratio   = isset($opt['bg_ratio']) ? (int)$opt['bg_ratio'] : 80;
 $size       = isset($opt['size']) ? (int)$opt['size'] : 18;
 $id         = isset($opt['id']) ? (int)$opt['id'] : 0;
 
-// TODO: implement matching
 if ($matched) {
-    die('Matched not currently implemented.');
+    //die('Matched not currently implemented.');
 }
 
 if (!($expert || $citizen)) {
@@ -69,6 +68,7 @@ if ($id > 0) {
 // see if we already have the file and touch it and return
 if (file_exists("/tmp/$filename.idx") && file_exists("/tmp/${filename}_species.idx")) {
     echo "File exists: $filename";
+
     try {
         touch("/tmp/$filename.idx");
         touch("/tmp/${filename}_species.idx");
@@ -92,13 +92,7 @@ if ($expert && !$unmatched) {
     $where[] = "is_expert = 0";
 }
 
-if ($start_date) {
-    $where[] = "submit_time >= $start_date";
-}
-
-if ($end_date) {
-    $where[] = "submit_time <= $end_date";
-}
+$where[] = "submit_time BETWEEN $start_date AND $end_date";
 
 // build the query
 $query = "SELECT * FROM view_mosaic_observations ";
@@ -112,11 +106,6 @@ if (count($where)) {
 }
 
 $query .= "ORDER BY image_id ASC";
-
-$result = query_wildlife_video_db($query);
-if (!$result || $result->num_rows <= 0) {
-    die("No results returned.");
-}
 
 require_once($cwd[__FILE__] . "/../../../citizen_science_grid/tools/idx.php");
 
@@ -132,12 +121,9 @@ $data = array();
 $bg_multiplier = ((float)$bg_ratio) / ((float)(100 - $bg_ratio));
 $halfsize = $size / 2.0;
 
-// add the result in
-foreach ($result as $row) {
-    $image_id = $row['image_id'];
+function add_image(array &$data, $image_id, $image_filename, $image_width, $image_height)
+{
     if (!isset($data[$image_id])) {
-        $image_filename = $row['image_filename'];
-
         // query for a shifted image
         $temp_result = query_wildlife_video_db("SELECT archive_filename FROM uas_blueshift_images WHERE image_id=$image_id");
         if ($temp_result && $temp_result->num_rows > 0) {
@@ -146,22 +132,109 @@ foreach ($result as $row) {
         }
 
         $data[$image_id] = array(
-            'image_width' => $row['image_width'],
-            'image_height' => $row['image_height'],
+            'image_width' => $image_width,
+            'image_height' => $image_height,
             'filename' => $image_filename,
             'boxes' => array()
         );
     }
+}
 
-    // normalize the x / y / w / h
-    $x = $row['x'] + intval($row['width'] / 2.0 - $halfsize);
-    $y = $row['y'] + intval($row['height'] / 2.0 - $halfsize);
+// add the result in
+if ($expert || $unmatched) {
+    // expert or unmatched
+    echo "Expert or umatched: $query\n";
+    $result = query_wildlife_video_db($query);
+    if (!$result) {
+        die("No results returned.");
+    }
 
-    $data[$image_id]['boxes'][] = array(
-        'x' => $x,
-        'y' => $y,
-        'species' => $row['species_id']
-    );
+    echo $result->num_rows . "\n";
+    while ($row = $result->fetch_assoc()) {
+        $image_id = $row['image_id'];
+
+        add_image($data, $image_id, $row['image_filename'], $row['image_width'], $row['image_height']);
+
+        // normalize the x / y / w / h
+        $x = $row['x'] + intval($row['width'] / 2.0 - $halfsize);
+        $y = $row['y'] + intval($row['height'] / 2.0 - $halfsize);
+
+        // make sure x and y are within range
+        if ($x < 0) $x = 0;
+        if (($x + $size) >= $row['image_width']) $x = $row['image_width'] - $size - 1;
+        if ($y < 0) $y = 0;
+        if (($y + $size) >= $row['image_height']) $y = $row['image_height'] - $size - 1;
+
+        $data[$image_id]['boxes'][] = array(
+            'x' => $x,
+            'y' => $y,
+            'species' => $row['species_id']
+        );
+    }
+}
+
+// do the results for matching
+$start_date = date("Y-m-d H:i:s", $start_date);
+$end_date = date("Y-m-d H:i:s", $end_date);
+if ($matched) {
+    echo "Matched data between $start_date and $end_date\n";
+
+    $query = "SELECT * FROM view_matched_observations_2 WHERE submit_time_1 BETWEEN '$start_date' AND '$end_date' AND submit_time_2 BETWEEN '$start_date' AND '$end_date' AND species_id IN (" . join(",", $species_allowable) . ")";
+
+    echo "$query\n";
+
+    $result = query_wildlife_video_db($query);
+    if (!$result) {
+        die("DB error");
+    }
+
+    echo $result->num_rows . "\n";
+    while ($row = $result->fetch_assoc()) {
+        $same = $row['same_image'];
+
+        add_image($data, $row['image_id_1'], $row['image_filename_1'], $row['image_width_1'], $row['image_height_1']);
+
+        if (!$same) {
+            add_image($data, $row['image_id_2'], $row['image_filename_2'], $row['image_width_2'], $row['image_height_2']);
+        }
+
+
+        // normalize the x / y / w / h
+        $width = intval($row['width']);
+        $height = intval($row['height']);
+
+        $x = $row['x1'] + ($width / 2.0 - $halfsize);
+        $y = $row['y1'] + ($height / 2.0 - $halfsize);
+
+        // make sure x and y are within range
+        if ($x < 0) $x = 0;
+        if (($x + $size) >= $row['image_width_1']) $x = $row['image_width_1'] - $size - 1;
+        if ($y < 0) $y = 0;
+        if (($y + $size) >= $row['image_height_1']) $y = $row['image_height_1'] - $size - 1;
+
+        $data[$row['image_id_1']]['boxes'][] = array(
+            'x' => $x,
+            'y' => $y,
+            'species' => $row['species_id']
+        );
+
+        if (!$same) {
+            $x = $row['x2'] + ($width / 2.0 - $halfsize);
+            $y = $row['y2'] + ($height / 2.0 - $halfsize);
+
+            // make sure x and y are within range
+            if ($x < 0) $x = 0;
+            if (($x + $size) >= $row['image_width_2']) $x = $row['image_width_2'] - $size - 1;
+            if ($y < 0) $y = 0;
+            if (($y + $size) >= $row['image_height_2']) $y = $row['image_height_2'] - $size - 1;
+
+            $data[$row['image_id_2']]['boxes'][] = array(
+                'x' => $x,
+                'y' => $y,
+                'species' => $row['species_id']
+            );
+        }
+    }
 }
 
 function has_overlap(int $x, int $y, int $size, array &$boxes) {
@@ -179,6 +252,8 @@ function has_overlap(int $x, int $y, int $size, array &$boxes) {
 
     return false;
 }
+
+echo "Generating IDX\n";
 
 // generate the background data
 foreach ($data as &$mosaic) {

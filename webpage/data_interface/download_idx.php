@@ -51,7 +51,7 @@ $unmatched = $citizen && $params['citizen'] == 0;
 $matched = $citizen && !$unmatched;
 
 if ($matched) {
-    exit(error('Matched citizens not yet supported.'));
+    //exit(error('Matched citizens not yet supported.'));
 }
 
 $start_date = is_null($params['start_date']) ? 0 : $params['start_date'];
