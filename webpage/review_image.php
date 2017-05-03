@@ -72,7 +72,7 @@
         $nest_confidence = 1;
 
         // see if the user has a non-completed mosaic for this project
-        $result = query_wildlife_video_db("SELECT mus.mosaic_image_id AS mosaic_image_id FROM mosaic_user_status AS mus INNER JOIN mosaic_images AS mi ON mi.id = mus.mosaic_image_id WHERE mus.user_id=$user_id AND mus.completed=0 AND mi.project_id=$project_id AND (SELECT COUNT(*) FROM mosaic_user_skip WHERE user_id = mus.user_id AND mosaic_image_id = mus.mosaic_image_id) = 0 ORDER BY mosaic_image_id DESC LIMIT 1");
+        $result = query_wildlife_video_db("SELECT mus.mosaic_image_id AS mosaic_image_id FROM mosaic_user_status AS mus INNER JOIN mosaic_images AS mi ON mi.id = mus.mosaic_image_id WHERE mus.user_id=$user_id AND mus.completed=0 AND mi.project_id=$project_id ORDER BY mosaic_image_id DESC LIMIT 1");
 
         if ($result->num_rows == 0) {
             // determine the first mosaic from the queue which the user has not submitted all
@@ -86,7 +86,7 @@
                 $spoof_note .= "Finding a new mosaic on $view<br>";
             }
 
-            $result = query_wildlife_video_db("SELECT queue.mosaic_image_id AS mosaic_image_id FROM $view AS queue WHERE queue.project_id = $project_id AND (SELECT COUNT(*) FROM mosaic_user_status WHERE mosaic_image_id = queue.mosaic_image_id AND user_id = $user_id) = 0 LIMIT 1");
+            $result = query_wildlife_video_db("SELECT queue.mosaic_image_id AS mosaic_image_id FROM $view AS queue WHERE queue.project_id = $project_id AND queue.mosaic_image_id NOT IN (SELECT mosaic_image_id FROM mosaic_user_status WHERE user_id = $user_id) LIMIT 1");
 
             if ($result->num_rows == 0) {
                 if ($spoof) {
