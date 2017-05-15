@@ -127,7 +127,7 @@ img.onload = function() {
 
 $(document).ready(function() {
     $.ajax({
-        url: "http://csgrid.org/csg/wildlife_mmattingly/canvas_select.php",
+        url: "https://csgrid.org/csg/wildlife/canvas_select.php",
         async: false,
         dataType: 'json',
         data: 'p=' + project_id,

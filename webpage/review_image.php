@@ -454,6 +454,6 @@
     var can_reload = $can_reload;
     var project_id = $project_id;
 </script>
-<script src='./js/review_image.js?v=2017030502'></script>";
+<script src='./js/review_image.js?v=2017051503'></script>";
 
 ?>

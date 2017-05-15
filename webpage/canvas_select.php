@@ -38,7 +38,7 @@ if ($project_id == 2) {
 }*/
 
 $res = query_wildlife_video_db("SELECT sl.species, spl.species_id FROM species_project_lookup AS spl INNER JOIN species_lookup AS sl ON sl.species_id = spl.species_id WHERE project_id=$project_id");
-while ($res && ($row = $res->fetch_assoc()) != null) {
+while (($row = $res->fetch_assoc()) !== null) {
     $result[$row['species']] = $row['species_id'];
 }
 
