@@ -16,7 +16,8 @@ $longops = array(
     'end_date:',
     'bg_ratio:',
     'size:',
-    'id:'
+    'id:',
+    'test:'
 );
 
 $opt = getopt("", $longops);
@@ -30,6 +31,7 @@ $end_date   = isset($opt['end_date']) ? (int)$opt['end_date'] : time();
 $bg_ratio   = isset($opt['bg_ratio']) ? (int)$opt['bg_ratio'] : 80;
 $size       = isset($opt['size']) ? (int)$opt['size'] : 18;
 $id         = isset($opt['id']) ? (int)$opt['id'] : 0;
+$testidx    = isset($opt['test']) ? $opt['test'] : '';
 
 if ($matched) {
     //die('Matched not currently implemented.');
@@ -47,6 +49,11 @@ if ($bg_ratio < 0 || $bg_ratio >= 100) {
 // check the size
 if ($size < 10 || $size > 100) {
     die('Sane size required. (10 - 100).');
+}
+
+$skip = array();
+if ($testidx) {
+    $skip = json_decode(file_get_contents($testidx), true);
 }
 
 // configure the filename
@@ -153,6 +160,12 @@ if ($expert || $unmatched) {
     while ($row = $result->fetch_assoc()) {
         $image_id = $row['image_id'];
 
+        // skip any in the list
+        if (isset($skip[$image_id])) {
+            echo "Skipping $image_id\n";
+            continue;
+        }
+
         add_image($data, $image_id, $row['image_filename'], $row['image_width'], $row['image_height']);
 
         // normalize the x / y / w / h
@@ -191,6 +204,12 @@ if ($matched) {
     echo $result->num_rows . "\n";
     while ($row = $result->fetch_assoc()) {
         $same = $row['same_image'];
+
+        // skip
+        if (isset($skip[$row['image_id_1']]) || isset($skip[$row['image_id_2']])) {
+            echo "Skipping image " . $row['image_id_1'] . " or " . $row['image_id_2'] . "\n";
+            continue;
+        }
 
         add_image($data, $row['image_id_1'], $row['image_filename_1'], $row['image_width_1'], $row['image_height_1']);
 
