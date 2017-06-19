@@ -14,6 +14,7 @@ $longops = array(
     'unmatched',
     'start_date:',
     'end_date:',
+    'outdir:'
 );
 
 $opt = getopt("", $longops);
@@ -24,6 +25,7 @@ $unmatched  = isset($opt['unmatched']) && !$matched;
 $citizen    = $matched || $unmatched;
 $start_date = isset($opt['start_date']) ? (int)$opt['start_date'] : 0;
 $end_date   = isset($opt['end_date']) ? (int)$opt['end_date'] : time();
+$outdir     = isset($opt['outdir']) ? $opt['outdir'] : '/tmp';
 
 if ($matched) {
     //die('Matched not currently implemented.');
@@ -46,11 +48,11 @@ if ($start_date)
 $filename .= '_end' . date('Ymd', $end_date) . '.csv';
 
 // see if we already have the file and touch it and return
-if (file_exists("/tmp/$filename")) {
+if (file_exists("$outdir/$filename")) {
     echo "File exists: $filename";
 
     try {
-        touch("/tmp/$filename");
+        touch("$outdir/$filename");
     } catch (Exception $e) {
         // eat it
     }
@@ -60,7 +62,7 @@ if (file_exists("/tmp/$filename")) {
 
 // open the file for writing
 try {
-    $fp = fopen("/tmp/$filename", "w");
+    $fp = fopen("$outdir/$filename", "w");
 } catch (Exception $e) {
     echo "Failed to open file: $filename";
     exit(1);

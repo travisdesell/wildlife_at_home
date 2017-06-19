@@ -17,7 +17,8 @@ $longops = array(
     'bg_ratio:',
     'size:',
     'id:',
-    'test:'
+    'test:',
+    'outdir:'
 );
 
 $opt = getopt("", $longops);
@@ -32,6 +33,7 @@ $bg_ratio   = isset($opt['bg_ratio']) ? (int)$opt['bg_ratio'] : 80;
 $size       = isset($opt['size']) ? (int)$opt['size'] : 18;
 $id         = isset($opt['id']) ? (int)$opt['id'] : 0;
 $testidx    = isset($opt['test']) ? $opt['test'] : '';
+$outdir     = isset($opt['outdir']) ? $opt['outdir'] : '/tmp';
 
 if ($matched) {
     //die('Matched not currently implemented.');
@@ -73,12 +75,12 @@ if ($id > 0) {
 }
 
 // see if we already have the file and touch it and return
-if (file_exists("/tmp/$filename.idx") && file_exists("/tmp/${filename}_species.idx")) {
+if (file_exists("$outdir/$filename.idx") && file_exists("$outdir/${filename}_species.idx")) {
     echo "File exists: $filename";
 
     try {
-        touch("/tmp/$filename.idx");
-        touch("/tmp/${filename}_species.idx");
+        touch("$outdir/$filename.idx");
+        touch("$outdir/${filename}_species.idx");
     } catch (Exception $e) {
         // eat it
     }
@@ -278,6 +280,9 @@ echo "Generating IDX\n";
 foreach ($data as &$mosaic) {
     $bg_locations = array(); 
     $bg_count = ceil($bg_multiplier * count($mosaic['boxes']));
+    if ($bg_ratio == 0) {
+        $bg_count = 0;
+    }
 
     // go until we get the background amount we need
     $width = $mosaic['image_width'];
@@ -341,8 +346,8 @@ foreach ($data as &$mosaic) {
 }
 
 // save the idx files
-$idx->saveToFile("/tmp/$filename.idx");
-$species_idx->saveToFile("/tmp/${filename}_species.idx");
+$idx->saveToFile("$outdir/$filename.idx");
+$species_idx->saveToFile("$outdir/${filename}_species.idx");
 
 exit(0);
 

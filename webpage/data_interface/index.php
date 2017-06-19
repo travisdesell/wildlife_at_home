@@ -16,6 +16,55 @@ $user_id = $user['id'];
 print_header("Wildlife@Home: Data Downloader",  "<link href='../wildlife_css/bootstrap-datetimepicker.min.css' rel='stylesheet'>", "wildlife");
 print_navbar("Projects: Wildlife@Home", "Wildlife@Home", "..");
 
+require_once($cwd[__FILE__] . "/form.php");
+
+// citizen dropdown used throughout
+$citizen_dropdown = new FormInputDropdown("citizen", "Citizen");
+$citizen_dropdown->append("-1", "None", true);
+$citizen_dropdown->append("0", "Unmatched");
+$citizen_dropdown->append("1", "Matched");
+
+// object size used throughout
+$object_size = new FormInputNumber(
+    "size", "Object Size",
+    10, 100, 18, "px"
+);
+
+$forms = array(
+    'idx' => new Form(
+        "idx", "download_idx.php",
+        "IDX Data",
+        "Downloads the IDX files with all the objects from the given the specified parameters."
+    ),
+    'bg' => new Form(
+        "bg", "download_bg.php",
+        "Background Data",
+        "Downloads an IDX file with background data from the given specified parameters."
+    )
+);
+
+/// IDX
+$forms['idx']->append(new FormInputNumber(
+    "bg_ratio", "BG Ratio",
+    0, 99, 80, "%"
+));
+
+$forms['idx']->append($object_size);
+
+$forms['idx']->append($citizen_dropdown);
+
+$forms['idx']->append(new FormInputCheckbox(
+    "expert", "Expert", true
+));
+
+/// Background
+$forms['bg']->append(new FormInputNumber(
+    "bg_ratio", "BG Ratio",
+    10, 99, 50, "%"
+));
+
+$forms['bg']->append($object_size);
+
 echo "
 <div class='container'>
 
@@ -24,99 +73,25 @@ echo "
     <p>This interface has configurable downloaders for all sorts of data for the Wildlife@Home project.</p>
     <p>None of the data has personally identifiable information.</p>
 </div>
+";
 
-<div class='row'>
-    <div class='col-md-4'>
-        <h3>IDX Training Data</h3>
-        <p>Downloads the IDX files for training given the specified parameters.</p>
-    </div>
+foreach ($forms as &$form) {
+    echo $form->html();
+}
 
-    <div class='col-md-8'>
-        <p class='hidden' id='idx_form_processing'>Processing... This may take a while.</p>
-
-        <form class='form-horizontal' id='idx_form'>
-            <div class='form-group'>
-                <label for='idx_picker_start' class='col-sm-2 control-label'>Start Date</label>
-                <div class='col-sm-10 input-group date' id='idx_picker_start'>
-                    <input type='text' class='form-control' name='start_date'>
-                    <span class='input-group-addon'>
-                        <span class='glyphicon glyphicon-calendar'></span>
-                    </span>
-                </div>
-            </div>
-
-            <div class='form-group'>
-                <label for='idx_picker_end' class='col-sm-2 control-label'>End Date</label>
-                <div class='col-sm-10 input-group date' id='idx_picker_end'>
-                    <input type='text' class='form-control' name='end_date'>
-                    <span class='input-group-addon'>
-                        <span class='glyphicon glyphicon-calendar'></span>
-                    </span>
-                </div>
-            </div>
-
-            <div class='form-group'>
-                <label for='idx_bg_ratio' class='col-sm-2 control-label'>BG Ratio</label>
-                <div class='col-sm-10 input-group'>
-                    <input type='number' class='form-control' name='bg_ratio' min='0' max='100' value='80'>
-                    <span class='input-group-addon'>%</span>
-                </div>
-            </div>
-
-            <div class='form-group'>
-                <label for='idx_size' class='col-sm-2 control-label'>Object Size</label>
-                <div class='col-sm-10 input-group'>
-                    <input type='number' class='form-control' name='size' min='10' max='100' value='18'>
-                    <span class='input-group-addon'>px<sup>2</sup></span>
-                </div>
-            </div>
-
-            <div class='form-group'>
-                <label for='idx_citizen' class='col-sm-2 control-label'>Citizen</label>
-                <div class='col-sm-10 input-group'>
-                    <select class='form-control' name='citizen' id='idx_citizen'>
-                        <option value='-1'>None</option>
-                        <option value='0'>Unmatched</option>
-                        <option value='1'>Matched</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class='form-group'>
-                <label for='idx_expert' class='col-sm-2 control-label'>Expert</label>
-                <div class='col-sm-10 input-group'>
-                    <input type='checkbox' id='idx_expert' name='expert' checked>
-                </div>
-            </div>
-
-            <div class='form-group'>
-                <div class='col-sm-offset-2 col-sm-10'>
-                    <button type='submit' class='btn btn-primary btn-lg' id='id_form_submit'>Generate</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
+echo "
 <script src='../js/moment.min.js'></script>
 <script src='../js/bootstrap-datetimepicker.min.js'></script>
 
 <script type='text/javascript'>
 $(function() {
-    $('#idx_picker_start').datetimepicker({
-        format: 'MM/DD/YYYY'
-    });
-    $('#idx_picker_end').datetimepicker({
-        useCurrent: false,
-        format: 'MM/DD/YYYY'
-    });
+";
 
-    $('#idx_picker_start').on('dp.change', function(e) {
-        $('#idx_picker_end').data('DateTimePicker').minDate(e.date);
-    });
-    $('#idx_picker_end').on('dp.change', function(e) {
-        $('#idx_picker_start').data('DateTimePicker').maxDate(e.date);
-    });
+foreach ($forms as &$form) {
+    echo $form->js_onload();
+}
+
+echo "
 });
 
 function hide_form(objForm, objProcess) {
@@ -157,33 +132,13 @@ function check_status(data, objForm, objProcess) {
             error_message('Error 500', objForm, objProcess);
         });
 }
+";
 
-$('#idx_form').submit(function() {
-    var form = $('#idx_form');
-    var form_processing = $('#idx_form_processing');
+foreach ($forms as &$form) {
+    echo $form->js();
+}
 
-    hide_form(form, form_processing);
-
-    $.post('download_idx.php', form.serialize())
-        .done(function(data) {
-            data = $.parseJSON(data);
-
-            if (data.status == 'error') {
-                error_message(data.error, form, form_processing);
-                return;
-            }
-
-            console.log(data);
-
-            check_status(data, form, form_processing);
-        })
-        .fail(function() {
-            error_message('Error 500', form, form_processing);
-        });
-
-    event.preventDefault();
-});
-
+echo"
 </script>
 ";
 
