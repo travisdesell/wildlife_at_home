@@ -21,7 +21,7 @@
     $species_id = 0;
     $nest_confidence = 0;
     $reload_location = "null";
-    $mosaic_projects = array(4, 5);
+    $mosaic_projects = array(4, 5, 6);
     $can_reload = 1;
     $year = 0;
     $spoof = false;
@@ -88,10 +88,12 @@
 
             $result = query_wildlife_video_db("SELECT queue.mosaic_image_id AS mosaic_image_id FROM $view AS queue WHERE queue.project_id = $project_id AND queue.mosaic_image_id NOT IN (SELECT mosaic_image_id FROM mosaic_user_status WHERE user_id = $user_id) LIMIT 1");
 
+            // nothing in the queue?
             if ($result->num_rows == 0) {
                 if ($spoof) {
                     $spoof_note .= "No mosaic found in $view<br>";
                 }
+
                 $result = NULL;
             }
         }
@@ -143,6 +145,10 @@
 
                 // update the result 
                 $result = query_wildlife_video_db("SELECT i.id, archive_filename, watermarked_filename, watermarked, species, year FROM mosaic_split_images AS s INNER JOIN images AS i ON s.image_id = i.id WHERE s.mosaic_image_id = $mosaic_id AND s.number = $mosaic_number");
+
+                if ($spoof) {
+                    $spoof_note .= "Number = $mosaic_number, Count = $mosaic_count, ToSkip = $mosaic_toskip, Skipped = $mosaic_skipped, Empty = $mosaic_empty<br>";
+                }
             }
         } else {
             $result = NULL;
