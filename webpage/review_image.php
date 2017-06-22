@@ -58,6 +58,12 @@
         die('Unable to connect to database');
     }
 
+    if ($is_expert) {
+        $view = "view_mosaic_expert_queue";
+    } else {
+        $view = "view_mosaic_citizen_queue";
+    }
+
     if ($spoof) {
         $spoof_note .= "User: $user_id<br>";
     }
@@ -76,12 +82,6 @@
 
         if ($result->num_rows == 0) {
             // determine the first mosaic from the queue which the user has not submitted all
-            if ($is_expert) {
-                $view = "view_mosaic_expert_queue";
-            } else {
-                $view = "view_mosaic_citizen_queue";
-            }
-
             if ($spoof) {
                 $spoof_note .= "Finding a new mosaic on $view<br>";
             }
@@ -92,14 +92,6 @@
             if ($result->num_rows == 0) {
                 if ($spoof) {
                     $spoof_note .= "No mosaic found in $view<br>";
-
-                    $result = query_wildlife_video_db("SELECT COUNT(*) FROM $view WHERE project_id = $project_id");
-                    $num_mosaics = ($result->fetch_assoc())["COUNT(*)"];
-
-                    $result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_user_status AS mus INNER JOIN mosaic_images AS mi ON mi.id = mus.mosaic_image_id WHERE mus.completed=1 AND mus.user_id=$user_id AND mi.project_id=$project_id");
-                    $num_completed = ($result->fetch_assoc())["COUNT(*)"];
-
-                    $spoof_note .= "<b>$num_completed out of $num_mosaics completed.</b><br>";
                 }
 
                 $result = NULL;
@@ -232,8 +224,15 @@
     $image = ltrim($image, '/');
 
     if (in_array($project_id, $mosaic_projects)) {
+        $result = query_wildlife_video_db("SELECT COUNT(*) FROM $view WHERE project_id = $project_id");
+        $num_mosaics = ($result->fetch_assoc())["COUNT(*)"];
+
+        $result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_user_status AS mus INNER JOIN mosaic_images AS mi ON mi.id = mus.mosaic_image_id WHERE mus.completed=1 AND mus.user_id=$user_id AND mi.project_id=$project_id");
+        $num_completed = ($result->fetch_assoc())["COUNT(*)"];
+
         $alert_class = 'alert-info';
-        $alert_message = "<strong>".($mosaic_count - $mosaic_toskip - $mosaic_number)."</strong> out of <strong>".($mosaic_count - $mosaic_empty)."</strong> remaining for Mosaic #<strong>$mosaic_id</strong>.";
+        $alert_message = "<strong>".($mosaic_count - $mosaic_toskip - $mosaic_number)."</strong> out of <strong>".($mosaic_count - $mosaic_empty)."</strong> remaining for Mosaic #<strong>$mosaic_id</strong>.<br>";
+        $alert_message .= "<i><strong>$num_completed</strong> out of <strong>$num_mosaics</strong> total mosaics completed.</i>";
     } else {
         $alert_class = 'alert-info';
         $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible (75% or more of the creature should fit in the smalled box; any less and the creature should be ignored). Boxes can shrink (a little) and grow.";
