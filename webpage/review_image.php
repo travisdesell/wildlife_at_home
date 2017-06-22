@@ -92,6 +92,14 @@
             if ($result->num_rows == 0) {
                 if ($spoof) {
                     $spoof_note .= "No mosaic found in $view<br>";
+
+                    $result = query_wildlife_video_db("SELECT COUNT(*) FROM $view WHERE project_id = $project_id");
+                    $num_mosaics = ($result->fetch_assoc())["COUNT(*)"];
+
+                    $result = query_wildlife_video_db("SELECT COUNT(*) FROM mosaic_user_status AS mus INNER JOIN mosaic_images AS mi ON mi.id = mus.mosaic_image_id WHERE mus.completed=1 AND mus.user_id=$user_id AND mi.project_id=$project_id");
+                    $num_completed = ($result->fetch_assoc())["COUNT(*)"];
+
+                    $spoof_note .= "<b>$num_completed out of $num_mosaics completed.</b><br>";
                 }
 
                 $result = NULL;
