@@ -129,7 +129,7 @@
 
                 $temp_row = $temp_result->fetch_assoc();
                 $mosaic_new_number = $temp_row['number'];
-                $mosaic_skipped = $mosaic_new_number - $mosaic_number - 1;
+                $mosaic_skipped = $mosaic_new_number - $mosaic_number;
                 $mosaic_number = $mosaic_new_number;
 
                 // how many are left to skip?
