@@ -164,23 +164,19 @@
         } else {
             $species = '';
             if ($species_id > 0)
-                $species = "and iq.species=$species_id";
+                $species = "AND vtq.species=$species_id";
 
-            /*
-            $temp_result = query_wildlife_video_db("select max(id), min(id) from images");
-            $row = $temp_result->fetch_assoc();
-            $max_int = $row['max(id)'];
-            $min_int = $row['min(id)'];
+            // use our trailcam queue to get the next image for the user
+            $query = "SELECT i.id, i.archive_filename, i.watermarked_filename, i.watermarked, i.species, i.year FROM view_trailcam_queue AS vtq INNER JOIN images AS i ON vtq.image_id = i.id WHERE vtq.project_id=$project_id $species AND (SELECT COUNT(*) FROM image_observations WHERE user_id=$user_id AND image_id=vtq.image_id) = 0 ORDER BY vtq.responses DESC LIMIT 1";
 
-            do {
-                $temp_id = mt_rand($min_int, $max_int);
-                $result = query_wildlife_video_db("select images.id, archive_filename, watermarked_filename, watermarked, species, year from images left outer join image_observations on images.id = image_observations.image_id where views < needed_views and project_id=$project_id $species and image_observations.user_id is null and images.id = $temp_id");
-            } while ($result->num_rows < 1);
-             */
-
-            // user our new queue system
-            $query = "select i.id, i.archive_filename, i.watermarked_filename, i.watermarked, i.species, i.year from images_queue as iq inner join images as i on iq.image_id = i.id inner join image_observations as io on i.id = io.image_id where iq.project_id = $project_id $species and io.user_id != $user_id ORDER BY rand() LIMIT 1";
             $result = query_wildlife_video_db($query);
+
+            // fallback if there are no images for the user left in the queue
+            if (!$result || $result->num_rows < 1) {
+                $note .= "<strong>WARNING:</strong> No more images for you in the queue. Falling back to a different algorithm that may take longer to retreive images.<br>";
+                $query = "SELECT * FROM images AS i WHERE project_id=$project_id $species AND (SELECT COUNT(*) FROM image_observations WHERE user_id=$user_id AND image_id=i.id) = 0 LIMIT 1"; 
+                $result = query_wildlife_video_db($query);
+            }
         }
     }
 

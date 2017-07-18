@@ -132,8 +132,12 @@ if ($success) {
                 $species_id = 0;
             }
 
-            // print to standard out to start the processing
-            exec('/usr/bin/php ' . $cwd[__FILE__] . '/reprocess_queue.php ' . $project_id . ' ' . $species_id);
+            // reprocess the queue in the background
+            $command = "php ${cwd[__FILE__]}/reprocess_queue_background.php $project_id $species_id";
+
+            require_once($cwd[__FILE__] . "/data_interface/BackgroundProcess.php");
+            $process = new Cocur\BackgroundProcess\BackgroundProcess($command);
+            $process->run();
         }
 
         // if it's a mosaic, we need to show that it's started it
