@@ -48,6 +48,7 @@
     $mosaic_skipped = 0;
     $mosaic_toskip = 0;
     $spoof_note = "";
+    $note = "";
 
     // is_expert?
     $is_expert = query_wildlife_video_db("SELECT COUNT(*) FROM image_observation_experts WHERE user_id=$user_id");
@@ -173,7 +174,10 @@
 
             // fallback if there are no images for the user left in the queue
             if (!$result || $result->num_rows < 1) {
-                $note .= "<strong>WARNING:</strong> No more images for you in the queue. Falling back to a different algorithm that may take longer to retreive images.<br>";
+                $species = "";
+                if ($species_id > 0)
+                    $species = "AND species=$species_id";
+                $note .= "<strong>WARNING:</strong> No more images for you in the queue. Falling back to a different algorithm that may take longer to retreive images.";
                 $query = "SELECT * FROM images AS i WHERE project_id=$project_id $species AND (SELECT COUNT(*) FROM image_observations WHERE user_id=$user_id AND image_id=i.id) = 0 LIMIT 1"; 
                 $result = query_wildlife_video_db($query);
             }
@@ -186,8 +190,14 @@
         <div class='row'>
             <div class='col-sm-12'>
                 <div class='alert alert-danger' role='alert' id='ajaxalert'>
-                    <strong>Error!</strong> Unable to find an available image for project_id=$project_id $species.
         ";
+
+        if ($note) {
+            echo "<strong>Completed!</strong> Looks like you've completed all the images we currently have available. Please check back next September and/or post on the forum for confirmation.
+                <br>Thanks for all your help!";
+        } else {
+            echo "<strong>Error!</strong> Unable to find an available image for project_id=$project_id $species. Please post this issue on the forum and we'll try to resolve it right away.";
+        }
 
         if ($spoof) {
             echo "<br>$spoof_note";
@@ -234,6 +244,9 @@
         $alert_message = "<strong>Note about boxes!</strong> Try to fit boxes as close to the species as possible (75% or more of the creature should fit in the smalled box; any less and the creature should be ignored). Boxes can shrink (a little) and grow.";
     }
 
+    if ($note) {
+        $alert_message .= "<br>$note";
+    }
     if ($spoof) {
         $alert_message .= "<br>$spoof_note";
     }
