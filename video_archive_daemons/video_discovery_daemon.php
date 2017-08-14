@@ -22,7 +22,7 @@ function multi_explode($pattern, $string, $standardDelimiter = ':') {
  *  TODO: there might be a bug here because some of the video durations seem kind of weird.
  */
 function get_video_duration($filename) {
-    $command = "avconv -y -i {$filename} 2>&1";
+    $command = "avconv -y -i '{$filename}' 2>&1";
     echo "command: '$command'\n";
     ob_start();
     passthru($command);
@@ -89,10 +89,8 @@ function already_inserted($filename) {
     $query = "SELECT count(*) FROM video_2 AS total WHERE archive_filename LIKE '" . $filename . "'"; 
     $results = query_wildlife_video_db($query);
 
-    $row = mysql_fetch_assoc($results);
-
-    if ($row['count(*)'] == 0) return false;
-    else return true;
+    $row = $results->fetch_row();
+    return ($row && $row[0] != 0);
 }
 
 /**
@@ -104,8 +102,14 @@ $dir = "/share/wildlife/archive";
 $count = 0;
 $directory_iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
 
+$video_formats = array(
+    "avi",
+    "asf"
+);
+
 foreach($directory_iterator as $filename => $path_object) {
-    if (substr($filename, -4) == ".avi") {  //only process movie files
+    $extension = pathinfo($filename, PATHINFO_EXTENSION);
+    if (in_array(strtolower($extension), $video_formats)) {  //only process movie files
         /*
          * For each file:
          *  1. check to see if it has already been added to the database, it if 
@@ -192,7 +196,6 @@ foreach($directory_iterator as $filename => $path_object) {
             echo "year is: '$year'\n";
             echo "improperly formatted year! file is: '$file'\n";
             continue;
-            die("improperly formatted year! file is: '$file'\n");
             $year = '0000';
             $month = '00';
             $day = '00';
@@ -204,7 +207,8 @@ foreach($directory_iterator as $filename => $path_object) {
         try {
             $duration_s = get_video_duration($filename);
         } catch (Exception $e) {
-            die("Problems parsing duration.\n");
+            echo "Problems parsing duration. Skipping.\n";
+            continue;
         }
 
         if ($duration_s == 0) {
@@ -214,7 +218,7 @@ foreach($directory_iterator as $filename => $path_object) {
 
 
         $watermarked_filename = "/share/wildlife/watermarked/" . substr($filename, strlen("/share/wildlife/archive/"));
-        $watermarked_filename = str_replace(".avi", "", $watermarked_filename);
+        $watermarked_filename = str_replace(".$extension", "", $watermarked_filename);
 
         $crowd_obs_count = 0;
         $expert_obs_count = 0;
@@ -233,7 +237,8 @@ foreach($directory_iterator as $filename => $path_object) {
         } else if ($species == "MALL") {
             $species_id = 5;
         } else {
-            die("Unknown species encountered: '$species'");
+            echo "Unknown species encountered: '$species'. Skipping.\n";
+            continue;
         }
 
         // TODO: See where these numbers come from
@@ -246,7 +251,8 @@ foreach($directory_iterator as $filename => $path_object) {
         } else if ($project == "Coteau_Ranch") {
             $project_id = 4;
         } else {
-            die("Unknown project encountered: '$project'");
+            echo "Unknown project encountered: '$project'. Skipping.\n";
+            continue;
         }
 
         // DB lookup here?
@@ -263,8 +269,8 @@ foreach($directory_iterator as $filename => $path_object) {
         } else if ($site == "Davis Ranch") {
             $location_id = 9;
         } else {
-            echo "filename: $filename \n";
-            die("Unknown location encountered: '$site' for year '$directory_year'\n");
+            echo "Unknown location encountered: '$site' for year '$directory_year'. Skipping.\n";
+            continue;
         }
 
         $archive_filename = $filename;
