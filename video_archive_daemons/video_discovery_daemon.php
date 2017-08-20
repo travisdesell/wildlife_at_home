@@ -248,7 +248,7 @@ foreach($directory_iterator as $filename => $path_object) {
             $project_id = 2;
         } else if ($project == "missouri_river_project") {
             $project_id = 3;
-        } else if ($project == "Coteau_Ranch") {
+        } else if ($project == "Coteau_Ranch" || $project == "davis_ranch_du") {
             $project_id = 4;
         } else {
             echo "Unknown project encountered: '$project'. Skipping.\n";
