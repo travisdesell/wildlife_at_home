@@ -22,7 +22,7 @@ $all_processed = false;
 
 $iteration = -1;
 $species_location_arr = array(
-    /*array(
+    array(
         'species_id' => 1,
         'location_id' => 1,
         'ducks' => false
@@ -46,7 +46,7 @@ $species_location_arr = array(
         'species_id' => 3,
         'location_id' => 4,
         'ducks' => false
-    ),*/
+    ),
     array(
         'species_id' => 4,
         'location_id' => 7,
