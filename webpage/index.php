@@ -22,6 +22,10 @@ echo "
 
 $carousel_info['items'][] = array(
     'active' => 'true',
+    'image' => './images/uav_takeoff_small.png',
+    'text' => "<h4>A Push for UAV Imagery Analysis</h4><p>We're making a push to analyze recent UAV imagery taken from the Hudson Bay! Help us find birds, bears and caribou in our images collected from an unmanned aircraft (aka. Drone) in Northern Manitoba. The wildlife found in the images will be used to create training datasets for us to automate post-processing of large datasets from aerial imagery.</p><p>You can help us by reviewing images for the <a href='http://csgrid.org/csg/wildlife/review_image.php?p=5'><b>UAS Estimating Snow Geese</b></a> project.</p>");
+
+$carousel_info['items'][] = array(
     'image' => './images/thumbnail_least_tern_resized.png',
     'text' => "<h4>Welcome to Wildlife@Home</h4><p>Wildlife@Home is a joint effort from <a href='http://und.edu'>University of North Dakota</a>'s <a href='http://www.cs.und.edu/'>Department of Computer Science</a> and <a href='http://www.und.edu/dept/biology/biology_main.htm'>Department of Biology</a>, aimed at analyzing video gathered from various cameras recording wildlife.  Currently the project is looking at video of <a href='sharptailed_grouse_info.php'>sharp-tailed grouse</a>, <i>Tympanuchus phasianellus</i> to examine their nesting habits and ecology. The nest cameras have been set up up both near western North Dakota's oil fields and also within protected state lands. We recently have also begun studying two federally protected species, interior least terns, <i>Sternula antillarum</i>, and piping plovers, <i>Charadruis melodus</i>. </p>");
 
